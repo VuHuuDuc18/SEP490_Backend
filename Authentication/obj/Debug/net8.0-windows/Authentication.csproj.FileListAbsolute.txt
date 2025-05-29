@@ -1,0 +1,11 @@
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Authentication\bin\Debug\net8.0-windows\Authentication.deps.json
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Authentication\bin\Debug\net8.0-windows\Authentication.dll
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Authentication\bin\Debug\net8.0-windows\Authentication.pdb
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Authentication\obj\Debug\net8.0-windows\Authentication.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Authentication\obj\Debug\net8.0-windows\Authentication.AssemblyInfoInputs.cache
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Authentication\obj\Debug\net8.0-windows\Authentication.AssemblyInfo.cs
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Authentication\obj\Debug\net8.0-windows\Authentication.csproj.CoreCompileInputs.cache
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Authentication\obj\Debug\net8.0-windows\Authentication.dll
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Authentication\obj\Debug\net8.0-windows\refint\Authentication.dll
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Authentication\obj\Debug\net8.0-windows\Authentication.pdb
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Authentication\obj\Debug\net8.0-windows\ref\Authentication.dll

@@ -1,0 +1,11 @@
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\bin\Debug\net8.0-windows\Domain.deps.json
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\bin\Debug\net8.0-windows\Domain.dll
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\bin\Debug\net8.0-windows\Domain.pdb
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\obj\Debug\net8.0-windows\Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\obj\Debug\net8.0-windows\Domain.AssemblyInfoInputs.cache
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\obj\Debug\net8.0-windows\Domain.AssemblyInfo.cs
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\obj\Debug\net8.0-windows\Domain.csproj.CoreCompileInputs.cache
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\obj\Debug\net8.0-windows\Domain.dll
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\obj\Debug\net8.0-windows\refint\Domain.dll
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\obj\Debug\net8.0-windows\Domain.pdb
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\obj\Debug\net8.0-windows\ref\Domain.dll

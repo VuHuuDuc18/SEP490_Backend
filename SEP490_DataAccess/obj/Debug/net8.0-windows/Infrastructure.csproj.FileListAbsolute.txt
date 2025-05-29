@@ -1,0 +1,17 @@
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\SEP490_DataAccess\bin\Debug\net8.0-windows\Infrastructure.deps.json
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\SEP490_DataAccess\bin\Debug\net8.0-windows\Infrastructure.runtimeconfig.json
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\SEP490_DataAccess\bin\Debug\net8.0-windows\Infrastructure.dll
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\SEP490_DataAccess\bin\Debug\net8.0-windows\Infrastructure.pdb
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\SEP490_DataAccess\bin\Debug\net8.0-windows\Entities.dll
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\SEP490_DataAccess\bin\Debug\net8.0-windows\Entities.pdb
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\SEP490_DataAccess\obj\Debug\net8.0-windows\Infrastructure.csproj.AssemblyReference.cache
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\SEP490_DataAccess\obj\Debug\net8.0-windows\Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\SEP490_DataAccess\obj\Debug\net8.0-windows\Infrastructure.AssemblyInfoInputs.cache
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\SEP490_DataAccess\obj\Debug\net8.0-windows\Infrastructure.AssemblyInfo.cs
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\SEP490_DataAccess\obj\Debug\net8.0-windows\Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\SEP490_DataAccess\obj\Debug\net8.0-windows\Infrastr.15EFFBFE.Up2Date
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\SEP490_DataAccess\obj\Debug\net8.0-windows\Infrastructure.dll
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\SEP490_DataAccess\obj\Debug\net8.0-windows\refint\Infrastructure.dll
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\SEP490_DataAccess\obj\Debug\net8.0-windows\Infrastructure.pdb
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\SEP490_DataAccess\obj\Debug\net8.0-windows\Infrastructure.genruntimeconfig.cache
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\SEP490_DataAccess\obj\Debug\net8.0-windows\ref\Infrastructure.dll

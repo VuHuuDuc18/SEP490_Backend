@@ -1,0 +1,11 @@
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Entities\bin\Debug\net8.0-windows\Entities.deps.json
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Entities\bin\Debug\net8.0-windows\Entities.dll
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Entities\bin\Debug\net8.0-windows\Entities.pdb
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Entities\obj\Debug\net8.0-windows\Entities.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Entities\obj\Debug\net8.0-windows\Entities.AssemblyInfoInputs.cache
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Entities\obj\Debug\net8.0-windows\Entities.AssemblyInfo.cs
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Entities\obj\Debug\net8.0-windows\Entities.csproj.CoreCompileInputs.cache
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Entities\obj\Debug\net8.0-windows\Entities.dll
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Entities\obj\Debug\net8.0-windows\refint\Entities.dll
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Entities\obj\Debug\net8.0-windows\Entities.pdb
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Entities\obj\Debug\net8.0-windows\ref\Entities.dll
