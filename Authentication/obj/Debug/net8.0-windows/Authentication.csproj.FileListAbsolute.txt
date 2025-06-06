@@ -9,3 +9,5 @@ C:\Users\admin\source\repos\SEP490_BackendAPI.API\Authentication\obj\Debug\net8.
 C:\Users\admin\source\repos\SEP490_BackendAPI.API\Authentication\obj\Debug\net8.0-windows\refint\Authentication.dll
 C:\Users\admin\source\repos\SEP490_BackendAPI.API\Authentication\obj\Debug\net8.0-windows\Authentication.pdb
 C:\Users\admin\source\repos\SEP490_BackendAPI.API\Authentication\obj\Debug\net8.0-windows\ref\Authentication.dll
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Authentication\obj\Debug\net8.0-windows\Authentication.csproj.AssemblyReference.cache
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Authentication\obj\Debug\net8.0-windows\Authentication.sourcelink.json

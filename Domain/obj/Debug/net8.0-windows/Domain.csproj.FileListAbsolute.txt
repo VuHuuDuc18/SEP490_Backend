@@ -9,3 +9,10 @@ C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\obj\Debug\net8.0-window
 C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\obj\Debug\net8.0-windows\refint\Domain.dll
 C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\obj\Debug\net8.0-windows\Domain.pdb
 C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\obj\Debug\net8.0-windows\ref\Domain.dll
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\bin\Debug\net8.0-windows\Entities.dll
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\bin\Debug\net8.0-windows\Infrastructure.dll
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\bin\Debug\net8.0-windows\Infrastructure.pdb
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\bin\Debug\net8.0-windows\Entities.pdb
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\obj\Debug\net8.0-windows\Domain.csproj.AssemblyReference.cache
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\obj\Debug\net8.0-windows\Domain.sourcelink.json
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Domain\obj\Debug\net8.0-windows\Domain.csproj.Up2Date

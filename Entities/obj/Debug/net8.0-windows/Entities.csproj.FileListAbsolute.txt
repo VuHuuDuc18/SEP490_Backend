@@ -9,3 +9,4 @@ C:\Users\admin\source\repos\SEP490_BackendAPI.API\Entities\obj\Debug\net8.0-wind
 C:\Users\admin\source\repos\SEP490_BackendAPI.API\Entities\obj\Debug\net8.0-windows\refint\Entities.dll
 C:\Users\admin\source\repos\SEP490_BackendAPI.API\Entities\obj\Debug\net8.0-windows\Entities.pdb
 C:\Users\admin\source\repos\SEP490_BackendAPI.API\Entities\obj\Debug\net8.0-windows\ref\Entities.dll
+C:\Users\admin\source\repos\SEP490_BackendAPI.API\Entities\obj\Debug\net8.0-windows\Entities.sourcelink.json
