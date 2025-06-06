@@ -1,5 +1,7 @@
+using Infrastructure.DBContext;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Abstractions;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.Resource;
@@ -11,6 +13,21 @@ namespace SEP490_BackendAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            // cors
+            builder.Services.AddCors(options =>
+
+            {
+                options.AddPolicy("AllowAllOrigins",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                               .AllowAnyMethod()
+                               .AllowAnyHeader();
+                    });
+            });
+            // connect DB SQL
+            builder.Services.AddDbContext<LCFMSDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Transient);
+            builder.Services.AddScoped<DbContext, LCFMSDBContext>();
 
             // Add services to the container.
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
