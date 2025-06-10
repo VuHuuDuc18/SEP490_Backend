@@ -4170,11 +4170,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_DataAccess\\Infrastructure.csproj",
+      "projectUniqueName": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\Infrastructure.csproj",
       "projectName": "Infrastructure",
-      "projectPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_DataAccess\\Infrastructure.csproj",
+      "projectPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\Infrastructure.csproj",
       "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_DataAccess\\obj\\",
+      "outputPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -4192,8 +4192,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Entities\\Entities.csproj": {
-              "projectPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Entities\\Entities.csproj"
+            "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Entities\\Entities.csproj": {
+              "projectPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Entities\\Entities.csproj"
             }
           }
         }

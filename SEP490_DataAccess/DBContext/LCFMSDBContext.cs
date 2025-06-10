@@ -20,7 +20,12 @@ namespace Infrastructure.DBContext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            List<User> users = new List<User>()
+            {
 
+            };
+
+            Users.AddRange(users);
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseLazyLoadingProxies();
 

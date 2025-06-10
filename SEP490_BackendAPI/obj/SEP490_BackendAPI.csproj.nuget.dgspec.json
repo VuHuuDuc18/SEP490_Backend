@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_BackendAPI\\SEP490_BackendAPI.csproj": {}
+    "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_BackendAPI\\SEP490_BackendAPI.csproj": {}
   },
   "projects": {
-    "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Authentication\\Authentication.csproj": {
+    "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Authentication\\Authentication.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Authentication\\Authentication.csproj",
+        "projectUniqueName": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Authentication\\Authentication.csproj",
         "projectName": "Authentication",
-        "projectPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Authentication\\Authentication.csproj",
+        "projectPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Authentication\\Authentication.csproj",
         "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Authentication\\obj\\",
+        "outputPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Authentication\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -71,14 +71,14 @@
         }
       }
     },
-    "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Domain\\Domain.csproj": {
+    "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Domain\\Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Domain\\Domain.csproj",
+        "projectUniqueName": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Domain\\Domain.csproj",
         "projectName": "Domain",
-        "projectPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Domain\\Domain.csproj",
+        "projectPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Domain\\Domain.csproj",
         "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Domain\\obj\\",
+        "outputPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Domain\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -96,8 +96,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_DataAccess\\Infrastructure.csproj": {
-                "projectPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_DataAccess\\Infrastructure.csproj"
+              "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\Infrastructure.csproj": {
+                "projectPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\Infrastructure.csproj"
               }
             }
           }
@@ -136,14 +136,14 @@
         }
       }
     },
-    "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Entities\\Entities.csproj": {
+    "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Entities\\Entities.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Entities\\Entities.csproj",
+        "projectUniqueName": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Entities\\Entities.csproj",
         "projectName": "Entities",
-        "projectPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Entities\\Entities.csproj",
+        "projectPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Entities\\Entities.csproj",
         "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Entities\\obj\\",
+        "outputPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Entities\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -197,14 +197,14 @@
         }
       }
     },
-    "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_BackendAPI\\SEP490_BackendAPI.csproj": {
+    "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_BackendAPI\\SEP490_BackendAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_BackendAPI\\SEP490_BackendAPI.csproj",
+        "projectUniqueName": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_BackendAPI\\SEP490_BackendAPI.csproj",
         "projectName": "SEP490_BackendAPI",
-        "projectPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_BackendAPI\\SEP490_BackendAPI.csproj",
+        "projectPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_BackendAPI\\SEP490_BackendAPI.csproj",
         "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_BackendAPI\\obj\\",
+        "outputPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_BackendAPI\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -222,11 +222,11 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Authentication\\Authentication.csproj": {
-                "projectPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Authentication\\Authentication.csproj"
+              "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Authentication\\Authentication.csproj": {
+                "projectPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Authentication\\Authentication.csproj"
               },
-              "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Domain\\Domain.csproj": {
-                "projectPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Domain\\Domain.csproj"
+              "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Domain\\Domain.csproj": {
+                "projectPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Domain\\Domain.csproj"
               }
             }
           }
@@ -259,6 +259,12 @@
               "noWarn": [
                 "NU1605"
               ]
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.1, )"
             },
             "Microsoft.Identity.Web": {
               "target": "Package",
@@ -300,14 +306,14 @@
         }
       }
     },
-    "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_DataAccess\\Infrastructure.csproj": {
+    "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_DataAccess\\Infrastructure.csproj",
+        "projectUniqueName": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\Infrastructure.csproj",
         "projectName": "Infrastructure",
-        "projectPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_DataAccess\\Infrastructure.csproj",
+        "projectPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\Infrastructure.csproj",
         "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_DataAccess\\obj\\",
+        "outputPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -325,8 +331,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Entities\\Entities.csproj": {
-                "projectPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Entities\\Entities.csproj"
+              "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Entities\\Entities.csproj": {
+                "projectPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Entities\\Entities.csproj"
               }
             }
           }

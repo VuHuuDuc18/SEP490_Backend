@@ -210,11 +210,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Authentication\\Authentication.csproj",
+      "projectUniqueName": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Authentication\\Authentication.csproj",
       "projectName": "Authentication",
-      "projectPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Authentication\\Authentication.csproj",
+      "projectPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Authentication\\Authentication.csproj",
       "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\Authentication\\obj\\",
+      "outputPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Authentication\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
