@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{B6A0E816-6E99-4906-99E2-7E9C3CE62473}|SEP490_DataAccess\\Infrastructure.csproj|c:\\users\\admin\\source\\repos\\demo_prn231\\sep490_backend\\sep490_dataaccess\\core\\corerolename.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B6A0E816-6E99-4906-99E2-7E9C3CE62473}|SEP490_DataAccess\\Infrastructure.csproj|solutionrelative:sep490_dataaccess\\core\\corerolename.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{B6A0E816-6E99-4906-99E2-7E9C3CE62473}|SEP490_DataAccess\\Infrastructure.csproj|c:\\users\\admin\\source\\repos\\demo_prn231\\sep490_backend\\sep490_dataaccess\\dbcontext\\lcfmsdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{B6A0E816-6E99-4906-99E2-7E9C3CE62473}|SEP490_DataAccess\\Infrastructure.csproj|solutionrelative:sep490_dataaccess\\dbcontext\\lcfmsdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -27,19 +31,32 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "CoreRoleName.cs",
+              "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\Core\\CoreRoleName.cs",
+              "RelativeDocumentMoniker": "SEP490_DataAccess\\Core\\CoreRoleName.cs",
+              "ToolTip": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\Core\\CoreRoleName.cs",
+              "RelativeToolTip": "SEP490_DataAccess\\Core\\CoreRoleName.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAADLAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-10T10:41:30.928Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "LCFMSDBContext.cs",
               "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\DBContext\\LCFMSDBContext.cs",
               "RelativeDocumentMoniker": "SEP490_DataAccess\\DBContext\\LCFMSDBContext.cs",
               "ToolTip": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\DBContext\\LCFMSDBContext.cs",
               "RelativeToolTip": "SEP490_DataAccess\\DBContext\\LCFMSDBContext.cs",
-              "ViewState": "AgIAAAsAAAAAAAAAAAAQwBgAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABoAAABcAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-06-10T04:16:18.893Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "LCFMSDBContextModelSnapshot.cs",
               "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\Migrations\\LCFMSDBContextModelSnapshot.cs",
               "RelativeDocumentMoniker": "SEP490_DataAccess\\Migrations\\LCFMSDBContextModelSnapshot.cs",
@@ -47,12 +64,11 @@
               "RelativeToolTip": "SEP490_DataAccess\\Migrations\\LCFMSDBContextModelSnapshot.cs",
               "ViewState": "AgIAADEAAAAAAAAAAAAgwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-10T04:15:45.376Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-10T04:15:45.376Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "20250610041518_InitialDb.cs",
               "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\Migrations\\20250610041518_InitialDb.cs",
               "RelativeDocumentMoniker": "SEP490_DataAccess\\Migrations\\20250610041518_InitialDb.cs",
@@ -60,8 +76,7 @@
               "RelativeToolTip": "SEP490_DataAccess\\Migrations\\20250610041518_InitialDb.cs",
               "ViewState": "AgIAABMAAAAAAAAAAAAgwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-10T04:15:44.489Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-10T04:15:44.489Z"
             }
           ]
         }

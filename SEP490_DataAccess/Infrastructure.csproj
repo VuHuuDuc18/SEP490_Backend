@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Core\" />
     <Folder Include="Repository\" />
   </ItemGroup>
 
