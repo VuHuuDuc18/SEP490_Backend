@@ -10,7 +10,7 @@ namespace Domain.Services.Interfaces
 {
     public interface IUserService
     {
-        public void CreateAccount(CreateAccountRequest req);
+        public Task<bool> CreateAccount(CreateAccountRequest req);
         public List<User> GetListUser();
     }
 }

@@ -1,6 +1,7 @@
 using Domain.Services.Implements;
 using Domain.Services.Interfaces;
 using Infrastructure.DBContext;
+using Infrastructure.Repository;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -30,9 +31,9 @@ namespace SEP490_BackendAPI
             // connect DB SQL
             builder.Services.AddDbContext<LCFMSDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Transient);
             builder.Services.AddScoped<DbContext, LCFMSDBContext>();
-            
-            // Add Service
 
+            // Add Service
+            builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             builder.Services.AddTransient<IUserService,UserService>() ;
 
             // Add services to the container.

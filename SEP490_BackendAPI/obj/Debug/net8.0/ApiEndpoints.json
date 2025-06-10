@@ -1,0 +1,18 @@
+[
+  {
+    "ContainingType": "SEP490_BackendAPI.Controllers.WeatherForecastController",
+    "Method": "CreateAccount",
+    "RelativePath": "WeatherForecast/create",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "req",
+        "Type": "Domain.Dto.Request.CreateAccountRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

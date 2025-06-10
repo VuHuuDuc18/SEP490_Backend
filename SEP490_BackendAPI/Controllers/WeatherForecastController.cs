@@ -1,3 +1,4 @@
+using Domain.Dto.Request;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -5,10 +6,10 @@ using Microsoft.Identity.Web.Resource;
 
 namespace SEP490_BackendAPI.Controllers
 {
-    [Authorize]
+    
     [ApiController]
     [Route("[controller]")]
-    [RequiredScope(RequiredScopesConfigurationKey = "AzureAd:Scopes")]
+    
     public class WeatherForecastController : ControllerBase
     {
         
@@ -20,6 +21,11 @@ namespace SEP490_BackendAPI.Controllers
             _logger = logger;
             _sv = sr;
         }
-
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateAccount(CreateAccountRequest req)
+        {
+            var Result = await _sv.CreateAccount(req);
+            return Ok(Result);
+        }
     }
 }

@@ -15,6 +15,6 @@ namespace Domain.Dto.Request
         [Required]
         public string UserName { get; set; }
         [Required]
-        public int RoleId { get; set; }
+        public Guid RoleId { get; set; }
     }
 }
