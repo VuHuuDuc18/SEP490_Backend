@@ -1,5 +1,7 @@
-using Infrastructure;
+using Domain.Services.Implements;
+using Domain.Services.Interfaces;
 using Infrastructure.DBContext;
+using Infrastructure.Repository;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +37,13 @@ namespace SEP490_BackendAPI
             //Add service extensions
             builder.Services.AddInfrastructure();
 
+            // Add Service
+            builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            builder.Services.AddTransient<IUserService,UserService>() ;
+
+            // Add services to the container.
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
             // Add services to the container.
             //builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             //    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));

@@ -1,14 +1,18 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\",
+  "WorkspaceRootPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|c:\\users\\admin\\source\\repos\\sep490_backendapi.api\\sep490_backendapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|solutionrelative:sep490_backendapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{B6A0E816-6E99-4906-99E2-7E9C3CE62473}|SEP490_DataAccess\\Infrastructure.csproj|c:\\users\\admin\\source\\repos\\demo_prn231\\sep490_backend\\sep490_dataaccess\\dbcontext\\lcfmsdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B6A0E816-6E99-4906-99E2-7E9C3CE62473}|SEP490_DataAccess\\Infrastructure.csproj|solutionrelative:sep490_dataaccess\\dbcontext\\lcfmsdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|c:\\users\\admin\\source\\repos\\sep490_backendapi.api\\sep490_backendapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|solutionrelative:sep490_backendapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{36496E8C-E13A-4E85-A509-822751ADF3A6}|Entities\\Entities.csproj|c:\\users\\admin\\source\\repos\\demo_prn231\\sep490_backend\\entities\\entitymodel\\order.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{36496E8C-E13A-4E85-A509-822751ADF3A6}|Entities\\Entities.csproj|solutionrelative:entities\\entitymodel\\order.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{36496E8C-E13A-4E85-A509-822751ADF3A6}|Entities\\Entities.csproj|c:\\users\\admin\\source\\repos\\demo_prn231\\sep490_backend\\entities\\entitymodel\\entitybase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{36496E8C-E13A-4E85-A509-822751ADF3A6}|Entities\\Entities.csproj|solutionrelative:entities\\entitymodel\\entitybase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -23,26 +27,41 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_BackendAPI\\appsettings.json",
-              "RelativeDocumentMoniker": "SEP490_BackendAPI\\appsettings.json",
-              "ToolTip": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_BackendAPI\\appsettings.json",
-              "RelativeToolTip": "SEP490_BackendAPI\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAAZAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-06-06T05:49:40.073Z"
+              "Title": "LCFMSDBContext.cs",
+              "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\DBContext\\LCFMSDBContext.cs",
+              "RelativeDocumentMoniker": "SEP490_DataAccess\\DBContext\\LCFMSDBContext.cs",
+              "ToolTip": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\DBContext\\LCFMSDBContext.cs",
+              "RelativeToolTip": "SEP490_DataAccess\\DBContext\\LCFMSDBContext.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAA8AAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-12T08:57:45.696Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "EntityBase.cs",
+              "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Entities\\EntityModel\\EntityBase.cs",
+              "RelativeDocumentMoniker": "Entities\\EntityModel\\EntityBase.cs",
+              "ToolTip": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Entities\\EntityModel\\EntityBase.cs",
+              "RelativeToolTip": "Entities\\EntityModel\\EntityBase.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-12T08:56:50.153Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_BackendAPI\\Program.cs",
-              "RelativeDocumentMoniker": "SEP490_BackendAPI\\Program.cs",
-              "ToolTip": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_BackendAPI\\Program.cs",
-              "RelativeToolTip": "SEP490_BackendAPI\\Program.cs",
-              "ViewState": "AgIAAAoAAAAAAAAAAAAxwB0AAABAAAAAAAAAAA==",
+              "Title": "Order.cs",
+              "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Entities\\EntityModel\\Order.cs",
+              "RelativeDocumentMoniker": "Entities\\EntityModel\\Order.cs",
+              "ToolTip": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Entities\\EntityModel\\Order.cs",
+              "RelativeToolTip": "Entities\\EntityModel\\Order.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAeAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-06T05:47:20.351Z"
+              "WhenOpened": "2025-06-12T08:52:16.881Z",
+              "EditorCaption": ""
             }
           ]
         }

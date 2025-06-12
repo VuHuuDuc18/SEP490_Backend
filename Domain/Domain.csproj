@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -8,12 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Dto\Response\" />
-    <Folder Include="Dto\Request\" />
     <Folder Include="Extensions\" />
-    <Folder Include="Helper\Constants\" />
-    <Folder Include="Services\Interfaces\" />
-    <Folder Include="Services\Implements\" />
   </ItemGroup>
 
   <ItemGroup>
