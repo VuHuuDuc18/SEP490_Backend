@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Entities.EntityModel
+namespace Domain.Dto.Response
 {
-    public class LivestockCircle : EntityBase
+    public class LivestockCircleResponse
     {
+        public Guid Id { get; set; }
         public string LivestockCircleName { get; set; }
-        [Required]
         public string Status { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
@@ -19,14 +18,9 @@ namespace Entities.EntityModel
         public float AverageWeight { get; set; }
         public int GoodUnitNumber { get; set; }
         public int BadUnitNumber { get; set; }
-
         public Guid BreedId { get; set; }
         public Guid BarnId { get; set; }
-        public Guid TechicalStaffId { get; set; }   
-
-
-        public virtual Breed Breed { get; set; }
-        public virtual Barn Barn { get; set; }
-        public virtual User TechicalStaff { get; set; }
+        public Guid TechicalStaffId { get; set; }
+        public bool IsActive { get; set; }
     }
 }

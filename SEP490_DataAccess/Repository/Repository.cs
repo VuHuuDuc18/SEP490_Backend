@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,11 +24,11 @@ namespace Infrastructure.Repository
             _dbSet = dbContext.Set<T>();
             _context = context;
         }
-        public virtual async Task<bool> CheckExist(System.Linq.Expressions.Expression<Func<T, bool>> predicate, Ref<CheckError> checkError = null)
+        public virtual async Task<bool> CheckExist(Expression<Func<T, bool>> predicate, Ref<CheckError> checkError = null, CancellationToken cancellationToken = default)
         {
             try
             {
-                return await _dbContext.Set<T>().AnyAsync(predicate);
+                return await _dbContext.Set<T>().AnyAsync(predicate, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -38,7 +39,6 @@ namespace Infrastructure.Repository
                 return false;
             }
         }
-
         public async Task<int> CommitAsync(CancellationToken cancellationToken = default)
         {
             return await _dbContext.SaveChangesAsync(cancellationToken);
@@ -108,7 +108,6 @@ namespace Infrastructure.Repository
             entityToUpdate.UpdatedBy = this.CurrentUserId;
             entityToUpdate.UpdatedDate = DateTime.Now;
         }
-
 
         protected Guid CurrentUserId
         {

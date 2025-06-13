@@ -2,6 +2,7 @@ using Domain.Services.Implements;
 using Domain.Services.Interfaces;
 using Infrastructure.DBContext;
 using Infrastructure;
+using Domain;
 using Infrastructure.Repository;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -37,10 +38,11 @@ namespace SEP490_BackendAPI
 
             //Add service extensions
             builder.Services.AddInfrastructure();
+            builder.Services.AddDomain();
 
             // Add Service
-            builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-            builder.Services.AddTransient<IUserService,UserService>() ;
+            //builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            //builder.Services.AddTransient<IUserService,UserService>() ;
 
             // Add services to the container.
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

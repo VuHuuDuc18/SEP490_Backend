@@ -4,6 +4,7 @@ using Infrastructure.DBContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(LCFMSDBContext))]
-    partial class LCFMSDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250613150823_UpdateLiveStockCircleAssigned")]
+    partial class UpdateLiveStockCircleAssigned
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -976,7 +979,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.User", "Worker")
                         .WithMany()
                         .HasForeignKey("WorkerId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Worker");
@@ -987,13 +990,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.BarnPlan", "BarnPlan")
                         .WithMany()
                         .HasForeignKey("BarnPlanId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.Food", "Food")
                         .WithMany()
                         .HasForeignKey("FoodId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("BarnPlan");
@@ -1006,13 +1009,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.BarnPlan", "BarnPlan")
                         .WithMany()
                         .HasForeignKey("BarnPlanId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.Medicine", "Medicine")
                         .WithMany()
                         .HasForeignKey("MedicineId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("BarnPlan");
@@ -1025,13 +1028,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.LivestockCircle", "LivestockCircle")
                         .WithMany()
                         .HasForeignKey("LivestockCircleId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.User", "UserRequest")
                         .WithMany()
                         .HasForeignKey("UserRequestId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("LivestockCircle");
@@ -1044,7 +1047,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.Bill", "Bill")
                         .WithMany()
                         .HasForeignKey("BillId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.Breed", "Breed")
@@ -1073,7 +1076,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.BreedCategory", "BreedCategory")
                         .WithMany()
                         .HasForeignKey("BreedCategoryId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("BreedCategory");
@@ -1084,7 +1087,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.LivestockCircle", "LivestockCircle")
                         .WithMany()
                         .HasForeignKey("LivestockCircleId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("LivestockCircle");
@@ -1095,7 +1098,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.FoodCategory", "FoodCategory")
                         .WithMany()
                         .HasForeignKey("FoodCategoryId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("FoodCategory");
@@ -1106,13 +1109,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.Food", "Food")
                         .WithMany()
                         .HasForeignKey("FoodId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.DailyReport", "Report")
                         .WithMany()
                         .HasForeignKey("ReportId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Food");
@@ -1125,19 +1128,19 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.Barn", "Barn")
                         .WithMany()
                         .HasForeignKey("BarnId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.Breed", "Breed")
                         .WithMany()
                         .HasForeignKey("BreedId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.User", "TechicalStaff")
                         .WithMany()
                         .HasForeignKey("TechicalStaffId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Barn");
@@ -1152,13 +1155,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.Food", "Food")
                         .WithMany()
                         .HasForeignKey("FoodId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.LivestockCircle", "LSCircle")
                         .WithMany()
                         .HasForeignKey("LivestockCircleId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Food");
@@ -1171,13 +1174,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.LivestockCircle", "LSCircle")
                         .WithMany()
                         .HasForeignKey("LivestockCircleId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.Medicine", "Medicine")
                         .WithMany()
                         .HasForeignKey("MedicineId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("LSCircle");
@@ -1190,7 +1193,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.MedicineCategory", "MedicineCategory")
                         .WithMany()
                         .HasForeignKey("MedicineCategoryId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("MedicineCategory");
@@ -1201,13 +1204,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.Medicine", "Medicine")
                         .WithMany()
                         .HasForeignKey("MedicineId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.DailyReport", "Report")
                         .WithMany()
                         .HasForeignKey("ReportId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Medicine");
@@ -1220,13 +1223,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.User", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.LivestockCircle", "LivestockCircle")
                         .WithMany()
                         .HasForeignKey("LivestockCircleId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Customer");
@@ -1239,7 +1242,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.Role", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Role");
