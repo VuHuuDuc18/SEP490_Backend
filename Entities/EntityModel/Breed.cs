@@ -11,5 +11,7 @@ namespace Entities.EntityModel
         public string BreedName { get; set; }
         public Guid BreedCategoryId { get; set; }
         public int Stock { get; set; }
+
+        public virtual BreedCategory BreedCategory { get; set; }
     }
 }
