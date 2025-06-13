@@ -23,7 +23,7 @@ namespace SEP490_BackendAPI.Controllers
         {
             _mailService = mailService;
             _logger = logger;
-            _sv = sr;
+          //  _sv = sr;
         }
 
 
