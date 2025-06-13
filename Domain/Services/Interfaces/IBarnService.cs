@@ -3,9 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using
-
-
 using Domain.Dto.Request;
 using Domain.Dto.Response;
 namespace Domain.Services.Interfaces

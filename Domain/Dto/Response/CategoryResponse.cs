@@ -4,11 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Entities.EntityModel
+namespace Domain.Dto.Response
 {
-    public class BreedCategory : EntityBase
+    public class CategoryResponse
     {
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+        public bool IsActive { get; set; }
     }
 }
