@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+<<<<<<< Updated upstream
     <Folder Include="Dto\Response\" />
     <Folder Include="Dto\Request\" />
     <Folder Include="Extensions\" />
@@ -17,7 +18,13 @@
   </ItemGroup>
 
   <ItemGroup>
+=======
+>>>>>>> Stashed changes
     <ProjectReference Include="..\SEP490_DataAccess\Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Extensions\" />
   </ItemGroup>
 
 </Project>
