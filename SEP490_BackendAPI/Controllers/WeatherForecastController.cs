@@ -5,6 +5,7 @@ using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
+using Domain.Helper.Constants;
 
 namespace SEP490_BackendAPI.Controllers
 {
@@ -38,7 +39,9 @@ namespace SEP490_BackendAPI.Controllers
                     return BadRequest("Invalid mail request. The Body is required.");
                 }
 
-                await _mailService.SendEmailCreateAccountAsync(Email, "123456");
+                string Body = Domain.Extensions.MailBodyGenerate.BodyCreateAccount(Email, "123456");
+
+                await _mailService.SendEmailAsync(Email, EmailConstant.EMAILSUBJECTCREATEACCOUNT,Body);
                 return Ok();
             }
             catch (Exception ex)
