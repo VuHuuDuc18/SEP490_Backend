@@ -1,6 +1,7 @@
 using Domain.Services.Implements;
 using Domain.Services.Interfaces;
 using Infrastructure.DBContext;
+using Infrastructure;
 using Infrastructure.Repository;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
