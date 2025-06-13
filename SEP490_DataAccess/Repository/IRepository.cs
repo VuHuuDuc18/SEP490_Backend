@@ -16,7 +16,7 @@ namespace Infrastructure.Repository
         IQueryable<T> GetQueryable();
         Task<T> GetById(object id, Ref<CheckError> checkError = null);
         IQueryable<T> GetQueryable(Expression<Func<T, bool>> condition);
-        Task<bool> CheckExist(Expression<Func<T, bool>> predicate, Ref<CheckError> checkError = null);
+        Task<bool> CheckExist(Expression<Func<T, bool>> predicate, Ref<CheckError> checkError = null, CancellationToken cancellationToken = default);
         Task<int> GetCount(Expression<Func<T, bool>> predicate, Ref<CheckError> checkError = null);
         Task<int> CommitAsync(CancellationToken cancellationToken = default(CancellationToken));
     }
