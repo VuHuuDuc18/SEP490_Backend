@@ -12,5 +12,7 @@ namespace Entities.EntityModel
         public Guid FoodCategoryId { get; set; }
         public int Stock { get; set; }
         public float WeighPerUnit { get; set; }
+
+        public virtual FoodCategory FoodCategory { get; set; }
     }
 }

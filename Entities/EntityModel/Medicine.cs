@@ -11,5 +11,7 @@ namespace Entities.EntityModel
         public string MedicineName { get; set; }
         public Guid MedicineCategoryId { get; set; }
         public int Stock { get; set; }
+
+        public virtual MedicineCategory MedicineCategory { get; set; }
     }
 }

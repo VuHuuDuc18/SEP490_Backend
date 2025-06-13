@@ -9,5 +9,6 @@ namespace Entities.EntityModel
     public class FoodCategory : EntityBase
     {
         public string Name { get; set; }
+
     }
 }
