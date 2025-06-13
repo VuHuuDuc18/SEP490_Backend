@@ -58,8 +58,8 @@ namespace SEP490_BackendAPI.Extensions
         {
             var userManager = servicesProvider.GetRequiredService<UserManager<User>>();
             var roleManaer = servicesProvider.GetRequiredService<RoleManager<Role>>();
-            RoleSeeds.SeedAsync(userManager, roleManaer);
-            UserSeeds.SeedAsync(userManager, roleManaer);
+            await RoleSeeds.SeedAsync( roleManaer);
+            await UserSeeds.SeedAsync(userManager, roleManaer);
         }
     }
 }

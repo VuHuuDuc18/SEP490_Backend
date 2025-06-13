@@ -3,16 +3,36 @@
   "WorkspaceRootPath": "D:\\src\\Fork\\SEP490_Backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|d:\\src\\fork\\sep490_backend\\sep490_backendapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|solutionrelative:sep490_backendapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|d:\\src\\fork\\sep490_backend\\sep490_backendapi\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|solutionrelative:sep490_backendapi\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|d:\\src\\fork\\sep490_backend\\infrastructure.identity\\services\\accountservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|solutionrelative:infrastructure.identity\\services\\accountservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4251EF54-58E8-4BA7-AA47-2BD0257C7684}|Application\\Application.csproj|d:\\src\\fork\\sep490_backend\\application\\interfaces\\iaccountservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4251EF54-58E8-4BA7-AA47-2BD0257C7684}|Application\\Application.csproj|solutionrelative:application\\interfaces\\iaccountservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|d:\\src\\fork\\sep490_backend\\infrastructure.identity\\servicesregistration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|solutionrelative:infrastructure.identity\\servicesregistration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|d:\\src\\fork\\sep490_backend\\infrastructure.identity\\contexts\\identitycontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|solutionrelative:infrastructure.identity\\contexts\\identitycontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|d:\\src\\fork\\sep490_backend\\sep490_backendapi\\extensions\\servicesextentions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|solutionrelative:sep490_backendapi\\extensions\\servicesextentions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4251EF54-58E8-4BA7-AA47-2BD0257C7684}|Application\\Application.csproj|d:\\src\\fork\\sep490_backend\\application\\exceptions\\validationexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4251EF54-58E8-4BA7-AA47-2BD0257C7684}|Application\\Application.csproj|solutionrelative:application\\exceptions\\validationexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4251EF54-58E8-4BA7-AA47-2BD0257C7684}|Application\\Application.csproj|d:\\src\\fork\\sep490_backend\\application\\dtos\\account\\createaccountrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4251EF54-58E8-4BA7-AA47-2BD0257C7684}|Application\\Application.csproj|solutionrelative:application\\dtos\\account\\createaccountrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4251EF54-58E8-4BA7-AA47-2BD0257C7684}|Application\\Application.csproj|d:\\src\\fork\\sep490_backend\\application\\dtos\\account\\authenticationresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4251EF54-58E8-4BA7-AA47-2BD0257C7684}|Application\\Application.csproj|solutionrelative:application\\dtos\\account\\authenticationresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,45 +42,110 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "IdentityContext.cs",
-              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\Contexts\\IdentityContext.cs",
-              "RelativeDocumentMoniker": "Infrastructure.Identity\\Contexts\\IdentityContext.cs",
-              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\Contexts\\IdentityContext.cs",
-              "RelativeToolTip": "Infrastructure.Identity\\Contexts\\IdentityContext.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-11T18:55:15.728Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\Program.cs",
-              "RelativeDocumentMoniker": "SEP490_BackendAPI\\Program.cs",
-              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\Program.cs",
-              "RelativeToolTip": "SEP490_BackendAPI\\Program.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAwwCkAAAAoAAAAAAAAAA==",
+              "Title": "AccountController.cs",
+              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\Controllers\\AccountController.cs",
+              "RelativeDocumentMoniker": "SEP490_BackendAPI\\Controllers\\AccountController.cs",
+              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\Controllers\\AccountController.cs",
+              "RelativeToolTip": "SEP490_BackendAPI\\Controllers\\AccountController.cs",
+              "ViewState": "AgIAAB0AAAAAAAAAAAAwwC8AAABCAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-11T18:54:37.625Z",
+              "WhenOpened": "2025-06-13T14:09:37.18Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "ServicesRegistration.cs",
               "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\ServicesRegistration.cs",
               "RelativeDocumentMoniker": "Infrastructure.Identity\\ServicesRegistration.cs",
               "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\ServicesRegistration.cs",
               "RelativeToolTip": "Infrastructure.Identity\\ServicesRegistration.cs",
-              "ViewState": "AgIAABUAAAAAAAAAAAAwwDMAAAA0AAAAAAAAAA==",
+              "ViewState": "AgIAACUAAAAAAAAAAAAgwC0AAAArAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-11T18:54:36.108Z",
+              "WhenOpened": "2025-06-13T14:07:08.581Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ServicesExtentions.cs",
+              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\Extensions\\ServicesExtentions.cs",
+              "RelativeDocumentMoniker": "SEP490_BackendAPI\\Extensions\\ServicesExtentions.cs",
+              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\Extensions\\ServicesExtentions.cs",
+              "RelativeToolTip": "SEP490_BackendAPI\\Extensions\\ServicesExtentions.cs",
+              "ViewState": "AgIAACgAAAAAAAAAAAAgwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-13T14:07:01.259Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ValidationException.cs",
+              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\Application\\Exceptions\\ValidationException.cs",
+              "RelativeDocumentMoniker": "Application\\Exceptions\\ValidationException.cs",
+              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\Application\\Exceptions\\ValidationException.cs",
+              "RelativeToolTip": "Application\\Exceptions\\ValidationException.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAxwBIAAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-13T14:03:01.671Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "AuthenticationResponse.cs",
+              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\Application\\DTOs\\Account\\AuthenticationResponse.cs",
+              "RelativeDocumentMoniker": "Application\\DTOs\\Account\\AuthenticationResponse.cs",
+              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\Application\\DTOs\\Account\\AuthenticationResponse.cs",
+              "RelativeToolTip": "Application\\DTOs\\Account\\AuthenticationResponse.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-13T13:04:10.076Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AccountService.cs",
+              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\Services\\AccountService.cs",
+              "RelativeDocumentMoniker": "Infrastructure.Identity\\Services\\AccountService.cs",
+              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\Services\\AccountService.cs",
+              "RelativeToolTip": "Infrastructure.Identity\\Services\\AccountService.cs",
+              "ViewState": "AgIAABEAAAAAAAAAAAAuwCAAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-13T13:00:53.217Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "CreateAccountRequest.cs",
+              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\Application\\DTOs\\Account\\CreateAccountRequest.cs",
+              "RelativeDocumentMoniker": "Application\\DTOs\\Account\\CreateAccountRequest.cs",
+              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\Application\\DTOs\\Account\\CreateAccountRequest.cs",
+              "RelativeToolTip": "Application\\DTOs\\Account\\CreateAccountRequest.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-13T12:59:57.682Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "IAccountService.cs",
+              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\Application\\Interfaces\\IAccountService.cs",
+              "RelativeDocumentMoniker": "Application\\Interfaces\\IAccountService.cs",
+              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\Application\\Interfaces\\IAccountService.cs",
+              "RelativeToolTip": "Application\\Interfaces\\IAccountService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAoAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-13T12:58:59.039Z",
               "EditorCaption": ""
             }
           ]

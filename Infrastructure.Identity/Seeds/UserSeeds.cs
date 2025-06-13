@@ -14,19 +14,40 @@ namespace Infrastructure.Identity.Seeds
     {
         public static async Task SeedAsync(UserManager<User> userManager, RoleManager<Role> roleManager)
         {
+            if (!await roleManager.RoleExistsAsync("Admin"))
+            {
+                await roleManager.CreateAsync(new Role ("Admin"));
+            }
+
             var defaultUser = new User
             {
                 UserName = "Admin",
                 Email = "admin@123",
                 EmailConfirmed = true,
-                PhoneNumberConfirmed = true
+                PhoneNumberConfirmed = true,
             };
+
             var user = await userManager.FindByEmailAsync(defaultUser.Email);
             if (user == null)
             {
-                await userManager.CreateAsync(defaultUser);
-                await userManager.AddToRoleAsync(defaultUser, "Admin");
+                var result = await userManager.CreateAsync(defaultUser, "Admin@123"); 
+
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(defaultUser, "Admin");
+                }
+                else
+                {
+                }
+            }
+            else
+            {
+                if (!await userManager.IsInRoleAsync(user, "Admin"))
+                {
+                    await userManager.AddToRoleAsync(user, "Admin");
+                }
             }
         }
+
     }
 }

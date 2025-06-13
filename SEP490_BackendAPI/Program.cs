@@ -42,8 +42,8 @@ namespace SEP490_BackendAPI
 
             builder.Services.AddIdentityInfrastructure(builder.Configuration);
 
-            //var servicesProvider = builder.Services.BuildServiceProvider();
-            //ServicesExtentions.SeedIdentity(servicesProvider);
+            var servicesProvider = builder.Services.BuildServiceProvider();
+            ServicesExtentions.SeedIdentity(servicesProvider);
             //builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             //    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
             builder.Services.AddControllers();

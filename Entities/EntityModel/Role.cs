@@ -10,8 +10,7 @@ using System.Threading.Tasks;
 
 namespace Entities.EntityModel
 {
-    [Table("Role")]
-    public class Role : IdentityRole
+    public class Role : IdentityRole<Guid>
     {
         public Role(string name) : base(name)
         {

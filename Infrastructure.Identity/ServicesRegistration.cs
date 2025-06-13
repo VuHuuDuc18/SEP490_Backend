@@ -9,8 +9,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -18,23 +20,30 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace Infrastructure.Identity
 {
     public static class ServicesRegistration
     {
         public static void AddIdentityInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<IdentityContext>(options => 
+            services.AddDbContext<IdentityContext>(options =>
+            {
                 options.UseSqlServer(
                     configuration.GetConnectionString("DefaultConnection"),
-                    b=>b.MigrationsAssembly(typeof(IdentityContext).Assembly.FullName)
-                )
-            );
+                    b =>
+                    {
+                        b.MigrationsAssembly(typeof(IdentityContext).Assembly.FullName);
+                        b.EnableRetryOnFailure();
+                    }
+                );
+                ;
+            });
             services.AddIdentity<User, Role>()
                 .AddEntityFrameworkStores<IdentityContext>()
                 .AddDefaultTokenProviders();
             #region Services
-            services.AddTransient<IAccountService, AccountService>();
+            services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IdentityContext>();
             #endregion
             services.Configure<JWTSettings>(configuration.GetSection("appJwt"));

@@ -9,8 +9,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Entities.EntityModel
 {
-    [Table("User")]
-    public class User : IdentityUser
+    public class User : IdentityUser<Guid>
     {
         public string? FirstName { get; set; }
         public string? MiddleName { get; set; }
@@ -20,6 +19,6 @@ namespace Entities.EntityModel
 
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 }
