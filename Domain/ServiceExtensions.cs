@@ -3,12 +3,12 @@ using Entities.EntityModel;
 using Infrastructure.Repository;
 using Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.Services.Implements;
 
 namespace Domain
 {

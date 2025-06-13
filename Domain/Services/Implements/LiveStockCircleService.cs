@@ -13,7 +13,7 @@ using Domain.Dto.Response;
 using Domain.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Services
+namespace Domain.Services.Implements
 {
     public class LivestockCircleService : ILivestockCircleService
     {
