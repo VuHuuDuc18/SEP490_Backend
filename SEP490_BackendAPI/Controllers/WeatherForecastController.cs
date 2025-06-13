@@ -38,7 +38,7 @@ namespace SEP490_BackendAPI.Controllers
                     return BadRequest("Invalid mail request. The Body is required.");
                 }
 
-                await _mailService.SendAsync(Email);
+                await _mailService.SendEmailCreateAccountAsync(Email, "123456");
                 return Ok();
             }
             catch (Exception ex)
