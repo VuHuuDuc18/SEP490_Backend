@@ -1,14 +1,38 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\",
+  "WorkspaceRootPath": "D:\\src\\Fork\\SEP490_Backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|c:\\users\\admin\\source\\repos\\sep490_backendapi.api\\sep490_backendapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|solutionrelative:sep490_backendapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|d:\\src\\fork\\sep490_backend\\infrastructure.identity\\servicesregistration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|solutionrelative:infrastructure.identity\\servicesregistration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|c:\\users\\admin\\source\\repos\\sep490_backendapi.api\\sep490_backendapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|d:\\src\\fork\\sep490_backend\\infrastructure.identity\\migrations\\identitycontextmodelsnapshot.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|solutionrelative:infrastructure.identity\\migrations\\identitycontextmodelsnapshot.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|d:\\src\\fork\\sep490_backend\\infrastructure.identity\\migrations\\20250612044722_identityinitial.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|solutionrelative:infrastructure.identity\\migrations\\20250612044722_identityinitial.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|d:\\src\\fork\\sep490_backend\\infrastructure.identity\\contexts\\identitycontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|solutionrelative:infrastructure.identity\\contexts\\identitycontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{36496E8C-E13A-4E85-A509-822751ADF3A6}|Entities\\Entities.csproj|d:\\src\\fork\\sep490_backend\\entities\\entitymodel\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{36496E8C-E13A-4E85-A509-822751ADF3A6}|Entities\\Entities.csproj|solutionrelative:entities\\entitymodel\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|d:\\src\\fork\\sep490_backend\\sep490_backendapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|solutionrelative:sep490_backendapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{36496E8C-E13A-4E85-A509-822751ADF3A6}|Entities\\Entities.csproj|d:\\src\\fork\\sep490_backend\\entities\\entitymodel\\role.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{36496E8C-E13A-4E85-A509-822751ADF3A6}|Entities\\Entities.csproj|solutionrelative:entities\\entitymodel\\role.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|d:\\src\\fork\\sep490_backend\\sep490_backendapi\\sep490_backendapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|solutionrelative:sep490_backendapi\\sep490_backendapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,31 +42,111 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 7,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_BackendAPI\\appsettings.json",
-              "RelativeDocumentMoniker": "SEP490_BackendAPI\\appsettings.json",
-              "ToolTip": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_BackendAPI\\appsettings.json",
-              "RelativeToolTip": "SEP490_BackendAPI\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAAZAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-06-06T05:49:40.073Z"
+              "DocumentIndex": 1,
+              "Title": "IdentityContextModelSnapshot.cs",
+              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\Migrations\\IdentityContextModelSnapshot.cs",
+              "RelativeDocumentMoniker": "Infrastructure.Identity\\Migrations\\IdentityContextModelSnapshot.cs",
+              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\Migrations\\IdentityContextModelSnapshot.cs",
+              "RelativeToolTip": "Infrastructure.Identity\\Migrations\\IdentityContextModelSnapshot.cs",
+              "ViewState": "AgIAABwAAAAAAAAAAAAgwC0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-12T04:47:30.51Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_BackendAPI\\Program.cs",
-              "RelativeDocumentMoniker": "SEP490_BackendAPI\\Program.cs",
-              "ToolTip": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_BackendAPI\\Program.cs",
-              "RelativeToolTip": "SEP490_BackendAPI\\Program.cs",
-              "ViewState": "AgIAAAoAAAAAAAAAAAAxwB0AAABAAAAAAAAAAA==",
+              "DocumentIndex": 2,
+              "Title": "20250612044722_IdentityInitial.cs",
+              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\Migrations\\20250612044722_IdentityInitial.cs",
+              "RelativeDocumentMoniker": "Infrastructure.Identity\\Migrations\\20250612044722_IdentityInitial.cs",
+              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\Migrations\\20250612044722_IdentityInitial.cs",
+              "RelativeToolTip": "Infrastructure.Identity\\Migrations\\20250612044722_IdentityInitial.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-06T05:47:20.351Z"
+              "WhenOpened": "2025-06-12T05:00:27.469Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "User.cs",
+              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\Entities\\EntityModel\\User.cs",
+              "RelativeDocumentMoniker": "Entities\\EntityModel\\User.cs",
+              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\Entities\\EntityModel\\User.cs",
+              "RelativeToolTip": "Entities\\EntityModel\\User.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-12T04:57:56.888Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Role.cs",
+              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\Entities\\EntityModel\\Role.cs",
+              "RelativeDocumentMoniker": "Entities\\EntityModel\\Role.cs",
+              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\Entities\\EntityModel\\Role.cs",
+              "RelativeToolTip": "Entities\\EntityModel\\Role.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-12T04:57:48.174Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "SEP490_BackendAPI",
+              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\SEP490_BackendAPI.csproj",
+              "RelativeDocumentMoniker": "SEP490_BackendAPI\\SEP490_BackendAPI.csproj",
+              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\SEP490_BackendAPI.csproj",
+              "RelativeToolTip": "SEP490_BackendAPI\\SEP490_BackendAPI.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-06-12T04:46:35.035Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "IdentityContext.cs",
+              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\Contexts\\IdentityContext.cs",
+              "RelativeDocumentMoniker": "Infrastructure.Identity\\Contexts\\IdentityContext.cs",
+              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\Contexts\\IdentityContext.cs*",
+              "RelativeToolTip": "Infrastructure.Identity\\Contexts\\IdentityContext.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-11T18:55:15.728Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\Program.cs",
+              "RelativeDocumentMoniker": "SEP490_BackendAPI\\Program.cs",
+              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\Program.cs",
+              "RelativeToolTip": "SEP490_BackendAPI\\Program.cs",
+              "ViewState": "AgIAADEAAAAAAAAAAAAgwCEAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-11T18:54:37.625Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ServicesRegistration.cs",
+              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\ServicesRegistration.cs",
+              "RelativeDocumentMoniker": "Infrastructure.Identity\\ServicesRegistration.cs",
+              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\ServicesRegistration.cs",
+              "RelativeToolTip": "Infrastructure.Identity\\ServicesRegistration.cs",
+              "ViewState": "AgIAAAcAAAAAAAAAAAApwBgAAAAbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-11T18:54:36.108Z",
+              "EditorCaption": ""
             }
           ]
         }

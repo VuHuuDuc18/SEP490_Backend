@@ -1,14 +1,18 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\",
+  "WorkspaceRootPath": "D:\\src\\Fork\\SEP490_Backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|c:\\users\\admin\\source\\repos\\sep490_backendapi.api\\sep490_backendapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|solutionrelative:sep490_backendapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|d:\\src\\fork\\sep490_backend\\sep490_backendapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|solutionrelative:sep490_backendapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|c:\\users\\admin\\source\\repos\\sep490_backendapi.api\\sep490_backendapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|solutionrelative:sep490_backendapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|d:\\src\\fork\\sep490_backend\\infrastructure.identity\\servicesregistration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|solutionrelative:infrastructure.identity\\servicesregistration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|d:\\src\\fork\\sep490_backend\\infrastructure.identity\\contexts\\identitycontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|solutionrelative:infrastructure.identity\\contexts\\identitycontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,32 +22,45 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "IdentityContext.cs",
+              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\Contexts\\IdentityContext.cs",
+              "RelativeDocumentMoniker": "Infrastructure.Identity\\Contexts\\IdentityContext.cs",
+              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\Contexts\\IdentityContext.cs",
+              "RelativeToolTip": "Infrastructure.Identity\\Contexts\\IdentityContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-11T18:55:15.728Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_BackendAPI\\appsettings.json",
-              "RelativeDocumentMoniker": "SEP490_BackendAPI\\appsettings.json",
-              "ToolTip": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_BackendAPI\\appsettings.json",
-              "RelativeToolTip": "SEP490_BackendAPI\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAAZAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-06-06T05:49:40.073Z",
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\Program.cs",
+              "RelativeDocumentMoniker": "SEP490_BackendAPI\\Program.cs",
+              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\Program.cs",
+              "RelativeToolTip": "SEP490_BackendAPI\\Program.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAwwCkAAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-11T18:54:37.625Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_BackendAPI\\Program.cs",
-              "RelativeDocumentMoniker": "SEP490_BackendAPI\\Program.cs",
-              "ToolTip": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_BackendAPI\\Program.cs",
-              "RelativeToolTip": "SEP490_BackendAPI\\Program.cs",
-              "ViewState": "AgIAAAoAAAAAAAAAAAAxwB0AAABAAAAAAAAAAA==",
+              "Title": "ServicesRegistration.cs",
+              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\ServicesRegistration.cs",
+              "RelativeDocumentMoniker": "Infrastructure.Identity\\ServicesRegistration.cs",
+              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\ServicesRegistration.cs",
+              "RelativeToolTip": "Infrastructure.Identity\\ServicesRegistration.cs",
+              "ViewState": "AgIAABUAAAAAAAAAAAAwwDMAAAA0AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-06T05:47:20.351Z",
+              "WhenOpened": "2025-06-11T18:54:36.108Z",
               "EditorCaption": ""
             }
           ]

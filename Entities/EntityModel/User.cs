@@ -1,24 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 
 namespace Entities.EntityModel
 {
-    public class User : EntityBase
+    [Table("User")]
+    public class User : IdentityUser
     {
-        [Required]
-        public string UserName { get; set; }
-        [Required]
-        public string Email { get; set; }
-        [Required]
-        public string Password { get; set; }
-        [Required]
-        public Guid  RoleId { get; set; }
+        public string? FirstName { get; set; }
+        public string? MiddleName { get; set; }
+        public string? LastName { get; set; }
+        public string? OTP { get; set; }
+        public DateTime? OTPExpiry { get; set; }
 
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
-        public virtual Role Role { get; set; }
+        public bool IsActive { get; set; }
     }
 }

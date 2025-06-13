@@ -8,12 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Dto\Response\" />
     <Folder Include="Dto\Request\" />
+    <Folder Include="Dto\Response\" />
     <Folder Include="Extensions\" />
     <Folder Include="Helper\Constants\" />
     <Folder Include="Services\Interfaces\" />
     <Folder Include="Services\Implements\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>

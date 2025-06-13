@@ -1,4 +1,5 @@
 ﻿using Entities.EntityBase;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -10,9 +11,10 @@ using System.Threading.Tasks;
 namespace Entities.EntityModel
 {
     [Table("Role")]
-    public class Role : EntityBase
+    public class Role : IdentityRole
     {
-        [Required]
-        public string RoleName { get; set; }
+        public Role(string name) : base(name)
+        {
+        }
     }
 }
