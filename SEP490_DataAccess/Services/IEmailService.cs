@@ -2,6 +2,6 @@
 {
     public interface IEmailService
     {
-        public Task SendAsync(string Email);
+        public Task SendEmailCreateAccountAsync(string Email, string Password);
     }
 }
