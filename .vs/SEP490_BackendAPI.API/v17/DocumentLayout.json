@@ -3,24 +3,8 @@
   "WorkspaceRootPath": "D:\\src\\Fork\\SEP490_Backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|d:\\src\\fork\\sep490_backend\\sep490_backendapi\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|solutionrelative:sep490_backendapi\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|d:\\src\\fork\\sep490_backend\\sep490_backendapi\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|solutionrelative:sep490_backendapi\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|d:\\src\\fork\\sep490_backend\\sep490_backendapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|solutionrelative:sep490_backendapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|d:\\src\\fork\\sep490_backend\\infrastructure.identity\\services\\accountservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|solutionrelative:infrastructure.identity\\services\\accountservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|d:\\src\\fork\\sep490_backend\\infrastructure.identity\\servicesregistration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{740E701D-F18A-C500-87DC-8CD482C98916}|Infrastructure.Identity\\Infrastructure.Identity.csproj|solutionrelative:infrastructure.identity\\servicesregistration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|d:\\src\\fork\\sep490_backend\\sep490_backendapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
@@ -29,14 +13,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{4251EF54-58E8-4BA7-AA47-2BD0257C7684}|Application\\Application.csproj|d:\\src\\fork\\sep490_backend\\application\\interfaces\\iaccountservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{4251EF54-58E8-4BA7-AA47-2BD0257C7684}|Application\\Application.csproj|solutionrelative:application\\interfaces\\iaccountservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|d:\\src\\fork\\sep490_backend\\sep490_backendapi\\extensions\\servicesextentions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|solutionrelative:sep490_backendapi\\extensions\\servicesextentions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{4251EF54-58E8-4BA7-AA47-2BD0257C7684}|Application\\Application.csproj|d:\\src\\fork\\sep490_backend\\application\\exceptions\\validationexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{4251EF54-58E8-4BA7-AA47-2BD0257C7684}|Application\\Application.csproj|solutionrelative:application\\exceptions\\validationexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{4251EF54-58E8-4BA7-AA47-2BD0257C7684}|Application\\Application.csproj|d:\\src\\fork\\sep490_backend\\application\\dtos\\account\\createaccountrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -55,110 +31,32 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "WeatherForecastController.cs",
-              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\Controllers\\WeatherForecastController.cs",
-              "RelativeDocumentMoniker": "SEP490_BackendAPI\\Controllers\\WeatherForecastController.cs",
-              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\Controllers\\WeatherForecastController.cs",
-              "RelativeToolTip": "SEP490_BackendAPI\\Controllers\\WeatherForecastController.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAYAAAAYAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-13T14:17:11.737Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\Program.cs",
-              "RelativeDocumentMoniker": "SEP490_BackendAPI\\Program.cs",
-              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\Program.cs",
-              "RelativeToolTip": "SEP490_BackendAPI\\Program.cs",
-              "ViewState": "AgIAABkAAAAAAAAAAAAgwCoAAAAmAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-13T14:13:14.908Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "AccountController.cs",
-              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\Controllers\\AccountController.cs",
-              "RelativeDocumentMoniker": "SEP490_BackendAPI\\Controllers\\AccountController.cs",
-              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\Controllers\\AccountController.cs",
-              "RelativeToolTip": "SEP490_BackendAPI\\Controllers\\AccountController.cs",
-              "ViewState": "AgIAAB0AAAAAAAAAAAAwwDEAAAAqAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-13T14:09:37.18Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "ServicesRegistration.cs",
-              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\ServicesRegistration.cs",
-              "RelativeDocumentMoniker": "Infrastructure.Identity\\ServicesRegistration.cs",
-              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\ServicesRegistration.cs",
-              "RelativeToolTip": "Infrastructure.Identity\\ServicesRegistration.cs",
-              "ViewState": "AgIAAFMAAAAAAAAAAAAqwBsAAAAbAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-13T14:07:08.581Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "ServicesExtentions.cs",
-              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\Extensions\\ServicesExtentions.cs",
-              "RelativeDocumentMoniker": "SEP490_BackendAPI\\Extensions\\ServicesExtentions.cs",
-              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\Extensions\\ServicesExtentions.cs",
-              "RelativeToolTip": "SEP490_BackendAPI\\Extensions\\ServicesExtentions.cs",
-              "ViewState": "AgIAACgAAAAAAAAAAAAgwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-13T14:07:01.259Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "ValidationException.cs",
-              "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\Application\\Exceptions\\ValidationException.cs",
-              "RelativeDocumentMoniker": "Application\\Exceptions\\ValidationException.cs",
-              "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\Application\\Exceptions\\ValidationException.cs",
-              "RelativeToolTip": "Application\\Exceptions\\ValidationException.cs",
-              "ViewState": "AgIAAAgAAAAAAAAAAAAxwBIAAAAtAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-13T14:03:01.671Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
               "Title": "AccountService.cs",
               "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\Services\\AccountService.cs",
               "RelativeDocumentMoniker": "Infrastructure.Identity\\Services\\AccountService.cs",
               "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\Infrastructure.Identity\\Services\\AccountService.cs",
               "RelativeToolTip": "Infrastructure.Identity\\Services\\AccountService.cs",
-              "ViewState": "AgIAAI4AAAAAAAAAAAAqwHoAAAAqAAAAAAAAAA==",
+              "ViewState": "AgIAAM8AAAAAAAAAAAAqwOAAAAAaAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-06-13T13:00:53.217Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 1,
               "Title": "appsettings.json",
               "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\appsettings.json",
               "RelativeDocumentMoniker": "SEP490_BackendAPI\\appsettings.json",
               "ToolTip": "D:\\src\\Fork\\SEP490_Backend\\SEP490_BackendAPI\\appsettings.json",
               "RelativeToolTip": "SEP490_BackendAPI\\appsettings.json",
-              "ViewState": "AgIAABUAAAAAAAAAAAAAABwAAAAaAAAAAAAAAA==",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAABkAAAA0AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
               "WhenOpened": "2025-06-13T14:13:01.065Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 3,
               "Title": "CreateAccountRequest.cs",
               "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\Application\\DTOs\\Account\\CreateAccountRequest.cs",
               "RelativeDocumentMoniker": "Application\\DTOs\\Account\\CreateAccountRequest.cs",
@@ -166,12 +64,11 @@
               "RelativeToolTip": "Application\\DTOs\\Account\\CreateAccountRequest.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-13T12:59:57.682Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-13T12:59:57.682Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 2,
               "Title": "IAccountService.cs",
               "DocumentMoniker": "D:\\src\\Fork\\SEP490_Backend\\Application\\Interfaces\\IAccountService.cs",
               "RelativeDocumentMoniker": "Application\\Interfaces\\IAccountService.cs",
@@ -179,8 +76,7 @@
               "RelativeToolTip": "Application\\Interfaces\\IAccountService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAqwAoAAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-13T12:58:59.039Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-13T12:58:59.039Z"
             }
           ]
         }

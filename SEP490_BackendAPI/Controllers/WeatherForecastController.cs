@@ -4,7 +4,7 @@ using Microsoft.Identity.Web.Resource;
 
 namespace SEP490_BackendAPI.Controllers
 {
-    [Authorize("Admin")]
+    [Authorize(Roles = "Admin")]
     [ApiController]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
