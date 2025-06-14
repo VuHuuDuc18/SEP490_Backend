@@ -34,23 +34,23 @@ namespace SEP490_BackendAPI.Extensions
                     BearerFormat = "JWT",
                     Description = "Input your Bearer token in this format - Bearer {your token here} to access this API",
                 });
-                //s.AddSecurityRequirement(new OpenApiSecurityRequirement
-                //{
-                //    {
-                //        new OpenApiSecurityScheme
-                //        {
-                //            Reference = new OpenApiReference
-                //            {
-                //                Type = ReferenceType.SecurityScheme,
-                //                Id = "Bearer",
-                //            },
-                //            Scheme = "Bearer",
-                //            Name = "Bearer",
-                //            In = ParameterLocation.Header,
-                //        }, new List<string>()
-                //    },
-                //});
-                options.OperationFilter<SecurityRequirementsOperationFilter>();
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer",
+                            },
+                            Scheme = "Bearer",
+                            Name = "Bearer",
+                            In = ParameterLocation.Header,
+                        }, new List<string>()
+                    },
+                });
+                //options.OperationFilter<SecurityRequirementsOperationFilter>();
             });
         }
         
@@ -58,7 +58,7 @@ namespace SEP490_BackendAPI.Extensions
         {
             var userManager = servicesProvider.GetRequiredService<UserManager<User>>();
             var roleManaer = servicesProvider.GetRequiredService<RoleManager<Role>>();
-            await RoleSeeds.SeedAsync( roleManaer);
+            await RoleSeeds.SeedAsync(roleManaer);
             await UserSeeds.SeedAsync(userManager, roleManaer);
         }
     }

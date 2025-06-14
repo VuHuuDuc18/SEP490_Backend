@@ -34,9 +34,8 @@ namespace SEP490_BackendAPI
             //builder.Services.AddDbContext<LCFMSDBContext>(options => 
             //    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")), 
             //    ServiceLifetime.Transient);
-            //builder.Services.AddScoped<DbContext, LCFMSDBContext>();
+            //builder.Services.AddScoped<DbContext, LCFMSDBContext>();builder.Configuration.GetConnectionString("DefaultConnection")
 
-            
             // Add services to the container.
             builder.Services.AddSwaggerExtensions();
 

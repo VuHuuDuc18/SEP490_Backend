@@ -18,12 +18,12 @@ namespace WebApi.Controllers
         {
             _accountService = accountService;
         }
-        [HttpPost("authenticate")]
+        [HttpPost("login")]
         public async Task<IActionResult> LoginAsync(AuthenticationRequest request)
         {
             return Ok(await _accountService.LoginAsync(request, GenerateIPAddress()));
         }
-        [HttpPost("register")]
+        [HttpPost("create-account")]
         public async Task<IActionResult> CreateAccountAsync(CreateAccountRequest request)
         {
             var origin = Request.Headers["origin"];

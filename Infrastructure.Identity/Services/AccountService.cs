@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using Entities.EntityModel;
 using Application.Wrappers;
 using Application.Exceptions;
+using Infrastructure.Identity.Helpers;
 
 namespace Infrastructure.Identity.Services
 {
@@ -95,7 +96,7 @@ namespace Infrastructure.Identity.Services
                 if (result.Succeeded)
                 {
                     await _userManager.AddToRoleAsync(user, "User");
-                    //var verificationUri = await SendVerificationEmail(user, origin);
+                    var verificationUri = await SendVerificationEmail(user, origin);
                     //TODO: Attach Email Service here and configure it via appsettings
                     //await _emailService.SendAsync(new Application.DTOs.Email.EmailRequest() { From = "mail@codewithmukesh.com", To = user.Email, Body = $"Please confirm your account by visiting this URL {verificationUri}", Subject = "Confirm Registration" });
                     return new Response<string>(user.Id.ToString(), message: $"User Registered. Please confirm your account by visiting this URL {"verificationUri"}");
@@ -123,15 +124,15 @@ namespace Infrastructure.Identity.Services
                 roleClaims.Add(new Claim("roles", roles[i]));
             }
 
-            //string ipAddress = IpHelper.GetIpAddress();
+            string ipAddress = IpHelper.GetIpAddress();
 
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                //new Claim("uid", user.Id),
-                //new Claim("ip", ipAddress)
+                new Claim("uid", user.Id.ToString()),
+                new Claim("ip", ipAddress)
             }
             .Union(userClaims)
             .Union(roleClaims);
@@ -143,7 +144,7 @@ namespace Infrastructure.Identity.Services
                 issuer: _jwtSettings.Issuer,
                 audience: _jwtSettings.Audience,
                 claims: claims,
-                //expires: DateTime.UtcNow.AddMinutes(_jwtSettings.DurationInMinutes),
+                expires: DateTime.UtcNow.AddMinutes(_jwtSettings.LifeTime),
                 signingCredentials: signingCredentials);
             return jwtSecurityToken;
         }
