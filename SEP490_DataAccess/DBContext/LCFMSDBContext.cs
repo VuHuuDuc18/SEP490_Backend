@@ -34,6 +34,12 @@ namespace Infrastructure.DBContext
         public virtual DbSet<MedicineReport> MedicineReports { get; set; }
         public virtual DbSet<MedicineCategory> MedicineCategories { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
+        public virtual DbSet<ImageFood> ImageFoods { get; set; }
+        public virtual DbSet<ImageMedicine> ImageMedicines { get; set; }
+        public virtual DbSet<ImageBreed> ImageBreeds { get; set; }
+        public virtual DbSet<ImageLivestockCircle> ImageLivestockCircles { get; set; }
+        public virtual DbSet<ImageDailyReport> ImageDailyReports { get; set; }
+  
 
 
 

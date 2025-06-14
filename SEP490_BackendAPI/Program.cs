@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Abstractions;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.Resource;
+using Domain.Services;
 
 
 namespace SEP490_BackendAPI
@@ -37,6 +38,7 @@ namespace SEP490_BackendAPI
             builder.Services.AddScoped<DbContext, LCFMSDBContext>();
 
             //Add service extensions
+            builder.Services.Configure<CloudinaryConfig>(builder.Configuration.GetSection("Cloudinary"));
             builder.Services.AddInfrastructure();
             builder.Services.AddDomain();
 
