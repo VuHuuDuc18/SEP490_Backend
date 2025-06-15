@@ -7,7 +7,6 @@
 		<UserSecretsId>aspnet-SEP490_BackendAPI-1fe70cc3-2416-4111-bd54-07f72704559d</UserSecretsId>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 		<GenerateRuntimeConfigurationFiles>True</GenerateRuntimeConfigurationFiles>
-
 	</PropertyGroup>
 
 	<ItemGroup>

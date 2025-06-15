@@ -45,3 +45,14 @@ Domain/obj
 Authentication/bin
 SEP490_DataAccess/obj
 .vs
+Authentication
+Authentication/obj
+Domain/obj
+Entities/obj
+SEP490_BackendAPI/obj
+SEP490_DataAccess/obj
+Authentication/bin
+Domain/bin
+Entities/bin
+SEP490_BackendAPI/bin
+SEP490_DataAccess/bin
