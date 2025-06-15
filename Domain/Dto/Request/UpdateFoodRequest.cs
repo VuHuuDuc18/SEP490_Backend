@@ -22,5 +22,15 @@ namespace Domain.Dto.Request
         [Required(ErrorMessage = "Cân nặng mỗi đơn vị là bắt buộc.")]
         [Range(0.01f, float.MaxValue, ErrorMessage = "Cân nặng mỗi đơn vị phải lớn hơn 0.")]
         public float WeighPerUnit { get; set; }
+
+        /// <summary>
+        /// Danh sách liên kết ảnh (upload lên Cloudinary) .
+        /// </summary>
+        public List<string> ImageLinks { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Liên kết ảnh thumbnail (upload lên Cloudinary).
+        /// </summary>
+        public string Thumbnail { get; set; }
     }
 }

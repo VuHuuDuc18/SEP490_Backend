@@ -16,29 +16,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Services.Implements
 {
-    public class MedicineService : IMedicineService
+    public class BreedService : IBreedService
     {
-        private readonly IRepository<Medicine> _medicineRepository;
-        private readonly IRepository<ImageMedicine> _imageMedicineRepository;
+        private readonly IRepository<Breed> _breedRepository;
+        private readonly IRepository<ImageBreed> _imageBreedRepository;
         private readonly CloudinaryCloudService _cloudinaryCloudService;
 
         /// <summary>
-        /// Khởi tạo service với repository của Medicine và CloudinaryCloudService.
+        /// Khởi tạo service với repository của Breed và CloudinaryCloudService.
         /// </summary>
-        public MedicineService(IRepository<Medicine> medicineRepository, IRepository<ImageMedicine> imageMedicineRepository, CloudinaryCloudService cloudinaryCloudService)
+        public BreedService(IRepository<Breed> breedRepository, IRepository<ImageBreed> imageBreedRepository, CloudinaryCloudService cloudinaryCloudService)
         {
-            _medicineRepository = medicineRepository ?? throw new ArgumentNullException(nameof(medicineRepository));
-            _imageMedicineRepository = imageMedicineRepository ?? throw new ArgumentNullException(nameof(imageMedicineRepository));
+            _breedRepository = breedRepository ?? throw new ArgumentNullException(nameof(breedRepository));
+            _imageBreedRepository = imageBreedRepository ?? throw new ArgumentNullException(nameof(imageBreedRepository));
             _cloudinaryCloudService = cloudinaryCloudService ?? throw new ArgumentNullException(nameof(cloudinaryCloudService));
         }
 
         /// <summary>
-        /// Tạo một loại thuốc mới với kiểm tra hợp lệ, bao gồm upload ảnh và thumbnail lên Cloudinary trong folder được chỉ định.
+        /// Tạo một giống loài mới với kiểm tra hợp lệ, bao gồm upload ảnh và thumbnail lên Cloudinary trong folder được chỉ định.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> CreateAsync(CreateMedicineRequest request, string folder, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> CreateAsync(CreateBreedRequest request, string folder, CancellationToken cancellationToken = default)
         {
             if (request == null)
-                return (false, "Dữ liệu thuốc không được null.");
+                return (false, "Dữ liệu giống loài không được null.");
             if (string.IsNullOrEmpty(folder))
                 return (false, "Tên folder là bắt buộc.");
 
@@ -50,28 +50,28 @@ namespace Domain.Services.Implements
             }
 
             var checkError = new Ref<CheckError>();
-            var exists = await _medicineRepository.CheckExist(
-                x => x.MedicineName == request.MedicineName && x.MedicineCategoryId == request.MedicineCategoryId && x.IsActive,
+            var exists = await _breedRepository.CheckExist(
+                x => x.BreedName == request.BreedName && x.BreedCategoryId == request.BreedCategoryId && x.IsActive,
                 checkError,
                 cancellationToken);
 
             if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi kiểm tra thuốc tồn tại: {checkError.Value.Message}");
+                return (false, $"Lỗi khi kiểm tra giống loài tồn tại: {checkError.Value.Message}");
 
             if (exists)
-                return (false, $"Thuốc với tên '{request.MedicineName}' trong danh mục này đã tồn tại.");
+                return (false, $"Giống loài với tên '{request.BreedName}' trong danh mục này đã tồn tại.");
 
-            var medicine = new Medicine
+            var breed = new Breed
             {
-                MedicineName = request.MedicineName,
-                MedicineCategoryId = request.MedicineCategoryId,
-                Stock = request.Stock,
+                BreedName = request.BreedName,
+                BreedCategoryId = request.BreedCategoryId,
+                Stock = request.Stock
             };
 
             try
             {
-                _medicineRepository.Insert(medicine);
-                await _medicineRepository.CommitAsync(cancellationToken);
+                _breedRepository.Insert(breed);
+                await _breedRepository.CommitAsync(cancellationToken);
 
                 if (!string.IsNullOrEmpty(request.Thumbnail))
                 {
@@ -86,13 +86,13 @@ namespace Domain.Services.Implements
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {
-                        var imageMedicine = new ImageMedicine
+                        var imageBreed = new ImageBreed
                         {
-                            MedicineId = medicine.Id,
+                            BreedId = breed.Id,
                             ImageLink = imageLink,
                             Thumnail = "true"
                         };
-                        _imageMedicineRepository.Insert(imageMedicine);
+                        _imageBreedRepository.Insert(imageBreed);
                     }
                 }
 
@@ -111,43 +111,43 @@ namespace Domain.Services.Implements
 
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
-                            var imageMedicine = new ImageMedicine
+                            var imageBreed = new ImageBreed
                             {
-                                MedicineId = medicine.Id,
+                                BreedId = breed.Id,
                                 ImageLink = uploadedLink,
                                 Thumnail = "false"
                             };
-                            _imageMedicineRepository.Insert(imageMedicine);
+                            _imageBreedRepository.Insert(imageBreed);
                         }
                     }
                 }
-                await _imageMedicineRepository.CommitAsync(cancellationToken);
+                await _imageBreedRepository.CommitAsync(cancellationToken);
 
                 return (true, null);
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi tạo thuốc: {ex.Message}");
+                return (false, $"Lỗi khi tạo giống loài: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// Cập nhật thông tin một loại thuốc, bao gồm upload ảnh và thumbnail lên Cloudinary trong folder được chỉ định.
+        /// Cập nhật thông tin một giống loài, bao gồm upload ảnh và thumbnail lên Cloudinary trong folder được chỉ định.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> UpdateAsync(Guid id, UpdateMedicineRequest request, string folder, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> UpdateAsync(Guid id, UpdateBreedRequest request, string folder, CancellationToken cancellationToken = default)
         {
             if (request == null)
-                return (false, "Dữ liệu thuốc không được null.");
+                return (false, "Dữ liệu giống loài không được null.");
             if (string.IsNullOrEmpty(folder))
                 return (false, "Tên folder là bắt buộc.");
 
             var checkError = new Ref<CheckError>();
-            var existing = await _medicineRepository.GetById(id, checkError);
+            var existing = await _breedRepository.GetById(id, checkError);
             if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi lấy thông tin thuốc: {checkError.Value.Message}");
+                return (false, $"Lỗi khi lấy thông tin giống loài: {checkError.Value.Message}");
 
             if (existing == null)
-                return (false, "Không tìm thấy thuốc.");
+                return (false, "Không tìm thấy giống loài.");
 
             var validationResults = new List<ValidationResult>();
             var validationContext = new ValidationContext(request);
@@ -156,33 +156,33 @@ namespace Domain.Services.Implements
                 return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
             }
 
-            var exists = await _medicineRepository.CheckExist(
-                x => x.MedicineName == request.MedicineName && x.MedicineCategoryId == request.MedicineCategoryId && x.Id != id && x.IsActive,
+            var exists = await _breedRepository.CheckExist(
+                x => x.BreedName == request.BreedName && x.BreedCategoryId == request.BreedCategoryId && x.Id != id && x.IsActive,
                 checkError,
                 cancellationToken);
 
             if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi kiểm tra thuốc tồn tại: {checkError.Value.Message}");
+                return (false, $"Lỗi khi kiểm tra giống loài tồn tại: {checkError.Value.Message}");
 
             if (exists)
-                return (false, $"Thuốc với tên '{request.MedicineName}' trong danh mục này đã tồn tại.");
+                return (false, $"Giống loài với tên '{request.BreedName}' trong danh mục này đã tồn tại.");
 
             try
             {
-                existing.MedicineName = request.MedicineName;
-                existing.MedicineCategoryId = request.MedicineCategoryId;
+                existing.BreedName = request.BreedName;
+                existing.BreedCategoryId = request.BreedCategoryId;
                 existing.Stock = request.Stock;
 
-                _medicineRepository.Update(existing);
-                await _medicineRepository.CommitAsync(cancellationToken);
+                _breedRepository.Update(existing);
+                await _breedRepository.CommitAsync(cancellationToken);
 
-                var existingImages = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == id).ToListAsync(cancellationToken);
+                var existingImages = await _imageBreedRepository.GetQueryable(x => x.BreedId == id).ToListAsync(cancellationToken);
                 foreach (var image in existingImages)
                 {
-                  //  _imageMedicineRepository.Delete(image);
+                  //  _imageBreedRepository.Delete(image);
                     await _cloudinaryCloudService.DeleteImage(image.ImageLink, cancellationToken);
                 }
-                await _imageMedicineRepository.CommitAsync(cancellationToken);
+                await _imageBreedRepository.CommitAsync(cancellationToken);
 
                 if (!string.IsNullOrEmpty(request.Thumbnail))
                 {
@@ -197,13 +197,13 @@ namespace Domain.Services.Implements
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {
-                        var imageMedicine = new ImageMedicine
+                        var imageBreed = new ImageBreed
                         {
-                            MedicineId = id,
+                            BreedId = id,
                             ImageLink = imageLink,
                             Thumnail = "true"
                         };
-                        _imageMedicineRepository.Insert(imageMedicine);
+                        _imageBreedRepository.Insert(imageBreed);
                     }
                 }
 
@@ -222,82 +222,82 @@ namespace Domain.Services.Implements
 
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
-                            var imageMedicine = new ImageMedicine
+                            var imageBreed = new ImageBreed
                             {
-                                MedicineId = id,
+                                BreedId = id,
                                 ImageLink = uploadedLink,
                                 Thumnail = "false"
                             };
-                            _imageMedicineRepository.Insert(imageMedicine);
+                            _imageBreedRepository.Insert(imageBreed);
                         }
                     }
                 }
-                await _imageMedicineRepository.CommitAsync(cancellationToken);
+                await _imageBreedRepository.CommitAsync(cancellationToken);
 
                 return (true, null);
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi cập nhật thuốc: {ex.Message}");
+                return (false, $"Lỗi khi cập nhật giống loài: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// Xóa mềm một loại thuốc bằng cách đặt IsActive thành false.
+        /// Xóa mềm một giống loài bằng cách đặt IsActive thành false.
         /// </summary>
         public async Task<(bool Success, string ErrorMessage)> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var medicine = await _medicineRepository.GetById(id, checkError);
+            var breed = await _breedRepository.GetById(id, checkError);
             if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi lấy thông tin thuốc: {checkError.Value.Message}");
+                return (false, $"Lỗi khi lấy thông tin giống loài: {checkError.Value.Message}");
 
-            if (medicine == null)
-                return (false, "Không tìm thấy thuốc.");
+            if (breed == null)
+                return (false, "Không tìm thấy giống loài.");
 
             try
             {
-                medicine.IsActive = false;
-                _medicineRepository.Update(medicine);
-                await _medicineRepository.CommitAsync(cancellationToken);
+                breed.IsActive = false;
+                _breedRepository.Update(breed);
+                await _breedRepository.CommitAsync(cancellationToken);
 
-                var images = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == id).ToListAsync(cancellationToken);
+                var images = await _imageBreedRepository.GetQueryable(x => x.BreedId == id).ToListAsync(cancellationToken);
                 foreach (var image in images)
                 {
-                  //  _imageMedicineRepository.Delete(image);
+                    //_imageBreedRepository.Delete(image);
                     await _cloudinaryCloudService.DeleteImage(image.ImageLink, cancellationToken);
                 }
-                await _imageMedicineRepository.CommitAsync(cancellationToken);
+                await _imageBreedRepository.CommitAsync(cancellationToken);
 
                 return (true, null);
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi xóa thuốc: {ex.Message}");
+                return (false, $"Lỗi khi xóa giống loài: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// Lấy thông tin một loại thuốc theo ID, bao gồm danh sách ảnh và thumbnail.
+        /// Lấy thông tin một giống loài theo ID, bao gồm danh sách ảnh và thumbnail.
         /// </summary>
-        public async Task<(MedicineResponse Medicine, string ErrorMessage)> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(BreedResponse Breed, string ErrorMessage)> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var medicine = await _medicineRepository.GetById(id, checkError);
+            var breed = await _breedRepository.GetById(id, checkError);
             if (checkError.Value?.IsError == true)
-                return (null, $"Lỗi khi lấy thông tin thuốc: {checkError.Value.Message}");
+                return (null, $"Lỗi khi lấy thông tin giống loài: {checkError.Value.Message}");
 
-            if (medicine == null)
-                return (null, "Không tìm thấy thuốc.");
+            if (breed == null)
+                return (null, "Không tìm thấy giống loài.");
 
-            var images = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == id).ToListAsync(cancellationToken);
-            var response = new MedicineResponse
+            var images = await _imageBreedRepository.GetQueryable(x => x.BreedId == id).ToListAsync(cancellationToken);
+            var response = new BreedResponse
             {
-                Id = medicine.Id,
-                MedicineName = medicine.MedicineName,
-                MedicineCategoryId = medicine.MedicineCategoryId,
-                Stock = medicine.Stock,              
-                IsActive = medicine.IsActive,
+                Id = breed.Id,
+                BreedName = breed.BreedName,
+                BreedCategoryId = breed.BreedCategoryId,
+                Stock = breed.Stock,
+                IsActive = breed.IsActive,
                 ImageLinks = images.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
                 Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink,
                // Folder = images.FirstOrDefault()?.ImageLink.Split('/')[4] // Lấy folder từ URL (giả định cấu trúc URL)
@@ -306,35 +306,35 @@ namespace Domain.Services.Implements
         }
 
         /// <summary>
-        /// Lấy danh sách tất cả loại thuốc đang hoạt động với bộ lọc tùy chọn, bao gồm danh sách ảnh và thumbnail.
+        /// Lấy danh sách tất cả giống loài đang hoạt động với bộ lọc tùy chọn, bao gồm danh sách ảnh và thumbnail.
         /// </summary>
-        public async Task<(List<MedicineResponse> Medicines, string ErrorMessage)> GetAllAsync(
-            string medicineName = null,
-            Guid? medicineCategoryId = null,
+        public async Task<(List<BreedResponse> Breeds, string ErrorMessage)> GetAllAsync(
+            string breedName = null,
+            Guid? breedCategoryId = null,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                var query = _medicineRepository.GetQueryable(x => x.IsActive);
+                var query = _breedRepository.GetQueryable(x => x.IsActive);
 
-                if (!string.IsNullOrEmpty(medicineName))
-                    query = query.Where(x => x.MedicineName.Contains(medicineName));
+                if (!string.IsNullOrEmpty(breedName))
+                    query = query.Where(x => x.BreedName.Contains(breedName));
 
-                if (medicineCategoryId.HasValue)
-                    query = query.Where(x => x.MedicineCategoryId == medicineCategoryId.Value);
+                if (breedCategoryId.HasValue)
+                    query = query.Where(x => x.BreedCategoryId == breedCategoryId.Value);
 
-                var medicines = await query.ToListAsync(cancellationToken);
-                var responses = new List<MedicineResponse>();
-                foreach (var medicine in medicines)
+                var breeds = await query.ToListAsync(cancellationToken);
+                var responses = new List<BreedResponse>();
+                foreach (var breed in breeds)
                 {
-                    var images = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == medicine.Id).ToListAsync(cancellationToken);
-                    responses.Add(new MedicineResponse
+                    var images = await _imageBreedRepository.GetQueryable(x => x.BreedId == breed.Id).ToListAsync(cancellationToken);
+                    responses.Add(new BreedResponse
                     {
-                        Id = medicine.Id,
-                        MedicineName = medicine.MedicineName,
-                        MedicineCategoryId = medicine.MedicineCategoryId,
-                        Stock = medicine.Stock,                      
-                        IsActive = medicine.IsActive,
+                        Id = breed.Id,
+                        BreedName = breed.BreedName,
+                        BreedCategoryId = breed.BreedCategoryId,
+                        Stock = breed.Stock,
+                        IsActive = breed.IsActive,
                         ImageLinks = images.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
                         Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink,
                        // Folder = images.FirstOrDefault()?.ImageLink.Split('/')[4] // Lấy folder từ URL (giả định cấu trúc URL)
@@ -344,7 +344,7 @@ namespace Domain.Services.Implements
             }
             catch (Exception ex)
             {
-                return (null, $"Lỗi khi lấy danh sách thuốc: {ex.Message}");
+                return (null, $"Lỗi khi lấy danh sách giống loài: {ex.Message}");
             }
         }
 

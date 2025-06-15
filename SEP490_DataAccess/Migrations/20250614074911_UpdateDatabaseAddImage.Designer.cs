@@ -4,6 +4,7 @@ using Infrastructure.DBContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(LCFMSDBContext))]
-    partial class LCFMSDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250614074911_UpdateDatabaseAddImage")]
+    partial class UpdateDatabaseAddImage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -519,201 +522,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("FoodReports");
                 });
 
-            modelBuilder.Entity("Entities.EntityModel.ImageBreed", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BreedId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ImageLink")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Thumnail")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BreedId");
-
-                    b.ToTable("ImageBreeds");
-                });
-
-            modelBuilder.Entity("Entities.EntityModel.ImageDailyReport", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("DailyReportId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ImageLink")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Thumnail")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DailyReportId");
-
-                    b.ToTable("ImageDailyReports");
-                });
-
-            modelBuilder.Entity("Entities.EntityModel.ImageFood", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("FoodId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ImageLink")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Thumnail")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FoodId");
-
-                    b.ToTable("ImageFoods");
-                });
-
-            modelBuilder.Entity("Entities.EntityModel.ImageLivestockCircle", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ImageLink")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("LivestockCircleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Thumnail")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LivestockCircleId");
-
-                    b.ToTable("ImageLivestockCircles");
-                });
-
-            modelBuilder.Entity("Entities.EntityModel.ImageMedicine", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ImageLink")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("MedicineId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Thumnail")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MedicineId");
-
-                    b.ToTable("ImageMedicines");
-                });
-
             modelBuilder.Entity("Entities.EntityModel.LivestockCircle", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1058,65 +866,65 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("2be359cd-f34f-4ba6-a1f8-d6cd2ff9f1ee"),
+                            Id = new Guid("a88b9793-0a15-479e-81f1-623e97a2105d"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDate = new DateTime(2025, 6, 14, 14, 57, 26, 670, DateTimeKind.Local).AddTicks(6376),
+                            CreatedDate = new DateTime(2025, 6, 14, 14, 49, 10, 570, DateTimeKind.Local).AddTicks(1269),
                             IsActive = true,
                             RoleName = "Company Admin"
                         },
                         new
                         {
-                            Id = new Guid("1aea0d98-dd4c-4b06-9665-2615a3723e18"),
+                            Id = new Guid("f2789395-47df-4536-9904-bbed0db60ce2"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDate = new DateTime(2025, 6, 14, 14, 57, 26, 670, DateTimeKind.Local).AddTicks(6396),
+                            CreatedDate = new DateTime(2025, 6, 14, 14, 49, 10, 570, DateTimeKind.Local).AddTicks(1288),
                             IsActive = true,
                             RoleName = "Technical Staff"
                         },
                         new
                         {
-                            Id = new Guid("c3af7aa2-bda6-4f65-a2d7-10b40cd9b73e"),
+                            Id = new Guid("ab55211b-b677-47a8-882b-405156c40d49"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDate = new DateTime(2025, 6, 14, 14, 57, 26, 670, DateTimeKind.Local).AddTicks(6399),
+                            CreatedDate = new DateTime(2025, 6, 14, 14, 49, 10, 570, DateTimeKind.Local).AddTicks(1290),
                             IsActive = true,
                             RoleName = "Feed Room Staff"
                         },
                         new
                         {
-                            Id = new Guid("c25be487-42ea-4858-892f-9b6f80ca623e"),
+                            Id = new Guid("d3eb1ae9-46a5-4859-8fe7-49d1e71c157b"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDate = new DateTime(2025, 6, 14, 14, 57, 26, 670, DateTimeKind.Local).AddTicks(6401),
+                            CreatedDate = new DateTime(2025, 6, 14, 14, 49, 10, 570, DateTimeKind.Local).AddTicks(1292),
                             IsActive = true,
                             RoleName = "Medicine Room Staff"
                         },
                         new
                         {
-                            Id = new Guid("f71d0ef6-3d4a-47ce-ab21-9c894217fb66"),
+                            Id = new Guid("838e2cc1-cf5f-49f3-87c2-8226403031ee"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDate = new DateTime(2025, 6, 14, 14, 57, 26, 670, DateTimeKind.Local).AddTicks(6404),
+                            CreatedDate = new DateTime(2025, 6, 14, 14, 49, 10, 570, DateTimeKind.Local).AddTicks(1304),
                             IsActive = true,
                             RoleName = "Weighing Room Staff"
                         },
                         new
                         {
-                            Id = new Guid("db19a21d-3515-421f-ae23-74188fbb4b6b"),
+                            Id = new Guid("d37cde57-531f-4990-b766-3461750e87a0"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDate = new DateTime(2025, 6, 14, 14, 57, 26, 670, DateTimeKind.Local).AddTicks(6406),
+                            CreatedDate = new DateTime(2025, 6, 14, 14, 49, 10, 570, DateTimeKind.Local).AddTicks(1306),
                             IsActive = true,
                             RoleName = "Worker"
                         },
                         new
                         {
-                            Id = new Guid("91a56989-b9b1-4c37-b378-18b8903029b0"),
+                            Id = new Guid("3e6bca2d-9b75-4ad3-9159-a1fbbd9ad6ab"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDate = new DateTime(2025, 6, 14, 14, 57, 26, 670, DateTimeKind.Local).AddTicks(6409),
+                            CreatedDate = new DateTime(2025, 6, 14, 14, 49, 10, 570, DateTimeKind.Local).AddTicks(1308),
                             IsActive = true,
                             RoleName = "Sales Staff"
                         },
                         new
                         {
-                            Id = new Guid("f5634051-8686-4801-a75b-c3fe928ba685"),
+                            Id = new Guid("3cae6d90-f805-4ecc-99be-7ab99be2d226"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDate = new DateTime(2025, 6, 14, 14, 57, 26, 670, DateTimeKind.Local).AddTicks(6411),
+                            CreatedDate = new DateTime(2025, 6, 14, 14, 49, 10, 570, DateTimeKind.Local).AddTicks(1309),
                             IsActive = true,
                             RoleName = "Customer"
                         });
@@ -1167,13 +975,13 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("531ab827-2b3a-4793-a758-ca4927d7c97b"),
+                            Id = new Guid("110f78d4-bb2d-4f11-98aa-bbe4d7c310d1"),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            CreatedDate = new DateTime(2025, 6, 14, 14, 57, 26, 670, DateTimeKind.Local).AddTicks(6589),
+                            CreatedDate = new DateTime(2025, 6, 14, 14, 49, 10, 570, DateTimeKind.Local).AddTicks(1483),
                             Email = "admin@a",
                             IsActive = true,
                             Password = "123",
-                            RoleId = new Guid("2be359cd-f34f-4ba6-a1f8-d6cd2ff9f1ee"),
+                            RoleId = new Guid("a88b9793-0a15-479e-81f1-623e97a2105d"),
                             UserName = "Company Admin"
                         });
                 });
@@ -1183,7 +991,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.User", "Worker")
                         .WithMany()
                         .HasForeignKey("WorkerId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Worker");
@@ -1194,13 +1002,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.BarnPlan", "BarnPlan")
                         .WithMany()
                         .HasForeignKey("BarnPlanId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.Food", "Food")
                         .WithMany()
                         .HasForeignKey("FoodId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("BarnPlan");
@@ -1213,13 +1021,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.BarnPlan", "BarnPlan")
                         .WithMany()
                         .HasForeignKey("BarnPlanId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.Medicine", "Medicine")
                         .WithMany()
                         .HasForeignKey("MedicineId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("BarnPlan");
@@ -1232,13 +1040,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.LivestockCircle", "LivestockCircle")
                         .WithMany()
                         .HasForeignKey("LivestockCircleId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.User", "UserRequest")
                         .WithMany()
                         .HasForeignKey("UserRequestId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("LivestockCircle");
@@ -1251,7 +1059,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.Bill", "Bill")
                         .WithMany()
                         .HasForeignKey("BillId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.Breed", "Breed")
@@ -1280,7 +1088,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.BreedCategory", "BreedCategory")
                         .WithMany()
                         .HasForeignKey("BreedCategoryId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("BreedCategory");
@@ -1291,7 +1099,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.LivestockCircle", "LivestockCircle")
                         .WithMany()
                         .HasForeignKey("LivestockCircleId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("LivestockCircle");
@@ -1302,7 +1110,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.FoodCategory", "FoodCategory")
                         .WithMany()
                         .HasForeignKey("FoodCategoryId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("FoodCategory");
@@ -1313,13 +1121,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.Food", "Food")
                         .WithMany()
                         .HasForeignKey("FoodId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.DailyReport", "Report")
                         .WithMany()
                         .HasForeignKey("ReportId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Food");
@@ -1327,79 +1135,24 @@ namespace Infrastructure.Migrations
                     b.Navigation("Report");
                 });
 
-            modelBuilder.Entity("Entities.EntityModel.ImageBreed", b =>
-                {
-                    b.HasOne("Entities.EntityModel.Breed", "Breed")
-                        .WithMany()
-                        .HasForeignKey("BreedId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Breed");
-                });
-
-            modelBuilder.Entity("Entities.EntityModel.ImageDailyReport", b =>
-                {
-                    b.HasOne("Entities.EntityModel.DailyReport", "DailyReport")
-                        .WithMany()
-                        .HasForeignKey("DailyReportId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("DailyReport");
-                });
-
-            modelBuilder.Entity("Entities.EntityModel.ImageFood", b =>
-                {
-                    b.HasOne("Entities.EntityModel.Food", "Food")
-                        .WithMany()
-                        .HasForeignKey("FoodId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Food");
-                });
-
-            modelBuilder.Entity("Entities.EntityModel.ImageLivestockCircle", b =>
-                {
-                    b.HasOne("Entities.EntityModel.LivestockCircle", "LivestockCircle")
-                        .WithMany()
-                        .HasForeignKey("LivestockCircleId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("LivestockCircle");
-                });
-
-            modelBuilder.Entity("Entities.EntityModel.ImageMedicine", b =>
-                {
-                    b.HasOne("Entities.EntityModel.Medicine", "Medicine")
-                        .WithMany()
-                        .HasForeignKey("MedicineId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Medicine");
-                });
-
             modelBuilder.Entity("Entities.EntityModel.LivestockCircle", b =>
                 {
                     b.HasOne("Entities.EntityModel.Barn", "Barn")
                         .WithMany()
                         .HasForeignKey("BarnId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.Breed", "Breed")
                         .WithMany()
                         .HasForeignKey("BreedId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.User", "TechicalStaff")
                         .WithMany()
                         .HasForeignKey("TechicalStaffId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Barn");
@@ -1414,13 +1167,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.Food", "Food")
                         .WithMany()
                         .HasForeignKey("FoodId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.LivestockCircle", "LSCircle")
                         .WithMany()
                         .HasForeignKey("LivestockCircleId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Food");
@@ -1433,13 +1186,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.LivestockCircle", "LSCircle")
                         .WithMany()
                         .HasForeignKey("LivestockCircleId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.Medicine", "Medicine")
                         .WithMany()
                         .HasForeignKey("MedicineId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("LSCircle");
@@ -1452,7 +1205,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.MedicineCategory", "MedicineCategory")
                         .WithMany()
                         .HasForeignKey("MedicineCategoryId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("MedicineCategory");
@@ -1463,13 +1216,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.Medicine", "Medicine")
                         .WithMany()
                         .HasForeignKey("MedicineId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.DailyReport", "Report")
                         .WithMany()
                         .HasForeignKey("ReportId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Medicine");
@@ -1482,13 +1235,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.User", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Entities.EntityModel.LivestockCircle", "LivestockCircle")
                         .WithMany()
                         .HasForeignKey("LivestockCircleId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Customer");
@@ -1501,7 +1254,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Entities.EntityModel.Role", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Role");
