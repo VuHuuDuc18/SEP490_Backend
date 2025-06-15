@@ -1,0 +1,15 @@
+# Ignore bin and obj folders at all levels
+**/bin/
+**/obj/
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+
+# Build results
+*.dll
+*.exe
+
+# Others
+*.log
