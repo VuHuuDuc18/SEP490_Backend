@@ -12,15 +12,15 @@ namespace SEP490_BackendAPI.Controllers
 
     [ApiController]
     [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    public class AccountController : ControllerBase
     {
 
 
         private readonly IEmailService _mailService;
-        private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ILogger<AccountController> _logger;
         public readonly IUserService _sv;
 
-        public WeatherForecastController(IEmailService mailService, ILogger<WeatherForecastController> logger)
+        public AccountController(IEmailService mailService, ILogger<AccountController> logger)
         {
             _mailService = mailService;
             _logger = logger;

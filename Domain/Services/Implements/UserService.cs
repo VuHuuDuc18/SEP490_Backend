@@ -19,15 +19,11 @@ namespace Domain.Services.Implements
         }
         public async Task<bool> CreateAccount(CreateAccountRequest req)
         {
-            var random = new Random();
-            byte[] bytes = new byte[6];
-            random.NextBytes(bytes);
-          
-            string generatedPassword = System.Text.Encoding.UTF8.GetString(bytes);
+           
             _userrepo.Insert(new User()
             {
                 Email = req.Email,
-                Password = generatedPassword,
+                Password = Extensions.PasswordGenerate.GenerateRandomCode(),
                 RoleId = req.RoleId,
                 UserName = req.UserName
             });
