@@ -1,15 +1,43 @@
-# Ignore bin and obj folders at all levels
-**/bin/
-**/obj/
-
-# Visual Studio files
-.vs/
-*.user
-*.suo
-
 # Build results
-*.dll
-*.exe
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
 
-# Others
+# User-specific files
+*.suo
+*.user
+*.sln.docstates
+.vs/
+
+# Test results and logs
+[Tt]est[Rr]esult*/
 *.log
+*.tmp
+*.tmp_proj
+
+# NuGet packages
+*.nupkg
+**/packages/*
+!**/packages/build/
+
+# IDE and tool settings
+_ReSharper*/
+*.dotCover
+.idea/
+.vscode/
+
+# Database files
+*.mdf
+*.ldf
+*.sdf
+
+# OS generated files
+Thumbs.db
+.DS_Store
+Desktop.ini
+
+# Node.js and web output
+**/node_modules/*
+**/wwwroot/*
