@@ -20,11 +20,11 @@ namespace SEP490_BackendAPI.Controllers
         private readonly ILogger<WeatherForecastController> _logger;
         public readonly IUserService _sv;
 
-        public WeatherForecastController(IEmailService mailService, ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(IEmailService mailService, IUserService sr, ILogger<WeatherForecastController> logger)
         {
             _mailService = mailService;
             _logger = logger;
-          //  _sv = sr;
+            _sv = sr;
         }
 
 
