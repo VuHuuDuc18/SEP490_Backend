@@ -4,6 +4,7 @@
   "Documents": [
     {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|c:\\users\\admin\\source\\repos\\sep490_backendapi.api\\sep490_backendapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|solutionrelative:sep490_backendapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
@@ -14,6 +15,14 @@
       "AbsoluteMoniker": "D:0:0:{A3738D40-049E-4AA6-9FC1-1170838524E1}|Domain\\Domain.csproj|c:\\users\\admin\\source\\repos\\demo_prn231\\sep490_backend\\domain\\extensions\\mailbodygenerate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A3738D40-049E-4AA6-9FC1-1170838524E1}|Domain\\Domain.csproj|solutionrelative:domain\\extensions\\mailbodygenerate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
 >>>>>>> Stashed changes
+=======
+      "AbsoluteMoniker": "D:0:0:{A3738D40-049E-4AA6-9FC1-1170838524E1}|Domain\\Domain.csproj|c:\\users\\admin\\source\\repos\\demo_prn231\\sep490_backend\\domain\\services\\implements\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A3738D40-049E-4AA6-9FC1-1170838524E1}|Domain\\Domain.csproj|solutionrelative:domain\\services\\implements\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A3738D40-049E-4AA6-9FC1-1170838524E1}|Domain\\Domain.csproj|c:\\users\\admin\\source\\repos\\demo_prn231\\sep490_backend\\domain\\extensions\\passwordgenerate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A3738D40-049E-4AA6-9FC1-1170838524E1}|Domain\\Domain.csproj|solutionrelative:domain\\extensions\\passwordgenerate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+>>>>>>> Stashed changes
     }
   ],
   "DocumentGroupContainers": [
@@ -23,10 +32,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
+<<<<<<< Updated upstream
               "DocumentIndex": 0,
 <<<<<<< Updated upstream
               "Title": "appsettings.json",
@@ -58,6 +68,30 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-06-13T14:25:04.621Z",
+=======
+              "DocumentIndex": 1,
+              "Title": "PasswordGenerate.cs",
+              "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Domain\\Extensions\\PasswordGenerate.cs",
+              "RelativeDocumentMoniker": "Domain\\Extensions\\PasswordGenerate.cs",
+              "ToolTip": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Domain\\Extensions\\PasswordGenerate.cs",
+              "RelativeToolTip": "Domain\\Extensions\\PasswordGenerate.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-15T10:54:09.43Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "UserService.cs",
+              "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Domain\\Services\\Implements\\UserService.cs",
+              "RelativeDocumentMoniker": "Domain\\Services\\Implements\\UserService.cs",
+              "ToolTip": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Domain\\Services\\Implements\\UserService.cs",
+              "RelativeToolTip": "Domain\\Services\\Implements\\UserService.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAcwB4AAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-15T10:52:00.469Z",
+>>>>>>> Stashed changes
               "EditorCaption": ""
 >>>>>>> Stashed changes
             }

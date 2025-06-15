@@ -234,6 +234,9 @@
               },
               "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\Infrastructure.csproj": {
                 "projectPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\Infrastructure.csproj"
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
               }
             }
@@ -355,7 +358,10 @@
           "targetAlias": "net8.0",
           "dependencies": {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
             "MailKit": {
               "target": "Package",
               "version": "[4.12.1, )"

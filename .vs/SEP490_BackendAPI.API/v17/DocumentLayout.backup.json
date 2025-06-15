@@ -1,5 +1,6 @@
 {
   "Version": 1,
+<<<<<<< Updated upstream
   "WorkspaceRootPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\",
   "Documents": [
     {
@@ -28,10 +29,15 @@
 >>>>>>> Stashed changes
     }
   ],
+=======
+  "WorkspaceRootPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\",
+  "Documents": [],
+>>>>>>> Stashed changes
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
+<<<<<<< Updated upstream
       "DocumentGroups": [
         {
           "DockedWidth": 200,
@@ -117,6 +123,9 @@
           ]
         }
       ]
+=======
+      "DocumentGroups": []
+>>>>>>> Stashed changes
     }
   ]
 }

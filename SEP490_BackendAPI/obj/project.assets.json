@@ -145,6 +145,9 @@
           }
         }
       },
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
       "Microsoft.AspNetCore.Authentication.JwtBearer/8.0.8": {
         "type": "package",
@@ -1084,7 +1087,10 @@
         }
       },
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
       "MimeKit/4.12.0": {
         "type": "package",
         "dependencies": {
@@ -1661,7 +1667,10 @@
         "dependencies": {
           "Entities": "1.0.0",
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
           "MailKit": "4.12.1",
           "Microsoft.AspNetCore.Http.Abstractions": "2.3.0",
 >>>>>>> Stashed changes
@@ -1855,6 +1864,9 @@
         "mailkit.nuspec"
       ]
     },
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
     "Microsoft.AspNetCore.Authentication.JwtBearer/8.0.8": {
       "sha512": "J145j2LgD4kkkNkrf5DW/pKzithZRKN5EFY+KAO3SqweMyDfv4cgKgtOIsv2bhrOLGqPJixuZkZte7LfK1seYQ==",
@@ -3433,7 +3445,10 @@
       ]
     },
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
     "MimeKit/4.12.0": {
       "sha512": "PFUHfs6BZxKYM/QPJksAwXphbJf0SEfdSfsoQ6p6yvFRaJPofFJMBiotWhFRrdSUzfp6C6K49EjBIqIwZ2TJqA==",
       "type": "package",
@@ -4415,6 +4430,9 @@
             },
             "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\Infrastructure.csproj": {
               "projectPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\Infrastructure.csproj"
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
             }
           }

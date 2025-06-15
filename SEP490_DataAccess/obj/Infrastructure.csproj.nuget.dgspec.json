@@ -112,7 +112,10 @@
           "targetAlias": "net8.0",
           "dependencies": {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
             "MailKit": {
               "target": "Package",
               "version": "[4.12.1, )"

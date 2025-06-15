@@ -76,7 +76,10 @@
         }
       },
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
       "MailKit/4.12.1": {
         "type": "package",
         "dependencies": {
@@ -1145,7 +1148,10 @@
         "dependencies": {
           "Entities": "1.0.0",
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
           "MailKit": "4.12.1",
           "Microsoft.AspNetCore.Http.Abstractions": "2.3.0",
 >>>>>>> Stashed changes
@@ -1248,7 +1254,10 @@
       ]
     },
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
     "MailKit/4.12.1": {
       "sha512": "rIqJm92qtHvk1hDchsJ95Hy7n46A7imE24ol++ikXBsjf3Bi1qDBu4H91FfY6LrYXJaxRlc2gIIpC8AOJrCbqg==",
       "type": "package",
