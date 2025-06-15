@@ -18,7 +18,10 @@ namespace Entities.EntityModel
         public DateTime? OTPExpiry { get; set; }
 
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedDate { get; set; }
 
         public bool IsActive { get; set; } = true;
+        [Required] public Guid CreatedBy { get; set; }
+        public Guid? UpdatedBy { get; set; }
     }
 }

@@ -12,8 +12,14 @@ namespace Entities.EntityModel
 {
     public class Role : IdentityRole<Guid>
     {
-        public Role(string name) : base(name)
-        {
-        }
+        [Required] 
+        public bool IsActive { get; set; }
+
+        [Required] 
+        public DateTime CreatedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
+        [Required] public Guid CreatedBy { get; set; }
+        public Guid? UpdatedBy { get; set; }
+        
     }
 }
