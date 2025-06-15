@@ -25,7 +25,8 @@ namespace Domain
             services.AddScoped<IFoodCategoryService, FoodCategoryService>();
             services.AddScoped<IBreedCategoryService, BreedCategoryService>();
             services.AddScoped<IMedicineCategoryService, MedicineCategoryService>();
-            services.AddScoped<IBreedService, BreedService>();      
+            services.AddScoped<IBreedService, BreedService>();
+            services.AddScoped<IUserService, UserService>();
             services.AddScoped<CloudinaryCloudService>();
 
             //Add repo
@@ -37,6 +38,7 @@ namespace Domain
             services.AddScoped<IRepository<FoodCategory>, Repository<FoodCategory>>();
             services.AddScoped<IRepository<BreedCategory>, Repository<BreedCategory>>();
             services.AddScoped<IRepository<Breed>, Repository<Breed>>();
+            services.AddScoped<IRepository<User>, Repository<User>>();
             services.AddScoped<IRepository<ImageBreed>, Repository<ImageBreed>>();
             services.AddScoped<IRepository<MedicineCategory>, Repository<MedicineCategory>>();
             services.AddScoped<IRepository<LivestockCircle>, Repository<LivestockCircle>>();

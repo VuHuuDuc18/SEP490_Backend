@@ -20,11 +20,11 @@ namespace SEP490_BackendAPI.Controllers
         private readonly ILogger<AccountController> _logger;
         public readonly IUserService _sv;
 
-        public AccountController(IEmailService mailService, ILogger<AccountController> logger)
+        public AccountController(IEmailService mailService, IUserService sr, ILogger<AccountController> logger)
         {
             _mailService = mailService;
             _logger = logger;
-          //  _sv = sr;
+            _sv = sr;
         }
 
 
