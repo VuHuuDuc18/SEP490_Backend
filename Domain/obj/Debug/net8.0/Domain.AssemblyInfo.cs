@@ -16,12 +16,16 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6d90a07cb8e86c2dabbaab0581a226c95f3e899f")]
 =======
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6dffaf25eeafaf611c3391ea7a760f4747f20b7f")]
 >>>>>>> Stashed changes
 =======
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b3fb774dbc66dd3e817380179023e074f67003ce")]
+>>>>>>> Stashed changes
+=======
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a74b3ee67c2742198b5dd7caac0c000aa61dccec")]
 >>>>>>> Stashed changes
 [assembly: System.Reflection.AssemblyProductAttribute("Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Domain")]

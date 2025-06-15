@@ -1,131 +1,53 @@
 {
   "Version": 1,
-<<<<<<< Updated upstream
-  "WorkspaceRootPath": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\",
+  "WorkspaceRootPath": "C:\\Users\\admin\\source\\repos\\SEP490\\SEP490_Backend\\",
   "Documents": [
     {
-<<<<<<< Updated upstream
-      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|c:\\users\\admin\\source\\repos\\sep490_backendapi.api\\sep490_backendapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|c:\\users\\admin\\source\\repos\\sep490\\sep490_backend\\sep490_backendapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|solutionrelative:sep490_backendapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|c:\\users\\admin\\source\\repos\\sep490_backendapi.api\\sep490_backendapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|c:\\users\\admin\\source\\repos\\sep490\\sep490_backend\\sep490_backendapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|solutionrelative:sep490_backendapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-=======
-      "AbsoluteMoniker": "D:0:0:{B6A0E816-6E99-4906-99E2-7E9C3CE62473}|SEP490_DataAccess\\Infrastructure.csproj|c:\\users\\admin\\source\\repos\\demo_prn231\\sep490_backend\\sep490_dataaccess\\services\\emailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B6A0E816-6E99-4906-99E2-7E9C3CE62473}|SEP490_DataAccess\\Infrastructure.csproj|solutionrelative:sep490_dataaccess\\services\\emailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A3738D40-049E-4AA6-9FC1-1170838524E1}|Domain\\Domain.csproj|c:\\users\\admin\\source\\repos\\demo_prn231\\sep490_backend\\domain\\extensions\\mailbodygenerate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A3738D40-049E-4AA6-9FC1-1170838524E1}|Domain\\Domain.csproj|solutionrelative:domain\\extensions\\mailbodygenerate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|c:\\users\\admin\\source\\repos\\demo_prn231\\sep490_backend\\sep490_backendapi\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|solutionrelative:sep490_backendapi\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|c:\\users\\admin\\source\\repos\\demo_prn231\\sep490_backend\\sep490_backendapi\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F4B61400-F9C3-4610-B8FE-8EE4B54D1F11}|SEP490_BackendAPI\\SEP490_BackendAPI.csproj|solutionrelative:sep490_backendapi\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
->>>>>>> Stashed changes
     }
   ],
-=======
-  "WorkspaceRootPath": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\",
-  "Documents": [],
->>>>>>> Stashed changes
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-<<<<<<< Updated upstream
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-<<<<<<< Updated upstream
               "DocumentIndex": 0,
               "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_BackendAPI\\appsettings.json",
+              "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\SEP490\\SEP490_Backend\\SEP490_BackendAPI\\appsettings.json",
               "RelativeDocumentMoniker": "SEP490_BackendAPI\\appsettings.json",
-              "ToolTip": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_BackendAPI\\appsettings.json",
+              "ToolTip": "C:\\Users\\admin\\source\\repos\\SEP490\\SEP490_Backend\\SEP490_BackendAPI\\appsettings.json",
               "RelativeToolTip": "SEP490_BackendAPI\\appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-06-06T05:49:40.073Z",
-=======
-              "DocumentIndex": 1,
-              "Title": "MailBodyGenerate.cs",
-              "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Domain\\Extensions\\MailBodyGenerate.cs",
-              "RelativeDocumentMoniker": "Domain\\Extensions\\MailBodyGenerate.cs",
-              "ToolTip": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\Domain\\Extensions\\MailBodyGenerate.cs",
-              "RelativeToolTip": "Domain\\Extensions\\MailBodyGenerate.cs",
-              "ViewState": "AgIAAAkAAAAAAAAAAAAAABgAAAAnAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-13T14:05:32.191Z",
->>>>>>> Stashed changes
+              "WhenOpened": "2025-06-15T11:38:35.909Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-<<<<<<< Updated upstream
               "DocumentIndex": 1,
               "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_BackendAPI\\Program.cs",
+              "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\SEP490\\SEP490_Backend\\SEP490_BackendAPI\\Program.cs",
               "RelativeDocumentMoniker": "SEP490_BackendAPI\\Program.cs",
-              "ToolTip": "C:\\Users\\admin\\source\\repos\\SEP490_BackendAPI.API\\SEP490_BackendAPI\\Program.cs",
+              "ToolTip": "C:\\Users\\admin\\source\\repos\\SEP490\\SEP490_Backend\\SEP490_BackendAPI\\Program.cs",
               "RelativeToolTip": "SEP490_BackendAPI\\Program.cs",
               "ViewState": "AgIAAAoAAAAAAAAAAAAxwB0AAABAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-06T05:47:20.351Z",
-              "EditorCaption": ""
-=======
-              "DocumentIndex": 0,
-              "Title": "EmailService.cs",
-              "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\Services\\EmailService.cs",
-              "RelativeDocumentMoniker": "SEP490_DataAccess\\Services\\EmailService.cs",
-              "ToolTip": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_DataAccess\\Services\\EmailService.cs",
-              "RelativeToolTip": "SEP490_DataAccess\\Services\\EmailService.cs",
-              "ViewState": "AgIAABkAAAAAAAAAAAAYwB4AAABWAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-13T13:57:58.44Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "WeatherForecastController.cs",
-              "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_BackendAPI\\Controllers\\WeatherForecastController.cs",
-              "RelativeDocumentMoniker": "SEP490_BackendAPI\\Controllers\\WeatherForecastController.cs",
-              "ToolTip": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_BackendAPI\\Controllers\\WeatherForecastController.cs",
-              "RelativeToolTip": "SEP490_BackendAPI\\Controllers\\WeatherForecastController.cs",
-              "ViewState": "AgIAABkAAAAAAAAAAAAgwCgAAAA+AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-13T13:57:37.767Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "UserController.cs",
-              "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_BackendAPI\\Controllers\\UserController.cs",
-              "RelativeDocumentMoniker": "SEP490_BackendAPI\\Controllers\\UserController.cs",
-              "ToolTip": "C:\\Users\\admin\\source\\repos\\DEMO_PRN231\\SEP490_Backend\\SEP490_BackendAPI\\Controllers\\UserController.cs",
-              "RelativeToolTip": "SEP490_BackendAPI\\Controllers\\UserController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-13T13:57:05.819Z",
-              "EditorCaption": ""
->>>>>>> Stashed changes
+              "WhenOpened": "2025-06-15T11:38:35.932Z"
             }
           ]
         }
       ]
-=======
-      "DocumentGroups": []
->>>>>>> Stashed changes
     }
   ]
 }

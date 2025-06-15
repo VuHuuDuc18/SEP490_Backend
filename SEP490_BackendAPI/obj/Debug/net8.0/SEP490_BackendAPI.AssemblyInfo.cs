@@ -15,15 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SEP490_BackendAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6d90a07cb8e86c2dabbaab0581a226c95f3e899f")]
-=======
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9184db5070b046cd0955b08860abf583ad06bda9")]
->>>>>>> Stashed changes
-=======
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b3fb774dbc66dd3e817380179023e074f67003ce")]
->>>>>>> Stashed changes
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+365bdf8053e75e0436277eff6e78b8609dfa4846")]
 [assembly: System.Reflection.AssemblyProductAttribute("SEP490_BackendAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SEP490_BackendAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
