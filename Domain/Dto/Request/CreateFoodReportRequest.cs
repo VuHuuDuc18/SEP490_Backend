@@ -12,9 +12,6 @@ namespace Domain.Dto.Request
         [Required(ErrorMessage = "ID thức ăn là bắt buộc.")]
         public Guid FoodId { get; set; }
 
-        [Required(ErrorMessage = "ID báo cáo là bắt buộc.")]
-        public Guid ReportId { get; set; }
-
         [Required(ErrorMessage = "Số lượng là bắt buộc.")]
         [Range(1, int.MaxValue, ErrorMessage = "Số lượng phải lớn hơn 0.")]
         public int Quantity { get; set; }

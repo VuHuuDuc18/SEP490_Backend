@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SEP490_BackendAPI.Controllers
+namespace Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -13,72 +13,59 @@ namespace SEP490_BackendAPI.Controllers
     {
         private readonly IDailyReportService _dailyReportService;
 
-        /// <summary>
-        /// Khởi tạo controller với service để xử lý logic báo cáo hàng ngày.
-        /// </summary>
         public DailyReportController(IDailyReportService dailyReportService)
         {
             _dailyReportService = dailyReportService ?? throw new ArgumentNullException(nameof(dailyReportService));
         }
 
-        /// <summary>
-        /// Tạo một báo cáo hàng ngày mới.
-        /// </summary>
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateDailyReportRequest requestDto, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Create([FromBody] CreateDailyReportWithDetailsRequest requestDto, CancellationToken cancellationToken = default)
         {
             var (success, errorMessage) = await _dailyReportService.CreateAsync(requestDto, cancellationToken);
-            if (!success)
-                return BadRequest(errorMessage);
-            return Ok();
+            return success ? Ok() : BadRequest(errorMessage);
         }
 
-        /// <summary>
-        /// Cập nhật thông tin một báo cáo hàng ngày.
-        /// </summary>
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateDailyReportRequest requestDto, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateDailyReportWithDetailsRequest requestDto, CancellationToken cancellationToken = default)
         {
             var (success, errorMessage) = await _dailyReportService.UpdateAsync(id, requestDto, cancellationToken);
-            if (!success)
-                return BadRequest(errorMessage);
-            return Ok();
+            return success ? Ok() : BadRequest(errorMessage);
         }
 
-        /// <summary>
-        /// Xóa mềm một báo cáo hàng ngày bằng cách đặt IsActive thành false.
-        /// </summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken = default)
         {
             var (success, errorMessage) = await _dailyReportService.DeleteAsync(id, cancellationToken);
-            if (!success)
-                return BadRequest(errorMessage);
-            return Ok();
+            return success ? Ok() : BadRequest(errorMessage);
         }
 
-        /// <summary>
-        /// Lấy thông tin một báo cáo hàng ngày theo ID, bao gồm danh sách FoodReport và MedicineReport.
-        /// </summary>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
         {
             var (dailyReport, errorMessage) = await _dailyReportService.GetByIdAsync(id, cancellationToken);
-            if (dailyReport == null)
-                return NotFound(errorMessage ?? "Không tìm thấy báo cáo hàng ngày.");
-            return Ok(dailyReport);
+            return dailyReport != null ? Ok(dailyReport) : NotFound(errorMessage ?? "Không tìm thấy báo cáo hàng ngày.");
         }
 
-        /// <summary>
-        /// Lấy danh sách tất cả báo cáo hàng ngày đang hoạt động với bộ lọc tùy chọn, bao gồm danh sách FoodReport và MedicineReport.
-        /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetAll(Guid? livestockCircleId = null, CancellationToken cancellationToken = default)
         {
             var (dailyReports, errorMessage) = await _dailyReportService.GetAllAsync(livestockCircleId, cancellationToken);
-            if (dailyReports == null)
-                return NotFound(errorMessage ?? "Không tìm thấy danh sách báo cáo hàng ngày.");
-            return Ok(dailyReports);
+            return dailyReports != null ? Ok(dailyReports) : NotFound(errorMessage ?? "Không tìm thấy danh sách báo cáo hàng ngày.");
         }
+
+        [HttpGet("{id}/food-details")]
+        public async Task<IActionResult> GetFoodReportDetails(Guid id, CancellationToken cancellationToken = default)
+        {
+            var (foodReports, errorMessage) = await _dailyReportService.GetFoodReportDetailsAsync(id, cancellationToken);
+            return foodReports != null ? Ok(foodReports) : NotFound(errorMessage ?? "Không tìm thấy chi tiết báo cáo thức ăn.");
+        }
+
+        [HttpGet("{id}/medicine-details")]
+        public async Task<IActionResult> GetMedicineReportDetails(Guid id, CancellationToken cancellationToken = default)
+        {
+            var (medicineReports, errorMessage) = await _dailyReportService.GetMedicineReportDetailsAsync(id, cancellationToken);
+            return medicineReports != null ? Ok(medicineReports) : NotFound(errorMessage ?? "Không tìm thấy chi tiết báo cáo thuốc.");
+        }
+
     }
 }
