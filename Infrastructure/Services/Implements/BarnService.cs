@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Dto.Request;
 using Domain.Dto.Response;
 
-namespace Domain.Services.Implements
+namespace Infrastructure.Services.Implements
 {
     public class BarnService : IBarnService
     {

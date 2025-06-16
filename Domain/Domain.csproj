@@ -13,7 +13,6 @@
     <Folder Include="Extensions\" />
     <Folder Include="Helper\Constants\" />
     <Folder Include="Services\Interfaces\" />
-    <Folder Include="Services\Implements\" />
 </ItemGroup>
 
 <ItemGroup>

@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.Helper.ValueObjects;
 
 namespace Infrastructure.Identity.Seeds
 {
@@ -13,15 +14,14 @@ namespace Infrastructure.Identity.Seeds
     {
         public static async Task SeedAsync(RoleManager<Role> roleManager)
         {
-            if (!await roleManager.RoleExistsAsync("Admin"))
+            foreach (var role in CoreRoleName.RoleNames)
             {
-                await roleManager.CreateAsync(new Role ("Admin"));
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    await roleManager.CreateAsync(new Role { Name = role });
+                } 
             }
-
-            if (!await roleManager.RoleExistsAsync("User"))
-            {
-                await roleManager.CreateAsync(new Role ("User"));
-            }
+            await roleManager.CreateAsync(new Role { Name = "Admin" });
         }
 
     }

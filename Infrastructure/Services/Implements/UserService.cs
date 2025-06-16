@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Services.Implements
+namespace Infrastructure.Services.Implements
 {
     public class UserService : IUserService
     {
@@ -23,14 +23,14 @@ namespace Domain.Services.Implements
             byte[] bytes = new byte[6];
             random.NextBytes(bytes);
           
-            string generatedPassword = System.Text.Encoding.UTF8.GetString(bytes);
-            _userrepo.Insert(new User()
-            {
-                Email = req.Email,
-                Password = generatedPassword,
-                RoleId = req.RoleId,
-                UserName = req.UserName
-            });
+            //string generatedPassword = System.Text.Encoding.UTF8.GetString(bytes);
+            //_userrepo.Insert(new User()
+            //{
+            //    Email = req.Email,
+            //    Password = generatedPassword,
+            //    RoleId = req.RoleId,
+            //    UserName = req.UserName
+            //});
             return await _userrepo.CommitAsync()>0;
         }
 

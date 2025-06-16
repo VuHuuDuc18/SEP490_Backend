@@ -47,10 +47,6 @@ namespace Infrastructure.Identity
             services.AddScoped<IdentityContext>();
             #endregion
             services.Configure<JWTSettings>(configuration.GetSection("appJwt"));
-            Console.WriteLine("----------------------------"+ configuration.GetSection("appJwt"));
-            Console.WriteLine("----------------------------"+ configuration["appJwt:Issuer"]);
-            Console.WriteLine("----------------------------"+ configuration["appJwt:Audience"]);
-            Console.WriteLine("----------------------------"+ configuration["appJwt:SecurityKey"]);
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

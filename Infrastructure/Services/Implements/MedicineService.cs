@@ -14,7 +14,7 @@ using Domain.Services.Interfaces;
 using Domain.Services;
 using Microsoft.EntityFrameworkCore;
 
-namespace Domain.Services.Implements
+namespace Infrastructure.Services.Implements
 {
     public class MedicineService : IMedicineService
     {

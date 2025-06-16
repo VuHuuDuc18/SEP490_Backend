@@ -1,5 +1,4 @@
-﻿
-using Entities.EntityModel;
+﻿using Entities.EntityModel;
 using Infrastructure.Core;
 using Infrastructure.Repository;
 using System;
@@ -13,27 +12,27 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Dto.Request;
 using Domain.Dto.Response;
 
-namespace Domain.Services.Implements
+namespace Infrastructure.Services.Implements
 {
-    public class MedicineCategoryService : IMedicineCategoryService
+    public class BreedCategoryService : IBreedCategoryService
     {
-        private readonly IRepository<MedicineCategory> _medicineCategoryRepository;
+        private readonly IRepository<BreedCategory> _breedCategoryRepository;
 
         /// <summary>
-        /// Khởi tạo service với repository của MedicineCategory.
+        /// Khởi tạo service với repository của BreedCategory.
         /// </summary>
-        public MedicineCategoryService(IRepository<MedicineCategory> medicineCategoryRepository)
+        public BreedCategoryService(IRepository<BreedCategory> breedCategoryRepository)
         {
-            _medicineCategoryRepository = medicineCategoryRepository ?? throw new ArgumentNullException(nameof(medicineCategoryRepository));
+            _breedCategoryRepository = breedCategoryRepository ?? throw new ArgumentNullException(nameof(breedCategoryRepository));
         }
 
         /// <summary>
-        /// Tạo một danh mục thuốc mới với kiểm tra hợp lệ.
+        /// Tạo một danh mục giống mới với kiểm tra hợp lệ.
         /// </summary>
         public async Task<(bool Success, string ErrorMessage)> CreateAsync(CreateCategoryRequest request, CancellationToken cancellationToken = default)
         {
             if (request == null)
-                return (false, "Dữ liệu danh mục thuốc không được null.");
+                return (false, "Dữ liệu danh mục giống không được null.");
 
             // Kiểm tra các trường bắt buộc
             var validationResults = new List<ValidationResult>();
@@ -45,7 +44,7 @@ namespace Domain.Services.Implements
 
             // Kiểm tra xem danh mục với tên này đã tồn tại chưa
             var checkError = new Ref<CheckError>();
-            var exists = await _medicineCategoryRepository.CheckExist(
+            var exists = await _breedCategoryRepository.CheckExist(
                 x => x.Name == request.Name && x.IsActive,
                 checkError,
                 cancellationToken);
@@ -54,9 +53,9 @@ namespace Domain.Services.Implements
                 return (false, $"Lỗi khi kiểm tra danh mục tồn tại: {checkError.Value.Message}");
 
             if (exists)
-                return (false, $"Danh mục thuốc với tên '{request.Name}' đã tồn tại.");
+                return (false, $"Danh mục giống với tên '{request.Name}' đã tồn tại.");
 
-            var medicineCategory = new MedicineCategory
+            var breedCategory = new BreedCategory
             {
                 Name = request.Name,
                 Description = request.Description
@@ -64,31 +63,31 @@ namespace Domain.Services.Implements
 
             try
             {
-                _medicineCategoryRepository.Insert(medicineCategory);
-                await _medicineCategoryRepository.CommitAsync(cancellationToken);
+                _breedCategoryRepository.Insert(breedCategory);
+                await _breedCategoryRepository.CommitAsync(cancellationToken);
                 return (true, null);
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi tạo danh mục thuốc: {ex.Message}");
+                return (false, $"Lỗi khi tạo danh mục giống: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// Cập nhật thông tin một danh mục thuốc.
+        /// Cập nhật thông tin một danh mục giống.
         /// </summary>
         public async Task<(bool Success, string ErrorMessage)> UpdateAsync(Guid id, UpdateCategoryRequest request, CancellationToken cancellationToken = default)
         {
             if (request == null)
-                return (false, "Dữ liệu danh mục thuốc không được null.");
+                return (false, "Dữ liệu danh mục giống không được null.");
 
             var checkError = new Ref<CheckError>();
-            var existing = await _medicineCategoryRepository.GetById(id, checkError);
+            var existing = await _breedCategoryRepository.GetById(id, checkError);
             if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi lấy thông tin danh mục thuốc: {checkError.Value.Message}");
+                return (false, $"Lỗi khi lấy thông tin danh mục giống: {checkError.Value.Message}");
 
             if (existing == null)
-                return (false, "Không tìm thấy danh mục thuốc.");
+                return (false, "Không tìm thấy danh mục giống.");
 
             // Kiểm tra các trường bắt buộc
             var validationResults = new List<ValidationResult>();
@@ -99,7 +98,7 @@ namespace Domain.Services.Implements
             }
 
             // Kiểm tra xung đột tên với các danh mục đang hoạt động khác
-            var exists = await _medicineCategoryRepository.CheckExist(
+            var exists = await _breedCategoryRepository.CheckExist(
                 x => x.Name == request.Name && x.Id != id && x.IsActive,
                 checkError,
                 cancellationToken);
@@ -108,74 +107,74 @@ namespace Domain.Services.Implements
                 return (false, $"Lỗi khi kiểm tra danh mục tồn tại: {checkError.Value.Message}");
 
             if (exists)
-                return (false, $"Danh mục thuốc với tên '{request.Name}' đã tồn tại.");
+                return (false, $"Danh mục giống với tên '{request.Name}' đã tồn tại.");
 
             try
             {
                 existing.Name = request.Name;
                 existing.Description = request.Description;
 
-                _medicineCategoryRepository.Update(existing);
-                await _medicineCategoryRepository.CommitAsync(cancellationToken);
+                _breedCategoryRepository.Update(existing);
+                await _breedCategoryRepository.CommitAsync(cancellationToken);
                 return (true, null);
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi cập nhật danh mục thuốc: {ex.Message}");
+                return (false, $"Lỗi khi cập nhật danh mục giống: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// Xóa mềm một danh mục thuốc bằng cách đặt IsActive thành false.
+        /// Xóa mềm một danh mục giống bằng cách đặt IsActive thành false.
         /// </summary>
         public async Task<(bool Success, string ErrorMessage)> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var medicineCategory = await _medicineCategoryRepository.GetById(id, checkError);
+            var breedCategory = await _breedCategoryRepository.GetById(id, checkError);
             if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi lấy thông tin danh mục thuốc: {checkError.Value.Message}");
+                return (false, $"Lỗi khi lấy thông tin danh mục giống: {checkError.Value.Message}");
 
-            if (medicineCategory == null)
-                return (false, "Không tìm thấy danh mục thuốc.");
+            if (breedCategory == null)
+                return (false, "Không tìm thấy danh mục giống.");
 
             try
             {
-                medicineCategory.IsActive = false;
-                _medicineCategoryRepository.Update(medicineCategory);
-                await _medicineCategoryRepository.CommitAsync(cancellationToken);
+                breedCategory.IsActive = false;
+                _breedCategoryRepository.Update(breedCategory);
+                await _breedCategoryRepository.CommitAsync(cancellationToken);
                 return (true, null);
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi xóa danh mục thuốc: {ex.Message}");
+                return (false, $"Lỗi khi xóa danh mục giống: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// Lấy thông tin một danh mục thuốc theo ID.
+        /// Lấy thông tin một danh mục giống theo ID.
         /// </summary>
         public async Task<(CategoryResponse Category, string ErrorMessage)> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var medicineCategory = await _medicineCategoryRepository.GetById(id, checkError);
+            var breedCategory = await _breedCategoryRepository.GetById(id, checkError);
             if (checkError.Value?.IsError == true)
-                return (null, $"Lỗi khi lấy thông tin danh mục thuốc: {checkError.Value.Message}");
+                return (null, $"Lỗi khi lấy thông tin danh mục giống: {checkError.Value.Message}");
 
-            if (medicineCategory == null)
-                return (null, "Không tìm thấy danh mục thuốc.");
+            if (breedCategory == null)
+                return (null, "Không tìm thấy danh mục giống.");
 
             var response = new CategoryResponse
             {
-                Id = medicineCategory.Id,
-                Name = medicineCategory.Name,
-                Description = medicineCategory.Description,
-                IsActive = medicineCategory.IsActive
+                Id = breedCategory.Id,
+                Name = breedCategory.Name,
+                Description = breedCategory.Description,
+                IsActive = breedCategory.IsActive
             };
             return (response, null);
         }
 
         /// <summary>
-        /// Lấy danh sách tất cả danh mục thuốc đang hoạt động với bộ lọc tùy chọn.
+        /// Lấy danh sách tất cả danh mục giống đang hoạt động với bộ lọc tùy chọn.
         /// </summary>
         public async Task<(List<CategoryResponse> Categories, string ErrorMessage)> GetAllAsync(
             string name = null,
@@ -183,7 +182,7 @@ namespace Domain.Services.Implements
         {
             try
             {
-                var query = _medicineCategoryRepository.GetQueryable(x => x.IsActive);
+                var query = _breedCategoryRepository.GetQueryable(x => x.IsActive);
 
                 if (!string.IsNullOrEmpty(name))
                     query = query.Where(x => x.Name.Contains(name));
@@ -200,7 +199,7 @@ namespace Domain.Services.Implements
             }
             catch (Exception ex)
             {
-                return (null, $"Lỗi khi lấy danh sách danh mục thuốc: {ex.Message}");
+                return (null, $"Lỗi khi lấy danh sách danh mục giống: {ex.Message}");
             }
         }
     }

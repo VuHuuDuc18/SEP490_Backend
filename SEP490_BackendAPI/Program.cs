@@ -1,11 +1,5 @@
-using Entities.EntityModel;
-using Infrastructure.DBContext;
 using Infrastructure.Identity;
-using Domain.Services.Implements;
-using Domain.Services.Interfaces;
 using Infrastructure;
-using Domain;
-using Infrastructure.Repository;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -16,6 +10,8 @@ using Microsoft.Identity.Web.Resource;
 using SEP490_BackendAPI.Extensions;
 using Microsoft.EntityFrameworkCore.Design;
 using Domain.Services;
+using Infrastructure.DBContext;
+using Infrastructure.Repository;
 
 namespace SEP490_BackendAPI
 {
@@ -36,19 +32,19 @@ namespace SEP490_BackendAPI
             //                   .AllowAnyHeader();
             //        });
             //});
-           // builder.Services.Configure<MailSendSettings>(builder.Configuration.GetSection("MailSettings"));
-            // connect DB SQL
-            //builder.Services.AddDbContext<LCFMSDBContext>(options => 
-            //    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")), 
-            //    ServiceLifetime.Transient);
-            //builder.Services.AddScoped<DbContext, LCFMSDBContext>();builder.Configuration.GetConnectionString("DefaultConnection")
-
+           //builder.Services.Configure<MailSendSettings>(builder.Configuration.GetSection("MailSettings"));
+            //connect DB SQL
+            builder.Services.AddDbContext<LCFMSDBContext>(options => 
+               options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")), 
+               ServiceLifetime.Transient);
+            builder.Services.AddScoped<DbContext, LCFMSDBContext>();
+            
             //Add service extensions
             builder.Services.Configure<CloudinaryConfig>(builder.Configuration.GetSection("Cloudinary"));
-            builder.Services.AddInfrastructure();
+            builder.Services.AddInfrastructure(builder.Configuration);
 
             // Add Service
-            //builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             //builder.Services.AddTransient<IUserService,UserService>() ;
 
             // Add services to the container.
