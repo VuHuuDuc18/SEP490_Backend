@@ -13,7 +13,7 @@ using Infrastructure.Core;
 using Infrastructure.Repository;
 using Microsoft.EntityFrameworkCore;
 
-namespace Domain.Services
+namespace Domain.Services.Implements
 {
     public class BarnService : IBarnService
     {
