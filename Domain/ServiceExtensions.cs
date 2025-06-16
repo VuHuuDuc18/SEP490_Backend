@@ -18,6 +18,7 @@ namespace Domain
         public static void AddDomain(this IServiceCollection services)
         {
             //Add service
+            services.AddTransient<IUserService, UserService>();
             services.AddScoped<IBarnService, BarnService>();
             services.AddScoped<IFoodService, FoodService>();
             services.AddScoped<IMedicineService, MedicineService>();
@@ -29,6 +30,7 @@ namespace Domain
             services.AddScoped<CloudinaryCloudService>();
 
             //Add repo
+            services.AddScoped<IRepository<User>, Repository<User>>();
             services.AddScoped<IRepository<Barn>, Repository<Barn>>();
             services.AddScoped<IRepository<Food>, Repository<Food>>();
             services.AddScoped<IRepository<Medicine>, Repository<Medicine>>();

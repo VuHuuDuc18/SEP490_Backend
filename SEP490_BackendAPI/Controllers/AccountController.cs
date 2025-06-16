@@ -1,4 +1,4 @@
-
+﻿
 using Infrastructure.Services;
 using Domain.Dto.Request;
 using Domain.Services.Interfaces;
@@ -20,42 +20,59 @@ namespace SEP490_BackendAPI.Controllers
         private readonly ILogger<AccountController> _logger;
         public readonly IUserService _sv;
 
-        public AccountController(IEmailService mailService, ILogger<AccountController> logger)
+        public AccountController(IEmailService mailService, ILogger<AccountController> logger, IUserService sr)
         {
             _mailService = mailService;
             _logger = logger;
-          //  _sv = sr;
+            _sv = sr;
         }
 
 
-        [HttpPost]
-        public async Task<IActionResult> SendEmail([FromForm] string Email)
-        {
-            try
-            {
-                if (Email == null )
-                {
-                    _logger.LogError("Invalid mail request. The request or Body is null.");
-                    return BadRequest("Invalid mail request. The Body is required.");
-                }
+        //[HttpPost]
+        //public async Task<IActionResult> SendEmail([FromForm] string Email)
+        //{
+        //    try
+        //    {
+        //        if (Email == null )
+        //        {
+        //            _logger.LogError("Invalid mail request. The request or Body is null.");
+        //            return BadRequest("Invalid mail request. The Body is required.");
+        //        }
 
-                string Body = Domain.Extensions.MailBodyGenerate.BodyCreateAccount(Email, "123456");
+        //        string Body = Domain.Extensions.MailBodyGenerate.BodyCreateAccount(Email, "123456");
 
-                await _mailService.SendEmailAsync(Email, EmailConstant.EMAILSUBJECTCREATEACCOUNT,Body);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while sending email.");
-                return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
-            }
-            }
+        //        await _mailService.SendEmailAsync(Email, EmailConstant.EMAILSUBJECTCREATEACCOUNT,Body);
+        //        return Ok();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error occurred while sending email.");
+        //        return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+        //    }
+        //    }
 
         [HttpPost("create")]
         public async Task<IActionResult> CreateAccount(CreateAccountRequest req)
         {
             var Result = await _sv.CreateAccount(req);
-            return Ok(Result);
+            if (Result)
+            {
+                throw new Exception("Email đã được đăng ký");
+            }
+            else
+            {
+                return Ok(Result);
+            }
+        }
+        [HttpGet("resetPassword/{id}")]
+        public async Task<IActionResult> ResetPassword([FromRoute]Guid id)
+        {
+            return Ok();
+        }
+        [HttpPost("changePassword")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest req)
+        {
+            return Ok();
         }
     }
 }

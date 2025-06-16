@@ -38,5 +38,6 @@ namespace Domain.Services.Interfaces
         /// Lấy danh sách chuồng trại theo ID của công nhân.
         /// </summary>
         Task<(List<BarnResponse> Barns, string ErrorMessage)> GetByWorkerAsync(Guid workerId, CancellationToken cancellationToken = default);
+        
     }
 }

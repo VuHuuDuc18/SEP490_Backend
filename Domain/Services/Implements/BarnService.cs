@@ -161,7 +161,7 @@ namespace Domain.Services.Implements
         public async Task<(BarnResponse Barn, string ErrorMessage)> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var barn = await _barnRepository.GetById(id, checkError);
+            var barn = await _barnRepository.GetById(id);
             if (checkError.Value?.IsError == true)
                 return (null, $"Lỗi khi lấy thông tin chuồng trại: {checkError.Value.Message}");
 
@@ -244,5 +244,7 @@ namespace Domain.Services.Implements
                 return (null, $"Lỗi khi lấy danh sách chuồng trại: {ex.Message}");
             }
         }
+
+        
     }
 }
