@@ -15,4 +15,8 @@
     <ProjectReference Include="..\SEP490_DataAccess\Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Dto\Request\Food\" />
+  </ItemGroup>
+
 </Project>
