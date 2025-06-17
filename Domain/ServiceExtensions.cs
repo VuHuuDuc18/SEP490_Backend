@@ -32,6 +32,7 @@ namespace Domain
             services.AddScoped<CloudinaryCloudService>();
 
             //Add repo
+            services.AddScoped<IRepository<Role>, Repository<Role>>();
             services.AddScoped<IRepository<User>, Repository<User>>();
             services.AddScoped<IRepository<Role>, Repository<Role>>();
             services.AddScoped<IRepository<Barn>, Repository<Barn>>();

@@ -11,8 +11,10 @@ namespace Domain.Extensions
     {
         public static IQueryable<T> SearchString<T>(this IQueryable<T> input, List<SearchObjectForCondition> searchCds)
         {
+
             if (searchCds == null || !searchCds.Any())
                 return input;
+
 
             var param = Expression.Parameter(typeof(T), "item");
             Expression combineSearch = null;
