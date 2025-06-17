@@ -1,4 +1,7 @@
 ﻿using Domain.Dto.Request;
+using Domain.Dto.Request.Account;
+using Domain.Dto.Response.Account;
+using Domain.Dto.Response;
 using Domain.Helper.Constants;
 using Domain.Services.Interfaces;
 using Entities.EntityModel;
@@ -10,6 +13,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.Extensions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using DEMO.Domain.Extensions;
 
 namespace Domain.Services.Implements
 {
@@ -71,9 +77,30 @@ namespace Domain.Services.Implements
             return true;
         }
 
-        public List<User> GetListAccount()
+        
+        public async Task<PaginationSet<AccountResponse>> GetListAccount(ListingRequest req)
         {
-            throw new NotImplementedException();
+            var AccountItems = _userrepo.GetQueryable()
+                .Select(it => new AccountResponse()
+            {
+                    Id = it.Id,
+                    UserName = it.UserName,
+                    IsActive = it.IsActive,
+                    RoleName = it.Role.RoleName,
+            });
+            if (req.Filter != null)
+            {
+                AccountItems = AccountItems.Filter(req.Filter);
+            }
+
+            if (req.SearchString != null)
+            {
+                AccountItems = AccountItems.SearchString(req.SearchString);
+            }
+
+
+            var result = await AccountItems.Pagination(req.PageIndex, req.PageSize, req.Sort);
+            return result;
         }
 
         public async Task<bool> ResetPassword(Guid id)

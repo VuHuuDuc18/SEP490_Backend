@@ -20,7 +20,7 @@ namespace DEMO.Domain.Extensions
             var param = Expression.Parameter(typeof(T));
             Expression conbineSearch = null;
 
-            if (!searchCds.IsNullOrEmpty())
+            if (searchCds.Count > 0)
             {
                 foreach (var item in searchCds)
                 {
