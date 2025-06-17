@@ -1,65 +1,45 @@
-﻿
-using Domain.Dto.Request;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.IdentityModel.Tokens;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using Domain.Dto.Request;
 
-
-namespace DEMO.Domain.Extensions
+namespace Domain.Extensions
 {
     public static class SearchStringExtension
     {
         public static IQueryable<T> SearchString<T>(this IQueryable<T> input, List<SearchObjectForCondition> searchCds)
         {
-            var param = Expression.Parameter(typeof(T));
-            Expression conbineSearch = null;
+            if (searchCds == null || !searchCds.Any())
+                return input;
 
-            if (!searchCds.IsNullOrEmpty())
+            var param = Expression.Parameter(typeof(T), "item");
+            Expression combineSearch = null;
+
+            foreach (var item in searchCds)
             {
-                foreach (var item in searchCds)
-                {
-                    PropertyInfo getter = typeof(T).GetProperty(item.Field);
+                if (string.IsNullOrEmpty(item.Field) || string.IsNullOrEmpty(item.Value))
+                    continue;
 
-                    var property = Expression.PropertyOrField(param, getter.Name);
+                PropertyInfo getter = typeof(T).GetProperty(item.Field);
+                if (getter == null || getter.PropertyType != typeof(string))
+                    continue;
 
-                    if (getter != null)
-                    {
-                        //var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
-                        var body = Expression.Call(
-                            property,
-                            method: typeof(string).GetMethod("Contains", new[] { typeof(string) }),
-                            Expression.Constant(item.Value)
-                            );
+                var property = Expression.Property(param, getter.Name);
+                var body = Expression.Call(
+                    property,
+                    typeof(string).GetMethod("Contains", new[] { typeof(string) }),
+                    Expression.Constant(item.Value));
 
-                        if (conbineSearch == null)
-                        {
-                            conbineSearch = body;
-                        }
-                        else
-                        {
-                            conbineSearch = Expression.OrElse(body, conbineSearch);
-                        }
-
-
-                    }
-                }
-
-                MethodCallExpression result = Expression.Call(
-                             typeof(Queryable),
-                             "where",
-                             new[] { typeof(T) },
-                             input.Expression,
-                             Expression.Lambda<Func<T, bool>>(conbineSearch, param)
-                             );
-                input = input.Provider.CreateQuery<T>(result);
+                combineSearch = combineSearch == null ? body : Expression.OrElse(body, combineSearch);
             }
 
+            if (combineSearch != null)
+            {
+                var lambda = Expression.Lambda<Func<T, bool>>(combineSearch, param);
+                input = input.Where(lambda);
+            }
 
             return input;
         }

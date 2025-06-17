@@ -1,4 +1,6 @@
-﻿using Domain.Dto.Request.Food;
+﻿using Domain.Dto.Request;
+using Domain.Dto.Request.Food;
+using Domain.Dto.Response;
 using Domain.Dto.Response.Food;
 using System;
 using System.Collections.Generic;
@@ -33,5 +35,11 @@ namespace Domain.Services.Interfaces
         /// Lấy danh sách tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn, bao gồm danh sách ảnh và thumbnail.
         /// </summary>
         Task<(List<FoodResponse> Foods, string ErrorMessage)> GetAllAsync(string foodName = null, Guid? foodCategoryId = null, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Lấy danh sách phân trang tìm kiếm lọc tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn, bao gồm danh sách ảnh và thumbnail.
+        /// </summary>
+        Task<(PaginationSet<FoodResponse> Result, string ErrorMessage)> GetPaginatedListAsync(
+            ListingRequest request,
+            CancellationToken cancellationToken = default);
     }
 }
