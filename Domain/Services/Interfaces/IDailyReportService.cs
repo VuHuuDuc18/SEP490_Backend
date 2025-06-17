@@ -1,5 +1,8 @@
-﻿using Domain.Dto.Request.DailyReport;
+﻿using Domain.Dto.Request;
+using Domain.Dto.Request.DailyReport;
+using Domain.Dto.Response;
 using Domain.Dto.Response.DailyReport;
+using Domain.Services.Implements;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -37,11 +40,23 @@ namespace Domain.Services.Interfaces
         /// <summary>
         /// Lấy danh sách tất cả thức ăn trong báo cáo hàng ngày.
         /// </summary>
-        Task<(List<FoodReportResponse> FoodReports, string ErrorMessage)> GetFoodReportDetailsAsync(Guid reportId, CancellationToken cancellationToken = default);
+        Task<(PaginationSet<FoodReportResponse> Result, string ErrorMessage)> GetFoodReportDetailsAsync(
+              Guid reportId,
+              ListingRequest request,
+              CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Lấy danh sách tất cả thức ăn trong báo cáo hàng ngày.
         /// </summary>
-        Task<(List<MedicineReportResponse> MedicineReports, string ErrorMessage)> GetMedicineReportDetailsAsync(Guid reportId, CancellationToken cancellationToken = default);
+        Task<(PaginationSet<MedicineReportResponse> Result, string ErrorMessage)> GetMedicineReportDetailsAsync(
+                  Guid reportId,
+                  ListingRequest request,
+                  CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Lấy danh sách phân trang tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn.
+        /// </summary>
+        Task<(PaginationSet<DailyReportResponse> Result, string ErrorMessage)> GetPaginatedListAsync(
+                ListingRequest request,
+                CancellationToken cancellationToken = default);
     }
 }

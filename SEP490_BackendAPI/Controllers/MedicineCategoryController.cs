@@ -41,5 +41,14 @@ namespace SEP490_BackendAPI.Controllers
                 return NotFound(errorMessage);
             return Ok(category);
         }
+
+        [HttpPost("medicine-categories/paginated")]
+        public async Task<IActionResult> GetPaginatedMedicineCategories([FromBody] ListingRequest request)
+        {
+            var (result, errorMessage) = await _medicineCategoryService.GetPaginatedListAsync(request);
+            if (errorMessage != null)
+                return BadRequest(errorMessage);
+            return Ok(result);
+        }
     }
 }

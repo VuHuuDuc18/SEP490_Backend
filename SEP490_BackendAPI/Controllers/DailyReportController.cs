@@ -1,5 +1,7 @@
-﻿using Domain.Dto.Request.DailyReport;
+﻿using Domain.Dto.Request;
+using Domain.Dto.Request.DailyReport;
 using Domain.Dto.Response;
+using Domain.Services.Implements;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
@@ -53,18 +55,30 @@ namespace Controllers
             return dailyReports != null ? Ok(dailyReports) : NotFound(errorMessage ?? "Không tìm thấy danh sách báo cáo hàng ngày.");
         }
 
-        [HttpGet("{id}/food-details")]
-        public async Task<IActionResult> GetFoodReportDetails(Guid id, CancellationToken cancellationToken = default)
+        [HttpPost("{id}/food-details")]
+        public async Task<IActionResult> GetFoodReportDetails(Guid id, [FromBody] ListingRequest request)
         {
-            var (foodReports, errorMessage) = await _dailyReportService.GetFoodReportDetailsAsync(id, cancellationToken);
+            var (foodReports, errorMessage) = await _dailyReportService.GetFoodReportDetailsAsync(id, request);
             return foodReports != null ? Ok(foodReports) : NotFound(errorMessage ?? "Không tìm thấy chi tiết báo cáo thức ăn.");
         }
 
-        [HttpGet("{id}/medicine-details")]
-        public async Task<IActionResult> GetMedicineReportDetails(Guid id, CancellationToken cancellationToken = default)
+        [HttpPost("{id}/medicine-details")]
+        public async Task<IActionResult> GetMedicineReportDetails(Guid id, [FromBody] ListingRequest request)
         {
-            var (medicineReports, errorMessage) = await _dailyReportService.GetMedicineReportDetailsAsync(id, cancellationToken);
+            var (medicineReports, errorMessage) = await _dailyReportService.GetMedicineReportDetailsAsync(id, request);
             return medicineReports != null ? Ok(medicineReports) : NotFound(errorMessage ?? "Không tìm thấy chi tiết báo cáo thuốc.");
+        }
+
+        /// <summary>
+        /// Lấy danh sách phân trang tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn.
+        /// </summary>
+        [HttpPost("daily_reports/paginated")]
+        public async Task<IActionResult> GetPaginatedMedicines([FromBody] ListingRequest request)
+        {
+            var (result, errorMessage) = await _dailyReportService.GetPaginatedListAsync(request);
+            if (errorMessage != null)
+                return BadRequest(errorMessage);
+            return Ok(result);
         }
 
     }

@@ -13,6 +13,10 @@ using Domain.Services;
 using Microsoft.EntityFrameworkCore;
 using Domain.Dto.Request.Medicine;
 using Domain.Dto.Response.Medicine;
+using Domain.Dto.Response;
+using Domain.Dto.Request;
+using Domain.Dto.Response.Food;
+using Domain.Extensions;
 
 namespace Domain.Services.Implements
 {
@@ -323,6 +327,67 @@ namespace Domain.Services.Implements
                 return (null, $"Lỗi khi lấy danh sách thuốc: {ex.Message}");
             }
         }
-     
+
+        public async Task<(PaginationSet<MedicineResponse> Result, string ErrorMessage)> GetPaginatedListAsync(ListingRequest request, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (request == null)
+                    return (null, "Yêu cầu không được null.");
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                    return (null, "PageIndex và PageSize phải lớn hơn 0.");
+
+                var validFields = typeof(Medicine).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any())
+                    return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+
+                var query = _medicineRepository.GetQueryable(x => x.IsActive);
+
+                if (request.SearchString?.Any() == true)
+                    query = query.SearchString(request.SearchString);
+
+                if (request.Filter?.Any() == true)
+                    query = query.Filter(request.Filter);
+
+                var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                var medicineIds = paginationResult.Items.Select(f => f.Id).ToList();
+                var images = await _imageMedicineRepository.GetQueryable(x => medicineIds.Contains(x.MedicineId)).ToListAsync(cancellationToken);
+                var imageGroups = images.GroupBy(x => x.MedicineId).ToDictionary(g => g.Key, g => g.ToList());
+
+                var responses = new List<MedicineResponse>();
+                foreach (var medicine in paginationResult.Items)
+                {
+                    var medicineImages = imageGroups.GetValueOrDefault(medicine.Id, new List<ImageMedicine>());
+                    responses.Add(new MedicineResponse
+                    {
+                        Id = medicine.Id,
+                        MedicineName = medicine.MedicineName,
+                        MedicineCategoryId = medicine.MedicineCategoryId,
+                        Stock = medicine.Stock,
+                        IsActive = medicine.IsActive,
+                        ImageLinks = medicineImages.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
+                        Thumbnail = medicineImages.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                    });
+                }
+
+                var result = new PaginationSet<MedicineResponse>
+                {
+                    PageIndex = paginationResult.PageIndex,
+                    Count = responses.Count,
+                    TotalCount = paginationResult.TotalCount,
+                    TotalPages = paginationResult.TotalPages,
+                    Items = responses
+                };
+
+                return (result, null);
+            }
+            catch (Exception ex)
+            {
+                return (null, $"Lỗi khi lấy danh sách phân trang: {ex.Message}");
+            }
+        }
     }
 }

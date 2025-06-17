@@ -1,4 +1,6 @@
-﻿using Domain.Dto.Request.Medicine;
+﻿using Domain.Dto.Request;
+using Domain.Dto.Request.Medicine;
+using Domain.Services.Implements;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
@@ -72,6 +74,18 @@ namespace SEP490_BackendAPI.Controllers
             if (medicines == null)
                 return NotFound(errorMessage ?? "Không tìm thấy danh sách thuốc.");
             return Ok(medicines);
+        }
+
+        /// <summary>
+        /// Lấy danh sách phân trang tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn.
+        /// </summary>
+        [HttpPost("medicines/paginated")]
+        public async Task<IActionResult> GetPaginatedMedicines([FromBody] ListingRequest request)
+        {
+            var (result, errorMessage) = await _medicineService.GetPaginatedListAsync(request);
+            if (errorMessage != null)
+                return BadRequest(errorMessage);
+            return Ok(result);
         }
     }
 }

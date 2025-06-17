@@ -1,5 +1,7 @@
+using Domain.Dto.Request;
 using Domain.Dto.Request.Barn;
 using Domain.Dto.Response;
+using Domain.Services.Implements;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
@@ -91,6 +93,18 @@ namespace SEP490_BackendAPI.Controllers
             if (barns == null)
                 return NotFound(errorMessage ?? "Không tìm thấy danh sách chuồng trại theo công nhân.");
             return Ok(barns);
+        }
+
+        /// <summary>
+        /// Lấy danh sách phân trang tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn.
+        /// </summary>
+        [HttpPost("barns/paginated")]
+        public async Task<IActionResult> GetPaginatedBarns([FromBody] ListingRequest request)
+        {
+            var (result, errorMessage) = await _barnService.GetPaginatedListAsync(request);
+            if (errorMessage != null)
+                return BadRequest(errorMessage);
+            return Ok(result);
         }
     }
 }

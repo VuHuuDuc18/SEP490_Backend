@@ -5,6 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Domain.Dto.Request.Barn;
 using Domain.Dto.Response.Barn;
+using Domain.Dto.Request;
+using Domain.Dto.Response.Medicine;
+using Domain.Dto.Response;
 namespace Domain.Services.Interfaces
 {
     public interface IBarnService
@@ -38,6 +41,13 @@ namespace Domain.Services.Interfaces
         /// Lấy danh sách chuồng trại theo ID của công nhân.
         /// </summary>
         Task<(List<BarnResponse> Barns, string ErrorMessage)> GetByWorkerAsync(Guid workerId, CancellationToken cancellationToken = default);
-        
+
+        /// <summary>
+        /// Lấy danh sách phân trang tìm kiếm lọc tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn, bao gồm danh sách ảnh và thumbnail.
+        /// </summary>
+        Task<(PaginationSet<BarnResponse> Result, string ErrorMessage)> GetPaginatedListAsync(
+            ListingRequest request,
+            CancellationToken cancellationToken = default);
+
     }
 }
