@@ -13,6 +13,10 @@ using Domain.Services;
 using Microsoft.EntityFrameworkCore;
 using Domain.Dto.Request.Breed;
 using Domain.Dto.Response.Breed;
+using Domain.Dto.Response;
+using Domain.Dto.Request;
+using Domain.Dto.Response.Food;
+using Domain.Extensions;
 
 namespace Domain.Services.Implements
 {
@@ -325,6 +329,66 @@ namespace Domain.Services.Implements
             }
         }
 
-       
+        public async Task<(PaginationSet<BreedResponse> Result, string ErrorMessage)> GetPaginatedListAsync(ListingRequest request, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (request == null)
+                    return (null, "Yêu cầu không được null.");
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                    return (null, "PageIndex và PageSize phải lớn hơn 0.");
+
+                var validFields = typeof(Breed).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any())
+                    return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+
+                var query = _breedRepository.GetQueryable(x => x.IsActive);
+
+                if (request.SearchString?.Any() == true)
+                    query = query.SearchString(request.SearchString);
+
+                if (request.Filter?.Any() == true)
+                    query = query.Filter(request.Filter);
+
+                var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                var breedIds = paginationResult.Items.Select(f => f.Id).ToList();
+                var images = await _imageBreedRepository.GetQueryable(x => breedIds.Contains(x.BreedId)).ToListAsync(cancellationToken);
+                var imageGroups = images.GroupBy(x => x.BreedId).ToDictionary(g => g.Key, g => g.ToList());
+
+                var responses = new List<BreedResponse>();
+                foreach (var breed in paginationResult.Items)
+                {
+                    var breedImages = imageGroups.GetValueOrDefault(breed.Id, new List<ImageBreed>());
+                    responses.Add(new BreedResponse
+                    {
+                        Id = breed.Id,
+                        BreedName = breed.BreedName,
+                        BreedCategoryId = breed.BreedCategoryId,
+                        Stock = breed.Stock,
+                        IsActive = breed.IsActive,
+                        ImageLinks = breedImages.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
+                        Thumbnail = breedImages.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                    });
+                }
+
+                var result = new PaginationSet<BreedResponse>
+                {
+                    PageIndex = paginationResult.PageIndex,
+                    Count = responses.Count,
+                    TotalCount = paginationResult.TotalCount,
+                    TotalPages = paginationResult.TotalPages,
+                    Items = responses
+                };
+
+                return (result, null);
+            }
+            catch (Exception ex)
+            {
+                return (null, $"Lỗi khi lấy danh sách phân trang: {ex.Message}");
+            }
+        }
     }
 }

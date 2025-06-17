@@ -14,6 +14,9 @@ using Domain.Dto.Request.DailyReport;
 using CloudinaryDotNet.Actions;
 using Org.BouncyCastle.Asn1.X509;
 using Domain.Dto.Response.DailyReport;
+using Domain.Dto.Request;
+using Domain.Dto.Response;
+using Domain.Extensions;
 
 namespace Domain.Services.Implements
 {
@@ -368,7 +371,7 @@ namespace Domain.Services.Implements
                 foreach (var existingImage in currentImageReports)
                 {
                     await _cloudinaryCloudService.DeleteImage(existingImage.ImageLink, cancellationToken);
-                   // _imageDailyReportRepository.Delete(existingImage);
+                    // _imageDailyReportRepository.Delete(existingImage);
                 }
                 await _imageDailyReportRepository.CommitAsync(cancellationToken);
 
@@ -602,28 +605,60 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
             }
         }
 
-        public async Task<(List<FoodReportResponse> FoodReports, string ErrorMessage)> GetFoodReportDetailsAsync(Guid reportId, CancellationToken cancellationToken = default)
+        public async Task<(PaginationSet<FoodReportResponse> Result, string ErrorMessage)> GetFoodReportDetailsAsync(
+             Guid reportId,
+             ListingRequest request,
+             CancellationToken cancellationToken = default)
         {
-            var checkError = new Ref<CheckError>();
-            var dailyReport = await _dailyReportRepository.GetById(reportId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (null, $"Lỗi khi lấy thông tin báo cáo hàng ngày: {checkError.Value.Message}");
-            if (dailyReport == null)
-                return (null, "Không tìm thấy báo cáo hàng ngày.");
-
             try
             {
-                var foodReports = await _foodReportRepository.GetQueryable(x => x.ReportId == reportId && x.IsActive)
-                    .Select(fr => new FoodReportResponse
-                    {
-                        Id = fr.Id,
-                        FoodId = fr.FoodId,
-                        ReportId = fr.ReportId,
-                        Quantity = fr.Quantity,
-                        IsActive = fr.IsActive
-                    }).ToListAsync(cancellationToken);
+                if (request == null)
+                    return (null, "Yêu cầu không được null.");
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                    return (null, "PageIndex và PageSize phải lớn hơn 0.");
 
-                return (foodReports, null);
+                var checkError = new Ref<CheckError>();
+                var dailyReport = await _dailyReportRepository.GetById(reportId, checkError);
+                if (checkError.Value?.IsError == true)
+                    return (null, $"Lỗi khi lấy thông tin báo cáo hàng ngày: {checkError.Value.Message}");
+                if (dailyReport == null)
+                    return (null, "Không tìm thấy báo cáo hàng ngày.");
+
+                var validFields = typeof(FoodReport).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any())
+                    return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+
+                var query = _foodReportRepository.GetQueryable(x => x.ReportId == reportId && x.IsActive);
+
+                if (request.SearchString?.Any() == true)
+                    query = query.SearchString(request.SearchString);
+
+                if (request.Filter?.Any() == true)
+                    query = query.Filter(request.Filter);
+
+                var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                var responses = paginationResult.Items.Select(fr => new FoodReportResponse
+                {
+                    Id = fr.Id,
+                    FoodId = fr.FoodId,
+                    ReportId = fr.ReportId,
+                    Quantity = fr.Quantity,
+                    IsActive = fr.IsActive
+                }).ToList();
+
+                var result = new PaginationSet<FoodReportResponse>
+                {
+                    PageIndex = paginationResult.PageIndex,
+                    Count = responses.Count,
+                    TotalCount = paginationResult.TotalCount,
+                    TotalPages = paginationResult.TotalPages,
+                    Items = responses
+                };
+
+                return (result, null);
             }
             catch (Exception ex)
             {
@@ -631,32 +666,157 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
             }
         }
 
-        public async Task<(List<MedicineReportResponse> MedicineReports, string ErrorMessage)> GetMedicineReportDetailsAsync(Guid reportId, CancellationToken cancellationToken = default)
+        public async Task<(PaginationSet<MedicineReportResponse> Result, string ErrorMessage)> GetMedicineReportDetailsAsync(
+            Guid reportId,
+            ListingRequest request,
+            CancellationToken cancellationToken = default)
         {
-            var checkError = new Ref<CheckError>();
-            var dailyReport = await _dailyReportRepository.GetById(reportId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (null, $"Lỗi khi lấy thông tin báo cáo hàng ngày: {checkError.Value.Message}");
-            if (dailyReport == null)
-                return (null, "Không tìm thấy báo cáo hàng ngày.");
-
             try
             {
-                var medicineReports = await _medicineReportRepository.GetQueryable(x => x.ReportId == reportId && x.IsActive)
-                    .Select(mr => new MedicineReportResponse
-                    {
-                        Id = mr.Id,
-                        MedicineId = mr.MedicineId,
-                        ReportId = mr.ReportId,
-                        Quantity = mr.Quantity,
-                        IsActive = mr.IsActive
-                    }).ToListAsync(cancellationToken);
+                if (request == null)
+                    return (null, "Yêu cầu không được null.");
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                    return (null, "PageIndex và PageSize phải lớn hơn 0.");
 
-                return (medicineReports, null);
+                var checkError = new Ref<CheckError>();
+                var dailyReport = await _dailyReportRepository.GetById(reportId, checkError);
+                if (checkError.Value?.IsError == true)
+                    return (null, $"Lỗi khi lấy thông tin báo cáo hàng ngày: {checkError.Value.Message}");
+                if (dailyReport == null)
+                    return (null, "Không tìm thấy báo cáo hàng ngày.");
+
+                var validFields = typeof(MedicineReport).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any())
+                    return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+
+                var query = _medicineReportRepository.GetQueryable(x => x.ReportId == reportId && x.IsActive);
+
+                if (request.SearchString?.Any() == true)
+                    query = query.SearchString(request.SearchString);
+
+                if (request.Filter?.Any() == true)
+                    query = query.Filter(request.Filter);
+
+                var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                var responses = paginationResult.Items.Select(mr => new MedicineReportResponse
+                {
+                    Id = mr.Id,
+                    MedicineId = mr.MedicineId,
+                    ReportId = mr.ReportId,
+                    Quantity = mr.Quantity,
+                    IsActive = mr.IsActive
+                }).ToList();
+
+                var result = new PaginationSet<MedicineReportResponse>
+                {
+                    PageIndex = paginationResult.PageIndex,
+                    Count = responses.Count,
+                    TotalCount = paginationResult.TotalCount,
+                    TotalPages = paginationResult.TotalPages,
+                    Items = responses
+                };
+
+                return (result, null);
             }
             catch (Exception ex)
             {
                 return (null, $"Lỗi khi lấy chi tiết báo cáo thuốc: {ex.Message}");
+            }
+        }
+
+    public async Task<(PaginationSet<DailyReportResponse> Result, string ErrorMessage)> GetPaginatedListAsync(
+                ListingRequest request,
+                CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (request == null)
+                    return (null, "Yêu cầu không được null.");
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                    return (null, "PageIndex và PageSize phải lớn hơn 0.");
+
+                var validFields = typeof(DailyReport).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any())
+                    return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+
+                var query = _dailyReportRepository.GetQueryable(x => x.IsActive);
+
+                if (request.SearchString?.Any() == true)
+                    query = query.SearchString(request.SearchString);
+
+                if (request.Filter?.Any() == true)
+                    query = query.Filter(request.Filter);
+
+                var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                var reportIds = paginationResult.Items.Select(r => r.Id).ToList();
+
+                // Lấy  dữ liệu liên quan
+                var foodReports = await _foodReportRepository.GetQueryable(x => reportIds.Contains(x.ReportId) && x.IsActive).ToListAsync(cancellationToken);
+                var medicineReports = await _medicineReportRepository.GetQueryable(x => reportIds.Contains(x.ReportId) && x.IsActive).ToListAsync(cancellationToken);
+                var imageReports = await _imageDailyReportRepository.GetQueryable(x => reportIds.Contains(x.DailyReportId) && x.IsActive).ToListAsync(cancellationToken);
+
+                // Nhóm data
+                var foodReportGroups = foodReports.GroupBy(x => x.ReportId).ToDictionary(g => g.Key, g => g.ToList());
+                var medicineReportGroups = medicineReports.GroupBy(x => x.ReportId).ToDictionary(g => g.Key, g => g.ToList());
+                var imageReportGroups = imageReports.GroupBy(x => x.DailyReportId).ToDictionary(g => g.Key, g => g.ToList());
+
+                var responses = new List<DailyReportResponse>();
+                foreach (var report in paginationResult.Items)
+                {
+                    var reportFoodReports = foodReportGroups.GetValueOrDefault(report.Id, new List<FoodReport>());
+                    var reportMedicineReports = medicineReportGroups.GetValueOrDefault(report.Id, new List<MedicineReport>());
+                    var reportImages = imageReportGroups.GetValueOrDefault(report.Id, new List<ImageDailyReport>());
+
+                    responses.Add(new DailyReportResponse
+                    {
+                        Id = report.Id,
+                        LivestockCircleId = report.LivestockCircleId,
+                        DeadUnit = report.DeadUnit,
+                        GoodUnit = report.GoodUnit,
+                        BadUnit = report.BadUnit,
+                        Note = report.Note,
+                        IsActive = report.IsActive,
+                        ImageLinks = reportImages.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
+                        Thumbnail = reportImages.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink,
+                        FoodReports = reportFoodReports.Select(fr => new FoodReportResponse
+                        {
+                            Id = fr.Id,
+                            FoodId = fr.FoodId,
+                            ReportId = fr.ReportId,
+                            Quantity = fr.Quantity,
+                            IsActive = fr.IsActive
+                        }).ToList(),
+                        MedicineReports = reportMedicineReports.Select(mr => new MedicineReportResponse
+                        {
+                            Id = mr.Id,
+                            MedicineId = mr.MedicineId,
+                            ReportId = mr.ReportId,
+                            Quantity = mr.Quantity,
+                            IsActive = mr.IsActive
+                        }).ToList()
+                    });
+                }
+
+                var result = new PaginationSet<DailyReportResponse>
+                {
+                    PageIndex = paginationResult.PageIndex,
+                    Count = responses.Count,
+                    TotalCount = paginationResult.TotalCount,
+                    TotalPages = paginationResult.TotalPages,
+                    Items = responses
+                };
+
+                return (result, null);
+            }
+            catch (Exception ex)
+            {
+                return (null, $"Lỗi khi lấy danh sách phân trang: {ex.Message}");
             }
         }
     }

@@ -13,6 +13,9 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Dto.Request.Barn;
 using CloudinaryDotNet.Actions;
 using Domain.Dto.Response.Barn;
+using Domain.Dto.Request;
+using Domain.Dto.Response;
+using Domain.Extensions;
 
 namespace Domain.Services.Implements
 {
@@ -294,19 +297,64 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                 return (null, $"Lỗi khi lấy danh sách chuồng trại theo người gia công: {ex.Message}");
             }
         }
-        /// <summary>
-        /// Trích xuất phần dữ liệu base64 từ chuỗi (bỏ qua phần header như data:image/jpeg;base64).
-        /// </summary>
-        private string ExtractBase64Data(string base64String)
+
+        public async Task<(PaginationSet<BarnResponse> Result, string ErrorMessage)> GetPaginatedListAsync(
+            ListingRequest request,
+            CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrEmpty(base64String))
-                return null;
+            try
+            {
+                if (request == null)
+                    return (null, "Yêu cầu không được null.");
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                    return (null, "PageIndex và PageSize phải lớn hơn 0.");
 
-            var parts = base64String.Split(',');
-            if (parts.Length < 2)
-                return null;
+                var validFields = typeof(Barn).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any())
+                    return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
 
-            return parts[1];
+                var query = _barnRepository.GetQueryable(x => x.IsActive);
+
+                if (request.SearchString?.Any() == true)
+                    query = query.SearchString(request.SearchString);
+
+                if (request.Filter?.Any() == true)
+                    query = query.Filter(request.Filter);
+
+                var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                var responses = new List<BarnResponse>();
+                foreach (var barn in paginationResult.Items)
+                {
+                    responses.Add(new BarnResponse
+                    {
+                        Id = barn.Id,
+                        BarnName = barn.BarnName,
+                        Address = barn.Address,
+                        Image = barn.Image,
+                        WorkerId = barn.WorkerId,
+                        IsActive = barn.IsActive
+                    });
+                }
+
+                var result = new PaginationSet<BarnResponse>
+                {
+                    PageIndex = paginationResult.PageIndex,
+                    Count = responses.Count,
+                    TotalCount = paginationResult.TotalCount,
+                    TotalPages = paginationResult.TotalPages,
+                    Items = responses
+                };
+
+                return (result, null);
+            }
+            catch (Exception ex)
+            {
+                return (null, $"Lỗi khi lấy danh sách phân trang: {ex.Message}");
+            }
         }
+
     }
 }
