@@ -5,15 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Dto.Request
+namespace Domain.Dto.Request.Medicine
 {
-    public class UpdateBreedRequest
+    public class UpdateMedicineRequest
     {
-        [Required(ErrorMessage = "Tên giống loài là bắt buộc.")]
-        public string BreedName { get; set; }
+        [Required(ErrorMessage = "Tên thuốc là bắt buộc.")]
+        public string MedicineName { get; set; }
 
-        [Required(ErrorMessage = "ID danh mục giống loài là bắt buộc.")]
-        public Guid BreedCategoryId { get; set; }
+        [Required(ErrorMessage = "ID danh mục thuốc là bắt buộc.")]
+        public Guid MedicineCategoryId { get; set; }
 
         [Required(ErrorMessage = "Số lượng tồn kho là bắt buộc.")]
         [Range(0, int.MaxValue, ErrorMessage = "Số lượng tồn kho phải là số không âm.")]

@@ -1,4 +1,4 @@
-﻿using Domain.Dto.Request;
+﻿using Domain.Dto.Request.Breed;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;

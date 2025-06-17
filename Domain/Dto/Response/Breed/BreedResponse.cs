@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Dto.Response
+namespace Domain.Dto.Response.Breed
 {
     public class BreedResponse
     {

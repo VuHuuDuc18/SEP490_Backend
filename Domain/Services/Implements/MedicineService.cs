@@ -8,11 +8,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
-using Domain.Dto.Request;
-using Domain.Dto.Response;
 using Domain.Services.Interfaces;
 using Domain.Services;
 using Microsoft.EntityFrameworkCore;
+using Domain.Dto.Request.Medicine;
+using Domain.Dto.Response.Medicine;
 
 namespace Domain.Services.Implements
 {
@@ -75,14 +75,8 @@ namespace Domain.Services.Implements
 
                 if (!string.IsNullOrEmpty(request.Thumbnail))
                 {
-                    var base64Data = ExtractBase64Data(request.Thumbnail);
-                    if (string.IsNullOrEmpty(base64Data))
-                        return (false, "Dữ liệu thumbnail không đúng định dạng base64.");
-
-                    var tempFilePath = Path.GetTempFileName();
-                    File.WriteAllBytes(tempFilePath, Convert.FromBase64String(base64Data));
-                    var imageLink = await _cloudinaryCloudService.UploadImage(request.Thumbnail, folder, cancellationToken);
-                    File.Delete(tempFilePath);
+                    var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
+      request.Thumbnail, folder, _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {
@@ -100,14 +94,8 @@ namespace Domain.Services.Implements
                 {
                     foreach (var imageLink in request.ImageLinks)
                     {
-                        var base64Data = ExtractBase64Data(imageLink);
-                        if (string.IsNullOrEmpty(base64Data))
-                            return (false, "Dữ liệu ảnh không đúng định dạng base64.");
-
-                        var tempFilePath = Path.GetTempFileName();
-                        File.WriteAllBytes(tempFilePath, Convert.FromBase64String(base64Data));
-                        var uploadedLink = await _cloudinaryCloudService.UploadImage(imageLink, folder, cancellationToken);
-                        File.Delete(tempFilePath);
+                        var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
+           imageLink, folder, _cloudinaryCloudService, cancellationToken);
 
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
@@ -186,14 +174,8 @@ namespace Domain.Services.Implements
 
                 if (!string.IsNullOrEmpty(request.Thumbnail))
                 {
-                    var base64Data = ExtractBase64Data(request.Thumbnail);
-                    if (string.IsNullOrEmpty(base64Data))
-                        return (false, "Dữ liệu thumbnail không đúng định dạng base64.");
-
-                    var tempFilePath = Path.GetTempFileName();
-                    File.WriteAllBytes(tempFilePath, Convert.FromBase64String(base64Data));
-                    var imageLink = await _cloudinaryCloudService.UploadImage(request.Thumbnail, folder, cancellationToken);
-                    File.Delete(tempFilePath);
+                    var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
+      request.Thumbnail, folder, _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {
@@ -211,14 +193,8 @@ namespace Domain.Services.Implements
                 {
                     foreach (var imageLink in request.ImageLinks)
                     {
-                        var base64Data = ExtractBase64Data(imageLink);
-                        if (string.IsNullOrEmpty(base64Data))
-                            return (false, "Dữ liệu ảnh không đúng định dạng base64.");
-
-                        var tempFilePath = Path.GetTempFileName();
-                        File.WriteAllBytes(tempFilePath, Convert.FromBase64String(base64Data));
-                        var uploadedLink = await _cloudinaryCloudService.UploadImage(imageLink, folder, cancellationToken);
-                        File.Delete(tempFilePath);
+                        var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
+         imageLink, folder, _cloudinaryCloudService, cancellationToken);
 
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
@@ -347,20 +323,6 @@ namespace Domain.Services.Implements
                 return (null, $"Lỗi khi lấy danh sách thuốc: {ex.Message}");
             }
         }
-
-        /// <summary>
-        /// Trích xuất phần dữ liệu base64 từ chuỗi (bỏ qua phần header như data:image/jpeg;base64).
-        /// </summary>
-        private string ExtractBase64Data(string base64String)
-        {
-            if (string.IsNullOrEmpty(base64String))
-                return null;
-
-            var parts = base64String.Split(',');
-            if (parts.Length < 2)
-                return null;
-
-            return parts[1];
-        }
+     
     }
 }

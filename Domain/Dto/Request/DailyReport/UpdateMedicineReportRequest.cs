@@ -5,10 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Dto.Request
+namespace Domain.Dto.Request.DailyReport
 {
-    public class CreateMedicineReportRequest
+    public class UpdateMedicineReportRequest
     {
+        [Required(ErrorMessage = "ID báo cáo thuốc là bắt buộc.")]
+        public Guid Id { get; set; }
+
         [Required(ErrorMessage = "ID thuốc là bắt buộc.")]
         public Guid MedicineId { get; set; }
 

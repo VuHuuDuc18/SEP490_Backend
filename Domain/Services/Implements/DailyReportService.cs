@@ -1,6 +1,4 @@
-﻿using Domain.Dto.Request;
-using Domain.Dto.Response;
-using Domain.Services.Interfaces;
+﻿using Domain.Services.Interfaces;
 using Entities.EntityModel;
 using Infrastructure.Core;
 using Infrastructure.Repository;
@@ -12,6 +10,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Domain.Dto.Request.DailyReport;
+using CloudinaryDotNet.Actions;
+using Org.BouncyCastle.Asn1.X509;
+using Domain.Dto.Response.DailyReport;
 
 namespace Domain.Services.Implements
 {
@@ -138,10 +140,8 @@ namespace Domain.Services.Implements
                 // Tạo ImageDailyReports
                 if (!string.IsNullOrEmpty(requestDto.Thumbnail))
                 {
-                    var tempFilePath = Path.GetTempFileName();
-                    File.WriteAllBytes(tempFilePath, Convert.FromBase64String(requestDto.Thumbnail.Split(',')[1]));
-                    var thumbnailUrl = await _cloudinaryCloudService.UploadImage(requestDto.Thumbnail, "daily-reports/thumbnails", cancellationToken);
-                    File.Delete(tempFilePath);
+                    var thumbnailUrl = await UploadImageExtension.UploadBase64ImageAsync(
+    requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(thumbnailUrl))
                     {
@@ -160,10 +160,8 @@ namespace Domain.Services.Implements
                 {
                     foreach (var imageLink in requestDto.ImageLinks)
                     {
-                        var tempFilePath = Path.GetTempFileName();
-                        File.WriteAllBytes(tempFilePath, Convert.FromBase64String(imageLink.Split(',')[1]));
-                        var uploadedLink = await _cloudinaryCloudService.UploadImage(imageLink, "daily-reports", cancellationToken);
-                        File.Delete(tempFilePath);
+                        var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
+         imageLink, "daily - reports", _cloudinaryCloudService, cancellationToken);
 
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
@@ -377,10 +375,8 @@ namespace Domain.Services.Implements
                 // Upload thumbnail mới
                 if (!string.IsNullOrEmpty(requestDto.Thumbnail))
                 {
-                    var tempFilePath = Path.GetTempFileName();
-                    File.WriteAllBytes(tempFilePath, Convert.FromBase64String(requestDto.Thumbnail.Split(',')[1]));
-                    var thumbnailUrl = await _cloudinaryCloudService.UploadImage(requestDto.Thumbnail, "daily-reports/thumbnails", cancellationToken);
-                    File.Delete(tempFilePath);
+                    var thumbnailUrl = await UploadImageExtension.UploadBase64ImageAsync(
+requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(thumbnailUrl))
                     {
@@ -400,10 +396,8 @@ namespace Domain.Services.Implements
                 {
                     foreach (var imageLink in requestDto.ImageLinks)
                     {
-                        var tempFilePath = Path.GetTempFileName();
-                        File.WriteAllBytes(tempFilePath, Convert.FromBase64String(imageLink.Split(',')[1]));
-                        var uploadedLink = await _cloudinaryCloudService.UploadImage(imageLink, "daily-reports", cancellationToken);
-                        File.Delete(tempFilePath);
+                        var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
+        imageLink, "daily-reports", _cloudinaryCloudService, cancellationToken);
 
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {

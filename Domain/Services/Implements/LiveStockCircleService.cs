@@ -8,10 +8,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
-using Domain.Dto.Request;
-using Domain.Dto.Response;
 using Domain.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Domain.Dto.Request.LivestockCircle;
+using Domain.Dto.Response.LivestockCircle;
 
 namespace Domain.Services.Implements
 {
@@ -66,10 +66,10 @@ namespace Domain.Services.Implements
                 Status = request.Status,
                 StartDate = request.StartDate,
                 TotalUnit = request.TotalUnit,
-                DeadUnit = request.DeadUnit,
-                AverageWeight = request.AverageWeight,
-                GoodUnitNumber = request.GoodUnitNumber,
-                BadUnitNumber = request.BadUnitNumber,
+                DeadUnit = 0,
+                AverageWeight = 0,
+                GoodUnitNumber = request.TotalUnit,
+                BadUnitNumber = 0,
                 BreedId = request.BreedId,
                 BarnId = request.BarnId,
                 TechicalStaffId = request.TechicalStaffId

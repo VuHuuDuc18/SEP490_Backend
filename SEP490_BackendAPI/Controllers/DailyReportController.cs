@@ -1,4 +1,4 @@
-﻿using Domain.Dto.Request;
+﻿using Domain.Dto.Request.DailyReport;
 using Domain.Dto.Response;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;

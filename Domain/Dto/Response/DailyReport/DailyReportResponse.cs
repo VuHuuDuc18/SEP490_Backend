@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Dto.Response
+namespace Domain.Dto.Response.DailyReport
 {
     public class DailyReportResponse
     {
@@ -27,7 +27,7 @@ namespace Domain.Dto.Response
         public string Thumbnail { get; set; }
         public List<FoodReportResponse> FoodReports { get; set; }
         public List<MedicineReportResponse> MedicineReports { get; set; }
-       
+
 
     }
 }
