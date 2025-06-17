@@ -1,4 +1,4 @@
-﻿using Domain.Dto.Request;
+﻿using Domain.Dto.Request.Medicine;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;

@@ -6,12 +6,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
-using Domain.Dto.Request;
-using Domain.Dto.Response;
 using Domain.Services.Interfaces;
 using Infrastructure.Core;
 using Infrastructure.Repository;
 using Microsoft.EntityFrameworkCore;
+using Domain.Dto.Request.Barn;
+using CloudinaryDotNet.Actions;
+using Domain.Dto.Response.Barn;
 
 namespace Domain.Services.Implements
 {
@@ -75,14 +76,8 @@ namespace Domain.Services.Implements
             {
                 if (!string.IsNullOrEmpty(requestDto.Image))
                 {
-                    var base64Data = ExtractBase64Data(requestDto.Image);
-                    if (string.IsNullOrEmpty(base64Data))
-                        return (false, "Dữ liệu ảnh không đúng định dạng base64.");
-
-                    var tempFilePath = Path.GetTempFileName();
-                    File.WriteAllBytes(tempFilePath, Convert.FromBase64String(base64Data));
-                    var imageLink = await _cloudinaryCloudService.UploadImage(requestDto.Image, "barn", cancellationToken);
-                    File.Delete(tempFilePath);
+                    var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
+     requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {
@@ -153,14 +148,8 @@ namespace Domain.Services.Implements
                         await _cloudinaryCloudService.DeleteImage(existing.Image, cancellationToken);
                     }
 
-                    var base64Data = ExtractBase64Data(requestDto.Image);
-                    if (string.IsNullOrEmpty(base64Data))
-                        return (false, "Dữ liệu ảnh không đúng định dạng base64.");
-
-                    var tempFilePath = Path.GetTempFileName();
-                    File.WriteAllBytes(tempFilePath, Convert.FromBase64String(base64Data));
-                    var imageLink = await _cloudinaryCloudService.UploadImage(requestDto.Image, "barn", cancellationToken);
-                    File.Delete(tempFilePath);
+                    var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
+requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {

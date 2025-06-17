@@ -3,8 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Domain.Dto.Request;
-using Domain.Dto.Response;
+using Domain.Dto.Request.Barn;
+using Domain.Dto.Response.Barn;
 namespace Domain.Services.Interfaces
 {
     public interface IBarnService

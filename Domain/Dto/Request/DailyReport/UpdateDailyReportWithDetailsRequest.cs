@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Dto.Request
+namespace Domain.Dto.Request.DailyReport
 {
     public class UpdateDailyReportWithDetailsRequest
     {
@@ -39,6 +39,6 @@ namespace Domain.Dto.Request
 
         public List<UpdateFoodReportRequest> FoodReports { get; set; }
         public List<UpdateMedicineReportRequest> MedicineReports { get; set; }
-        
+
     }
 }

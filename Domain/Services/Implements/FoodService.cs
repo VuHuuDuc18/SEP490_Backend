@@ -8,11 +8,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
-using Domain.Dto.Request;
-using Domain.Dto.Response;
 using Domain.Services.Interfaces;
 using Domain.Services;
 using Microsoft.EntityFrameworkCore;
+using Domain.Dto.Request.Food;
+using Domain.Dto.Response.Food;
 
 namespace Domain.Services.Implements
 {
@@ -79,10 +79,8 @@ namespace Domain.Services.Implements
                 // Upload thumbnail lên Cloudinary trong folder được chỉ định
                 if (!string.IsNullOrEmpty(request.Thumbnail))
                 {
-                    var tempFilePath = Path.GetTempFileName();
-                    File.WriteAllBytes(tempFilePath, Convert.FromBase64String(request.Thumbnail.Split(',')[1]));
-                    var imageLink = await _cloudinaryCloudService.UploadImage(request.Thumbnail, folder, cancellationToken);
-                    File.Delete(tempFilePath);
+                    var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
+     request.Thumbnail, folder, _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {
@@ -101,11 +99,8 @@ namespace Domain.Services.Implements
                 {
                     foreach (var imageLink in request.ImageLinks)
                     {
-                        var tempFilePath = Path.GetTempFileName();
-                        File.WriteAllBytes(tempFilePath, Convert.FromBase64String(imageLink.Split(',')[1]));
-                        var uploadedLink = await _cloudinaryCloudService.UploadImage(imageLink, folder, cancellationToken);
-                        File.Delete(tempFilePath);
-
+                        var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
+                           imageLink, folder, _cloudinaryCloudService, cancellationToken);
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
                             var imageFood = new ImageFood
@@ -188,10 +183,8 @@ namespace Domain.Services.Implements
                 // Upload thumbnail mới
                 if (!string.IsNullOrEmpty(request.Thumbnail))
                 {
-                    var tempFilePath = Path.GetTempFileName();
-                    File.WriteAllBytes(tempFilePath, Convert.FromBase64String(request.Thumbnail.Split(',')[1]));
-                    var imageLink = await _cloudinaryCloudService.UploadImage(request.Thumbnail, folder, cancellationToken);
-                    File.Delete(tempFilePath);
+                    var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
+    request.Thumbnail, folder, _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {
@@ -210,11 +203,8 @@ namespace Domain.Services.Implements
                 {
                     foreach (var imageLink in request.ImageLinks)
                     {
-                        var tempFilePath = Path.GetTempFileName();
-                        File.WriteAllBytes(tempFilePath, Convert.FromBase64String(imageLink.Split(',')[1]));
-                        var uploadedLink = await _cloudinaryCloudService.UploadImage(imageLink, folder, cancellationToken);
-                        File.Delete(tempFilePath);
-
+                        var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
+            imageLink, folder, _cloudinaryCloudService, cancellationToken);
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
                             var imageFood = new ImageFood

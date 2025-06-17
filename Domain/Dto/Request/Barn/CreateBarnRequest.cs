@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Dto.Request
+namespace Domain.Dto.Request.Barn
 {
     /// <summary>
     /// DTO dùng để nhận dữ liệu khi tạo chuồng trại.

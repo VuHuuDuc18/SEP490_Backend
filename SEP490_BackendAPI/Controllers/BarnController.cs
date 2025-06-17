@@ -1,4 +1,4 @@
-﻿using Domain.Dto.Request;
+﻿using Domain.Dto.Request.Barn;
 using Domain.Dto.Response;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
