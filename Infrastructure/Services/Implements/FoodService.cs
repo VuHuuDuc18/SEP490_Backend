@@ -8,11 +8,15 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
-using Domain.Dto.Request;
-using Domain.Dto.Response;
 using Domain.Services.Interfaces;
 using Domain.Services;
 using Microsoft.EntityFrameworkCore;
+using Domain.Dto.Request.Food;
+using Domain.Dto.Response.Food;
+using Domain.Dto.Response;
+using Domain.Dto.Request;
+using Domain.Extensions;
+using Infrastructure.Extensions;
 
 namespace Infrastructure.Services.Implements
 {
@@ -79,10 +83,8 @@ namespace Infrastructure.Services.Implements
                 // Upload thumbnail lên Cloudinary trong folder được chỉ định
                 if (!string.IsNullOrEmpty(request.Thumbnail))
                 {
-                    var tempFilePath = Path.GetTempFileName();
-                    File.WriteAllBytes(tempFilePath, Convert.FromBase64String(request.Thumbnail.Split(',')[1]));
-                    var imageLink = await _cloudinaryCloudService.UploadImage(request.Thumbnail, folder, cancellationToken);
-                    File.Delete(tempFilePath);
+                    var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
+     request.Thumbnail, folder, _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {
@@ -101,11 +103,8 @@ namespace Infrastructure.Services.Implements
                 {
                     foreach (var imageLink in request.ImageLinks)
                     {
-                        var tempFilePath = Path.GetTempFileName();
-                        File.WriteAllBytes(tempFilePath, Convert.FromBase64String(imageLink.Split(',')[1]));
-                        var uploadedLink = await _cloudinaryCloudService.UploadImage(imageLink, folder, cancellationToken);
-                        File.Delete(tempFilePath);
-
+                        var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
+                           imageLink, folder, _cloudinaryCloudService, cancellationToken);
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
                             var imageFood = new ImageFood
@@ -188,10 +187,8 @@ namespace Infrastructure.Services.Implements
                 // Upload thumbnail mới
                 if (!string.IsNullOrEmpty(request.Thumbnail))
                 {
-                    var tempFilePath = Path.GetTempFileName();
-                    File.WriteAllBytes(tempFilePath, Convert.FromBase64String(request.Thumbnail.Split(',')[1]));
-                    var imageLink = await _cloudinaryCloudService.UploadImage(request.Thumbnail, folder, cancellationToken);
-                    File.Delete(tempFilePath);
+                    var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
+    request.Thumbnail, folder, _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {
@@ -210,11 +207,8 @@ namespace Infrastructure.Services.Implements
                 {
                     foreach (var imageLink in request.ImageLinks)
                     {
-                        var tempFilePath = Path.GetTempFileName();
-                        File.WriteAllBytes(tempFilePath, Convert.FromBase64String(imageLink.Split(',')[1]));
-                        var uploadedLink = await _cloudinaryCloudService.UploadImage(imageLink, folder, cancellationToken);
-                        File.Delete(tempFilePath);
-
+                        var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
+            imageLink, folder, _cloudinaryCloudService, cancellationToken);
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
                             var imageFood = new ImageFood
@@ -343,6 +337,71 @@ namespace Infrastructure.Services.Implements
             catch (Exception ex)
             {
                 return (null, $"Lỗi khi lấy danh sách thức ăn: {ex.Message}");
+            }
+        }
+
+        public async Task<(PaginationSet<FoodResponse> Result, string ErrorMessage)> GetPaginatedListAsync(
+    ListingRequest request,
+    CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (request == null)
+                    return (null, "Yêu cầu không được null.");
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                    return (null, "PageIndex và PageSize phải lớn hơn 0.");
+
+                var validFields = typeof(Food).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any())
+                    return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+
+                var query = _foodRepository.GetQueryable(x => x.IsActive);
+
+                if (request.SearchString?.Any() == true)
+                    query = query.SearchString(request.SearchString);
+
+                if (request.Filter?.Any() == true)
+                    query = query.Filter(request.Filter);
+
+                var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                var foodIds = paginationResult.Items.Select(f => f.Id).ToList();
+                var images = await _imageFoodRepository.GetQueryable(x => foodIds.Contains(x.FoodId)).ToListAsync(cancellationToken);
+                var imageGroups = images.GroupBy(x => x.FoodId).ToDictionary(g => g.Key, g => g.ToList());
+
+                var responses = new List<FoodResponse>();
+                foreach (var food in paginationResult.Items)
+                {
+                    var foodImages = imageGroups.GetValueOrDefault(food.Id, new List<ImageFood>());
+                    responses.Add(new FoodResponse
+                    {
+                        Id = food.Id,
+                        FoodName = food.FoodName,
+                        FoodCategoryId = food.FoodCategoryId,
+                        Stock = food.Stock,
+                        WeighPerUnit = food.WeighPerUnit,
+                        IsActive = food.IsActive,
+                        ImageLinks = foodImages.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
+                        Thumbnail = foodImages.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                    });
+                }
+
+                var result = new PaginationSet<FoodResponse>
+                {
+                    PageIndex = paginationResult.PageIndex,
+                    Count = responses.Count,
+                    TotalCount = paginationResult.TotalCount,
+                    TotalPages = paginationResult.TotalPages,
+                    Items = responses
+                };
+
+                return (result, null);
+            }
+            catch (Exception ex)
+            {
+                return (null, $"Lỗi khi lấy danh sách phân trang: {ex.Message}");
             }
         }
     }

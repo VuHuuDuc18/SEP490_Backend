@@ -33,5 +33,12 @@ namespace Domain.Services.Interfaces
         /// Lấy danh sách tất cả danh mục thuốc đang hoạt động với bộ lọc tùy chọn.
         /// </summary>
         Task<(List<CategoryResponse> Categories, string ErrorMessage)> GetAllAsync(string name = null, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Lấy danh sách phân trang các danh mục thuốc với tìm kiếm, lọc và sắp xếp.
+        /// </summary>
+        Task<(PaginationSet<CategoryResponse> Result, string ErrorMessage)> GetPaginatedListAsync(
+            ListingRequest request,
+            CancellationToken cancellationToken = default);
     }
 }

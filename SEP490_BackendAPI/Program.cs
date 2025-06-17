@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore.Design;
 using Domain.Services;
 using Infrastructure.DBContext;
 using Infrastructure.Repository;
+using Domain.Settings;
 
 namespace SEP490_BackendAPI
 {
@@ -33,15 +34,10 @@ namespace SEP490_BackendAPI
                     });
             });
             //builder.Services.Configure<MailSendSettings>(builder.Configuration.GetSection("MailSettings"));
-            //connect DB SQL
-            builder.Services.AddDbContext<LCFMSDBContext>(options => 
-               options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")), 
-               ServiceLifetime.Transient);
-            builder.Services.AddScoped<DbContext, LCFMSDBContext>();
             
-            //Add service extensions
-            builder.Services.Configure<CloudinaryConfig>(builder.Configuration.GetSection("Cloudinary"));
+            //Add Infrastructures
             builder.Services.AddInfrastructure(builder.Configuration);
+            builder.Services.AddIdentityInfrastructure(builder.Configuration);
 
             // Add Service
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -49,8 +45,6 @@ namespace SEP490_BackendAPI
 
             // Add services to the container.
             builder.Services.AddSwaggerExtensions();
-
-            builder.Services.AddIdentityInfrastructure(builder.Configuration);
 
             var servicesProvider = builder.Services.BuildServiceProvider();
             ServicesExtentions.SeedIdentity(servicesProvider);

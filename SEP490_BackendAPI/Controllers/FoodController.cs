@@ -1,4 +1,5 @@
 ﻿using Domain.Dto.Request;
+using Domain.Dto.Request.Food;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
@@ -72,6 +73,17 @@ namespace SEP490_BackendAPI.Controllers
             if (foods == null)
                 return NotFound(errorMessage ?? "Không tìm thấy danh sách thức ăn.");
             return Ok(foods);
+        }
+        /// <summary>
+        /// Lấy danh sách phân trang tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn.
+        /// </summary>
+        [HttpPost("foods/paginated")]
+        public async Task<IActionResult> GetPaginatedFoods([FromBody] ListingRequest request)
+        {
+            var (result, errorMessage) = await _foodService.GetPaginatedListAsync(request);
+            if (errorMessage != null)
+                return BadRequest(errorMessage);
+            return Ok(result);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Domain.Dto.Request;
+using Domain.Dto.Request.Breed;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
@@ -72,6 +73,18 @@ namespace SEP490_BackendAPI.Controllers
             if (breeds == null)
                 return NotFound(errorMessage ?? "Không tìm thấy danh sách giống loài.");
             return Ok(breeds);
+        }
+
+        /// <summary>
+        /// Lấy danh sách phân trang tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn.
+        /// </summary>
+        [HttpPost("breeds/paginated")]
+        public async Task<IActionResult> GetPaginatedBreeds([FromBody] ListingRequest request)
+        {
+            var (result, errorMessage) = await _breedService.GetPaginatedListAsync(request);
+            if (errorMessage != null)
+                return BadRequest(errorMessage);
+            return Ok(result);
         }
     }
 }

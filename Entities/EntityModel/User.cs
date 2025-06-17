@@ -5,11 +5,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Entities.EntityBase;
 using Microsoft.AspNetCore.Identity;
 
 namespace Entities.EntityModel
 {
-    public class User : IdentityUser<Guid>
+    public class User : IdentityUser<Guid>, IEntityBase
     {
         public string? FirstName { get; set; }
         public string? MiddleName { get; set; }

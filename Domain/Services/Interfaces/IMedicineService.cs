@@ -1,5 +1,7 @@
 ﻿using Domain.Dto.Request;
+using Domain.Dto.Request.Medicine;
 using Domain.Dto.Response;
+using Domain.Dto.Response.Medicine;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -33,5 +35,12 @@ namespace Domain.Services.Interfaces
         /// Lấy danh sách tất cả loại thuốc đang hoạt động với bộ lọc tùy chọn, bao gồm danh sách ảnh và thumbnail.
         /// </summary>
         Task<(List<MedicineResponse> Medicines, string ErrorMessage)> GetAllAsync(string medicineName = null, Guid? medicineCategoryId = null, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Lấy danh sách phân trang tìm kiếm lọc tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn, bao gồm danh sách ảnh và thumbnail.
+        /// </summary>
+        Task<(PaginationSet<MedicineResponse> Result, string ErrorMessage)> GetPaginatedListAsync(
+           ListingRequest request,
+           CancellationToken cancellationToken = default);
     }
 }

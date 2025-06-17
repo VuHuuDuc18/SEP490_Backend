@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Dto.Request
+namespace Domain.Dto.Request.LivestockCircle
 {
     /// <summary>
     /// DTO dùng để nhận dữ liệu khi tạo chu kỳ chăn nuôi.
@@ -24,13 +24,8 @@ namespace Domain.Dto.Request
         //[Required(ErrorMessage = "Ngày kết thúc là bắt buộc.")]
         //public DateTime EndDate { get; set; }
 
-        [Required(ErrorMessage = "Tổng số đơn vị là bắt buộc.")]
+        [Required(ErrorMessage = "Tổng số đơn vị giống là bắt buộc.")]
         public int TotalUnit { get; set; }
-
-        public int DeadUnit { get; set; }
-        public float AverageWeight { get; set; }
-        public int GoodUnitNumber { get; set; }
-        public int BadUnitNumber { get; set; }
 
         [Required(ErrorMessage = "ID giống là bắt buộc.")]
         public Guid BreedId { get; set; }

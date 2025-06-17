@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Entities.EntityModel
 {
-    public class Role : IdentityRole<Guid>
+    public class Role : IdentityRole<Guid>, IEntityBase
     {
         [Required] 
         public bool IsActive { get; set; }

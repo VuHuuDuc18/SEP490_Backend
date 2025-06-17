@@ -1,5 +1,5 @@
-﻿using Domain.Dto.Request;
-using Domain.Dto.Response;
+﻿using Domain.Dto.Request.LivestockCircle;
+using Domain.Dto.Response.LivestockCircle;
 using System;
 using System.Collections.Generic;
 using System.Threading;

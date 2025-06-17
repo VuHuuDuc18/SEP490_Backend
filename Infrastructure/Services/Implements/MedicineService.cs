@@ -8,11 +8,16 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
-using Domain.Dto.Request;
-using Domain.Dto.Response;
 using Domain.Services.Interfaces;
 using Domain.Services;
 using Microsoft.EntityFrameworkCore;
+using Domain.Dto.Request.Medicine;
+using Domain.Dto.Response.Medicine;
+using Domain.Dto.Response;
+using Domain.Dto.Request;
+using Domain.Dto.Response.Food;
+using Domain.Extensions;
+using Infrastructure.Extensions;
 
 namespace Infrastructure.Services.Implements
 {
@@ -75,14 +80,8 @@ namespace Infrastructure.Services.Implements
 
                 if (!string.IsNullOrEmpty(request.Thumbnail))
                 {
-                    var base64Data = ExtractBase64Data(request.Thumbnail);
-                    if (string.IsNullOrEmpty(base64Data))
-                        return (false, "Dữ liệu thumbnail không đúng định dạng base64.");
-
-                    var tempFilePath = Path.GetTempFileName();
-                    File.WriteAllBytes(tempFilePath, Convert.FromBase64String(base64Data));
-                    var imageLink = await _cloudinaryCloudService.UploadImage(request.Thumbnail, folder, cancellationToken);
-                    File.Delete(tempFilePath);
+                    var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
+      request.Thumbnail, folder, _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {
@@ -100,14 +99,8 @@ namespace Infrastructure.Services.Implements
                 {
                     foreach (var imageLink in request.ImageLinks)
                     {
-                        var base64Data = ExtractBase64Data(imageLink);
-                        if (string.IsNullOrEmpty(base64Data))
-                            return (false, "Dữ liệu ảnh không đúng định dạng base64.");
-
-                        var tempFilePath = Path.GetTempFileName();
-                        File.WriteAllBytes(tempFilePath, Convert.FromBase64String(base64Data));
-                        var uploadedLink = await _cloudinaryCloudService.UploadImage(imageLink, folder, cancellationToken);
-                        File.Delete(tempFilePath);
+                        var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
+           imageLink, folder, _cloudinaryCloudService, cancellationToken);
 
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
@@ -186,14 +179,8 @@ namespace Infrastructure.Services.Implements
 
                 if (!string.IsNullOrEmpty(request.Thumbnail))
                 {
-                    var base64Data = ExtractBase64Data(request.Thumbnail);
-                    if (string.IsNullOrEmpty(base64Data))
-                        return (false, "Dữ liệu thumbnail không đúng định dạng base64.");
-
-                    var tempFilePath = Path.GetTempFileName();
-                    File.WriteAllBytes(tempFilePath, Convert.FromBase64String(base64Data));
-                    var imageLink = await _cloudinaryCloudService.UploadImage(request.Thumbnail, folder, cancellationToken);
-                    File.Delete(tempFilePath);
+                    var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
+      request.Thumbnail, folder, _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {
@@ -211,14 +198,8 @@ namespace Infrastructure.Services.Implements
                 {
                     foreach (var imageLink in request.ImageLinks)
                     {
-                        var base64Data = ExtractBase64Data(imageLink);
-                        if (string.IsNullOrEmpty(base64Data))
-                            return (false, "Dữ liệu ảnh không đúng định dạng base64.");
-
-                        var tempFilePath = Path.GetTempFileName();
-                        File.WriteAllBytes(tempFilePath, Convert.FromBase64String(base64Data));
-                        var uploadedLink = await _cloudinaryCloudService.UploadImage(imageLink, folder, cancellationToken);
-                        File.Delete(tempFilePath);
+                        var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
+         imageLink, folder, _cloudinaryCloudService, cancellationToken);
 
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
@@ -348,19 +329,66 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-        /// <summary>
-        /// Trích xuất phần dữ liệu base64 từ chuỗi (bỏ qua phần header như data:image/jpeg;base64).
-        /// </summary>
-        private string ExtractBase64Data(string base64String)
+        public async Task<(PaginationSet<MedicineResponse> Result, string ErrorMessage)> GetPaginatedListAsync(ListingRequest request, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrEmpty(base64String))
-                return null;
+            try
+            {
+                if (request == null)
+                    return (null, "Yêu cầu không được null.");
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                    return (null, "PageIndex và PageSize phải lớn hơn 0.");
 
-            var parts = base64String.Split(',');
-            if (parts.Length < 2)
-                return null;
+                var validFields = typeof(Medicine).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any())
+                    return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
 
-            return parts[1];
+                var query = _medicineRepository.GetQueryable(x => x.IsActive);
+
+                if (request.SearchString?.Any() == true)
+                    query = query.SearchString(request.SearchString);
+
+                if (request.Filter?.Any() == true)
+                    query = query.Filter(request.Filter);
+
+                var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                var medicineIds = paginationResult.Items.Select(f => f.Id).ToList();
+                var images = await _imageMedicineRepository.GetQueryable(x => medicineIds.Contains(x.MedicineId)).ToListAsync(cancellationToken);
+                var imageGroups = images.GroupBy(x => x.MedicineId).ToDictionary(g => g.Key, g => g.ToList());
+
+                var responses = new List<MedicineResponse>();
+                foreach (var medicine in paginationResult.Items)
+                {
+                    var medicineImages = imageGroups.GetValueOrDefault(medicine.Id, new List<ImageMedicine>());
+                    responses.Add(new MedicineResponse
+                    {
+                        Id = medicine.Id,
+                        MedicineName = medicine.MedicineName,
+                        MedicineCategoryId = medicine.MedicineCategoryId,
+                        Stock = medicine.Stock,
+                        IsActive = medicine.IsActive,
+                        ImageLinks = medicineImages.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
+                        Thumbnail = medicineImages.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                    });
+                }
+
+                var result = new PaginationSet<MedicineResponse>
+                {
+                    PageIndex = paginationResult.PageIndex,
+                    Count = responses.Count,
+                    TotalCount = paginationResult.TotalCount,
+                    TotalPages = paginationResult.TotalPages,
+                    Items = responses
+                };
+
+                return (result, null);
+            }
+            catch (Exception ex)
+            {
+                return (null, $"Lỗi khi lấy danh sách phân trang: {ex.Message}");
+            }
         }
     }
 }

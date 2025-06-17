@@ -67,5 +67,14 @@ namespace Controllers
                 return NotFound(errorMessage ?? "Không tìm thấy danh sách danh mục giống loài.");
             return Ok(breedCategories);
         }
+
+        [HttpPost("breed-categories/paginated")]
+        public async Task<IActionResult> GetPaginatedMedicineCategories([FromBody] ListingRequest request)
+        {
+            var (result, errorMessage) = await _breedCategoryService.GetPaginatedListAsync(request);
+            if (errorMessage != null)
+                return BadRequest(errorMessage);
+            return Ok(result);
+        }
     }
 }

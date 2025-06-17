@@ -5,8 +5,8 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-
-namespace Domain.Services
+using Domain.Settings;
+namespace Infrastructure.Services
 {
     public class CloudinaryCloudService
     {
@@ -101,13 +101,5 @@ namespace Domain.Services
         }
     }
 
-    /// <summary>
-    /// Cấu hình cho Cloudinary.
-    /// </summary>
-    public class CloudinaryConfig
-    {
-        public string CloudName { get; set; }
-        public string ApiKey { get; set; }
-        public string ApiSecret { get; set; }
-    }
+    
 }

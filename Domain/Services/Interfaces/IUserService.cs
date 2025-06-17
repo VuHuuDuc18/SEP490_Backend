@@ -1,4 +1,7 @@
-﻿using Domain.Dto.Request.Account;
+﻿using Domain.Dto.Request;
+using Domain.Dto.Request.Account;
+using Domain.Dto.Response;
+using Domain.Dto.Response.Account;
 using Entities.EntityModel;
 using System;
 using System.Collections.Generic;
@@ -10,7 +13,9 @@ namespace Domain.Services.Interfaces
 {
     public interface IUserService
     {
-        public Task<bool> CreateAccount(CreateAccountRequest req);
-        public List<User> GetListUser();
+        //public Task<bool> CreateAccount(CreateAccountRequest req);
+        //public Task<bool> ResetPassword(Guid id);
+        //public Task<bool> ChangePassword(ChangePasswordRequest req);
+        //public Task<PaginationSet<AccountResponse>> GetListAccount(ListingRequest req);
     }
 }
