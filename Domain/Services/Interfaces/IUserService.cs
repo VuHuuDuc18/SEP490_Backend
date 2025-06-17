@@ -11,6 +11,8 @@ namespace Domain.Services.Interfaces
     public interface IUserService
     {
         public Task<bool> CreateAccount(CreateAccountRequest req);
-        public List<User> GetListUser();
+        public Task<bool> ResetPassword(Guid id);
+        public Task<bool> ChangePassword(ChangePasswordRequest req);
+        public List<User> GetListAccount();
     }
 }

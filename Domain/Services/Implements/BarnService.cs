@@ -1,4 +1,4 @@
-﻿using Entities.EntityModel;
+using Entities.EntityModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -203,7 +203,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
         public async Task<(BarnResponse Barn, string ErrorMessage)> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var barn = await _barnRepository.GetById(id, checkError);
+            var barn = await _barnRepository.GetById(id);
             if (checkError.Value?.IsError == true)
                 return (null, $"Lỗi khi lấy thông tin chuồng trại: {checkError.Value.Message}");
 
@@ -294,7 +294,6 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                 return (null, $"Lỗi khi lấy danh sách chuồng trại theo người gia công: {ex.Message}");
             }
         }
-
         /// <summary>
         /// Trích xuất phần dữ liệu base64 từ chuỗi (bỏ qua phần header như data:image/jpeg;base64).
         /// </summary>
