@@ -1,7 +1,5 @@
 ﻿using Domain.Dto.Request;
 using Domain.Dto.Request.DailyReport;
-using Domain.Dto.Response;
-using Domain.Services.Implements;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;

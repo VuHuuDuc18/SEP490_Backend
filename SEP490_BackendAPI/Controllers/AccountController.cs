@@ -1,89 +1,87 @@
-
-using Infrastructure.Services;
-using Domain.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Web.Resource;
-using Domain.Helper.Constants;
-using Domain.Dto.Request.Account;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Application.DTOs.Account;
+using Application.Interfaces;
 using Domain.Dto.Request;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
-namespace SEP490_BackendAPI.Controllers
+namespace WebApi.Controllers
 {
-
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("[controller]")]
     public class AccountController : ControllerBase
     {
-
-
-        private readonly IEmailService _mailService;
-        private readonly ILogger<AccountController> _logger;
-        public readonly IUserService _sv;
-
-
-        public AccountController(IEmailService mailService, ILogger<AccountController> logger, IUserService sr)
-
+        private readonly IAccountService _accountService;
+        public AccountController(IAccountService accountService)
         {
-            _mailService = mailService;
-            _logger = logger;
-            _sv = sr;
+            _accountService = accountService;
         }
-
-
-        //[HttpPost]
-        //public async Task<IActionResult> SendEmail([FromForm] string Email)
-        //{
-        //    try
-        //    {
-        //        if (Email == null )
-        //        {
-        //            _logger.LogError("Invalid mail request. The request or Body is null.");
-        //            return BadRequest("Invalid mail request. The Body is required.");
-        //        }
-
-        //        string Body = Domain.Extensions.MailBodyGenerate.BodyCreateAccount(Email, "123456");
-
-        //        await _mailService.SendEmailAsync(Email, EmailConstant.EMAILSUBJECTCREATEACCOUNT,Body);
-        //        return Ok();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "Error occurred while sending email.");
-        //        return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
-        //    }
-        //    }
-
-        [HttpPost("create")]
-        public async Task<IActionResult> CreateAccount(CreateAccountRequest req)
+        [HttpPost("login")]
+        public async Task<IActionResult> LoginAsync(AuthenticationRequest request)
         {
-            var Result = await _sv.CreateAccount(req);
-            if (Result)
-            {
-                throw new Exception("Email đã được đăng ký");
-            }
-            else
-            {
-                return Ok(Result);
-            }
+            return Ok(await _accountService.LoginAsync(request, GenerateIPAddress()));
         }
-        [HttpGet("resetPassword/{id}")]
-        public async Task<IActionResult> ResetPassword([FromRoute]Guid id)
+        [HttpPost("create-account")]
+        public async Task<IActionResult> CreateAccountAsync(CreateNewAccountRequest request)
+        {
+            var origin = Request.Headers["origin"].ToString();
+            if (string.IsNullOrEmpty(origin))
+            {
+                origin = Request.Headers["Referer"].ToString() ?? "https://localhost:7074";
+            }
+            return Ok(await _accountService.CreateAccountAsync(request, origin));
+        }
+        [HttpGet("confirm-email")]
+        public async Task<IActionResult> ConfirmEmailAsync([FromQuery]string userId, [FromQuery]string code)
+        {
+            var origin = Request.Headers["origin"].ToString();
+            if (string.IsNullOrEmpty(origin))
+            {
+                origin = Request.Headers["Referer"].ToString() ?? "https://localhost:7074";
+            }
+            return Ok(await _accountService.ConfirmEmailAsync(userId, code));
+        }
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest model)
+        {
+            var origin = Request.Headers["origin"].ToString();
+            if (string.IsNullOrEmpty(origin))
+            {
+                origin = Request.Headers["Referer"].ToString() ?? "https://localhost:7074";
+            }
+            await _accountService.ForgotPassword(model, origin);
+            return Ok();
+        }
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordRequest model)
         {
             
-            return Ok( await _sv.ResetPassword(id));
+            return Ok(await _accountService.ResetPassword(model));
         }
-        [HttpPost("changePassword")]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest req)
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
         {
-            return Ok(await _sv.ChangePassword(req));
+            return Ok(await _accountService.RefreshTokenAsync(request.Token, GenerateIPAddress()));
         }
-        [HttpPost("list")]
-        public async Task<IActionResult> Listing(ListingRequest req)
+        [HttpPost("revoke-token")]
+        public async Task<IActionResult> RevokeToken([FromBody] RefreshTokenRequest request)
         {
-            var result = await _sv.GetListAccount(req);
-
-            return Ok(result);
+            return Ok(await _accountService.RevokeTokenAsync(request.Token, GenerateIPAddress()));
+        }
+        private string GenerateIPAddress()
+        {
+            if (Request.Headers.ContainsKey("X-Forwarded-For"))
+                return Request.Headers["X-Forwarded-For"];
+            else
+                return HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+        }
+        [HttpDelete("delete-account")]
+        public async Task<IActionResult> DeleteAccount([FromBody]DeleteAccountRequest request)
+        {
+            return Ok(await _accountService.DeleteAccount(request.Email));
         }
     }
 }

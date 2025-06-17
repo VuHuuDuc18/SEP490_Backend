@@ -2,7 +2,6 @@
 using Domain.Dto.Request.DailyReport;
 using Domain.Dto.Response;
 using Domain.Dto.Response.DailyReport;
-using Domain.Services.Implements;
 using System;
 using System.Collections.Generic;
 using System.Threading;
