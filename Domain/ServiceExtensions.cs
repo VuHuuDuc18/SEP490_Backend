@@ -27,13 +27,14 @@ namespace Domain
             services.AddScoped<IBreedCategoryService, BreedCategoryService>();
             services.AddScoped<IMedicineCategoryService, MedicineCategoryService>();
             services.AddScoped<IBreedService, BreedService>();
-            services.AddScoped<IUserService, UserService>();         
+            services.AddScoped<IUserService, UserService>();                
             services.AddScoped<IDailyReportService, DailyReportService>();
             services.AddScoped<CloudinaryCloudService>();
 
             //Add repo
             services.AddScoped<IRepository<Role>, Repository<Role>>();
             services.AddScoped<IRepository<User>, Repository<User>>();
+            services.AddScoped<IRepository<Role>, Repository<Role>>();
             services.AddScoped<IRepository<Barn>, Repository<Barn>>();
             services.AddScoped<IRepository<Food>, Repository<Food>>();
             services.AddScoped<IRepository<Medicine>, Repository<Medicine>>();

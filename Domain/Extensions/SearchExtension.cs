@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace DEMO.Domain.Extensions
+namespace Domain.Extensions
 {
     public static class SearchExtension
     {
