@@ -15,7 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Domain.Extensions;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using DEMO.Domain.Extensions;
+using Domain.Extensions;
 
 namespace Domain.Services.Implements
 {
