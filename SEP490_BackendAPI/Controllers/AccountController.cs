@@ -1,11 +1,12 @@
 
 using Infrastructure.Services;
-using Domain.Dto.Request;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
 using Domain.Helper.Constants;
+using Domain.Dto.Request.Account;
+using Domain.Dto.Request;
 
 namespace SEP490_BackendAPI.Controllers
 {
@@ -69,12 +70,20 @@ namespace SEP490_BackendAPI.Controllers
         [HttpGet("resetPassword/{id}")]
         public async Task<IActionResult> ResetPassword([FromRoute]Guid id)
         {
-            return Ok();
+            
+            return Ok( await _sv.ResetPassword(id));
         }
         [HttpPost("changePassword")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest req)
         {
-            return Ok();
+            return Ok(await _sv.ChangePassword(req));
+        }
+        [HttpPost("list")]
+        public async Task<IActionResult> Listing(ListingRequest req)
+        {
+            var result = await _sv.GetListAccount(req);
+
+            return Ok(result);
         }
     }
 }
