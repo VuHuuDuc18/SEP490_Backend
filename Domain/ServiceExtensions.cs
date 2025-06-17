@@ -26,7 +26,9 @@ namespace Domain
             services.AddScoped<IFoodCategoryService, FoodCategoryService>();
             services.AddScoped<IBreedCategoryService, BreedCategoryService>();
             services.AddScoped<IMedicineCategoryService, MedicineCategoryService>();
-            services.AddScoped<IBreedService, BreedService>();      
+            services.AddScoped<IBreedService, BreedService>();
+            services.AddScoped<IUserService, UserService>();         
+            services.AddScoped<IDailyReportService, DailyReportService>();
             services.AddScoped<CloudinaryCloudService>();
 
             //Add repo
@@ -36,12 +38,21 @@ namespace Domain
             services.AddScoped<IRepository<Medicine>, Repository<Medicine>>();
             services.AddScoped<IRepository<ImageFood>, Repository<ImageFood>>();
             services.AddScoped<IRepository<ImageMedicine>, Repository<ImageMedicine>>();
+            services.AddScoped<IRepository<ImageDailyReport>, Repository<ImageDailyReport>>();
             services.AddScoped<IRepository<FoodCategory>, Repository<FoodCategory>>();
             services.AddScoped<IRepository<BreedCategory>, Repository<BreedCategory>>();
             services.AddScoped<IRepository<Breed>, Repository<Breed>>();
+            services.AddScoped<IRepository<User>, Repository<User>>();
             services.AddScoped<IRepository<ImageBreed>, Repository<ImageBreed>>();
             services.AddScoped<IRepository<MedicineCategory>, Repository<MedicineCategory>>();
             services.AddScoped<IRepository<LivestockCircle>, Repository<LivestockCircle>>();
+            services.AddScoped<IRepository<FoodReport>, Repository<FoodReport>>();
+            services.AddScoped<IRepository<MedicineReport>, Repository<MedicineReport>>();
+            services.AddScoped<IRepository<LivestockCircleFood>, Repository<LivestockCircleFood>>();
+            services.AddScoped<IRepository<LivestockCircleMedicine>, Repository<LivestockCircleMedicine>>();
+            services.AddScoped<IRepository<DailyReport>, Repository<DailyReport>>();
+            services.AddScoped<IRepository<DailyReport>, Repository<DailyReport>>();
+
         }
     }
 }

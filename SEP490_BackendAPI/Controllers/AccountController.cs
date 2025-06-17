@@ -1,4 +1,4 @@
-﻿
+
 using Infrastructure.Services;
 using Domain.Dto.Request;
 using Domain.Services.Interfaces;
@@ -20,7 +20,9 @@ namespace SEP490_BackendAPI.Controllers
         private readonly ILogger<AccountController> _logger;
         public readonly IUserService _sv;
 
+
         public AccountController(IEmailService mailService, ILogger<AccountController> logger, IUserService sr)
+
         {
             _mailService = mailService;
             _logger = logger;
