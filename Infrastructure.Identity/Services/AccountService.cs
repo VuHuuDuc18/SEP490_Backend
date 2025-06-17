@@ -68,22 +68,29 @@ namespace Infrastructure.Identity.Services
                 return new Response<AuthenticationResponse>($"Account Not Confirmed for '{request.Email}'.");
                 //throw new ApiException($"Account Not Confirmed for '{request.Email}'.");
             }
+            try
+            {
+                var refreshToken = GenerateRefreshToken(user.Id, ipAddress);
+                _context.RefreshTokens.Add(refreshToken);
+                await _context.SaveChangesAsync();
+                JwtSecurityToken jwtSecurityToken = await GenerateJWToken(user);
+                AuthenticationResponse response = new AuthenticationResponse();
+                response.Id = user.Id;
+                response.JWToken = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+                response.Email = user.Email;
+                response.UserName = user.UserName;
+                var rolesList = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
+                response.Roles = rolesList.ToList();
+                response.IsVerified = user.EmailConfirmed;
+                response.RefreshToken = refreshToken.Token;
+                return new Response<AuthenticationResponse>(response, $"Authenticated {user.UserName}");
+            }
+            catch (Exception ex)
+            {
+                return new Response<AuthenticationResponse>(ex.Message) { Errors = new List<string>() { ex.Message} };
+            }
 
-            var refreshToken = GenerateRefreshToken(user.Id, ipAddress);
-            _context.RefreshTokens.Add(refreshToken);
-            await _context.SaveChangesAsync();
 
-            JwtSecurityToken jwtSecurityToken = await GenerateJWToken(user);
-            AuthenticationResponse response = new AuthenticationResponse();
-            response.Id = user.Id;
-            response.JWToken = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
-            response.Email = user.Email;
-            response.UserName = user.UserName;
-            var rolesList = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
-            response.Roles = rolesList.ToList();
-            response.IsVerified = user.EmailConfirmed;
-            response.RefreshToken = refreshToken.Token;
-            return new Response<AuthenticationResponse>(response, $"Authenticated {user.UserName}");
         }
 
         public async Task<Response<string>> CreateAccountAsync(CreateNewAccountRequest request, string origin)
@@ -236,7 +243,7 @@ namespace Infrastructure.Identity.Services
         public async Task<Response<string>> DeleteAccount(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
-            if (user == null) return new Response<string>($"No Accounts Registered with {email}."); 
+            if (user == null) return new Response<string>($"No Accounts Registered with {email}.");
             var result = await _userManager.DeleteAsync(user);
             if (result.Succeeded)
             {
@@ -266,7 +273,7 @@ namespace Infrastructure.Identity.Services
             // Generate new JWT token
             var jwtToken = await GenerateJWToken(user);
             var newRefreshToken = GenerateRefreshToken(user.Id, ipAddress);
-            
+
             // Revoke old refresh token
             refreshToken.Revoked = DateTime.UtcNow;
             refreshToken.RevokedByIp = ipAddress;
