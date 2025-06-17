@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Application.DTOs.Account
 {
-    public class CreateAccountRequest
+    public class CreateNewAccountRequest
     {
         [Required]
         public string FirstName { get; set; }
@@ -27,5 +27,8 @@ namespace Application.DTOs.Account
         [Required]
         [Compare("Password")]
         public string ConfirmPassword { get; set; }
+
+        [Required]
+        public string Role { get; set; }
     }
 }

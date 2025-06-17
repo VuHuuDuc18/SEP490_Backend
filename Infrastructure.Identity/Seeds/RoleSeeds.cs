@@ -18,10 +18,15 @@ namespace Infrastructure.Identity.Seeds
             {
                 if (!await roleManager.RoleExistsAsync(role))
                 {
-                    await roleManager.CreateAsync(new Role { Name = role });
-                } 
+                    await roleManager.CreateAsync(new Role { 
+                        Name = role, 
+                        CreatedBy = Guid.Empty, 
+                        CreatedDate = DateTime.Now, 
+                        IsActive = true, 
+                        UpdatedBy = null, 
+                        UpdatedDate = null });
+                }
             }
-            await roleManager.CreateAsync(new Role { Name = "Admin" });
         }
 
     }

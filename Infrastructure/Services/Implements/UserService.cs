@@ -1,4 +1,4 @@
-﻿using Domain.Dto.Request;
+﻿using Domain.Dto.Request.Account;
 using Domain.Services.Interfaces;
 using Entities.EntityModel;
 using Infrastructure.Repository;

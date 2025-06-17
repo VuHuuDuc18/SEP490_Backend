@@ -20,19 +20,19 @@ namespace SEP490_BackendAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            // cors
-            //builder.Services.AddCors(options =>
+            //cors
+            builder.Services.AddCors(options =>
 
-            //{
-            //    options.AddPolicy("AllowAllOrigins",
-            //        builder =>
-            //        {
-            //            builder.AllowAnyOrigin()
-            //                   .AllowAnyMethod()
-            //                   .AllowAnyHeader();
-            //        });
-            //});
-           //builder.Services.Configure<MailSendSettings>(builder.Configuration.GetSection("MailSettings"));
+            {
+                options.AddPolicy("AllowAllOrigins",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                               .AllowAnyMethod()
+                               .AllowAnyHeader();
+                    });
+            });
+            //builder.Services.Configure<MailSendSettings>(builder.Configuration.GetSection("MailSettings"));
             //connect DB SQL
             builder.Services.AddDbContext<LCFMSDBContext>(options => 
                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")), 

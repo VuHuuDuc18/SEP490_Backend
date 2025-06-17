@@ -1,11 +1,11 @@
 
 using Infrastructure.Services;
-using Domain.Dto.Request;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
 using Domain.Helper.Constants;
+using Domain.Dto.Request.Account;
 
 namespace SEP490_BackendAPI.Controllers
 {
@@ -24,16 +24,27 @@ namespace SEP490_BackendAPI.Controllers
         {
             _mailService = mailService;
             _logger = logger;
-          //  _sv = sr;
+            //  _sv = sr;
         }
 
+        [HttpGet("NoAuth")]
+        public async Task<IActionResult> Test()
+        {
+            return Ok("Ok");
 
+        }
+        [Authorize(Roles ="Company Admin")]
+        [HttpGet("Auth")]
+        public async Task<IActionResult> Test1()
+        {
+            return Ok("Ok");
+        }
         [HttpPost]
         public async Task<IActionResult> SendEmail([FromForm] string Email)
         {
             try
             {
-                if (Email == null )
+                if (Email == null)
                 {
                     _logger.LogError("Invalid mail request. The request or Body is null.");
                     return BadRequest("Invalid mail request. The Body is required.");
@@ -41,7 +52,7 @@ namespace SEP490_BackendAPI.Controllers
 
                 string Body = Domain.Extensions.MailBodyGenerate.BodyCreateAccount(Email, "123456");
 
-                await _mailService.SendEmailAsync(Email, EmailConstant.EMAILSUBJECTCREATEACCOUNT,Body);
+                await _mailService.SendEmailAsync(Email, EmailConstant.EMAILSUBJECTCREATEACCOUNT, Body);
                 return Ok();
             }
             catch (Exception ex)
@@ -49,7 +60,7 @@ namespace SEP490_BackendAPI.Controllers
                 _logger.LogError(ex, "Error occurred while sending email.");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
             }
-            }
+        }
 
         [HttpPost("create")]
         public async Task<IActionResult> CreateAccount(CreateAccountRequest req)

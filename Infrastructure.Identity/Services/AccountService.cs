@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Application.DTOs;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -18,7 +17,12 @@ using Entities.EntityModel;
 using Application.Wrappers;
 using Application.Exceptions;
 using Infrastructure.Identity.Helpers;
-
+using Infrastructure.Services;
+using Domain.Helper.Constants;
+using Domain.Extensions;
+using Microsoft.EntityFrameworkCore;
+using Infrastructure.Identity.Models;
+using Infrastructure.Identity.Contexts;
 namespace Infrastructure.Identity.Services
 {
     public class AccountService : IAccountService
@@ -26,23 +30,23 @@ namespace Infrastructure.Identity.Services
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
         private readonly SignInManager<User> _signInManager;
-        //private readonly IEmailService _emailService;
+        private readonly IEmailService _emailService;
         private readonly JWTSettings _jwtSettings;
-        //private readonly IDateTimeService _dateTimeService;
+        private readonly IdentityContext _context;
         public AccountService(UserManager<User> userManager,
             RoleManager<Role> roleManager,
             IOptions<JWTSettings> jwtSettings,
-            //IDateTimeService dateTimeService,
-            SignInManager<User> signInManager
-            //IEmailService emailService
+            SignInManager<User> signInManager,
+            IEmailService emailService,
+            IdentityContext context
         )
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _jwtSettings = jwtSettings.Value;
-            //_dateTimeService = dateTimeService;
             _signInManager = signInManager;
-            //this._emailService = emailService;
+            this._emailService = emailService;
+            _context = context;
         }
 
         public async Task<Response<AuthenticationResponse>> LoginAsync(AuthenticationRequest request, string ipAddress)
@@ -50,17 +54,25 @@ namespace Infrastructure.Identity.Services
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
             {
-                throw new ApiException($"No Accounts Registered with {request.Email}.");
+                return new Response<AuthenticationResponse>($"No Accounts Registered with {request.Email}.");
+                //throw new ApiException($"No Accounts Registered with {request.Email}.");
             }
             var result = await _signInManager.PasswordSignInAsync(user.UserName, request.Password, false, lockoutOnFailure: false);
             if (!result.Succeeded)
             {
-                throw new ApiException($"Invalid Credentials for '{request.Email}'.");
+                //throw new ApiException($"Invalid Credentials for '{request.Email}'.");
+                return new Response<AuthenticationResponse>($"Invalid Credentials for '{request.Email}'.");
             }
             if (!user.EmailConfirmed)
             {
-                throw new ApiException($"Account Not Confirmed for '{request.Email}'.");
+                return new Response<AuthenticationResponse>($"Account Not Confirmed for '{request.Email}'.");
+                //throw new ApiException($"Account Not Confirmed for '{request.Email}'.");
             }
+
+            var refreshToken = GenerateRefreshToken(user.Id, ipAddress);
+            _context.RefreshTokens.Add(refreshToken);
+            await _context.SaveChangesAsync();
+
             JwtSecurityToken jwtSecurityToken = await GenerateJWToken(user);
             AuthenticationResponse response = new AuthenticationResponse();
             response.Id = user.Id;
@@ -70,12 +82,11 @@ namespace Infrastructure.Identity.Services
             var rolesList = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
             response.Roles = rolesList.ToList();
             response.IsVerified = user.EmailConfirmed;
-            var refreshToken = GenerateRefreshToken(ipAddress);
             response.RefreshToken = refreshToken.Token;
             return new Response<AuthenticationResponse>(response, $"Authenticated {user.UserName}");
         }
 
-        public async Task<Response<string>> CreateAccountAsync(CreateAccountRequest request, string origin)
+        public async Task<Response<string>> CreateAccountAsync(CreateNewAccountRequest request, string origin)
         {
             var userWithSameUserName = await _userManager.FindByNameAsync(request.UserName);
             if (userWithSameUserName != null)
@@ -95,7 +106,7 @@ namespace Infrastructure.Identity.Services
                 var result = await _userManager.CreateAsync(user, request.Password);
                 if (result.Succeeded)
                 {
-                    await _userManager.AddToRoleAsync(user, "User");
+                    await _userManager.AddToRoleAsync(user, request.Role);
                     var verificationUri = await SendVerificationEmail(user, origin);
                     //TODO: Attach Email Service here and configure it via appsettings
                     //await _emailService.SendAsync(new Application.DTOs.Email.EmailRequest() { From = "mail@codewithmukesh.com", To = user.Email, Body = $"Please confirm your account by visiting this URL {verificationUri}", Subject = "Confirm Registration" });
@@ -151,11 +162,7 @@ namespace Infrastructure.Identity.Services
 
         private string RandomTokenString()
         {
-            using var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
-            var randomBytes = new byte[40];
-            rngCryptoServiceProvider.GetBytes(randomBytes);
-            // convert random bytes to hex string
-            return BitConverter.ToString(randomBytes).Replace("-", "");
+            return Convert.ToHexString(RandomNumberGenerator.GetBytes(40));
         }
 
         private async Task<string> SendVerificationEmail(User user, string origin)
@@ -167,6 +174,7 @@ namespace Infrastructure.Identity.Services
             var verificationUri = QueryHelpers.AddQueryString(_enpointUri.ToString(), "userId", user.Id.ToString());
             verificationUri = QueryHelpers.AddQueryString(verificationUri, "code", code);
             //Email Service Call Here
+            _emailService.SendEmailAsync(user.Email, EmailConstant.EMAILSUBJECTCONFIRMEMAIL, MailBodyGenerate.BodyCreateConfirmEmail(user.Email, verificationUri));
             return verificationUri;
         }
 
@@ -177,7 +185,7 @@ namespace Infrastructure.Identity.Services
             var result = await _userManager.ConfirmEmailAsync(user, code);
             if (result.Succeeded)
             {
-                return new Response<string>(user.Id.ToString(), message: $"Account Confirmed for {user.Email}. You can now use the /api/Account/authenticate endpoint.");
+                return new Response<string>(user.Id.ToString(), message: $"Account Confirmed for {user.Email}.");
             }
             else
             {
@@ -185,14 +193,15 @@ namespace Infrastructure.Identity.Services
             }
         }
 
-        private RefreshToken GenerateRefreshToken(string ipAddress)
+        private RefreshToken GenerateRefreshToken(Guid userId, string ipAddress)
         {
             return new RefreshToken
             {
                 Token = RandomTokenString(),
                 Expires = DateTime.UtcNow.AddDays(7),
                 Created = DateTime.UtcNow,
-                CreatedByIp = ipAddress
+                CreatedByIp = ipAddress,
+                UserId = userId
             };
         }
 
@@ -206,13 +215,7 @@ namespace Infrastructure.Identity.Services
             var code = await _userManager.GeneratePasswordResetTokenAsync(account);
             var route = "api/account/reset-password/";
             var _enpointUri = new Uri(string.Concat($"{origin}/", route));
-            //var emailRequest = new EmailRequest()
-            //{
-            //    Body = $"You reset token is - {code}",
-            //    To = model.Email,
-            //    Subject = "Reset Password",
-            //};
-            //await _emailService.SendAsync(emailRequest);
+            await _emailService.SendEmailAsync(model.Email, EmailConstant.EMAILSUBJECTFORGOTPASSWORD, MailBodyGenerate.BodyCreateForgotPassword(code, _enpointUri.ToString()));
         }
 
         public async Task<Response<string>> ResetPassword(ResetPasswordRequest model)
@@ -228,6 +231,82 @@ namespace Infrastructure.Identity.Services
             {
                 throw new ApiException($"Error occured while reseting the password.");
             }
+        }
+
+        public async Task<Response<string>> DeleteAccount(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return new Response<string>($"No Accounts Registered with {email}."); 
+            var result = await _userManager.DeleteAsync(user);
+            if (result.Succeeded)
+            {
+                return new Response<string>(email, message: $"Account Deleted Successfully.");
+            }
+            else
+            {
+                throw new ApiException($"Error occured while deleting the account.");
+            }
+        }
+
+        public async Task<Response<AuthenticationResponse>> RefreshTokenAsync(string token, string ipAddress)
+        {
+            var refreshToken = await _context.RefreshTokens
+                .FirstOrDefaultAsync(x => x.Token == token);
+
+            if (refreshToken == null)
+                return new Response<AuthenticationResponse>("Invalid refresh token");
+
+            if (!refreshToken.IsActive)
+                return new Response<AuthenticationResponse>("Token expired");
+
+            var user = await _userManager.FindByIdAsync(refreshToken.UserId.ToString());
+            if (user == null)
+                return new Response<AuthenticationResponse>("User not found");
+
+            // Generate new JWT token
+            var jwtToken = await GenerateJWToken(user);
+            var newRefreshToken = GenerateRefreshToken(user.Id, ipAddress);
+            
+            // Revoke old refresh token
+            refreshToken.Revoked = DateTime.UtcNow;
+            refreshToken.RevokedByIp = ipAddress;
+            refreshToken.ReplacedByToken = newRefreshToken.Token;
+
+            // Save new refresh token
+            newRefreshToken.UserId = user.Id;
+            _context.RefreshTokens.Add(newRefreshToken);
+            await _context.SaveChangesAsync();
+
+            var response = new AuthenticationResponse
+            {
+                Id = user.Id,
+                JWToken = new JwtSecurityTokenHandler().WriteToken(jwtToken),
+                Email = user.Email,
+                UserName = user.UserName,
+                Roles = (await _userManager.GetRolesAsync(user)).ToList(),
+                IsVerified = user.EmailConfirmed,
+                RefreshToken = newRefreshToken.Token
+            };
+
+            return new Response<AuthenticationResponse>(response, $"Token refreshed for {user.UserName}");
+        }
+
+        public async Task<Response<string>> RevokeTokenAsync(string token, string ipAddress)
+        {
+            var refreshToken = await _context.RefreshTokens
+                .FirstOrDefaultAsync(x => x.Token == token);
+
+            if (refreshToken == null)
+                return new Response<string>("Invalid refresh token");
+
+            if (!refreshToken.IsActive)
+                return new Response<string>("Token already revoked");
+
+            refreshToken.Revoked = DateTime.UtcNow;
+            refreshToken.RevokedByIp = ipAddress;
+            await _context.SaveChangesAsync();
+
+            return new Response<string>("Token revoked successfully");
         }
     }
 }

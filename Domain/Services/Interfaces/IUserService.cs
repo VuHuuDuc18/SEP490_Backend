@@ -1,4 +1,4 @@
-﻿using Domain.Dto.Request;
+﻿using Domain.Dto.Request.Account;
 using Entities.EntityModel;
 using System;
 using System.Collections.Generic;

@@ -23,7 +23,7 @@ namespace Infrastructure
             services.AddScoped<IMedicineCategoryService, MedicineCategoryService>();
             services.AddScoped<IBreedService, BreedService>();
             services.AddScoped<CloudinaryCloudService>();
-
+            services.AddScoped<IEmailService, EmailService>();
             //Add repo 
             services.AddScoped<IRepository<Barn>, Repository<Barn>>();
             services.AddScoped<IRepository<Food>, Repository<Food>>();

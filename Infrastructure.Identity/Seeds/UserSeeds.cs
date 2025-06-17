@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Entities.EntityModel;
 using Azure.Identity;
+using Domain.Helper.Constants;
 
 namespace Infrastructure.Identity.Seeds
 {
@@ -25,11 +26,11 @@ namespace Infrastructure.Identity.Seeds
             var user = await userManager.FindByEmailAsync(defaultUser.Email);
             if (user == null)
             {
-                var result = await userManager.CreateAsync(defaultUser, "Admin@123"); 
+                var result = await userManager.CreateAsync(defaultUser, "Admin@123");
 
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(defaultUser, "Admin");
+                    await userManager.AddToRoleAsync(defaultUser, RoleConstant.CompanyAdmin);
                 }
                 else
                 {
@@ -37,9 +38,9 @@ namespace Infrastructure.Identity.Seeds
             }
             else
             {
-                if (!await userManager.IsInRoleAsync(user, "Admin"))
+                if (!await userManager.IsInRoleAsync(user, RoleConstant.CompanyAdmin))
                 {
-                    await userManager.AddToRoleAsync(user, "Admin");
+                    await userManager.AddToRoleAsync(user, RoleConstant.CompanyAdmin);
                 }
             }
         }

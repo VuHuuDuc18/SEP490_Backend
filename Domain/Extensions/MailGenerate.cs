@@ -8,7 +8,7 @@ namespace Domain.Extensions
 {
     public static class MailBodyGenerate
     {
-        public static string BodyCreateAccount(string email, string password)
+        private static string GenerateBaseTemplate(string title, string content)
         {
             return $@"
     <html>
@@ -20,7 +20,7 @@ namespace Domain.Extensions
                 padding: 20px;
                 color: #333;
             }}
-            .container {{
+            .container {{ 
                 background-color: #fff;
                 border-radius: 8px;
                 padding: 20px;
@@ -52,15 +52,50 @@ namespace Domain.Extensions
     </head>
     <body>
         <div class='container'>
-            <div class='header'>Chào mừng !</div>
+            <div class='header'>{title}</div>
+            {content}
+        </div>
+    </body>
+    </html>";
+        }
+
+        public static string BodyCreateAccount(string email, string password)
+        {
+            var content = $@"
             <div class='info'>Tài khoản được cấp của bạn: </div>
             <div class='info'><strong>Email:</strong> {email}</div>
             <div class='info'><strong>Mật khẩu:</strong> {password}</div>
             <div class='info'>Vui lòng đăng nhập bằng thông tin trên tại đường dẫn dưới đây:</div>
-            <a class='btn' href=''>Đăng nhập ngay</a>
-        </div>
-    </body>
-    </html>";
+            <a class='btn' href=''>Đăng nhập ngay</a>";
+
+            return GenerateBaseTemplate("Chào mừng !", content);
+        }
+
+        public static string BodyCreateForgotPassword(string token, string resetLink)
+        {
+            var content = $@"
+            <div class='info'>Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.</div>
+            <div class='info'><strong>Mã:</strong> {token}</div>
+            <div class='info'>Vui lòng nhấp vào nút bên dưới để đặt lại mật khẩu. Link này sẽ hết hạn sau 24 giờ:</div>
+            <a class='btn' href='{resetLink}'>Đặt lại mật khẩu</a>
+            <div class='info' style='margin-top: 20px; font-size: 12px; color: #666;'>
+                Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.
+            </div>";
+
+            return GenerateBaseTemplate("Yêu cầu đặt lại mật khẩu!", content);
+        }
+        public static string BodyCreateConfirmEmail(string email, string resetLink)
+        {
+            var content = $@"
+            <div class='info'>Chúng tôi đã nhận được yêu cầu xác thực tài khoản của bạn.</div>
+            <div class='info'><strong>Email:</strong> {email}</div>
+            <div class='info'>Vui lòng nhấp vào nút bên dưới để xác thực tài khoản. Link này sẽ hết hạn sau 24 giờ:</div>
+            <a class='btn' href='{resetLink}'>Xác thực tài khoản</a>
+            <div class='info' style='margin-top: 20px; font-size: 12px; color: #666;'>
+                Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.
+            </div>";
+
+            return GenerateBaseTemplate("Yêu cầu xác thực tài khoản!", content);
         }
     }
 }

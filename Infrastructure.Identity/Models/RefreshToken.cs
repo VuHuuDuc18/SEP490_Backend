@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Application.DTOs.Account
+namespace Infrastructure.Identity.Models
 {
     public class RefreshToken
     {
@@ -16,5 +16,6 @@ namespace Application.DTOs.Account
         public string RevokedByIp { get; set; }
         public string ReplacedByToken { get; set; }
         public bool IsActive => Revoked == null && !IsExpired;
+        public Guid UserId { get; set; }
     }
 }
