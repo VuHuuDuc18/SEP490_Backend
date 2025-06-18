@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Application.DTOs.Account
+namespace Domain.Dto.Request.Account
 {
     public class AuthenticationResponse
     {
