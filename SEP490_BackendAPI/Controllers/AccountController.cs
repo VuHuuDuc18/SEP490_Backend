@@ -67,11 +67,11 @@ namespace SEP490_BackendAPI.Controllers
                 return Ok(Result);
             }
         }
-        [HttpGet("resetPassword/{id}")]
-        public async Task<IActionResult> ResetPassword([FromRoute]Guid id)
+        [HttpGet("resetPassword/{email}")]
+        public async Task<IActionResult> ResetPassword([FromRoute]string email)
         {
             
-            return Ok( await _sv.ResetPassword(id));
+            return Ok( await _sv.ResetPassword(email));
         }
         [HttpPost("changePassword")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest req)

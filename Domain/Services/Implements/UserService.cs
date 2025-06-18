@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using Domain.Extensions;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using DEMO.Domain.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Services.Implements
 {
@@ -103,11 +104,11 @@ namespace Domain.Services.Implements
             return result;
         }
 
-        public async Task<bool> ResetPassword(Guid id)
+        public async Task<bool> ResetPassword(string email)
         {
             var userPassword = Extensions.PasswordGenerate.GenerateRandomCode();
             // update
-            var user = await _userrepo.GetById(id);
+            var user = await _userrepo.GetQueryable(x => x.IsActive).FirstOrDefaultAsync(it => it.Email.Equals(email));
             user.Password = userPassword;
             //send mail
             if (await _userrepo.CommitAsync() > 0)
