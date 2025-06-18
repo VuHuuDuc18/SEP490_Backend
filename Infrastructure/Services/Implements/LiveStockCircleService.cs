@@ -366,5 +366,97 @@ namespace Infrastructure.Services.Implements
                 return (null, $"Lỗi khi lấy danh sách phân trang: {ex.Message}");
             }
         }
+
+        /// <summary>
+        /// Cập nhật trọng lượng trung bình (AverageWeight) của một chu kỳ chăn nuôi.
+        /// </summary>
+        public async Task<(bool Success, string ErrorMessage)> UpdateAverageWeightAsync(
+            Guid id,
+            float averageWeight,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (averageWeight < 0)
+                    return (false, "Trọng lượng trung bình không thể âm.");
+
+                var checkError = new Ref<CheckError>();
+                var livestockCircle = await _livestockCircleRepository.GetById(id, checkError);
+                if (checkError.Value?.IsError == true)
+                    return (false, $"Lỗi khi lấy thông tin chu kỳ chăn nuôi: {checkError.Value.Message}");
+
+                if (livestockCircle == null)
+                    return (false, "Không tìm thấy chu kỳ chăn nuôi.");
+
+                if (!livestockCircle.IsActive)
+                    return (false, "Chu kỳ chăn nuôi không còn hoạt động.");
+
+                livestockCircle.AverageWeight = averageWeight;
+
+                _livestockCircleRepository.Update(livestockCircle);
+                await _livestockCircleRepository.CommitAsync(cancellationToken);
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Lỗi khi cập nhật trọng lượng trung bình: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Thay đổi trạng thái (Status) của một chu kỳ chăn nuôi.
+        /// </summary>
+        public async Task<(bool Success, string ErrorMessage)> ChangeStatusAsync(
+            Guid id,
+            string status,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(status))
+                    return (false, "Trạng thái không được để trống.");
+
+                // Danh sách trạng thái hợp lệ 
+                var validStatuses = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    "Đang đợi duyệt",
+                    "Đã duyệt chờ vận chuyển",
+                    "Đang vận chuyển",
+                    "Đã giao chờ xác nhận",
+                    "Đang trong giai đoạn nuôi",
+                    "Đang chờ duyệt mở bán",
+                    "Đang mở bán",
+                    "Đã xong"
+                };
+
+                if (!validStatuses.Contains(status))
+                    return (false, $"Trạng thái không hợp lệ: {status}. Trạng thái hợp lệ: {string.Join(", ", validStatuses)}.");
+
+                var checkError = new Ref<CheckError>();
+                var livestockCircle = await _livestockCircleRepository.GetById(id, checkError);
+                if (checkError.Value?.IsError == true)
+                    return (false, $"Lỗi khi lấy thông tin chu kỳ chăn nuôi: {checkError.Value.Message}");
+
+                if (livestockCircle == null)
+                    return (false, "Không tìm thấy chu kỳ chăn nuôi.");
+
+                if (!livestockCircle.IsActive)
+                    return (false, "Chu kỳ chăn nuôi không còn hoạt động.");
+
+                // Kiểm tra nếu trạng thái mới giống trạng thái hiện tại
+                if (string.Equals(livestockCircle.Status, status, StringComparison.OrdinalIgnoreCase))
+                    return (true, "Trạng thái không thay đổi, không cần cập nhật.");
+
+                livestockCircle.Status = status;
+
+                _livestockCircleRepository.Update(livestockCircle);
+                await _livestockCircleRepository.CommitAsync(cancellationToken);
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Lỗi khi thay đổi trạng thái: {ex.Message}");
+            }
+        }
     }
 }

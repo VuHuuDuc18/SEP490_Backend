@@ -36,10 +36,13 @@ namespace Infrastructure
             services.AddScoped<IBreedService, BreedService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IDailyReportService, DailyReportService>();
+            services.AddScoped<IBillService, BillService>();
             services.AddScoped<CloudinaryCloudService>();
 
             //Add repo
             services.AddScoped<IRepository<Role>, Repository<Role>>();
+            services.AddScoped<IRepository<Bill>, Repository<Bill>>();
+            services.AddScoped<IRepository<BillItem>, Repository<BillItem>>();
             services.AddScoped<IRepository<User>, Repository<User>>();
             services.AddScoped<IRepository<Barn>, Repository<Barn>>();
             services.AddScoped<IRepository<Food>, Repository<Food>>();
