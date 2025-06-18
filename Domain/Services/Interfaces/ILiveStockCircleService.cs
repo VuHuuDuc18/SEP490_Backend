@@ -1,4 +1,6 @@
-﻿using Domain.Dto.Request.LivestockCircle;
+﻿using Domain.Dto.Request;
+using Domain.Dto.Request.LivestockCircle;
+using Domain.Dto.Response;
 using Domain.Dto.Response.LivestockCircle;
 using System;
 using System.Collections.Generic;
@@ -38,5 +40,13 @@ namespace Domain.Services.Interfaces
         /// Lấy danh sách chu kỳ chăn nuôi theo ID của nhân viên kỹ thuật.
         /// </summary>
         Task<(List<LivestockCircleResponse> Circles, string ErrorMessage)> GetByTechnicalStaffAsync(Guid technicalStaffId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Lấy danh sách chu kỳ chăn nuôi theo status.
+        /// </summary>
+        Task<(PaginationSet<LivestockCircleResponse> Result, string ErrorMessage)> GetPaginatedListByStatusAsync(
+            string status,
+            ListingRequest request,
+            CancellationToken cancellationToken = default);
     }
 }

@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Account;
+﻿using Domain.Dto.Request.Account;
 using Application.Interfaces;
 using Domain.Settings;
 using Microsoft.AspNetCore.Identity;
@@ -95,7 +95,7 @@ namespace Infrastructure.Identity.Services
 
         public async Task<Response<string>> CreateAccountAsync(CreateNewAccountRequest request, string origin)
         {
-            var userWithSameUserName = await _userManager.FindByNameAsync(request.UserName);
+            var userWithSameUserName = await _userManager.FindByNameAsync(request.UserName);            
             if (userWithSameUserName != null)
             {
                 throw new ApiException($"Username '{request.UserName}' is already taken.");
