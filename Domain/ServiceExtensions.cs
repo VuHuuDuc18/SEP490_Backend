@@ -1,30 +1,28 @@
 ﻿using Domain.Services.Interfaces;
 using Entities.EntityModel;
+using Domain.Services.Implements;
+using Domain.Services.Interfaces;
+using Domain.Settings;
+using Entities.EntityModel;
+using Infrastructure.DBContext;
 using Infrastructure.Repository;
 using Infrastructure.Services;
+using Infrastructure.Services.Implements;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Domain.Services.Implements;
-using Domain.Services;
 namespace Domain
 {
     public static class ServiceExtensions
     {
 
-<<<<<<< Updated upstream:Domain/ServiceExtensions.cs
-        public static void AddDomain(this IServiceCollection services)
+        public static void AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             //Add service
-=======
             //Add Cloudiary Config to DI Container
             services.Configure<CloudinaryConfig>(configuration.GetSection("Cloudinary"));
             //Register services
             services.AddTransient<IBarnPlanService, BarnPlanService>();
->>>>>>> Stashed changes:Infrastructure/ServiceExtensions.cs
             services.AddTransient<IUserService, UserService>();
             services.AddScoped<IBarnService, BarnService>();
             services.AddScoped<IFoodService, FoodService>();
