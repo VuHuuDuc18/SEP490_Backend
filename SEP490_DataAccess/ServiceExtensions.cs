@@ -5,7 +5,8 @@ using Infrastructure.Repository;
 using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-
+using Domain.Services.Interfaces;
+using Infrastructure.Services;
 
 namespace Infrastructure
 {
@@ -37,6 +38,9 @@ namespace Infrastructure
             services.AddScoped<CloudinaryCloudService>();
 
             //Add repo
+            services.AddScoped<IRepository<BarnPlan>, Repository<BarnPlan>>();
+            services.AddScoped<IRepository<BarnPlanFood>, Repository<BarnPlanFood>>();
+            services.AddScoped<IRepository<BarnPlanMedicine>, Repository<BarnPlanMedicine>>();
             services.AddScoped<IRepository<Role>, Repository<Role>>();
             services.AddScoped<IRepository<Bill>, Repository<Bill>>();
             services.AddScoped<IRepository<BillItem>, Repository<BillItem>>();
