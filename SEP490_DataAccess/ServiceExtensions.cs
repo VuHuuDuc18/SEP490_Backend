@@ -1,19 +1,24 @@
-﻿using Castle.Core.Configuration;
+﻿using Infrastructure.Services;
+using Castle.Core.Configuration;
 using Entities.EntityModel;
 using Infrastructure.DBContext;
 using Infrastructure.Repository;
 using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+
 using Domain.Services.Interfaces;
 using Infrastructure.Services;
+using Domain.Settings;
 
 namespace Infrastructure
 {
     public static class ServiceExtensions
-    {
+    {       
         public static void AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            //
+            services.AddTransient<IEmailService, EmailService>();
             //Add DBContext
             services.AddDbContext<LCFMSDBContext>(options =>
                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")),
@@ -66,5 +71,5 @@ namespace Infrastructure
         }
     }
 
-    }
+}
 }
