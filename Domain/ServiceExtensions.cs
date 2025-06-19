@@ -10,21 +10,17 @@ using System.Text;
 using System.Threading.Tasks;
 using Domain.Services.Implements;
 using Domain.Services;
+using Infrastructure.Services.Implements;
 namespace Domain
 {
     public static class ServiceExtensions
     {
-
-<<<<<<< Updated upstream:Domain/ServiceExtensions.cs
         public static void AddDomain(this IServiceCollection services)
         {
-            //Add service
-=======
-            //Add Cloudiary Config to DI Container
+            
             services.Configure<CloudinaryConfig>(configuration.GetSection("Cloudinary"));
             //Register services
             services.AddTransient<IBarnPlanService, BarnPlanService>();
->>>>>>> Stashed changes:Infrastructure/ServiceExtensions.cs
             services.AddTransient<IUserService, UserService>();
             services.AddScoped<IBarnService, BarnService>();
             services.AddScoped<IFoodService, FoodService>();
