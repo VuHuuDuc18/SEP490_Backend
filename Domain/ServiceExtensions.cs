@@ -15,9 +15,16 @@ namespace Domain
     public static class ServiceExtensions
     {
 
+<<<<<<< Updated upstream:Domain/ServiceExtensions.cs
         public static void AddDomain(this IServiceCollection services)
         {
             //Add service
+=======
+            //Add Cloudiary Config to DI Container
+            services.Configure<CloudinaryConfig>(configuration.GetSection("Cloudinary"));
+            //Register services
+            services.AddTransient<IBarnPlanService, BarnPlanService>();
+>>>>>>> Stashed changes:Infrastructure/ServiceExtensions.cs
             services.AddTransient<IUserService, UserService>();
             services.AddScoped<IBarnService, BarnService>();
             services.AddScoped<IFoodService, FoodService>();
@@ -32,6 +39,9 @@ namespace Domain
             services.AddScoped<CloudinaryCloudService>();
 
             //Add repo
+            services.AddScoped<IRepository<BarnPlan>, Repository<BarnPlan>>();
+            services.AddScoped<IRepository<BarnPlanFood>, Repository<BarnPlanFood>>();
+            services.AddScoped<IRepository<BarnPlanMedicine>, Repository<BarnPlanMedicine>>();
             services.AddScoped<IRepository<Role>, Repository<Role>>();
             services.AddScoped<IRepository<User>, Repository<User>>();
             services.AddScoped<IRepository<Role>, Repository<Role>>();
