@@ -373,7 +373,7 @@ namespace Domain.Services.Implements
                 foreach (var existingImage in currentImageReports)
                 {
                     await _cloudinaryCloudService.DeleteImage(existingImage.ImageLink, cancellationToken);
-                    // _imageDailyReportRepository.Delete(existingImage);
+                     _imageDailyReportRepository.Remove(existingImage);
                 }
                 await _imageDailyReportRepository.CommitAsync(cancellationToken);
 
