@@ -18,7 +18,7 @@ namespace SEP490_BackendAPI
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
             //cors
@@ -57,6 +57,9 @@ namespace SEP490_BackendAPI
             
             var app = builder.Build();
 
+            // 🔥 Apply migrations with retry logic
+            await app.MigrateDatabaseAsync();
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -71,7 +74,7 @@ namespace SEP490_BackendAPI
 
             app.MapControllers();
 
-            app.Run();
+            await app.RunAsync();
         }
     }
 }

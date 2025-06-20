@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # SQL Server Database
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: lcfm_sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=@Password123
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - lcfm_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P '@Password123' -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # .NET API với Code First Migration
+  api:
+    build: 
+      context: .
+      dockerfile: SEP490_BackendAPI/Dockerfile
+    container_name: lcfm_api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Data Source=lcfm_sqlserver;Initial Catalog=LCFMSystem;User Id=sa;Password=@Password123;TrustServerCertificate=true;
+    ports:
+      - "8080:80"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - lcfm_network
+    restart: unless-stopped
+    # Thêm health check cho API
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  sqlserver_data:
+
+networks:
+  lcfm_network:
+    driver: bridge
