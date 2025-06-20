@@ -57,5 +57,11 @@ namespace Domain.Services.Interfaces
         Task<(PaginationSet<DailyReportResponse> Result, string ErrorMessage)> GetPaginatedListAsync(
                 ListingRequest request,
                 CancellationToken cancellationToken = default);
+
+        Task<(bool HasReport, string ErrorMessage)> HasDailyReportTodayAsync(
+            Guid livestockCircleId, CancellationToken cancellationToken = default);
+
+        Task<(DailyReportResponse DailyReport, string ErrorMessage)> GetTodayDailyReportAsync(
+            Guid livestockCircleId, CancellationToken cancellationToken = default);
     }
 }

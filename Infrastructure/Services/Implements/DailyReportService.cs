@@ -71,7 +71,7 @@ namespace Domain.Services.Implements
                 return (false, "Vòng chăn nuôi không tồn tại.");
 
             // Tính số ngày tuổi
-            var ageInDays = (DateTime.UtcNow.Date - livestockCircle.CreatedDate.Date).Days;
+            var ageInDays = (DateTime.UtcNow.Date - livestockCircle.StartDate.Date).Days;
             if (ageInDays < 0)
                 return (false, "Ngày tạo vòng chăn nuôi không hợp lệ.");
 
@@ -81,6 +81,7 @@ namespace Domain.Services.Implements
                 DeadUnit = requestDto.DeadUnit,
                 GoodUnit = requestDto.GoodUnit,
                 AgeInDays = ageInDays,
+                Status = "Hoạt Động",
                 BadUnit = requestDto.BadUnit,
                 Note = requestDto.Note,
                 IsActive = true
@@ -172,7 +173,7 @@ namespace Domain.Services.Implements
                     foreach (var imageLink in requestDto.ImageLinks)
                     {
                         var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
-         imageLink, "daily - reports", _cloudinaryCloudService, cancellationToken);
+         imageLink, "daily-reports", _cloudinaryCloudService, cancellationToken);
 
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
@@ -831,6 +832,96 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
             catch (Exception ex)
             {
                 return (null, $"Lỗi khi lấy danh sách phân trang: {ex.Message}");
+            }
+        }
+
+        public async Task<(bool HasReport, string ErrorMessage)> HasDailyReportTodayAsync(Guid livestockCircleId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var checkError = new Ref<CheckError>();
+                var livestockCircle = await _livestockCircleRepository.GetById(livestockCircleId, checkError);
+                if (checkError.Value?.IsError == true)
+                    return (false, $"Lỗi khi lấy thông tin vòng chăn nuôi: {checkError.Value.Message}");
+                if (livestockCircle == null)
+                    return (false, "Vòng chăn nuôi không tồn tại.");
+
+                var today = DateTime.UtcNow.Date;
+                var hasReport = await _dailyReportRepository.GetQueryable(x =>
+                    x.LivestockCircleId == livestockCircleId &&
+                    x.IsActive &&
+                    x.CreatedDate.Date == today)
+                    .AnyAsync(cancellationToken);
+
+                return (hasReport, null);
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Lỗi khi kiểm tra báo cáo hàng ngày: {ex.Message}");
+            }
+        }
+
+        public async Task<(DailyReportResponse DailyReport, string ErrorMessage)> GetTodayDailyReportAsync(Guid livestockCircleId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var checkError = new Ref<CheckError>();
+                var livestockCircle = await _livestockCircleRepository.GetById(livestockCircleId, checkError);
+                if (checkError.Value?.IsError == true)
+                    return (null, $"Lỗi khi lấy thông tin vòng chăn nuôi: {checkError.Value.Message}");
+                if (livestockCircle == null)
+                    return (null, "Vòng chăn nuôi không tồn tại.");
+
+                var today = DateTime.UtcNow.Date;
+                var dailyReport = await _dailyReportRepository.GetQueryable(x =>
+                    x.LivestockCircleId == livestockCircleId &&
+                    x.IsActive &&
+                    x.CreatedDate.Date == today)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (dailyReport == null)
+                    return (null, "Không tìm thấy báo cáo hàng ngày cho hôm nay.");
+
+                var foodReports = await _foodReportRepository.GetQueryable(x => x.ReportId == dailyReport.Id && x.IsActive).ToListAsync(cancellationToken);
+                var medicineReports = await _medicineReportRepository.GetQueryable(x => x.ReportId == dailyReport.Id && x.IsActive).ToListAsync(cancellationToken);
+                var imageReports = await _imageDailyReportRepository.GetQueryable(x => x.DailyReportId == dailyReport.Id && x.IsActive).ToListAsync(cancellationToken);
+
+                var response = new DailyReportResponse
+                {
+                    Id = dailyReport.Id,
+                    LivestockCircleId = dailyReport.LivestockCircleId,
+                    DeadUnit = dailyReport.DeadUnit,
+                    GoodUnit = dailyReport.GoodUnit,
+                    BadUnit = dailyReport.BadUnit,
+                    AgeInDays = dailyReport.AgeInDays,
+                    Status = dailyReport.Status,
+                    Note = dailyReport.Note,
+                    IsActive = dailyReport.IsActive,
+                    ImageLinks = imageReports.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
+                    Thumbnail = imageReports.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink,
+                    FoodReports = foodReports.Select(fr => new FoodReportResponse
+                    {
+                        Id = fr.Id,
+                        FoodId = fr.FoodId,
+                        ReportId = fr.ReportId,
+                        Quantity = fr.Quantity,
+                        IsActive = fr.IsActive
+                    }).ToList(),
+                    MedicineReports = medicineReports.Select(mr => new MedicineReportResponse
+                    {
+                        Id = mr.Id,
+                        MedicineId = mr.MedicineId,
+                        ReportId = mr.ReportId,
+                        Quantity = mr.Quantity,
+                        IsActive = mr.IsActive
+                    }).ToList()
+                };
+
+                return (response, null);
+            }
+            catch (Exception ex)
+            {
+                return (null, $"Lỗi khi lấy báo cáo hàng ngày hôm nay: {ex.Message}");
             }
         }
     }

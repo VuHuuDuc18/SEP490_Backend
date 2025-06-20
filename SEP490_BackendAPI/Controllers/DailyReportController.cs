@@ -1,6 +1,7 @@
 ﻿using Domain.Dto.Request;
 using Domain.Dto.Request.DailyReport;
 using Domain.Services.Interfaces;
+using Entities.EntityModel;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using System.Threading.Tasks;
@@ -77,6 +78,13 @@ namespace Controllers
             if (errorMessage != null)
                 return BadRequest(errorMessage);
             return Ok(result);
+        }
+
+        [HttpPost("daily_reports/today-daily-report")]
+        public async Task<IActionResult> GetTodayDailyReport(Guid id)
+        {
+            var (dailyReports, errorMessage) = await _dailyReportService.GetTodayDailyReportAsync(id);
+            return dailyReports != null ? Ok(dailyReports) : NotFound(errorMessage ?? "Không tìm thấy báo cáo hôm nay.");
         }
 
     }
