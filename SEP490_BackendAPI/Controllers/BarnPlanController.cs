@@ -1,4 +1,5 @@
-﻿using Domain.Dto.Request.BarnPlan;
+﻿using Domain.Dto.Request;
+using Domain.Dto.Request.BarnPlan;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +27,23 @@ namespace SEP490_BackendAPI.Controllers
         {
             var result = await _barnPlanService.CreateBarnPlan(req);
             return Ok(result);
+        }
+        [HttpPost("update")]
+        public async Task<IActionResult> updateBarnPlan([FromBody] UpdateBarnPlanRequest req)
+        {
+            var result = await _barnPlanService.UpdateBarnPlan(req);
+            return Ok(result);
+        }
+        [HttpDelete("disable/{id}")]
+        public async Task<IActionResult> disableBarnPlan([FromRoute]Guid id)
+        {
+            return Ok(await _barnPlanService.DisableBarnPlan(id));
+        }
+        [HttpPost("history")]
+        public async Task<IActionResult> getPlanHistory([FromBody]ListingRequest req)
+        {
+            var result = _barnPlanService.ListingHistoryBarnPlan(req);
+            return Ok(result);  
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using Domain.Dto.Request.BarnPlan;
+﻿using Domain.Dto.Request;
+using Domain.Dto.Request.BarnPlan;
+using Domain.Dto.Response;
 using Domain.Dto.Response.BarnPlan;
 using System;
 using System.Collections.Generic;
@@ -12,5 +14,8 @@ namespace Domain.Services.Interfaces
     {
         public Task<ViewBarnPlanResponse>  GetById(Guid id);
         public Task<bool> CreateBarnPlan(CreateBarnPlanRequest req);
+        public Task<bool> UpdateBarnPlan(UpdateBarnPlanRequest req);
+        public Task<bool> DisableBarnPlan(Guid id);
+        public Task<PaginationSet<ViewBarnPlanResponse>> ListingHistoryBarnPlan(ListingRequest req);
     }
 }
