@@ -41,5 +41,9 @@ namespace Domain.Services.Interfaces
         Task<(BillResponse Bill, string ErrorMessage)> GetByIdAsync(
             Guid id,
             CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Thay đổi status của billl.
+        /// </summary>
     }
 }

@@ -23,7 +23,7 @@ namespace Domain.Dto.Request.DailyReport
         [Required(ErrorMessage = "Số lượng xấu là bắt buộc.")]
         [Range(0, int.MaxValue, ErrorMessage = "Số lượng xấu phải là số không âm.")]
         public int BadUnit { get; set; }
-
+        public int AgeInDays { get; set; }
         public string Note { get; set; }
 
 

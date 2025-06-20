@@ -70,11 +70,17 @@ namespace Domain.Services.Implements
             if (livestockCircle == null)
                 return (false, "Vòng chăn nuôi không tồn tại.");
 
+            // Tính số ngày tuổi
+            var ageInDays = (DateTime.UtcNow.Date - livestockCircle.CreatedDate.Date).Days;
+            if (ageInDays < 0)
+                return (false, "Ngày tạo vòng chăn nuôi không hợp lệ.");
+
             var dailyReport = new DailyReport
             {
                 LivestockCircleId = requestDto.LivestockCircleId,
                 DeadUnit = requestDto.DeadUnit,
                 GoodUnit = requestDto.GoodUnit,
+                AgeInDays = ageInDays,
                 BadUnit = requestDto.BadUnit,
                 Note = requestDto.Note,
                 IsActive = true
@@ -488,7 +494,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                 foreach (var imageReport in imageReports)
                 {
                     await _cloudinaryCloudService.DeleteImage(imageReport.ImageLink, cancellationToken);
-                    //_imageDailyReportRepository.Delete(imageReport);
+                    _imageDailyReportRepository.Remove(imageReport);
                 }
                 await _imageDailyReportRepository.CommitAsync(cancellationToken);
 
@@ -527,6 +533,8 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                 DeadUnit = dailyReport.DeadUnit,
                 GoodUnit = dailyReport.GoodUnit,
                 BadUnit = dailyReport.BadUnit,
+                AgeInDays = dailyReport.AgeInDays,
+                Status = dailyReport.Status,
                 Note = dailyReport.Note,
                 IsActive = dailyReport.IsActive,
                 ImageLinks = imageReports.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
@@ -578,6 +586,8 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                         GoodUnit = report.GoodUnit,
                         BadUnit = report.BadUnit,
                         Note = report.Note,
+                        AgeInDays = report.AgeInDays,
+                        Status = report.Status,
                         IsActive = report.IsActive,
                         ImageLinks = imageReports.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
                         Thumbnail = imageReports.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink,
@@ -783,6 +793,8 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                         GoodUnit = report.GoodUnit,
                         BadUnit = report.BadUnit,
                         Note = report.Note,
+                        AgeInDays = report.AgeInDays,
+                        Status = report.Status,
                         IsActive = report.IsActive,
                         ImageLinks = reportImages.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
                         Thumbnail = reportImages.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink,
