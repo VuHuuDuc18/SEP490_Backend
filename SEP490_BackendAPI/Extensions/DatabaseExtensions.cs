@@ -18,10 +18,6 @@ namespace SEP490_BackendAPI.Extensions
                 await RetryPolicy(async () =>
                 {
                     logger.LogInformation("🚀 Attempting to connect to database...");
-                    
-                    var mainContext = services.GetRequiredService<LCFMSDBContext>();
-                    await mainContext.Database.CanConnectAsync();
-                    
                     var identityContext = services.GetRequiredService<IdentityContext>();
                     await identityContext.Database.CanConnectAsync();
                     
@@ -32,9 +28,6 @@ namespace SEP490_BackendAPI.Extensions
                 await RetryPolicy(async () =>
                 {
                     logger.LogInformation("🚀 Applying database migrations...");
-                    
-                    var mainContext = services.GetRequiredService<LCFMSDBContext>();
-                    await mainContext.Database.MigrateAsync();
                     
                     var identityContext = services.GetRequiredService<IdentityContext>();
                     await identityContext.Database.MigrateAsync();

@@ -46,8 +46,7 @@ namespace SEP490_BackendAPI
             // Add services to the container.
             builder.Services.AddSwaggerExtensions();
 
-            var servicesProvider = builder.Services.BuildServiceProvider();
-            ServicesExtentions.SeedIdentity(servicesProvider);
+            
 
             //builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             //    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
@@ -59,13 +58,15 @@ namespace SEP490_BackendAPI
 
             // 🔥 Apply migrations with retry logic
             await app.MigrateDatabaseAsync();
+            var servicesProvider = builder.Services.BuildServiceProvider();
+            ServicesExtentions.SeedIdentity(servicesProvider);
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
+            // if (app.Environment.IsDevelopment())
+            // {
                 app.UseSwagger();
                 app.UseSwaggerUI();
-            }
+            // }
 
             app.UseHttpsRedirection();
 

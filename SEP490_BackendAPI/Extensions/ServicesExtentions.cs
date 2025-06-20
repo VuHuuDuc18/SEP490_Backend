@@ -16,14 +16,18 @@ namespace SEP490_BackendAPI.Extensions
                 options.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",
-                    Title = "LCFMSystem",
-                    Description = "This Api will be responsible for overall data distribution and authorization.",
-                    //Contact = new OpenApiContact
-                    //{
-                    //    Name = "LCFMSystem",
-                    //    Email = "hello@codewithmukesh.com",
-                    //    Url = new Uri("https://codewithmukesh.com/contact"),
-                    //}
+                    Title = "LCFM System API",
+                    Description = "Livestock Circle Feed Management System - API for managing livestock, feeds, medicines, and daily reports.",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "LCFM System",
+                        Email = "luongcongduy826@gmail.com"
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "LCFM License",
+                        Url = new Uri("https://example.com/license")
+                    }
                 });
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
