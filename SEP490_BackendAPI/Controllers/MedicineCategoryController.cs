@@ -1,5 +1,6 @@
 ﻿using Domain.Dto.Request;
 using Domain.Services.Interfaces;
+using Infrastructure.Services.Implements;
 using Microsoft.AspNetCore.Mvc;
 
 namespace SEP490_BackendAPI.Controllers
@@ -15,37 +16,56 @@ namespace SEP490_BackendAPI.Controllers
             _medicineCategoryService = medicineCategoryService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateCategoryRequest request)
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateMedicineCategory([FromBody] CreateCategoryRequest request)
         {
-            var (success, errorMessage) = await _medicineCategoryService.CreateAsync(request);
+            var (success, errorMessage) = await _medicineCategoryService.CreateMedicineCategory(request);
             if (!success)
                 return BadRequest(errorMessage);
             return Ok();
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCategoryRequest request)
+        [HttpPut("update/{MedicineCategoryId}")]
+        public async Task<IActionResult> UpdateMedicineCategory(Guid MedicineCategoryId, [FromBody] UpdateCategoryRequest request)
         {
-            var (success, errorMessage) = await _medicineCategoryService.UpdateAsync(id, request);
+            var (success, errorMessage) = await _medicineCategoryService.UpdateMedicineCategory(MedicineCategoryId, request);
             if (!success)
                 return BadRequest(errorMessage);
             return Ok();
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        [HttpDelete("disable/{MedicineCategoryId}")]
+        public async Task<IActionResult> DisableMedicineCategory(Guid MedicineCategoryId)
         {
-            var (category, errorMessage) = await _medicineCategoryService.GetByIdAsync(id);
+            var (success, errorMessage) = await _medicineCategoryService.DisableMedicineCategory(MedicineCategoryId);
+            if (!success)
+                return BadRequest(errorMessage);
+            return Ok();
+        }
+
+        [HttpGet("getMedicineCategoryByName/{name}")]
+        public async Task<IActionResult> GetMedicineCategoryByName(string name)
+        {
+            var (category, errorMessage) = await _medicineCategoryService.GetMedicineCategoryByName(name);
             if (category == null)
                 return NotFound(errorMessage);
             return Ok(category);
         }
 
-        [HttpPost("medicine-categories/paginated")]
-        public async Task<IActionResult> GetPaginatedMedicineCategories([FromBody] ListingRequest request)
+
+        [HttpGet("getMedicineCategoryById/{MedicineCategoryId}")]
+        public async Task<IActionResult> GetMedicineCategoryById(Guid MedicineCategoryId)
         {
-            var (result, errorMessage) = await _medicineCategoryService.GetPaginatedListAsync(request);
+            var (category, errorMessage) = await _medicineCategoryService.GetMedicineCategoryById(MedicineCategoryId);
+            if (category == null)
+                return NotFound(errorMessage);
+            return Ok(category);
+        }
+
+        [HttpPost("getPaginatedMedicineCategoryList")]
+        public async Task<IActionResult> GetPaginatedMedicineCategoryList([FromBody] ListingRequest request)
+        {
+            var (result, errorMessage) = await _medicineCategoryService.GetPaginatedMedicineCategoryList(request);
             if (errorMessage != null)
                 return BadRequest(errorMessage);
             return Ok(result);

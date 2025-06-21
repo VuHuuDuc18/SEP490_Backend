@@ -45,7 +45,7 @@ namespace Infrastructure.Services.Implements
             _breedRepository = breedRepository ?? throw new ArgumentNullException(nameof(breedRepository));
         }
 
-        public async Task<(bool Success, string ErrorMessage)> CreateAsync(
+        public async Task<(bool Success, string ErrorMessage)> CreateBill(
             CreateBillRequest request,
             CancellationToken cancellationToken = default)
         {
@@ -147,7 +147,7 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-        public async Task<(bool Success, string ErrorMessage)> DeleteBillItemAsync(Guid billItemId, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> DisableBillItem(Guid billItemId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
             var billItem = await _billItemRepository.GetById(billItemId, checkError);
@@ -178,10 +178,10 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-        public async Task<(bool Success, string ErrorMessage)> DisableAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> DisableBill(Guid billId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetById(id, checkError);
+            var bill = await _billRepository.GetById(billId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin hóa đơn: {checkError.Value.Message}");
             if (bill == null || !bill.IsActive)
@@ -200,7 +200,7 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-        public async Task<(PaginationSet<BillItemResponse> Result, string ErrorMessage)> GetBillItemsByBillIdAsync(
+        public async Task<(PaginationSet<BillItemResponse> Result, string ErrorMessage)> GetBillItemsByBillId(
             Guid billId, ListingRequest request, CancellationToken cancellationToken = default)
         {
             try
@@ -262,11 +262,11 @@ namespace Infrastructure.Services.Implements
         }
     
 
-        public async Task<(BillResponse Bill, string ErrorMessage)> GetByIdAsync(Guid id,
+        public async Task<(BillResponse Bill, string ErrorMessage)> GetBillById(Guid billId,
             CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetById(id, checkError);
+            var bill = await _billRepository.GetById(billId, checkError);
             if (checkError.Value?.IsError == true)
                 return (null, $"Lỗi khi lấy thông tin hóa đơn: {checkError.Value.Message}");
             if (bill == null)
@@ -287,7 +287,7 @@ namespace Infrastructure.Services.Implements
             return (response, null);
         }
 
-        public async Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetPaginatedListAsync(
+        public async Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetPaginatedBillList(
             ListingRequest request, CancellationToken cancellationToken = default)
         {
             try
@@ -342,7 +342,7 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-        public async Task<(bool Success, string ErrorMessage)> UpdateAsync(Guid id,
+        public async Task<(bool Success, string ErrorMessage)> UpdateBill(Guid billId,
             UpdateBillRequest request, CancellationToken cancellationToken = default)
         {         
                 if (request == null)
@@ -354,7 +354,7 @@ namespace Infrastructure.Services.Implements
                     return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
 
                 var checkError = new Ref<CheckError>();
-                var bill = await _billRepository.GetById(id, checkError);
+                var bill = await _billRepository.GetById(billId, checkError);
                 if (checkError.Value?.IsError == true)
                     return (false, $"Lỗi khi lấy thông tin hóa đơn: {checkError.Value.Message}");
                 if (bill == null || !bill.IsActive)
@@ -425,7 +425,7 @@ namespace Infrastructure.Services.Implements
                     // Xử lý BillItems
                     if (request.ItemOperations != null && request.ItemOperations.Any())
                     {
-                        var existingItems = await _billItemRepository.GetQueryable(x => x.BillId == id && x.IsActive)
+                        var existingItems = await _billItemRepository.GetQueryable(x => x.BillId == billId && x.IsActive)
                             .ToListAsync(cancellationToken);
 
                         foreach (var op in request.ItemOperations)
@@ -467,7 +467,7 @@ namespace Infrastructure.Services.Implements
                     }
 
                     // Cập nhật Total
-                    var activeItems = await _billItemRepository.GetQueryable(x => x.BillId == id && x.IsActive)
+                    var activeItems = await _billItemRepository.GetQueryable(x => x.BillId == billId && x.IsActive)
                         .ToListAsync(cancellationToken);
                     bill.Total = activeItems.Sum(x => x.Stock);
 
@@ -482,7 +482,7 @@ namespace Infrastructure.Services.Implements
             }
 
         // Lấy danh sách hóa đơn chỉ chứa các mục hóa đơn thuộc loại được chỉ định (Food, Medicine hoặc Breed)
-        public async Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetBillsByItemTypeAsync(
+        public async Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetBillsByItemType(
             ListingRequest request, string itemType, CancellationToken cancellationToken = default)
         {
             try
@@ -568,7 +568,7 @@ namespace Infrastructure.Services.Implements
         }
 
         // Thay đổi trạng thái của hóa đơn
-        public async Task<(bool Success, string ErrorMessage)> ChangeBillStatusAsync(
+        public async Task<(bool Success, string ErrorMessage)> ChangeBillStatus(
             Guid billId, string newStatus, CancellationToken cancellationToken = default)
         {
             try

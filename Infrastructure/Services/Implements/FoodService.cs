@@ -39,12 +39,10 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Tạo một loại thức ăn mới với kiểm tra hợp lệ, bao gồm upload ảnh và thumbnail lên Cloudinary trong folder được chỉ định.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> CreateAsync(CreateFoodRequest request, string folder, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> CreateFood(CreateFoodRequest request, CancellationToken cancellationToken = default)
         {
             if (request == null)
                 return (false, "Dữ liệu thức ăn không được null.");
-            if (string.IsNullOrEmpty(folder))
-                return (false, "Tên folder là bắt buộc.");
 
             // Kiểm tra các trường bắt buộc
             var validationResults = new List<ValidationResult>();
@@ -84,7 +82,7 @@ namespace Infrastructure.Services.Implements
                 if (!string.IsNullOrEmpty(request.Thumbnail))
                 {
                     var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
-     request.Thumbnail, folder, _cloudinaryCloudService, cancellationToken);
+     request.Thumbnail, "food", _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {
@@ -104,7 +102,7 @@ namespace Infrastructure.Services.Implements
                     foreach (var imageLink in request.ImageLinks)
                     {
                         var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
-                           imageLink, folder, _cloudinaryCloudService, cancellationToken);
+                           imageLink, "food", _cloudinaryCloudService, cancellationToken);
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
                             var imageFood = new ImageFood
@@ -130,15 +128,13 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Cập nhật thông tin một loại thức ăn, bao gồm upload ảnh và thumbnail lên Cloudinary trong folder được chỉ định.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> UpdateAsync(Guid id, UpdateFoodRequest request, string folder, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> UpdateFood(Guid FoodId, UpdateFoodRequest request, CancellationToken cancellationToken = default)
         {
             if (request == null)
                 return (false, "Dữ liệu thức ăn không được null.");
-            if (string.IsNullOrEmpty(folder))
-                return (false, "Tên folder là bắt buộc.");
 
             var checkError = new Ref<CheckError>();
-            var existing = await _foodRepository.GetById(id, checkError);
+            var existing = await _foodRepository.GetById(FoodId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin thức ăn: {checkError.Value.Message}");
 
@@ -155,7 +151,7 @@ namespace Infrastructure.Services.Implements
 
             // Kiểm tra xung đột tên với các thức ăn khác trong cùng danh mục
             var exists = await _foodRepository.CheckExist(
-                x => x.FoodName == request.FoodName && x.FoodCategoryId == request.FoodCategoryId && x.Id != id && x.IsActive,
+                x => x.FoodName == request.FoodName && x.FoodCategoryId == request.FoodCategoryId && x.Id != FoodId && x.IsActive,
                 checkError,
                 cancellationToken);
 
@@ -176,10 +172,10 @@ namespace Infrastructure.Services.Implements
                 await _foodRepository.CommitAsync(cancellationToken);
 
                 // Xóa ảnh và thumbnail cũ
-                var existingImages = await _imageFoodRepository.GetQueryable(x => x.FoodId == id).ToListAsync(cancellationToken);
+                var existingImages = await _imageFoodRepository.GetQueryable(x => x.FoodId == FoodId).ToListAsync(cancellationToken);
                 foreach (var image in existingImages)
                 {
-                    //_imageFoodRepository.Delete(image);
+                    _imageFoodRepository.Remove(image);
                     await _cloudinaryCloudService.DeleteImage(image.ImageLink, cancellationToken);
                 }
                 await _imageFoodRepository.CommitAsync(cancellationToken);
@@ -188,13 +184,13 @@ namespace Infrastructure.Services.Implements
                 if (!string.IsNullOrEmpty(request.Thumbnail))
                 {
                     var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
-    request.Thumbnail, folder, _cloudinaryCloudService, cancellationToken);
+    request.Thumbnail, "food", _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {
                         var imageFood = new ImageFood
                         {
-                            FoodId = id,
+                            FoodId = FoodId,
                             ImageLink = imageLink,
                             Thumnail = "true"
                         };
@@ -208,12 +204,12 @@ namespace Infrastructure.Services.Implements
                     foreach (var imageLink in request.ImageLinks)
                     {
                         var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
-            imageLink, folder, _cloudinaryCloudService, cancellationToken);
+            imageLink, "food", _cloudinaryCloudService, cancellationToken);
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
                             var imageFood = new ImageFood
                             {
-                                FoodId = id,
+                                FoodId = FoodId,
                                 ImageLink = uploadedLink,
                                 Thumnail = "false"
                             };
@@ -234,10 +230,10 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Xóa mềm một loại thức ăn bằng cách đặt IsActive thành false.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> DisableFood(Guid FoodId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var food = await _foodRepository.GetById(id, checkError);
+            var food = await _foodRepository.GetById(FoodId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin thức ăn: {checkError.Value.Message}");
 
@@ -246,18 +242,18 @@ namespace Infrastructure.Services.Implements
 
             try
             {
-                food.IsActive = false;
+                food.IsActive = !food.IsActive;
                 _foodRepository.Update(food);
                 await _foodRepository.CommitAsync(cancellationToken);
 
                 // Xóa ảnh và thumbnail liên quan khỏi Cloudinary
-                var images = await _imageFoodRepository.GetQueryable(x => x.FoodId == id).ToListAsync(cancellationToken);
-                foreach (var image in images)
-                {
-                   // _imageFoodRepository.Delete(image);
-                    await _cloudinaryCloudService.DeleteImage(image.ImageLink, cancellationToken);
-                }
-                await _imageFoodRepository.CommitAsync(cancellationToken);
+                //var images = await _imageFoodRepository.GetQueryable(x => x.FoodId == FoodId).ToListAsync(cancellationToken);
+                //foreach (var image in images)
+                //{
+                //    _imageFoodRepository.Remove(image);
+                //    await _cloudinaryCloudService.DeleteImage(image.ImageLink, cancellationToken);
+                //}
+                //await _imageFoodRepository.CommitAsync(cancellationToken);
 
                 return (true, null);
             }
@@ -270,17 +266,17 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Lấy thông tin một loại thức ăn theo ID, bao gồm danh sách ảnh và thumbnail.
         /// </summary>
-        public async Task<(FoodResponse Food, string ErrorMessage)> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(FoodResponse Food, string ErrorMessage)> GetFoodById(Guid FoodId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var food = await _foodRepository.GetById(id, checkError);
+            var food = await _foodRepository.GetById(FoodId, checkError);
             if (checkError.Value?.IsError == true)
                 return (null, $"Lỗi khi lấy thông tin thức ăn: {checkError.Value.Message}");
 
             if (food == null)
                 return (null, "Không tìm thấy thức ăn.");
 
-            var images = await _imageFoodRepository.GetQueryable(x => x.FoodId == id).ToListAsync(cancellationToken);
+            var images = await _imageFoodRepository.GetQueryable(x => x.FoodId == FoodId).ToListAsync(cancellationToken);
             var response = new FoodResponse
             {
                 Id = food.Id,
@@ -299,7 +295,7 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Lấy danh sách tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn, bao gồm danh sách ảnh và thumbnail.
         /// </summary>
-        public async Task<(List<FoodResponse> Foods, string ErrorMessage)> GetAllAsync(
+        public async Task<(List<FoodResponse> Foods, string ErrorMessage)> GetFoodByCategory(
             string foodName = null,
             Guid? foodCategoryId = null,
             CancellationToken cancellationToken = default)
@@ -340,7 +336,7 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-        public async Task<(PaginationSet<FoodResponse> Result, string ErrorMessage)> GetPaginatedListAsync(
+        public async Task<(PaginationSet<FoodResponse> Result, string ErrorMessage)> GetPaginatedFoodList(
     ListingRequest request,
     CancellationToken cancellationToken = default)
         {

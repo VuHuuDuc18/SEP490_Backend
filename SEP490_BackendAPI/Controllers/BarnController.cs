@@ -24,10 +24,10 @@ namespace SEP490_BackendAPI.Controllers
         /// <summary>
         /// Tạo một chuồng trại mới.
         /// </summary>
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateBarnRequest requestDto, CancellationToken cancellationToken = default)
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateBarn([FromBody] CreateBarnRequest requestDto, CancellationToken cancellationToken = default)
         {
-            var (success, errorMessage) = await _barnService.CreateAsync(requestDto, cancellationToken);
+            var (success, errorMessage) = await _barnService.CreateBarn(requestDto, cancellationToken);
             if (!success)
                 return BadRequest(errorMessage);
             return Ok();
@@ -36,10 +36,10 @@ namespace SEP490_BackendAPI.Controllers
         /// <summary>
         /// Cập nhật thông tin một chuồng trại.
         /// </summary>
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateBarnRequest requestDto, CancellationToken cancellationToken = default)
+        [HttpPut("update/{BarnId}")]
+        public async Task<IActionResult> Update(Guid BarnId, [FromBody] UpdateBarnRequest requestDto, CancellationToken cancellationToken = default)
         {
-            var (success, errorMessage) = await _barnService.UpdateAsync(id, requestDto, cancellationToken);
+            var (success, errorMessage) = await _barnService.UpdateBarn(BarnId, requestDto, cancellationToken);
             if (!success)
                 return BadRequest(errorMessage);
             return Ok();
@@ -48,10 +48,10 @@ namespace SEP490_BackendAPI.Controllers
         /// <summary>
         /// Xóa mềm một chuồng trại bằng cách đặt IsActive thành false.
         /// </summary>
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken = default)
+        [HttpDelete("disable/{BarnId}")]
+        public async Task<IActionResult> DisableBarn(Guid BarnId, CancellationToken cancellationToken = default)
         {
-            var (success, errorMessage) = await _barnService.DeleteAsync(id, cancellationToken);
+            var (success, errorMessage) = await _barnService.DisableBarn(BarnId, cancellationToken);
             if (!success)
                 return BadRequest(errorMessage);
             return Ok();
@@ -60,46 +60,34 @@ namespace SEP490_BackendAPI.Controllers
         /// <summary>
         /// Lấy thông tin một chuồng trại theo ID.
         /// </summary>
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
+        [HttpGet("getBarnById/{BarnId}")]
+        public async Task<IActionResult> GetBarnById(Guid BarnId, CancellationToken cancellationToken = default)
         {
-            var (barn, errorMessage) = await _barnService.GetByIdAsync(id, cancellationToken);
+            var (barn, errorMessage) = await _barnService.GetBarnById(BarnId, cancellationToken);
             if (barn == null)
                 return NotFound(errorMessage ?? "Không tìm thấy chuồng trại.");
             return Ok(barn);
         }
 
         /// <summary>
-        /// Lấy danh sách tất cả chuồng trại đang hoạt động với bộ lọc tùy chọn.
-        /// </summary>
-        [HttpGet]
-        public async Task<IActionResult> GetAll(string barnName = null, Guid? workerId = null, CancellationToken cancellationToken = default)
-        {
-            var (barns, errorMessage) = await _barnService.GetAllAsync(barnName, workerId, cancellationToken);
-            if (barns == null)
-                return NotFound(errorMessage ?? "Không tìm thấy danh sách chuồng trại.");
-            return Ok(barns);
-        }
-
-        /// <summary>
         /// Lấy danh sách chuồng trại theo ID của công nhân.
         /// </summary>
-        [HttpGet("worker/{workerId}")]
+        [HttpGet("getBarnByWorker/{workerId}")]
         public async Task<IActionResult> GetByWorker(Guid workerId, CancellationToken cancellationToken = default)
         {
-            var (barns, errorMessage) = await _barnService.GetByWorkerAsync(workerId, cancellationToken);
+            var (barns, errorMessage) = await _barnService.GetBarnByWorker(workerId, cancellationToken);
             if (barns == null)
-                return NotFound(errorMessage ?? "Không tìm thấy danh sách chuồng trại theo công nhân.");
+                return NotFound(errorMessage ?? "Không tìm thấy danh sách chuồng trại theo người gia công.");
             return Ok(barns);
         }
 
         /// <summary>
         /// Lấy danh sách phân trang tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn.
         /// </summary>
-        [HttpPost("barns/paginated")]
+        [HttpPost("getPaginatedBarnList")]
         public async Task<IActionResult> GetPaginatedBarns([FromBody] ListingRequest request)
         {
-            var (result, errorMessage) = await _barnService.GetPaginatedListAsync(request);
+            var (result, errorMessage) = await _barnService.GetPaginatedBarnList(request);
             if (errorMessage != null)
                 return BadRequest(errorMessage);
             return Ok(result);

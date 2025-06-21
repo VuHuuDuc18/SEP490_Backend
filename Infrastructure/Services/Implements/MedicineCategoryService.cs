@@ -31,7 +31,7 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Tạo một danh mục thuốc mới với kiểm tra hợp lệ.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> CreateAsync(CreateCategoryRequest request, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> CreateMedicineCategory(CreateCategoryRequest request, CancellationToken cancellationToken = default)
         {
             if (request == null)
                 return (false, "Dữ liệu danh mục thuốc không được null.");
@@ -78,13 +78,13 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Cập nhật thông tin một danh mục thuốc.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> UpdateAsync(Guid id, UpdateCategoryRequest request, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> UpdateMedicineCategory(Guid MedicineCategoryId, UpdateCategoryRequest request, CancellationToken cancellationToken = default)
         {
             if (request == null)
                 return (false, "Dữ liệu danh mục thuốc không được null.");
 
             var checkError = new Ref<CheckError>();
-            var existing = await _medicineCategoryRepository.GetById(id, checkError);
+            var existing = await _medicineCategoryRepository.GetById(MedicineCategoryId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin danh mục thuốc: {checkError.Value.Message}");
 
@@ -101,7 +101,7 @@ namespace Infrastructure.Services.Implements
 
             // Kiểm tra xung đột tên với các danh mục đang hoạt động khác
             var exists = await _medicineCategoryRepository.CheckExist(
-                x => x.Name == request.Name && x.Id != id && x.IsActive,
+                x => x.Name == request.Name && x.Id != MedicineCategoryId && x.IsActive,
                 checkError,
                 cancellationToken);
 
@@ -129,10 +129,10 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Xóa mềm một danh mục thuốc bằng cách đặt IsActive thành false.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> DisableMedicineCategory(Guid MedicineCategoryId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var medicineCategory = await _medicineCategoryRepository.GetById(id, checkError);
+            var medicineCategory = await _medicineCategoryRepository.GetById(MedicineCategoryId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin danh mục thuốc: {checkError.Value.Message}");
 
@@ -141,7 +141,7 @@ namespace Infrastructure.Services.Implements
 
             try
             {
-                medicineCategory.IsActive = false;
+                medicineCategory.IsActive = !medicineCategory.IsActive;
                 _medicineCategoryRepository.Update(medicineCategory);
                 await _medicineCategoryRepository.CommitAsync(cancellationToken);
                 return (true, null);
@@ -155,10 +155,10 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Lấy thông tin một danh mục thuốc theo ID.
         /// </summary>
-        public async Task<(CategoryResponse Category, string ErrorMessage)> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(CategoryResponse Category, string ErrorMessage)> GetMedicineCategoryById(Guid MedicineCategoryId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var medicineCategory = await _medicineCategoryRepository.GetById(id, checkError);
+            var medicineCategory = await _medicineCategoryRepository.GetById(MedicineCategoryId, checkError);
             if (checkError.Value?.IsError == true)
                 return (null, $"Lỗi khi lấy thông tin danh mục thuốc: {checkError.Value.Message}");
 
@@ -178,7 +178,7 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Lấy danh sách tất cả danh mục thuốc đang hoạt động với bộ lọc tùy chọn.
         /// </summary>
-        public async Task<(List<CategoryResponse> Categories, string ErrorMessage)> GetAllAsync(
+        public async Task<(List<CategoryResponse> Categories, string ErrorMessage)> GetMedicineCategoryByName(
             string name = null,
             CancellationToken cancellationToken = default)
         {
@@ -208,7 +208,7 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Lấy danh sách phân trang các danh mục thuốc với tìm kiếm, lọc và sắp xếp.
         /// </summary>
-        public async Task<(PaginationSet<CategoryResponse> Result, string ErrorMessage)> GetPaginatedListAsync(
+        public async Task<(PaginationSet<CategoryResponse> Result, string ErrorMessage)> GetPaginatedMedicineCategoryList(
             ListingRequest request,
             CancellationToken cancellationToken = default)
         {
