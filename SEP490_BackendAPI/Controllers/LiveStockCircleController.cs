@@ -1,4 +1,5 @@
-﻿using Domain.Dto.Request.LivestockCircle;
+﻿using Domain.Dto.Request;
+using Domain.Dto.Request.LivestockCircle;
 using Domain.Dto.Response;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -114,6 +115,15 @@ namespace SEP490_BackendAPI.Controllers
             if (!success)
                 return BadRequest(errorMessage);
             return Ok();
+        }
+        [HttpPost("technical-staff/assignedbarn/{technicalStaffId}")]
+        public async Task<IActionResult> GetAssignedBarn(Guid technicalStaffId, [FromBody]ListingRequest req)
+        {
+            var result = await _livestockCircleService.GetAssignedBarn(technicalStaffId, req);
+            if (result.Items == null)
+                return StatusCode(StatusCodes.Status500InternalServerError);
+
+            return Ok(result);
         }
     }
 }
