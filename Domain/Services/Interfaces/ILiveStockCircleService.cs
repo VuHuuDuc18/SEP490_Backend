@@ -78,5 +78,8 @@ namespace Domain.Services.Interfaces
             Guid id,
             string status,
             CancellationToken cancellationToken = default);
+
+        public Task<bool> ReleaseBarn(Guid id);
+        public Task<PaginationSet<LivestockCircleResponse>> GetAssignedBarn(Guid tsid, ListingRequest req);
     }
 }
