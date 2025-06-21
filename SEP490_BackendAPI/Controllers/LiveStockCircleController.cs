@@ -22,10 +22,10 @@ namespace SEP490_BackendAPI.Controllers
         /// <summary>
         /// Tạo một chu kỳ chăn nuôi mới.
         /// </summary>
-        [HttpPost]
+        [HttpPost("create")]
         public async Task<IActionResult> Create([FromBody] CreateLivestockCircleRequest request, CancellationToken cancellationToken = default)
         {
-            var (success, errorMessage) = await _livestockCircleService.CreateAsync(request, cancellationToken);
+            var (success, errorMessage) = await _livestockCircleService.CreateLiveStockCircle(request, cancellationToken);
             if (!success)
                 return BadRequest(new { error = errorMessage });
 
@@ -35,10 +35,10 @@ namespace SEP490_BackendAPI.Controllers
         /// <summary>
         /// Cập nhật thông tin một chu kỳ chăn nuôi.
         /// </summary>
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateLivestockCircleRequest request, CancellationToken cancellationToken = default)
+        [HttpPut("update/{livestockCircleId}")]
+        public async Task<IActionResult> Update(Guid livestockCircleId, [FromBody] UpdateLivestockCircleRequest request, CancellationToken cancellationToken = default)
         {
-            var (success, errorMessage) = await _livestockCircleService.UpdateAsync(id, request, cancellationToken);
+            var (success, errorMessage) = await _livestockCircleService.UpdateLiveStockCircle(livestockCircleId, request, cancellationToken);
             if (!success)
             {
                 if (errorMessage.Contains("Không tìm thấy"))
@@ -52,10 +52,10 @@ namespace SEP490_BackendAPI.Controllers
         /// <summary>
         /// Xóa mềm một chu kỳ chăn nuôi.
         /// </summary>
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken = default)
+        [HttpDelete("disable/{livestockCircleId}")]
+        public async Task<IActionResult> DisableLiveStockCircle(Guid livestockCircleId, CancellationToken cancellationToken = default)
         {
-            var (success, errorMessage) = await _livestockCircleService.DeleteAsync(id, cancellationToken);
+            var (success, errorMessage) = await _livestockCircleService.DisableLiveStockCircle(livestockCircleId, cancellationToken);
             if (!success)
             {
                 if (errorMessage.Contains("Không tìm thấy"))
@@ -69,10 +69,10 @@ namespace SEP490_BackendAPI.Controllers
         /// <summary>
         /// Lấy thông tin một chu kỳ chăn nuôi theo ID.
         /// </summary>
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
+        [HttpGet("getLiveStockCircleById/{livestockCircleId}")]
+        public async Task<IActionResult> GetById(Guid livestockCircleId, CancellationToken cancellationToken = default)
         {
-            var (circle, errorMessage) = await _livestockCircleService.GetByIdAsync(id, cancellationToken);
+            var (circle, errorMessage) = await _livestockCircleService.GetLiveStockCircleById(livestockCircleId, cancellationToken);
             if (circle == null)
                 return NotFound(new { error = errorMessage });
 
@@ -80,12 +80,12 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         /// <summary>
-        /// Lấy danh sách tất cả chu kỳ chăn nuôi đang hoạt động với bộ lọc tùy chọn.
+        /// Lấy danh sách tất cả chu kỳ chăn nuôi theo status/barn
         /// </summary>
-        [HttpGet]
-        public async Task<IActionResult> GetAll(string status = null, Guid? barnId = null, CancellationToken cancellationToken = default)
+        [HttpGet("getLiveStockCircleByBarnIdAndStatus")]
+        public async Task<IActionResult> GetLiveStockCircleByBarnIdAndStatus(string status = null, Guid? barnId = null, CancellationToken cancellationToken = default)
         {
-            var (circles, errorMessage) = await _livestockCircleService.GetAllAsync(status, barnId, cancellationToken);
+            var (circles, errorMessage) = await _livestockCircleService.GetLiveStockCircleByBarnIdAndStatus(status, barnId, cancellationToken);
             if (circles == null)
                 return StatusCode(StatusCodes.Status500InternalServerError, new { error = errorMessage });
 
@@ -95,10 +95,10 @@ namespace SEP490_BackendAPI.Controllers
         /// <summary>
         /// Lấy danh sách chu kỳ chăn nuôi theo ID của nhân viên kỹ thuật.
         /// </summary>
-        [HttpGet("technical-staff/{technicalStaffId}")]
+        [HttpGet("getLiveStockCircleByTechnicalStaff/{technicalStaffId}")]
         public async Task<IActionResult> GetByTechnicalStaff(Guid technicalStaffId, CancellationToken cancellationToken = default)
         {
-            var (circles, errorMessage) = await _livestockCircleService.GetByTechnicalStaffAsync(technicalStaffId, cancellationToken);
+            var (circles, errorMessage) = await _livestockCircleService.GetLiveStockCircleByTechnicalStaff(technicalStaffId, cancellationToken);
             if (circles == null)
                 return StatusCode(StatusCodes.Status500InternalServerError, new { error = errorMessage });
 
@@ -107,10 +107,10 @@ namespace SEP490_BackendAPI.Controllers
         /// <summary>
         /// Cập nhật trung bình cân của chu kỳ chăn nuôi
         /// </summary>
-        [HttpPatch("livestock-circles/{id}/average-weight")]
-        public async Task<IActionResult> UpdateLivestockCircleAverageWeight(Guid id, [FromBody] float averageWeight)
+        [HttpPatch("updateLivestockCircleAverageWeight/{livestockCircleId}")]
+        public async Task<IActionResult> UpdateLivestockCircleAverageWeight(Guid livestockCircleId, [FromBody] float averageWeight)
         {
-            var (success, errorMessage) = await _livestockCircleService.UpdateAverageWeightAsync(id, averageWeight);
+            var (success, errorMessage) = await _livestockCircleService.UpdateAverageWeight(livestockCircleId, averageWeight);
             if (!success)
                 return BadRequest(errorMessage);
             return Ok();

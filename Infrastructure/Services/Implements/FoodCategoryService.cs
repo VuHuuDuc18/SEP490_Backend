@@ -31,7 +31,7 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Tạo một danh mục thức ăn mới với kiểm tra hợp lệ.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> CreateAsync(CreateCategoryRequest request, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> CreateFoodCategory(CreateCategoryRequest request, CancellationToken cancellationToken = default)
         {
             if (request == null)
                 return (false, "Dữ liệu danh mục thức ăn không được null.");
@@ -78,13 +78,13 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Cập nhật thông tin một danh mục thức ăn.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> UpdateAsync(Guid id, UpdateCategoryRequest request, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> UpdateFoodCategory(Guid FoodCategoryId, UpdateCategoryRequest request, CancellationToken cancellationToken = default)
         {
             if (request == null)
                 return (false, "Dữ liệu danh mục thức ăn không được null.");
 
             var checkError = new Ref<CheckError>();
-            var existing = await _foodCategoryRepository.GetById(id, checkError);
+            var existing = await _foodCategoryRepository.GetById(FoodCategoryId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin danh mục thức ăn: {checkError.Value.Message}");
 
@@ -101,7 +101,7 @@ namespace Infrastructure.Services.Implements
 
             // Kiểm tra xung đột tên với các danh mục đang hoạt động khác
             var exists = await _foodCategoryRepository.CheckExist(
-                x => x.Name == request.Name && x.Id != id && x.IsActive,
+                x => x.Name == request.Name && x.Id != FoodCategoryId && x.IsActive,
                 checkError,
                 cancellationToken);
 
@@ -129,10 +129,10 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Xóa mềm một danh mục thức ăn bằng cách đặt IsActive thành false.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> DisableFoodCategory(Guid FoodCategoryId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var foodCategory = await _foodCategoryRepository.GetById(id, checkError);
+            var foodCategory = await _foodCategoryRepository.GetById(FoodCategoryId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin danh mục thức ăn: {checkError.Value.Message}");
 
@@ -141,7 +141,8 @@ namespace Infrastructure.Services.Implements
 
             try
             {
-                foodCategory.IsActive = false;
+                //foodCategory.IsActive = false;
+                foodCategory.IsActive = !foodCategory.IsActive;
                 _foodCategoryRepository.Update(foodCategory);
                 await _foodCategoryRepository.CommitAsync(cancellationToken);
                 return (true, null);
@@ -155,10 +156,10 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Lấy thông tin một danh mục thức ăn theo ID.
         /// </summary>
-        public async Task<(CategoryResponse Category, string ErrorMessage)> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(CategoryResponse Category, string ErrorMessage)> GetFoodCategoryById(Guid FoodCategoryId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var foodCategory = await _foodCategoryRepository.GetById(id, checkError);
+            var foodCategory = await _foodCategoryRepository.GetById(FoodCategoryId, checkError);
             if (checkError.Value?.IsError == true)
                 return (null, $"Lỗi khi lấy thông tin danh mục thức ăn: {checkError.Value.Message}");
 
@@ -178,7 +179,7 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Lấy danh sách tất cả danh mục thức ăn đang hoạt động với bộ lọc tùy chọn.
         /// </summary>
-        public async Task<(List<CategoryResponse> Categories, string ErrorMessage)> GetAllAsync(
+        public async Task<(List<CategoryResponse> Categories, string ErrorMessage)> GetFoodCategoryByName(
             string name = null,
             CancellationToken cancellationToken = default)
         {
@@ -208,7 +209,7 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Lấy danh sách phân trang các danh mục thuốc với tìm kiếm, lọc và sắp xếp.
         /// </summary>
-        public async Task<(PaginationSet<CategoryResponse> Result, string ErrorMessage)> GetPaginatedListAsync(
+        public async Task<(PaginationSet<CategoryResponse> Result, string ErrorMessage)> GetPaginatedFoodCategoryList(
             ListingRequest request,
             CancellationToken cancellationToken = default)
         {

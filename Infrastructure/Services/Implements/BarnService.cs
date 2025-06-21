@@ -40,7 +40,7 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Tạo một chuồng trại mới với kiểm tra hợp lệ, bao gồm upload ảnh lên Cloudinary trong folder được chỉ định.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> CreateAsync(CreateBarnRequest requestDto, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> CreateBarn(CreateBarnRequest requestDto, CancellationToken cancellationToken = default)
         {
             if (requestDto == null)
                 return (false, "Dữ liệu chuồng trại không được null.");
@@ -103,13 +103,13 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Cập nhật thông tin một chuồng trại, bao gồm upload ảnh lên Cloudinary trong folder được chỉ định.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> UpdateAsync(Guid id, UpdateBarnRequest requestDto, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> UpdateBarn(Guid BarnId, UpdateBarnRequest requestDto, CancellationToken cancellationToken = default)
         {
             if (requestDto == null)
                 return (false, "Dữ liệu chuồng trại không được null.");
 
             var checkError = new Ref<CheckError>();
-            var existing = await _barnRepository.GetById(id, checkError);
+            var existing = await _barnRepository.GetById(BarnId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin chuồng trại: {checkError.Value.Message}");
 
@@ -124,7 +124,7 @@ namespace Infrastructure.Services.Implements
             }
 
             var exists = await _barnRepository.CheckExist(
-                x => x.BarnName == requestDto.BarnName && x.Address == requestDto.Address && x.Id != id && x.IsActive,
+                x => x.BarnName == requestDto.BarnName && x.Address == requestDto.Address && x.Id != BarnId && x.IsActive,
                 checkError,
                 cancellationToken);
 
@@ -150,6 +150,7 @@ namespace Infrastructure.Services.Implements
                 {
                     if (!string.IsNullOrEmpty(existing.Image))
                     {
+
                         await _cloudinaryCloudService.DeleteImage(existing.Image, cancellationToken);
                     }
 
@@ -175,10 +176,10 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
         /// <summary>
         /// Xóa mềm một chuồng trại bằng cách đặt IsActive thành false.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> DisableBarn(Guid BarnId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var barn = await _barnRepository.GetById(id, checkError);
+            var barn = await _barnRepository.GetById(BarnId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin chuồng trại: {checkError.Value.Message}");
 
@@ -187,11 +188,11 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
 
             try
             {
-                barn.IsActive = false;
-                if (!string.IsNullOrEmpty(barn.Image))
-                {
-                    await _cloudinaryCloudService.DeleteImage(barn.Image, cancellationToken);
-                }
+                barn.IsActive = !barn.IsActive;
+                //if (!string.IsNullOrEmpty(barn.Image))
+                //{
+                //    await _cloudinaryCloudService.DeleteImage(barn.Image, cancellationToken);
+                //}
                 _barnRepository.Update(barn);
                 await _barnRepository.CommitAsync(cancellationToken);
                 return (true, null);
@@ -205,10 +206,10 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
         /// <summary>
         /// Lấy thông tin một chuồng trại theo ID.
         /// </summary>
-        public async Task<(BarnResponse Barn, string ErrorMessage)> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(BarnResponse Barn, string ErrorMessage)> GetBarnById(Guid BarnId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var barn = await _barnRepository.GetById(id);
+            var barn = await _barnRepository.GetById(BarnId);
             if (checkError.Value?.IsError == true)
                 return (null, $"Lỗi khi lấy thông tin chuồng trại: {checkError.Value.Message}");
 
@@ -228,46 +229,9 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
         }
 
         /// <summary>
-        /// Lấy danh sách tất cả chuồng trại đang hoạt động với bộ lọc tùy chọn.
-        /// </summary>
-        public async Task<(List<BarnResponse> Barns, string ErrorMessage)> GetAllAsync(string barnName = null, Guid? workerId = null, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                var query = _barnRepository.GetQueryable(x => x.IsActive);
-
-                if (!string.IsNullOrEmpty(barnName))
-                    query = query.Where(x => x.BarnName.Contains(barnName));
-
-                if (workerId.HasValue)
-                    query = query.Where(x => x.WorkerId == workerId.Value);
-
-                var barns = await query.ToListAsync(cancellationToken);
-                var responses = new List<BarnResponse>();
-                foreach (var barn in barns)
-                {
-                    responses.Add(new BarnResponse
-                    {
-                        Id = barn.Id,
-                        BarnName = barn.BarnName,
-                        Address = barn.Address,
-                        Image = barn.Image,
-                        WorkerId = barn.WorkerId,
-                        IsActive = barn.IsActive
-                    });
-                }
-                return (responses, null);
-            }
-            catch (Exception ex)
-            {
-                return (null, $"Lỗi khi lấy danh sách chuồng trại: {ex.Message}");
-            }
-        }
-
-        /// <summary>
         /// Lấy danh sách chuồng trại theo ID của người gia công.
         /// </summary>
-        public async Task<(List<BarnResponse> Barns, string ErrorMessage)> GetByWorkerAsync(Guid workerId, CancellationToken cancellationToken = default)
+        public async Task<(List<BarnResponse> Barns, string ErrorMessage)> GetBarnByWorker(Guid workerId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -300,7 +264,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
             }
         }
 
-        public async Task<(PaginationSet<BarnResponse> Result, string ErrorMessage)> GetPaginatedListAsync(
+        public async Task<(PaginationSet<BarnResponse> Result, string ErrorMessage)> GetPaginatedBarnList(
             ListingRequest request,
             CancellationToken cancellationToken = default)
         {

@@ -53,7 +53,7 @@ namespace Domain.Services.Implements
             _cloudinaryCloudService = cloudinaryCloudService ?? throw new ArgumentNullException(nameof(cloudinaryCloudService));
         }
 
-        public async Task<(bool Success, string ErrorMessage)> CreateAsync(CreateDailyReportWithDetailsRequest requestDto, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> CreateDailyReport(CreateDailyReportWithDetailsRequest requestDto, CancellationToken cancellationToken = default)
         {
             if (requestDto == null)
                 return (false, "Dữ liệu báo cáo hàng ngày không được null.");
@@ -198,7 +198,7 @@ namespace Domain.Services.Implements
             }
         }
 
-        public async Task<(bool Success, string ErrorMessage)> UpdateAsync(Guid id, UpdateDailyReportWithDetailsRequest requestDto, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> UpdateDailyReport(Guid dailyReportId, UpdateDailyReportWithDetailsRequest requestDto, CancellationToken cancellationToken = default)
         {
             if (requestDto == null)
                 return (false, "Dữ liệu báo cáo hàng ngày không được null.");
@@ -209,7 +209,7 @@ namespace Domain.Services.Implements
                 return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
 
             var checkError = new Ref<CheckError>();
-            var existing = await _dailyReportRepository.GetById(id, checkError);
+            var existing = await _dailyReportRepository.GetById(dailyReportId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin báo cáo hàng ngày: {checkError.Value.Message}");
             if (existing == null)
@@ -237,9 +237,9 @@ namespace Domain.Services.Implements
                 _dailyReportRepository.Update(existing);
 
                 // Lấy danh sách hiện tại
-                var currentFoodReports = await _foodReportRepository.GetQueryable(x => x.ReportId == id && x.IsActive).ToListAsync(cancellationToken);
-                var currentMedicineReports = await _medicineReportRepository.GetQueryable(x => x.ReportId == id && x.IsActive).ToListAsync(cancellationToken);
-                var currentImageReports = await _imageDailyReportRepository.GetQueryable(x => x.DailyReportId == id).ToListAsync(cancellationToken);
+                var currentFoodReports = await _foodReportRepository.GetQueryable(x => x.ReportId == dailyReportId && x.IsActive).ToListAsync(cancellationToken);
+                var currentMedicineReports = await _medicineReportRepository.GetQueryable(x => x.ReportId == dailyReportId && x.IsActive).ToListAsync(cancellationToken);
+                var currentImageReports = await _imageDailyReportRepository.GetQueryable(x => x.DailyReportId == dailyReportId).ToListAsync(cancellationToken);
 
                 // Xử lý FoodReports
                 foreach (var existingFood in currentFoodReports)
@@ -297,7 +297,7 @@ namespace Domain.Services.Implements
                             {
                                 Id = newFood.Id,
                                 FoodId = newFood.FoodId,
-                                ReportId = id,
+                                ReportId = dailyReportId,
                                 Quantity = newFood.Quantity,
                                 IsActive = true
                             };
@@ -364,7 +364,7 @@ namespace Domain.Services.Implements
                             {
                                 Id = newMedicine.Id,
                                 MedicineId = newMedicine.MedicineId,
-                                ReportId = id,
+                                ReportId = dailyReportId,
                                 Quantity = newMedicine.Quantity,
                                 IsActive = true
                             };
@@ -394,7 +394,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                     {
                         var imageDailyReport = new ImageDailyReport
                         {
-                            DailyReportId = id,
+                            DailyReportId = dailyReportId,
                             ImageLink = thumbnailUrl,
                             Thumnail = "true",
                             IsActive = true
@@ -415,7 +415,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                         {
                             var imageDailyReport = new ImageDailyReport
                             {
-                                DailyReportId = id,
+                                DailyReportId = dailyReportId,
                                 ImageLink = uploadedLink,
                                 Thumnail = "false",
                                 IsActive = true
@@ -441,10 +441,10 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
             }
         }
 
-        public async Task<(bool Success, string ErrorMessage)> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> DisableDailyReport(Guid dailyReportId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var dailyReport = await _dailyReportRepository.GetById(id, checkError);
+            var dailyReport = await _dailyReportRepository.GetById(dailyReportId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin báo cáo hàng ngày: {checkError.Value.Message}");
             if (dailyReport == null)
@@ -461,7 +461,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                 dailyReport.IsActive = false;
                 _dailyReportRepository.Update(dailyReport);
 
-                var foodReports = await _foodReportRepository.GetQueryable(x => x.ReportId == id && x.IsActive).ToListAsync(cancellationToken);
+                var foodReports = await _foodReportRepository.GetQueryable(x => x.ReportId == dailyReportId && x.IsActive).ToListAsync(cancellationToken);
                 foreach (var foodReport in foodReports)
                 {
                     var livestockCircleFood = await _livestockCircleFoodRepository.GetQueryable(
@@ -476,7 +476,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                     _foodReportRepository.Update(foodReport);
                 }
 
-                var medicineReports = await _medicineReportRepository.GetQueryable(x => x.ReportId == id && x.IsActive).ToListAsync(cancellationToken);
+                var medicineReports = await _medicineReportRepository.GetQueryable(x => x.ReportId == dailyReportId && x.IsActive).ToListAsync(cancellationToken);
                 foreach (var medicineReport in medicineReports)
                 {
                     var livestockCircleMedicine = await _livestockCircleMedicineRepository.GetQueryable(
@@ -491,7 +491,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                     _medicineReportRepository.Update(medicineReport);
                 }
 
-                var imageReports = await _imageDailyReportRepository.GetQueryable(x => x.DailyReportId == id).ToListAsync(cancellationToken);
+                var imageReports = await _imageDailyReportRepository.GetQueryable(x => x.DailyReportId == dailyReportId).ToListAsync(cancellationToken);
                 foreach (var imageReport in imageReports)
                 {
                     await _cloudinaryCloudService.DeleteImage(imageReport.ImageLink, cancellationToken);
@@ -514,18 +514,18 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
             }
         }
 
-        public async Task<(DailyReportResponse DailyReport, string ErrorMessage)> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(DailyReportResponse DailyReport, string ErrorMessage)> GetDailyReportById(Guid dailyReportId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var dailyReport = await _dailyReportRepository.GetById(id, checkError);
+            var dailyReport = await _dailyReportRepository.GetById(dailyReportId, checkError);
             if (checkError.Value?.IsError == true)
                 return (null, $"Lỗi khi lấy thông tin báo cáo hàng ngày: {checkError.Value.Message}");
             if (dailyReport == null)
                 return (null, "Không tìm thấy báo cáo hàng ngày.");
 
-            var foodReports = await _foodReportRepository.GetQueryable(x => x.ReportId == id && x.IsActive).ToListAsync(cancellationToken);
-            var medicineReports = await _medicineReportRepository.GetQueryable(x => x.ReportId == id && x.IsActive).ToListAsync(cancellationToken);
-            var imageReports = await _imageDailyReportRepository.GetQueryable(x => x.DailyReportId == id && x.IsActive).ToListAsync(cancellationToken);
+            var foodReports = await _foodReportRepository.GetQueryable(x => x.ReportId == dailyReportId && x.IsActive).ToListAsync(cancellationToken);
+            var medicineReports = await _medicineReportRepository.GetQueryable(x => x.ReportId == dailyReportId && x.IsActive).ToListAsync(cancellationToken);
+            var imageReports = await _imageDailyReportRepository.GetQueryable(x => x.DailyReportId == dailyReportId && x.IsActive).ToListAsync(cancellationToken);
 
             var response = new DailyReportResponse
             {
@@ -560,7 +560,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
             return (response, null);
         }
 
-        public async Task<(List<DailyReportResponse> DailyReports, string ErrorMessage)> GetAllAsync(
+        public async Task<(List<DailyReportResponse> DailyReports, string ErrorMessage)> GetDailyReportByLiveStockCircle(
             Guid? livestockCircleId = null, CancellationToken cancellationToken = default)
         {
             try
@@ -618,7 +618,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
             }
         }
 
-        public async Task<(PaginationSet<FoodReportResponse> Result, string ErrorMessage)> GetFoodReportDetailsAsync(
+        public async Task<(PaginationSet<FoodReportResponse> Result, string ErrorMessage)> GetFoodReportDetails(
              Guid reportId,
              ListingRequest request,
              CancellationToken cancellationToken = default)
@@ -679,7 +679,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
             }
         }
 
-        public async Task<(PaginationSet<MedicineReportResponse> Result, string ErrorMessage)> GetMedicineReportDetailsAsync(
+        public async Task<(PaginationSet<MedicineReportResponse> Result, string ErrorMessage)> GetMedicineReportDetails(
             Guid reportId,
             ListingRequest request,
             CancellationToken cancellationToken = default)
@@ -740,7 +740,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
             }
         }
 
-    public async Task<(PaginationSet<DailyReportResponse> Result, string ErrorMessage)> GetPaginatedListAsync(
+    public async Task<(PaginationSet<DailyReportResponse> Result, string ErrorMessage)> GetPaginatedDailyReportList(
                 ListingRequest request,
                 CancellationToken cancellationToken = default)
         {
@@ -835,7 +835,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
             }
         }
 
-        public async Task<(bool HasReport, string ErrorMessage)> HasDailyReportTodayAsync(Guid livestockCircleId, CancellationToken cancellationToken = default)
+        public async Task<(bool HasReport, string ErrorMessage)> HasDailyReportToday(Guid livestockCircleId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -861,7 +861,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
             }
         }
 
-        public async Task<(DailyReportResponse DailyReport, string ErrorMessage)> GetTodayDailyReportAsync(Guid livestockCircleId, CancellationToken cancellationToken = default)
+        public async Task<(DailyReportResponse DailyReport, string ErrorMessage)> GetTodayDailyReport(Guid livestockCircleId, CancellationToken cancellationToken = default)
         {
             try
             {

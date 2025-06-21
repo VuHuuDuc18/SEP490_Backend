@@ -24,13 +24,11 @@ namespace SEP490_BackendAPI.Controllers
         /// <summary>
         /// Tạo một loại thuốc mới, bao gồm upload ảnh và thumbnail.
         /// </summary>
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateMedicineRequest request, string folder, CancellationToken cancellationToken = default)
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateMedicine([FromBody] CreateMedicineRequest request, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrEmpty(folder))
-                return BadRequest("Tên folder là bắt buộc.");
 
-            var (success, errorMessage) = await _medicineService.CreateAsync(request, folder, cancellationToken);
+            var (success, errorMessage) = await _medicineService.CreateMedicine(request, cancellationToken);
             if (!success)
                 return BadRequest(errorMessage);
             return Ok();
@@ -39,13 +37,19 @@ namespace SEP490_BackendAPI.Controllers
         /// <summary>
         /// Cập nhật thông tin một loại thuốc, bao gồm upload ảnh và thumbnail.
         /// </summary>
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateMedicineRequest request, string folder, CancellationToken cancellationToken = default)
+        [HttpPut("update/{MedicineId}")]
+        public async Task<IActionResult> UpdateMedicine(Guid MedicineId, [FromBody] UpdateMedicineRequest request, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrEmpty(folder))
-                return BadRequest("Tên folder là bắt buộc.");
+            var (success, errorMessage) = await _medicineService.UpdateMedicine(MedicineId, request, cancellationToken);
+            if (!success)
+                return BadRequest(errorMessage);
+            return Ok();
+        }
 
-            var (success, errorMessage) = await _medicineService.UpdateAsync(id, request, folder, cancellationToken);
+        [HttpDelete("disable/{MedicineId}")]
+        public async Task<IActionResult> DisableMedicine(Guid MedicineId, CancellationToken cancellationToken = default)
+        {
+            var (success, errorMessage) = await _medicineService.DisableMedicine(MedicineId,cancellationToken);
             if (!success)
                 return BadRequest(errorMessage);
             return Ok();
@@ -54,10 +58,10 @@ namespace SEP490_BackendAPI.Controllers
         /// <summary>
         /// Lấy thông tin một loại thuốc theo ID.
         /// </summary>
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
+        [HttpGet("getMedicineById/{MedicineId}")]
+        public async Task<IActionResult> GetMedicineById(Guid id, CancellationToken cancellationToken = default)
         {
-            var (medicine, errorMessage) = await _medicineService.GetByIdAsync(id, cancellationToken);
+            var (medicine, errorMessage) = await _medicineService.GetMedicineById(id, cancellationToken);
             if (medicine == null)
                 return NotFound(errorMessage ?? "Không tìm thấy thuốc.");
             return Ok(medicine);
@@ -66,10 +70,10 @@ namespace SEP490_BackendAPI.Controllers
         /// <summary>
         /// Lấy danh sách tất cả loại thuốc đang hoạt động với bộ lọc tùy chọn.
         /// </summary>
-        [HttpGet]
-        public async Task<IActionResult> GetAll(string medicineName = null, Guid? medicineCategoryId = null, CancellationToken cancellationToken = default)
+        [HttpGet("getMedicineByCategory")]
+        public async Task<IActionResult> GetMedicineByCategory(string medicineName = null, Guid? medicineCategoryId = null, CancellationToken cancellationToken = default)
         {
-            var (medicines, errorMessage) = await _medicineService.GetAllAsync(medicineName, medicineCategoryId, cancellationToken);
+            var (medicines, errorMessage) = await _medicineService.GetMedicineByCategory(medicineName, medicineCategoryId, cancellationToken);
             if (medicines == null)
                 return NotFound(errorMessage ?? "Không tìm thấy danh sách thuốc.");
             return Ok(medicines);
@@ -78,10 +82,10 @@ namespace SEP490_BackendAPI.Controllers
         /// <summary>
         /// Lấy danh sách phân trang tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn.
         /// </summary>
-        [HttpPost("medicines/paginated")]
+        [HttpPost("getPaginatedMedicineList")]
         public async Task<IActionResult> GetPaginatedMedicines([FromBody] ListingRequest request)
         {
-            var (result, errorMessage) = await _medicineService.GetPaginatedListAsync(request);
+            var (result, errorMessage) = await _medicineService.GetPaginatedMedicineList(request);
             if (errorMessage != null)
                 return BadRequest(errorMessage);
             return Ok(result);

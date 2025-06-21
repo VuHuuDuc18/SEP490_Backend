@@ -15,32 +15,32 @@ namespace Domain.Services.Interfaces
         /// <summary>
         /// Tạo một giống loài mới với kiểm tra hợp lệ, bao gồm upload ảnh và thumbnail lên Cloudinary trong folder được chỉ định.
         /// </summary>
-        Task<(bool Success, string ErrorMessage)> CreateAsync(CreateBreedRequest request, string folder, CancellationToken cancellationToken = default);
+        Task<(bool Success, string ErrorMessage)> CreateBreed(CreateBreedRequest request, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Cập nhật thông tin một giống loài, bao gồm upload ảnh và thumbnail lên Cloudinary trong folder được chỉ định.
         /// </summary>
-        Task<(bool Success, string ErrorMessage)> UpdateAsync(Guid id, UpdateBreedRequest request, string folder, CancellationToken cancellationToken = default);
+        Task<(bool Success, string ErrorMessage)> UpdateBreed(Guid BreedId, UpdateBreedRequest request,CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Xóa mềm một giống loài bằng cách đặt IsActive thành false.
         /// </summary>
-        Task<(bool Success, string ErrorMessage)> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<(bool Success, string ErrorMessage)> DisableBreed(Guid BreedId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Lấy thông tin một giống loài theo ID, bao gồm danh sách ảnh và thumbnail.
         /// </summary>
-        Task<(BreedResponse Breed, string ErrorMessage)> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<(BreedResponse Breed, string ErrorMessage)> GetBreedById(Guid BreedId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Lấy danh sách tất cả giống loài đang hoạt động với bộ lọc tùy chọn, bao gồm danh sách ảnh và thumbnail.
         /// </summary>
-        Task<(List<BreedResponse> Breeds, string ErrorMessage)> GetAllAsync(string breedName = null, Guid? breedCategoryId = null, CancellationToken cancellationToken = default);
+        Task<(List<BreedResponse> Breeds, string ErrorMessage)> GetBreedByCategory(string breedName = null, Guid? breedCategoryId = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Lấy danh sách phân trang tìm kiếm lọc tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn, bao gồm danh sách ảnh và thumbnail.
         /// </summary>
-        Task<(PaginationSet<BreedResponse> Result, string ErrorMessage)> GetPaginatedListAsync(
+        Task<(PaginationSet<BreedResponse> Result, string ErrorMessage)> GetPaginatedBreedList(
            ListingRequest request,
            CancellationToken cancellationToken = default);
     }

@@ -34,7 +34,7 @@ namespace Infrastructure.Services.Implements
         /// Tạo một chu kỳ chăn nuôi request số lượng con giống và chuồng của người gia công đến nhân viên
         /// phòng con giống.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> CreateAsync(CreateLivestockCircleRequest request, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> CreateLiveStockCircle(CreateLivestockCircleRequest request, CancellationToken cancellationToken = default)
         {
             if (request == null)
                 return (false, "Dữ liệu chu kỳ chăn nuôi không được null.");
@@ -94,13 +94,13 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Cập nhật thông tin một chu kỳ chăn nuôi.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> UpdateAsync(Guid id, UpdateLivestockCircleRequest request, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> UpdateLiveStockCircle(Guid livestockCircleId, UpdateLivestockCircleRequest request, CancellationToken cancellationToken = default)
         {
             if (request == null)
                 return (false, "Dữ liệu chu kỳ chăn nuôi không được null.");
 
             var checkError = new Ref<CheckError>();
-            var existing = await _livestockCircleRepository.GetById(id, checkError);
+            var existing = await _livestockCircleRepository.GetById(livestockCircleId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin chu kỳ chăn nuôi: {checkError.Value.Message}");
 
@@ -121,7 +121,7 @@ namespace Infrastructure.Services.Implements
 
             // Kiểm tra xung đột tên với các chu kỳ đang hoạt động khác
             var exists = await _livestockCircleRepository.CheckExist(
-                x => x.LivestockCircleName == request.LivestockCircleName && x.Id != id && x.IsActive,
+                x => x.LivestockCircleName == request.LivestockCircleName && x.Id != livestockCircleId && x.IsActive,
                 checkError,
                 cancellationToken);
 
@@ -159,10 +159,10 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Xóa mềm một chu kỳ chăn nuôi bằng cách đặt IsActive thành false.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> DisableLiveStockCircle(Guid livestockCircleId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var livestockCircle = await _livestockCircleRepository.GetById(id, checkError);
+            var livestockCircle = await _livestockCircleRepository.GetById(livestockCircleId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin chu kỳ chăn nuôi: {checkError.Value.Message}");
 
@@ -185,10 +185,10 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Lấy thông tin một chu kỳ chăn nuôi theo ID.
         /// </summary>
-        public async Task<(LivestockCircleResponse Circle, string ErrorMessage)> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(LivestockCircleResponse Circle, string ErrorMessage)> GetLiveStockCircleById(Guid livestockCircleId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var livestockCircle = await _livestockCircleRepository.GetById(id, checkError);
+            var livestockCircle = await _livestockCircleRepository.GetById(livestockCircleId, checkError);
             if (checkError.Value?.IsError == true)
                 return (null, $"Lỗi khi lấy thông tin chu kỳ chăn nuôi: {checkError.Value.Message}");
 
@@ -218,7 +218,7 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Lấy danh sách tất cả chu kỳ chăn nuôi đang hoạt động với bộ lọc tùy chọn.
         /// </summary>
-        public async Task<(List<LivestockCircleResponse> Circles, string ErrorMessage)> GetAllAsync(
+        public async Task<(List<LivestockCircleResponse> Circles, string ErrorMessage)> GetLiveStockCircleByBarnIdAndStatus(
             string status = null,
             Guid? barnId = null,
             CancellationToken cancellationToken = default)
@@ -262,7 +262,7 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Lấy danh sách chu kỳ chăn nuôi theo ID của nhân viên kỹ thuật.
         /// </summary>
-        public async Task<(List<LivestockCircleResponse> Circles, string ErrorMessage)> GetByTechnicalStaffAsync(
+        public async Task<(List<LivestockCircleResponse> Circles, string ErrorMessage)> GetLiveStockCircleByTechnicalStaff(
             Guid technicalStaffId,
             CancellationToken cancellationToken = default)
         {
@@ -300,7 +300,7 @@ namespace Infrastructure.Services.Implements
         /// Lấy danh sách phân trang các chu kỳ chăn nuôi với lọc trực tiếp theo Status, 
         /// cùng với tìm kiếm và lọc bổ sung từ ListingRequest.
         /// </summary>
-        public async Task<(PaginationSet<LivestockCircleResponse> Result, string ErrorMessage)> GetPaginatedListByStatusAsync(
+        public async Task<(PaginationSet<LivestockCircleResponse> Result, string ErrorMessage)> GetPaginatedListByStatus(
             string status,
             ListingRequest request,
             CancellationToken cancellationToken = default)
@@ -370,8 +370,8 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Cập nhật trọng lượng trung bình (AverageWeight) của một chu kỳ chăn nuôi.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> UpdateAverageWeightAsync(
-            Guid id,
+        public async Task<(bool Success, string ErrorMessage)> UpdateAverageWeight(
+            Guid livestockCircleId,
             float averageWeight,
             CancellationToken cancellationToken = default)
         {
@@ -381,7 +381,7 @@ namespace Infrastructure.Services.Implements
                     return (false, "Trọng lượng trung bình không thể âm.");
 
                 var checkError = new Ref<CheckError>();
-                var livestockCircle = await _livestockCircleRepository.GetById(id, checkError);
+                var livestockCircle = await _livestockCircleRepository.GetById(livestockCircleId, checkError);
                 if (checkError.Value?.IsError == true)
                     return (false, $"Lỗi khi lấy thông tin chu kỳ chăn nuôi: {checkError.Value.Message}");
 
@@ -406,8 +406,8 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Thay đổi trạng thái (Status) của một chu kỳ chăn nuôi.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> ChangeStatusAsync(
-            Guid id,
+        public async Task<(bool Success, string ErrorMessage)> ChangeStatus(
+            Guid livestockCircleId,
             string status,
             CancellationToken cancellationToken = default)
         {
@@ -433,7 +433,7 @@ namespace Infrastructure.Services.Implements
                     return (false, $"Trạng thái không hợp lệ: {status}. Trạng thái hợp lệ: {string.Join(", ", validStatuses)}.");
 
                 var checkError = new Ref<CheckError>();
-                var livestockCircle = await _livestockCircleRepository.GetById(id, checkError);
+                var livestockCircle = await _livestockCircleRepository.GetById(livestockCircleId, checkError);
                 if (checkError.Value?.IsError == true)
                     return (false, $"Lỗi khi lấy thông tin chu kỳ chăn nuôi: {checkError.Value.Message}");
 

@@ -15,37 +15,55 @@ namespace SEP490_BackendAPI.Controllers
             _foodCategoryService = foodCategoryService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateCategoryRequest request)
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateFoodCategory([FromBody] CreateCategoryRequest request)
         {
-            var (success, errorMessage) = await _foodCategoryService.CreateAsync(request);
+            var (success, errorMessage) = await _foodCategoryService.CreateFoodCategory(request);
             if (!success)
                 return BadRequest(errorMessage);
             return Ok();
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCategoryRequest request)
+        [HttpPut("update/{FoodCategoryId}")]
+        public async Task<IActionResult> UpdateFoodCategory(Guid FoodCategoryId, [FromBody] UpdateCategoryRequest request)
         {
-            var (success, errorMessage) = await _foodCategoryService.UpdateAsync(id, request);
+            var (success, errorMessage) = await _foodCategoryService.UpdateFoodCategory(FoodCategoryId, request);
             if (!success)
                 return BadRequest(errorMessage);
             return Ok();
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        [HttpDelete("disable/{FoodCategoryId}")]
+        public async Task<IActionResult> DisableFoodCategory(Guid FoodCategoryId)
         {
-            var (category, errorMessage) = await _foodCategoryService.GetByIdAsync(id);
+            var (success, errorMessage) = await _foodCategoryService.DisableFoodCategory(FoodCategoryId);
+            if (!success)
+                return BadRequest(errorMessage);
+            return Ok();
+        }
+
+        [HttpGet("getFoodCategoryById/{FoodCategoryId}")]
+        public async Task<IActionResult> GetFoodCategoryById(Guid FoodCategoryId)
+        {
+            var (category, errorMessage) = await _foodCategoryService.GetFoodCategoryById(FoodCategoryId);
             if (category == null)
                 return NotFound(errorMessage);
             return Ok(category);
         }
 
-        [HttpPost("food-categories/paginated")]
+        [HttpGet("getFoodCategoryByName/{name}")]
+        public async Task<IActionResult> GetFoodCategoryByName(string name)
+        {
+            var (category, errorMessage) = await _foodCategoryService.GetFoodCategoryByName(name);
+            if (category == null)
+                return NotFound(errorMessage);
+            return Ok(category);
+        }
+
+        [HttpPost("getPaginatedFoodCategories")]
         public async Task<IActionResult> GetPaginatedFoodCategories([FromBody] ListingRequest request)
         {
-            var (result, errorMessage) = await _foodCategoryService.GetPaginatedListAsync(request);
+            var (result, errorMessage) = await _foodCategoryService.GetPaginatedFoodCategoryList(request);
             if (errorMessage != null)
                 return BadRequest(errorMessage);
             return Ok(result);
