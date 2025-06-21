@@ -45,5 +45,11 @@ namespace Domain.Services.Interfaces
         /// <summary>
         /// Thay đổi status của billl.
         /// </summary>
+        Task<(bool Success, string ErrorMessage)> ChangeBillStatusAsync(
+           Guid billId, string newStatus, CancellationToken cancellationToken = default);
+
+        // Lấy danh sách hóa đơn chỉ chứa các mục hóa đơn thuộc loại được chỉ định (Food, Medicine hoặc Breed)
+        Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetBillsByItemTypeAsync(
+           ListingRequest request, string itemType, CancellationToken cancellationToken = default);
     }
 }

@@ -173,7 +173,7 @@ namespace Infrastructure.Services.Implements
                 var existingImages = await _imageBreedRepository.GetQueryable(x => x.BreedId == id).ToListAsync(cancellationToken);
                 foreach (var image in existingImages)
                 {
-                  //  _imageBreedRepository.Delete(image);
+                    _imageBreedRepository.Remove(image);
                     await _cloudinaryCloudService.DeleteImage(image.ImageLink, cancellationToken);
                 }
                 await _imageBreedRepository.CommitAsync(cancellationToken);
@@ -246,7 +246,7 @@ namespace Infrastructure.Services.Implements
                 var images = await _imageBreedRepository.GetQueryable(x => x.BreedId == id).ToListAsync(cancellationToken);
                 foreach (var image in images)
                 {
-                    //_imageBreedRepository.Delete(image);
+                    _imageBreedRepository.Remove(image);
                     await _cloudinaryCloudService.DeleteImage(image.ImageLink, cancellationToken);
                 }
                 await _imageBreedRepository.CommitAsync(cancellationToken);

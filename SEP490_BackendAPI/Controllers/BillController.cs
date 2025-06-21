@@ -65,10 +65,19 @@ namespace SEP490_BackendAPI.Controllers
             return Ok(result);
         }
 
-        [HttpGet("{billId}/items")]
+        [HttpPost("items-paginated")]
         public async Task<IActionResult> GetBillItems(Guid billId, [FromBody] ListingRequest request)
         {
             var (items, errorMessage) = await _billService.GetBillItemsByBillIdAsync(billId, request);
+            if (errorMessage != null)
+                return BadRequest(new { error = errorMessage });
+            return Ok(items);
+        }
+
+        [HttpPost("itemType")]
+        public async Task<IActionResult> GetBillsByItemTypeAsync(string typeItem, [FromBody] ListingRequest request)
+        {
+            var (items, errorMessage) = await _billService.GetBillsByItemTypeAsync(request, typeItem);
             if (errorMessage != null)
                 return BadRequest(new { error = errorMessage });
             return Ok(items);
