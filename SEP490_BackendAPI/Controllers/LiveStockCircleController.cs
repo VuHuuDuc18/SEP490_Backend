@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Security.Claims;
+using Entities.EntityModel;
 
 namespace SEP490_BackendAPI.Controllers
 {
@@ -116,14 +118,26 @@ namespace SEP490_BackendAPI.Controllers
                 return BadRequest(errorMessage);
             return Ok();
         }
-        [HttpPost("technical-staff/assignedbarn/{technicalStaffId}")]
-        public async Task<IActionResult> GetAssignedBarn(Guid technicalStaffId, [FromBody]ListingRequest req)
+        [HttpPost("technical-staff/assignedbarn")]
+        public async Task<IActionResult> GetAssignedBarn([FromBody] ListingRequest req)
         {
-            var result = await _livestockCircleService.GetAssignedBarn(technicalStaffId, req);
-            if (result.Items == null)
-                return StatusCode(StatusCodes.Status500InternalServerError);
+            //Guid technicalStaffId;
+            try
+            {
+                Guid.TryParse(User.FindFirst("uid")?.Value, out Guid technicalStaffId);
+                var result = await _livestockCircleService.GetAssignedBarn(technicalStaffId, req);
+                if (result.Items == null)
+                    return StatusCode(StatusCodes.Status500InternalServerError);
 
-            return Ok(result);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("User không hợp lệ");
+            }
+
+
+
         }
     }
 }
