@@ -17,6 +17,7 @@ using Domain.Dto.Response;
 using Domain.Dto.Request;
 using Domain.Extensions;
 using Infrastructure.Extensions;
+using Domain.Dto.Response.Breed;
 
 namespace Infrastructure.Services.Implements
 {
@@ -277,11 +278,17 @@ namespace Infrastructure.Services.Implements
                 return (null, "Không tìm thấy thức ăn.");
 
             var images = await _imageFoodRepository.GetQueryable(x => x.FoodId == FoodId).ToListAsync(cancellationToken);
+            var foodCategoryResponse = new FoodCategoryResponse()
+            {
+                Id = food.FoodCategory.Id,
+                Name = food.FoodCategory.Name,
+                Description = food.FoodCategory.Description
+            };
             var response = new FoodResponse
             {
                 Id = food.Id,
                 FoodName = food.FoodName,
-                FoodCategoryId = food.FoodCategoryId,
+                FoodCategory = foodCategoryResponse,
                 Stock = food.Stock,
                 WeighPerUnit = food.WeighPerUnit,
                 IsActive = food.IsActive,
@@ -314,12 +321,18 @@ namespace Infrastructure.Services.Implements
                 var responses = new List<FoodResponse>();
                 foreach (var food in foods)
                 {
+                    var foodCategoryResponse = new FoodCategoryResponse()
+                    {
+                        Id = food.FoodCategory.Id,
+                        Name = food.FoodCategory.Name,
+                        Description = food.FoodCategory.Description
+                    };
                     var images = await _imageFoodRepository.GetQueryable(x => x.FoodId == food.Id).ToListAsync(cancellationToken);
                     responses.Add(new FoodResponse
                     {
                         Id = food.Id,
                         FoodName = food.FoodName,
-                        FoodCategoryId = food.FoodCategoryId,
+                        FoodCategory = foodCategoryResponse,
                         Stock = food.Stock,
                         WeighPerUnit = food.WeighPerUnit,
                         IsActive = food.IsActive,
@@ -370,12 +383,18 @@ namespace Infrastructure.Services.Implements
                 var responses = new List<FoodResponse>();
                 foreach (var food in paginationResult.Items)
                 {
+                    var foodCategoryResponse = new FoodCategoryResponse()
+                    {
+                        Id = food.FoodCategory.Id,
+                        Name = food.FoodCategory.Name,
+                        Description = food.FoodCategory.Description
+                    };
                     var foodImages = imageGroups.GetValueOrDefault(food.Id, new List<ImageFood>());
                     responses.Add(new FoodResponse
                     {
                         Id = food.Id,
                         FoodName = food.FoodName,
-                        FoodCategoryId = food.FoodCategoryId,
+                        FoodCategory = foodCategoryResponse,
                         Stock = food.Stock,
                         WeighPerUnit = food.WeighPerUnit,
                         IsActive = food.IsActive,

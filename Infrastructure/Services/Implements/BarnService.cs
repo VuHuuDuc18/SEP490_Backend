@@ -216,13 +216,22 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
             if (barn == null)
                 return (null, "Không tìm thấy chuồng trại.");
 
+            var wokerResponse = new WokerResponse()
+            {
+                Id = barn.Worker.Id,
+                FirstName = barn.Worker.FirstName,
+                LastName = barn.Worker.LastName,
+                MiddleName = barn.Worker.MiddleName,
+                Email = barn.Worker.Email
+            };
+          
             var response = new BarnResponse
             {
                 Id = barn.Id,
                 BarnName = barn.BarnName,
                 Address = barn.Address,
                 Image = barn.Image,
-                WorkerId = barn.WorkerId,
+                Worker = wokerResponse,
                 IsActive = barn.IsActive
             };
             return (response, null);
@@ -246,13 +255,22 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                 var responses = new List<BarnResponse>();
                 foreach (var barn in barns)
                 {
+                    var wokerResponse = new WokerResponse()
+                    {
+                        Id = barn.Worker.Id,
+                        FirstName = barn.Worker.FirstName,
+                        LastName = barn.Worker.LastName,
+                        MiddleName = barn.Worker.MiddleName,
+                        Email = barn.Worker.Email
+                    };
+
                     responses.Add(new BarnResponse
                     {
                         Id = barn.Id,
                         BarnName = barn.BarnName,
                         Address = barn.Address,
                         Image = barn.Image,
-                        WorkerId = barn.WorkerId,
+                        Worker = wokerResponse,
                         IsActive = barn.IsActive
                     });
                 }
@@ -294,13 +312,22 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                 var responses = new List<BarnResponse>();
                 foreach (var barn in paginationResult.Items)
                 {
+                    var wokerResponse = new WokerResponse()
+                    {
+                        Id = barn.Worker.Id,
+                        FirstName = barn.Worker.FirstName,
+                        LastName = barn.Worker.LastName,
+                        MiddleName = barn.Worker.MiddleName,
+                        Email = barn.Worker.Email
+                    };
+
                     responses.Add(new BarnResponse
                     {
                         Id = barn.Id,
                         BarnName = barn.BarnName,
                         Address = barn.Address,
                         Image = barn.Image,
-                        WorkerId = barn.WorkerId,
+                        Worker = wokerResponse,
                         IsActive = barn.IsActive
                     });
                 }

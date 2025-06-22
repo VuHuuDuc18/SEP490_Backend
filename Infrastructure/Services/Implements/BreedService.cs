@@ -269,11 +269,18 @@ namespace Infrastructure.Services.Implements
                 return (null, "Không tìm thấy giống loài.");
 
             var images = await _imageBreedRepository.GetQueryable(x => x.BreedId == BreedId).ToListAsync(cancellationToken);
+
+            var breedCategoryResponse = new BreedCategoryResponse()
+            {
+                Id = breed.BreedCategory.Id,
+                Name = breed.BreedCategory.Name,
+                Description = breed.BreedCategory.Description
+            };
             var response = new BreedResponse
             {
                 Id = breed.Id,
                 BreedName = breed.BreedName,
-                BreedCategoryId = breed.BreedCategoryId,
+                BreedCategory = breedCategoryResponse,
                 Stock = breed.Stock,
                 IsActive = breed.IsActive,
                 ImageLinks = images.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
@@ -305,12 +312,18 @@ namespace Infrastructure.Services.Implements
                 var responses = new List<BreedResponse>();
                 foreach (var breed in breeds)
                 {
+                    var breedCategoryResponse = new BreedCategoryResponse()
+                    {
+                        Id = breed.BreedCategory.Id,
+                        Name = breed.BreedCategory.Name,
+                        Description = breed.BreedCategory.Description
+                    };
                     var images = await _imageBreedRepository.GetQueryable(x => x.BreedId == breed.Id).ToListAsync(cancellationToken);
                     responses.Add(new BreedResponse
                     {
                         Id = breed.Id,
                         BreedName = breed.BreedName,
-                        BreedCategoryId = breed.BreedCategoryId,
+                        BreedCategory = breedCategoryResponse,
                         Stock = breed.Stock,
                         IsActive = breed.IsActive,
                         ImageLinks = images.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
@@ -358,12 +371,18 @@ namespace Infrastructure.Services.Implements
                 var responses = new List<BreedResponse>();
                 foreach (var breed in paginationResult.Items)
                 {
+                    var breedCategoryResponse = new BreedCategoryResponse()
+                    {
+                        Id = breed.BreedCategory.Id,
+                        Name = breed.BreedCategory.Name,
+                        Description = breed.BreedCategory.Description
+                    };
                     var breedImages = imageGroups.GetValueOrDefault(breed.Id, new List<ImageBreed>());
                     responses.Add(new BreedResponse
                     {
                         Id = breed.Id,
                         BreedName = breed.BreedName,
-                        BreedCategoryId = breed.BreedCategoryId,
+                        BreedCategory = breedCategoryResponse,
                         Stock = breed.Stock,
                         IsActive = breed.IsActive,
                         ImageLinks = breedImages.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
