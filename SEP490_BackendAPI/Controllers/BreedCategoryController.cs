@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/breed-categories")]
     public class BreedCategoryController : ControllerBase
     {
         private readonly IBreedCategoryService _breedCategoryService;
@@ -23,10 +23,10 @@ namespace Controllers
         /// <summary>
         /// Tạo một danh mục giống loài mới.
         /// </summary>
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateCategoryRequest request, CancellationToken cancellationToken = default)
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateBreedCategory([FromBody] CreateCategoryRequest request, CancellationToken cancellationToken = default)
         {
-            var (success, errorMessage) = await _breedCategoryService.CreateAsync(request, cancellationToken);
+            var (success, errorMessage) = await _breedCategoryService.CreateBreedCategory(request, cancellationToken);
             if (!success)
                 return BadRequest(errorMessage);
             return Ok();
@@ -35,10 +35,19 @@ namespace Controllers
         /// <summary>
         /// Cập nhật thông tin một danh mục giống loài.
         /// </summary>
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCategoryRequest request, CancellationToken cancellationToken = default)
+        [HttpPut("update/{BreedCategoryId}")]
+        public async Task<IActionResult> UpdateBreedCategory(Guid BreedCategoryId, [FromBody] UpdateCategoryRequest request, CancellationToken cancellationToken = default)
         {
-            var (success, errorMessage) = await _breedCategoryService.UpdateAsync(id, request, cancellationToken);
+            var (success, errorMessage) = await _breedCategoryService.UpdateBreedCategory(BreedCategoryId, request, cancellationToken);
+            if (!success)
+                return BadRequest(errorMessage);
+            return Ok();
+        }
+
+        [HttpDelete("disable/{BreedCategoryId}")]
+        public async Task<IActionResult> DisableBreedCategory(Guid BreedCategoryId, CancellationToken cancellationToken = default)
+        {
+            var (success, errorMessage) = await _breedCategoryService.DisableBreedCategory(BreedCategoryId,  cancellationToken);
             if (!success)
                 return BadRequest(errorMessage);
             return Ok();
@@ -47,31 +56,31 @@ namespace Controllers
         /// <summary>
         /// Lấy thông tin một danh mục giống loài theo ID.
         /// </summary>
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
+        [HttpGet("getBreedCategoryById/{BreedCategoryId}")]
+        public async Task<IActionResult> GetBreedCategoryById(Guid BreedCategoryId, CancellationToken cancellationToken = default)
         {
-            var (breedCategory, errorMessage) = await _breedCategoryService.GetByIdAsync(id, cancellationToken);
+            var (breedCategory, errorMessage) = await _breedCategoryService.GetBreedCategoryById(BreedCategoryId, cancellationToken);
             if (breedCategory == null)
                 return NotFound(errorMessage ?? "Không tìm thấy danh mục giống loài.");
             return Ok(breedCategory);
         }
 
         /// <summary>
-        /// Lấy danh sách tất cả danh mục giống loài đang hoạt động với bộ lọc tùy chọn.
+        /// Lấy danh sách tất cả danh mục giống loài đang hoạt động với bộ lọc name.
         /// </summary>
-        [HttpGet]
-        public async Task<IActionResult> GetAll(string name = null, CancellationToken cancellationToken = default)
+        [HttpGet("getBreedCategoryByName/{name}")]
+        public async Task<IActionResult> GetBreedCategoryByName(string name = null, CancellationToken cancellationToken = default)
         {
-            var (breedCategories, errorMessage) = await _breedCategoryService.GetAllAsync(name, cancellationToken);
+            var (breedCategories, errorMessage) = await _breedCategoryService.GetBreedCategoryByName(name, cancellationToken);
             if (breedCategories == null)
                 return NotFound(errorMessage ?? "Không tìm thấy danh sách danh mục giống loài.");
             return Ok(breedCategories);
         }
 
-        [HttpPost("breed-categories/paginated")]
-        public async Task<IActionResult> GetPaginatedMedicineCategories([FromBody] ListingRequest request)
+        [HttpPost("getPaginatedBreedCategoryList")]
+        public async Task<IActionResult> GetPaginatedBreedCategoryList([FromBody] ListingRequest request)
         {
-            var (result, errorMessage) = await _breedCategoryService.GetPaginatedListAsync(request);
+            var (result, errorMessage) = await _breedCategoryService.GetPaginatedBreedCategoryList(request);
             if (errorMessage != null)
                 return BadRequest(errorMessage);
             return Ok(result);

@@ -53,12 +53,12 @@ namespace Infrastructure.Identity.Contexts
             base.OnModelCreating(builder);
             builder.Entity<User>(entity =>
             {
-                entity.ToTable(name: "User");
+                entity.ToTable(name: "Users");
             });
 
             builder.Entity<Role>(entity =>
             {
-                entity.ToTable(name: "Role");
+                entity.ToTable(name: "Roles");
             });
             builder.Entity<IdentityUserRole<Guid>>(entity =>
             {

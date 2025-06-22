@@ -12,38 +12,44 @@ namespace Domain.Services.Interfaces
 {
     public interface IBillService
     {
-        Task<(bool Success, string ErrorMessage)> CreateAsync(
+        Task<(bool Success, string ErrorMessage)> CreateBill(
             CreateBillRequest request,
             CancellationToken cancellationToken = default);
 
-        Task<(bool Success, string ErrorMessage)> UpdateAsync(
-            Guid id,
+        Task<(bool Success, string ErrorMessage)> UpdateBill(
+            Guid billId,
             UpdateBillRequest request,
             CancellationToken cancellationToken = default);
 
-        Task<(bool Success, string ErrorMessage)> DeleteBillItemAsync(
+        Task<(bool Success, string ErrorMessage)> DisableBillItem(
             Guid billItemId,
             CancellationToken cancellationToken = default);
 
-        Task<(bool Success, string ErrorMessage)> DisableAsync(
+        Task<(bool Success, string ErrorMessage)> DisableBill(
             Guid id,
             CancellationToken cancellationToken = default);
 
-        Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetPaginatedListAsync(
+        Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetPaginatedBillList(
             ListingRequest request,
             CancellationToken cancellationToken = default);
 
-        Task<(PaginationSet<BillItemResponse> Result, string ErrorMessage)> GetBillItemsByBillIdAsync(
+        Task<(PaginationSet<BillItemResponse> Result, string ErrorMessage)> GetBillItemsByBillId(
             Guid billId,
             ListingRequest request,
             CancellationToken cancellationToken = default);
 
-        Task<(BillResponse Bill, string ErrorMessage)> GetByIdAsync(
-            Guid id,
+        Task<(BillResponse Bill, string ErrorMessage)> GetBillById(
+            Guid billId,
             CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Thay đổi status của billl.
         /// </summary>
+        Task<(bool Success, string ErrorMessage)> ChangeBillStatus(
+           Guid billId, string newStatus, CancellationToken cancellationToken = default);
+
+        // Lấy danh sách hóa đơn chỉ chứa các mục hóa đơn thuộc loại được chỉ định (Food, Medicine hoặc Breed)
+        Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetBillsByItemType(
+           ListingRequest request, string itemType, CancellationToken cancellationToken = default);
     }
 }
