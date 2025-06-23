@@ -475,7 +475,7 @@ namespace Infrastructure.Services.Implements
             return await _livestockCircleRepository.CommitAsync() > 0;
         }
 
-        public async Task<PaginationSet<LivestockCircleResponse>> GetAssignedBarn(Guid tsid, ListingRequest request
+        public async Task<PaginationSet<LivestockCircleResponse>> GetAssignedBarn(Guid tsid, ListingRequest request)
         {
             try
             {
