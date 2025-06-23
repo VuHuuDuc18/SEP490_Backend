@@ -124,6 +124,20 @@ namespace Infrastructure.Services.Implements
                 throw new Exception("Kế khoạch không tồn tại");
             }
 
+            var barnPlanFood = _bpfoodrepo.GetQueryable(x => x.IsActive).Where(x => x.BarnPlanId == id).ToList();
+            foreach (var it in barnPlanFood)
+            {
+                it.IsActive = false;
+            }
+            await _bpfoodrepo.CommitAsync();
+
+            var barnPlanMedicine = _bpmedicinerepo.GetQueryable(x => x.IsActive).Where(x => x.BarnPlanId == id).ToList();
+            foreach (var it in barnPlanMedicine)
+            {
+                it.IsActive = false;
+            }
+            await _bpmedicinerepo.CommitAsync();
+
             if (deleteItem.EndDate >= DateTime.Now)
             {
                 deleteItem.IsActive = false;
@@ -150,16 +164,20 @@ namespace Infrastructure.Services.Implements
                 Note = barnPlanDetail.Note,
                 foodPlans = await _bpfoodrepo.GetQueryable(x => x.IsActive)
                                         .Where(x => x.BarnPlanId == id)
+                                        .Include(x => x.Food)
                                         .Select(it => new Domain.Dto.Response.BarnPlan.FoodPlan()
                                         {
+                                            FoodId = it.FoodId,
                                             FoodName = it.Food.FoodName,
                                             Note = it.Note,
                                             Stock = it.Stock
                                         }).ToListAsync(),
                 medicinePlans = await _bpmedicinerepo.GetQueryable(x => x.IsActive)
                                         .Where(x => x.BarnPlanId == id)
+                                        .Include(x=>x.Medicine)
                                         .Select(it => new Domain.Dto.Response.BarnPlan.MedicinePlan()
                                         {
+                                            MedicineId = it.MedicineId,
                                             MedicineName = it.Medicine.MedicineName,
                                             Note = it.Note,
                                             Stock = it.Stock
