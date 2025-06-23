@@ -27,7 +27,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: your-username/lcfm-api
+        images: nhtxd/sep490_backend-api
         tags: |
           type=ref,event=branch
           type=ref,event=pr
