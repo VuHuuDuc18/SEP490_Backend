@@ -13,6 +13,8 @@ namespace Entities.EntityModel
         public int GoodUnit { get; set; }
         public int BadUnit { get; set; }
         public string Note { get; set; }
+        public int AgeInDays { get; set; } 
+        public string Status { get; set; }
         public virtual LivestockCircle LivestockCircle { get; set; }
     }
 }

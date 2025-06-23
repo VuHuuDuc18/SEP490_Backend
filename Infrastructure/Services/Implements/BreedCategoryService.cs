@@ -30,7 +30,7 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Tạo một danh mục giống mới với kiểm tra hợp lệ.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> CreateAsync(CreateCategoryRequest request, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> CreateBreedCategory(CreateCategoryRequest request, CancellationToken cancellationToken = default)
         {
             if (request == null)
                 return (false, "Dữ liệu danh mục giống không được null.");
@@ -77,13 +77,13 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Cập nhật thông tin một danh mục giống.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> UpdateAsync(Guid id, UpdateCategoryRequest request, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> UpdateBreedCategory(Guid BreedCategoryId, UpdateCategoryRequest request, CancellationToken cancellationToken = default)
         {
             if (request == null)
                 return (false, "Dữ liệu danh mục giống không được null.");
 
             var checkError = new Ref<CheckError>();
-            var existing = await _breedCategoryRepository.GetById(id, checkError);
+            var existing = await _breedCategoryRepository.GetById(BreedCategoryId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin danh mục giống: {checkError.Value.Message}");
 
@@ -100,7 +100,7 @@ namespace Infrastructure.Services.Implements
 
             // Kiểm tra xung đột tên với các danh mục đang hoạt động khác
             var exists = await _breedCategoryRepository.CheckExist(
-                x => x.Name == request.Name && x.Id != id && x.IsActive,
+                x => x.Name == request.Name && x.Id != BreedCategoryId && x.IsActive,
                 checkError,
                 cancellationToken);
 
@@ -128,10 +128,10 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Xóa mềm một danh mục giống bằng cách đặt IsActive thành false.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> DisableBreedCategory(Guid BreedCategoryId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var breedCategory = await _breedCategoryRepository.GetById(id, checkError);
+            var breedCategory = await _breedCategoryRepository.GetById(BreedCategoryId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin danh mục giống: {checkError.Value.Message}");
 
@@ -140,7 +140,7 @@ namespace Infrastructure.Services.Implements
 
             try
             {
-                breedCategory.IsActive = false;
+                breedCategory.IsActive = !breedCategory.IsActive;
                 _breedCategoryRepository.Update(breedCategory);
                 await _breedCategoryRepository.CommitAsync(cancellationToken);
                 return (true, null);
@@ -154,10 +154,10 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Lấy thông tin một danh mục giống theo ID.
         /// </summary>
-        public async Task<(CategoryResponse Category, string ErrorMessage)> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(CategoryResponse Category, string ErrorMessage)> GetBreedCategoryById(Guid BreedCategoryId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var breedCategory = await _breedCategoryRepository.GetById(id, checkError);
+            var breedCategory = await _breedCategoryRepository.GetById(BreedCategoryId, checkError);
             if (checkError.Value?.IsError == true)
                 return (null, $"Lỗi khi lấy thông tin danh mục giống: {checkError.Value.Message}");
 
@@ -177,7 +177,7 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Lấy danh sách tất cả danh mục giống đang hoạt động với bộ lọc tùy chọn.
         /// </summary>
-        public async Task<(List<CategoryResponse> Categories, string ErrorMessage)> GetAllAsync(
+        public async Task<(List<CategoryResponse> Categories, string ErrorMessage)> GetBreedCategoryByName(
             string name = null,
             CancellationToken cancellationToken = default)
         {
@@ -207,7 +207,7 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Lấy danh sách phân trang các danh mục thuốc với tìm kiếm, lọc và sắp xếp.
         /// </summary>
-        public async Task<(PaginationSet<CategoryResponse> Result, string ErrorMessage)> GetPaginatedListAsync(
+        public async Task<(PaginationSet<CategoryResponse> Result, string ErrorMessage)> GetPaginatedBreedCategoryList(
             ListingRequest request,
             CancellationToken cancellationToken = default)
         {

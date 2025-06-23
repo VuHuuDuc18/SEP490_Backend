@@ -40,12 +40,10 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Tạo một giống loài mới với kiểm tra hợp lệ, bao gồm upload ảnh và thumbnail lên Cloudinary trong folder được chỉ định.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> CreateAsync(CreateBreedRequest request, string folder, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> CreateBreed(CreateBreedRequest request, CancellationToken cancellationToken = default)
         {
             if (request == null)
                 return (false, "Dữ liệu giống loài không được null.");
-            if (string.IsNullOrEmpty(folder))
-                return (false, "Tên folder là bắt buộc.");
 
             var validationResults = new List<ValidationResult>();
             var validationContext = new ValidationContext(request);
@@ -82,7 +80,7 @@ namespace Infrastructure.Services.Implements
                 {
 
                     var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
-                        request.Thumbnail, folder, _cloudinaryCloudService, cancellationToken);
+                        request.Thumbnail, "breed", _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {
@@ -102,7 +100,7 @@ namespace Infrastructure.Services.Implements
                     {
 
                         var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
-                                imageLink, folder, _cloudinaryCloudService, cancellationToken);
+                                imageLink, "breed", _cloudinaryCloudService, cancellationToken);
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
                             var imageBreed = new ImageBreed
@@ -128,15 +126,13 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Cập nhật thông tin một giống loài, bao gồm upload ảnh và thumbnail lên Cloudinary trong folder được chỉ định.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> UpdateAsync(Guid id, UpdateBreedRequest request, string folder, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> UpdateBreed(Guid BreedId, UpdateBreedRequest request, CancellationToken cancellationToken = default)
         {
             if (request == null)
                 return (false, "Dữ liệu giống loài không được null.");
-            if (string.IsNullOrEmpty(folder))
-                return (false, "Tên folder là bắt buộc.");
 
             var checkError = new Ref<CheckError>();
-            var existing = await _breedRepository.GetById(id, checkError);
+            var existing = await _breedRepository.GetById(BreedId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin giống loài: {checkError.Value.Message}");
 
@@ -151,7 +147,7 @@ namespace Infrastructure.Services.Implements
             }
 
             var exists = await _breedRepository.CheckExist(
-                x => x.BreedName == request.BreedName && x.BreedCategoryId == request.BreedCategoryId && x.Id != id && x.IsActive,
+                x => x.BreedName == request.BreedName && x.BreedCategoryId == request.BreedCategoryId && x.Id != BreedId && x.IsActive,
                 checkError,
                 cancellationToken);
 
@@ -170,10 +166,10 @@ namespace Infrastructure.Services.Implements
                 _breedRepository.Update(existing);
                 await _breedRepository.CommitAsync(cancellationToken);
 
-                var existingImages = await _imageBreedRepository.GetQueryable(x => x.BreedId == id).ToListAsync(cancellationToken);
+                var existingImages = await _imageBreedRepository.GetQueryable(x => x.BreedId == BreedId).ToListAsync(cancellationToken);
                 foreach (var image in existingImages)
                 {
-                  //  _imageBreedRepository.Delete(image);
+                    _imageBreedRepository.Remove(image);
                     await _cloudinaryCloudService.DeleteImage(image.ImageLink, cancellationToken);
                 }
                 await _imageBreedRepository.CommitAsync(cancellationToken);
@@ -181,13 +177,13 @@ namespace Infrastructure.Services.Implements
                 if (!string.IsNullOrEmpty(request.Thumbnail))
                 {
                     var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
-                        request.Thumbnail, folder, _cloudinaryCloudService, cancellationToken);
+                        request.Thumbnail, "breed", _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {
                         var imageBreed = new ImageBreed
                         {
-                            BreedId = id,
+                            BreedId = BreedId,
                             ImageLink = imageLink,
                             Thumnail = "true"
                         };
@@ -200,13 +196,13 @@ namespace Infrastructure.Services.Implements
                     foreach (var imageLink in request.ImageLinks)
                     {
                         var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
-           imageLink, folder, _cloudinaryCloudService, cancellationToken);
+           imageLink, "breed", _cloudinaryCloudService, cancellationToken);
 
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
                             var imageBreed = new ImageBreed
                             {
-                                BreedId = id,
+                                BreedId = BreedId,
                                 ImageLink = uploadedLink,
                                 Thumnail = "false"
                             };
@@ -227,10 +223,10 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Xóa mềm một giống loài bằng cách đặt IsActive thành false.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> DisableBreed(Guid BreedId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var breed = await _breedRepository.GetById(id, checkError);
+            var breed = await _breedRepository.GetById(BreedId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin giống loài: {checkError.Value.Message}");
 
@@ -239,17 +235,17 @@ namespace Infrastructure.Services.Implements
 
             try
             {
-                breed.IsActive = false;
+                breed.IsActive = !breed.IsActive;
                 _breedRepository.Update(breed);
                 await _breedRepository.CommitAsync(cancellationToken);
 
-                var images = await _imageBreedRepository.GetQueryable(x => x.BreedId == id).ToListAsync(cancellationToken);
-                foreach (var image in images)
-                {
-                    //_imageBreedRepository.Delete(image);
-                    await _cloudinaryCloudService.DeleteImage(image.ImageLink, cancellationToken);
-                }
-                await _imageBreedRepository.CommitAsync(cancellationToken);
+                //var images = await _imageBreedRepository.GetQueryable(x => x.BreedId == BreedId).ToListAsync(cancellationToken);
+                //foreach (var image in images)
+                //{
+                //    _imageBreedRepository.Remove(image);
+                //    await _cloudinaryCloudService.DeleteImage(image.ImageLink, cancellationToken);
+                //}
+                //await _imageBreedRepository.CommitAsync(cancellationToken);
 
                 return (true, null);
             }
@@ -262,10 +258,10 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Lấy thông tin một giống loài theo ID, bao gồm danh sách ảnh và thumbnail.
         /// </summary>
-        public async Task<(BreedResponse Breed, string ErrorMessage)> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(BreedResponse Breed, string ErrorMessage)> GetBreedById(Guid BreedId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var breed = await _breedRepository.GetById(id, checkError);
+            var breed = await _breedRepository.GetById(BreedId, checkError);
             if (checkError.Value?.IsError == true)
                 return (null, $"Lỗi khi lấy thông tin giống loài: {checkError.Value.Message}");
 
@@ -280,7 +276,7 @@ namespace Infrastructure.Services.Implements
                 Name = breed.BreedCategory.Name,
                 Description = breed.BreedCategory.Description
             };
-
+<
             var response = new BreedResponse
             {
                 Id = breed.Id,
@@ -298,7 +294,7 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Lấy danh sách tất cả giống loài đang hoạt động với bộ lọc tùy chọn, bao gồm danh sách ảnh và thumbnail.
         /// </summary>
-        public async Task<(List<BreedResponse> Breeds, string ErrorMessage)> GetAllAsync(
+        public async Task<(List<BreedResponse> Breeds, string ErrorMessage)> GetBreedByCategory(
             string breedName = null,
             Guid? breedCategoryId = null,
             CancellationToken cancellationToken = default)
@@ -344,7 +340,7 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-        public async Task<(PaginationSet<BreedResponse> Result, string ErrorMessage)> GetPaginatedListAsync(ListingRequest request, CancellationToken cancellationToken = default)
+        public async Task<(PaginationSet<BreedResponse> Result, string ErrorMessage)> GetPaginatedBreedList(ListingRequest request, CancellationToken cancellationToken = default)
         {
             try
             {

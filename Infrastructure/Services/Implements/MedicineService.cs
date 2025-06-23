@@ -40,12 +40,10 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Tạo một loại thuốc mới với kiểm tra hợp lệ, bao gồm upload ảnh và thumbnail lên Cloudinary trong folder được chỉ định.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> CreateAsync(CreateMedicineRequest request, string folder, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> CreateMedicine(CreateMedicineRequest request, CancellationToken cancellationToken = default)
         {
             if (request == null)
                 return (false, "Dữ liệu thuốc không được null.");
-            if (string.IsNullOrEmpty(folder))
-                return (false, "Tên folder là bắt buộc.");
 
             var validationResults = new List<ValidationResult>();
             var validationContext = new ValidationContext(request);
@@ -81,7 +79,7 @@ namespace Infrastructure.Services.Implements
                 if (!string.IsNullOrEmpty(request.Thumbnail))
                 {
                     var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
-      request.Thumbnail, folder, _cloudinaryCloudService, cancellationToken);
+      request.Thumbnail, "medicine", _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {
@@ -100,7 +98,7 @@ namespace Infrastructure.Services.Implements
                     foreach (var imageLink in request.ImageLinks)
                     {
                         var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
-           imageLink, folder, _cloudinaryCloudService, cancellationToken);
+           imageLink, "medicine", _cloudinaryCloudService, cancellationToken);
 
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
@@ -127,15 +125,13 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Cập nhật thông tin một loại thuốc, bao gồm upload ảnh và thumbnail lên Cloudinary trong folder được chỉ định.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> UpdateAsync(Guid id, UpdateMedicineRequest request, string folder, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> UpdateMedicine(Guid MedicineId, UpdateMedicineRequest request,CancellationToken cancellationToken = default)
         {
             if (request == null)
                 return (false, "Dữ liệu thuốc không được null.");
-            if (string.IsNullOrEmpty(folder))
-                return (false, "Tên folder là bắt buộc.");
 
             var checkError = new Ref<CheckError>();
-            var existing = await _medicineRepository.GetById(id, checkError);
+            var existing = await _medicineRepository.GetById(MedicineId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin thuốc: {checkError.Value.Message}");
 
@@ -150,7 +146,7 @@ namespace Infrastructure.Services.Implements
             }
 
             var exists = await _medicineRepository.CheckExist(
-                x => x.MedicineName == request.MedicineName && x.MedicineCategoryId == request.MedicineCategoryId && x.Id != id && x.IsActive,
+                x => x.MedicineName == request.MedicineName && x.MedicineCategoryId == request.MedicineCategoryId && x.Id != MedicineId && x.IsActive,
                 checkError,
                 cancellationToken);
 
@@ -169,10 +165,10 @@ namespace Infrastructure.Services.Implements
                 _medicineRepository.Update(existing);
                 await _medicineRepository.CommitAsync(cancellationToken);
 
-                var existingImages = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == id).ToListAsync(cancellationToken);
+                var existingImages = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == MedicineId).ToListAsync(cancellationToken);
                 foreach (var image in existingImages)
                 {
-                  //  _imageMedicineRepository.Delete(image);
+                    _imageMedicineRepository.Remove(image);
                     await _cloudinaryCloudService.DeleteImage(image.ImageLink, cancellationToken);
                 }
                 await _imageMedicineRepository.CommitAsync(cancellationToken);
@@ -180,13 +176,13 @@ namespace Infrastructure.Services.Implements
                 if (!string.IsNullOrEmpty(request.Thumbnail))
                 {
                     var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
-      request.Thumbnail, folder, _cloudinaryCloudService, cancellationToken);
+      request.Thumbnail, "medicine", _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {
                         var imageMedicine = new ImageMedicine
                         {
-                            MedicineId = id,
+                            MedicineId = MedicineId,
                             ImageLink = imageLink,
                             Thumnail = "true"
                         };
@@ -199,13 +195,13 @@ namespace Infrastructure.Services.Implements
                     foreach (var imageLink in request.ImageLinks)
                     {
                         var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
-         imageLink, folder, _cloudinaryCloudService, cancellationToken);
+         imageLink, "medicine", _cloudinaryCloudService, cancellationToken);
 
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
                             var imageMedicine = new ImageMedicine
                             {
-                                MedicineId = id,
+                                MedicineId = MedicineId,
                                 ImageLink = uploadedLink,
                                 Thumnail = "false"
                             };
@@ -226,10 +222,10 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Xóa mềm một loại thuốc bằng cách đặt IsActive thành false.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> DisableMedicine(Guid MedicineId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var medicine = await _medicineRepository.GetById(id, checkError);
+            var medicine = await _medicineRepository.GetById(MedicineId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin thuốc: {checkError.Value.Message}");
 
@@ -238,17 +234,17 @@ namespace Infrastructure.Services.Implements
 
             try
             {
-                medicine.IsActive = false;
+                medicine.IsActive = !medicine.IsActive;
                 _medicineRepository.Update(medicine);
                 await _medicineRepository.CommitAsync(cancellationToken);
 
-                var images = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == id).ToListAsync(cancellationToken);
-                foreach (var image in images)
-                {
-                  //  _imageMedicineRepository.Delete(image);
-                    await _cloudinaryCloudService.DeleteImage(image.ImageLink, cancellationToken);
-                }
-                await _imageMedicineRepository.CommitAsync(cancellationToken);
+                //var images = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == MedicineId).ToListAsync(cancellationToken);
+                //foreach (var image in images)
+                //{
+                //  //  _imageMedicineRepository.Remove(image);
+                //    await _cloudinaryCloudService.DeleteImage(image.ImageLink, cancellationToken);
+                //}
+                //await _imageMedicineRepository.CommitAsync(cancellationToken);
 
                 return (true, null);
             }
@@ -261,10 +257,10 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Lấy thông tin một loại thuốc theo ID, bao gồm danh sách ảnh và thumbnail.
         /// </summary>
-        public async Task<(MedicineResponse Medicine, string ErrorMessage)> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<(MedicineResponse Medicine, string ErrorMessage)> GetMedicineById(Guid MedicineId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var medicine = await _medicineRepository.GetById(id, checkError);
+            var medicine = await _medicineRepository.GetById(MedicineId, checkError);
             if (checkError.Value?.IsError == true)
                 return (null, $"Lỗi khi lấy thông tin thuốc: {checkError.Value.Message}");
 
@@ -279,7 +275,7 @@ namespace Infrastructure.Services.Implements
                 Description = medicine.MedicineCategory.Description
             };
             var images = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == MedicineId).ToListAsync(cancellationToken);
-
+<
             var response = new MedicineResponse
             {
                 Id = medicine.Id,
@@ -297,7 +293,7 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Lấy danh sách tất cả loại thuốc đang hoạt động với bộ lọc tùy chọn, bao gồm danh sách ảnh và thumbnail.
         /// </summary>
-        public async Task<(List<MedicineResponse> Medicines, string ErrorMessage)> GetAllAsync(
+        public async Task<(List<MedicineResponse> Medicines, string ErrorMessage)> GetMedicineByCategory(
             string medicineName = null,
             Guid? medicineCategoryId = null,
             CancellationToken cancellationToken = default)
@@ -343,7 +339,7 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-        public async Task<(PaginationSet<MedicineResponse> Result, string ErrorMessage)> GetPaginatedListAsync(ListingRequest request, CancellationToken cancellationToken = default)
+        public async Task<(PaginationSet<MedicineResponse> Result, string ErrorMessage)> GetPaginatedMedicineList(ListingRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
