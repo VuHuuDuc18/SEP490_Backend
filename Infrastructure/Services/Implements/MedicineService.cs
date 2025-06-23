@@ -267,12 +267,18 @@ namespace Infrastructure.Services.Implements
             if (medicine == null)
                 return (null, "Không tìm thấy thuốc.");
 
+            var medicineCategoryResponse = new MedicineCategoryResponse()
+            {
+                Id = medicine.MedicineCategory.Id,
+                Name = medicine.MedicineCategory.Name,
+                Description = medicine.MedicineCategory.Description
+            };
             var images = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == MedicineId).ToListAsync(cancellationToken);
             var response = new MedicineResponse
             {
                 Id = medicine.Id,
                 MedicineName = medicine.MedicineName,
-                MedicineCategoryId = medicine.MedicineCategoryId,
+                MedicineCategory = medicineCategoryResponse,
                 Stock = medicine.Stock,              
                 IsActive = medicine.IsActive,
                 ImageLinks = images.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
@@ -304,12 +310,18 @@ namespace Infrastructure.Services.Implements
                 var responses = new List<MedicineResponse>();
                 foreach (var medicine in medicines)
                 {
+                    var medicineCategoryResponse = new MedicineCategoryResponse()
+                    {
+                        Id = medicine.MedicineCategory.Id,
+                        Name = medicine.MedicineCategory.Name,
+                        Description = medicine.MedicineCategory.Description
+                    };
                     var images = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == medicine.Id).ToListAsync(cancellationToken);
                     responses.Add(new MedicineResponse
                     {
                         Id = medicine.Id,
                         MedicineName = medicine.MedicineName,
-                        MedicineCategoryId = medicine.MedicineCategoryId,
+                        MedicineCategory = medicineCategoryResponse,
                         Stock = medicine.Stock,                      
                         IsActive = medicine.IsActive,
                         ImageLinks = images.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
@@ -357,12 +369,18 @@ namespace Infrastructure.Services.Implements
                 var responses = new List<MedicineResponse>();
                 foreach (var medicine in paginationResult.Items)
                 {
+                    var medicineCategoryResponse = new MedicineCategoryResponse()
+                    {
+                        Id = medicine.MedicineCategory.Id,
+                        Name = medicine.MedicineCategory.Name,
+                        Description = medicine.MedicineCategory.Description
+                    };
                     var medicineImages = imageGroups.GetValueOrDefault(medicine.Id, new List<ImageMedicine>());
                     responses.Add(new MedicineResponse
                     {
                         Id = medicine.Id,
                         MedicineName = medicine.MedicineName,
-                        MedicineCategoryId = medicine.MedicineCategoryId,
+                        MedicineCategory = medicineCategoryResponse,
                         Stock = medicine.Stock,
                         IsActive = medicine.IsActive,
                         ImageLinks = medicineImages.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
