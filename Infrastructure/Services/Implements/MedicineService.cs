@@ -275,7 +275,7 @@ namespace Infrastructure.Services.Implements
                 Description = medicine.MedicineCategory.Description
             };
             var images = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == MedicineId).ToListAsync(cancellationToken);
-<
+
             var response = new MedicineResponse
             {
                 Id = medicine.Id,
