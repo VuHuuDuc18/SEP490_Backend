@@ -19,12 +19,14 @@ namespace Domain.Dto.Response.BarnPlan
 
     public class FoodPlan
     {
+        public Guid FoodId { get; set; }
         public string FoodName { get; set; }
         public float Stock { get; set; }
         public string Note { get; set; }
     }
     public class MedicinePlan
     {
+        public Guid MedicineId { get; set; }
         public string MedicineName { get; set; }
         public float Stock { get; set; }
         public string Note { get; set; }
