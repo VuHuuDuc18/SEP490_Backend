@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Entities.EntityModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ namespace Domain.Dto.Response.Medicine
     {
         public Guid Id { get; set; }
         public string MedicineName { get; set; }
-        public Guid MedicineCategoryId { get; set; }
+        public MedicineCategoryResponse MedicineCategory { get; set; }
         public int Stock { get; set; }
         public bool IsActive { get; set; }
         /// <summary>
@@ -22,5 +23,12 @@ namespace Domain.Dto.Response.Medicine
         /// Liên kết ảnh thumbnail từ Cloudinary.
         /// </summary>
         public string Thumbnail { get; set; }
+    }
+
+    public class MedicineCategoryResponse
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
     }
 }
