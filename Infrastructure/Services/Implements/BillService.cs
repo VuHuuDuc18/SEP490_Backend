@@ -8,11 +8,12 @@ using Entities.EntityModel;
 using Infrastructure.Core;
 using Infrastructure.Repository;
 using Microsoft.EntityFrameworkCore;
+using Domain.Helper.Constants;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Infrastructure.Services.Implements
@@ -26,6 +27,8 @@ namespace Infrastructure.Services.Implements
         private readonly IRepository<Food> _foodRepository;
         private readonly IRepository<Medicine> _medicineRepository;
         private readonly IRepository<Breed> _breedRepository;
+        private readonly IRepository<LivestockCircleFood> _livestockCircleFoodRepository;
+        private readonly IRepository<LivestockCircleMedicine> _livestockCircleMedicineRepository;
 
         public BillService(
             IRepository<Bill> billRepository,
@@ -34,7 +37,9 @@ namespace Infrastructure.Services.Implements
             IRepository<LivestockCircle> livestockCircleRepository,
             IRepository<Food> foodRepository,
             IRepository<Medicine> medicineRepository,
-            IRepository<Breed> breedRepository)
+            IRepository<Breed> breedRepository,
+            IRepository<LivestockCircleFood> livestockCircleFoodRepository,
+            IRepository<LivestockCircleMedicine> livestockCircleMedicineRepository)
         {
             _billRepository = billRepository ?? throw new ArgumentNullException(nameof(billRepository));
             _billItemRepository = billItemRepository ?? throw new ArgumentNullException(nameof(billItemRepository));
@@ -43,88 +48,113 @@ namespace Infrastructure.Services.Implements
             _foodRepository = foodRepository ?? throw new ArgumentNullException(nameof(foodRepository));
             _medicineRepository = medicineRepository ?? throw new ArgumentNullException(nameof(medicineRepository));
             _breedRepository = breedRepository ?? throw new ArgumentNullException(nameof(breedRepository));
+            _livestockCircleFoodRepository = livestockCircleFoodRepository ?? throw new ArgumentNullException(nameof(livestockCircleFoodRepository));
+            _livestockCircleMedicineRepository = livestockCircleMedicineRepository ?? throw new ArgumentNullException(nameof(livestockCircleMedicineRepository));
         }
 
-        public async Task<(bool Success, string ErrorMessage)> CreateBill(
-            CreateBillRequest request,
-            CancellationToken cancellationToken = default)
+        private async Task<(bool Success, string ErrorMessage)> ValidateItem(CreateBillItemRequest item, CancellationToken cancellationToken)
+        {
+            var checkError = new Ref<CheckError>();
+            if (item.FoodId.HasValue)
+            {
+                var food = await _foodRepository.GetById(item.FoodId.Value, checkError);
+                return food != null && food.IsActive && food.Stock >= item.Stock
+                    ? (true, null)
+                    : (false, $"Food with ID {item.FoodId} not found, inactive, or insufficient stock.");
+            }
+            else if (item.MedicineId.HasValue)
+            {
+                var medicine = await _medicineRepository.GetById(item.MedicineId.Value, checkError);
+                return medicine != null && medicine.IsActive && medicine.Stock >= item.Stock
+                    ? (true, null)
+                    : (false, $"Medicine with ID {item.MedicineId} not found, inactive, or insufficient stock.");
+            }
+            else if (item.BreedId.HasValue)
+            {
+                var breed = await _breedRepository.GetById(item.BreedId.Value, checkError);
+                return breed != null && breed.IsActive && breed.Stock >= item.Stock
+                    ? (true, null)
+                    : (false, $"Breed with ID {item.BreedId} not found, inactive, or insufficient stock.");
+            }
+            return (false, "Each bill item must have exactly one of FoodId, MedicineId, or BreedId.");
+        }
+
+        private async Task UpdateStock(BillItem billItem, int quantity, CancellationToken cancellationToken)
+        {
+            var checkError = new Ref<CheckError>();
+            if (billItem.FoodId.HasValue)
+            {
+                var food = await _foodRepository.GetById(billItem.FoodId.Value, checkError);
+                if (food != null) { food.Stock -= quantity; _foodRepository.Update(food); }
+            }
+            else if (billItem.MedicineId.HasValue)
+            {
+                var medicine = await _medicineRepository.GetById(billItem.MedicineId.Value, checkError);
+                if (medicine != null) { medicine.Stock -= quantity; _medicineRepository.Update(medicine); }
+            }
+            else if (billItem.BreedId.HasValue)
+            {
+                var breed = await _breedRepository.GetById(billItem.BreedId.Value, checkError);
+                if (breed != null) { breed.Stock -= quantity; _breedRepository.Update(breed); }
+            }
+            await Task.CompletedTask;
+        }
+
+        private async Task UpdateLivestockCircle(Guid livestockCircleId, int quantity, int? deadUnit, float? averageWeight, CancellationToken cancellationToken)
+        {
+            var livestockCircle = await _livestockCircleRepository.GetById(livestockCircleId, new Ref<CheckError>());
+            if (livestockCircle != null)
+            {
+                livestockCircle.TotalUnit = (quantity - (deadUnit ?? 0));
+                livestockCircle.StartDate = DateTime.UtcNow;
+                livestockCircle.AverageWeight = averageWeight ?? livestockCircle.AverageWeight;
+                _livestockCircleRepository.Update(livestockCircle);
+            }
+            await Task.CompletedTask;
+        }
+
+        public async Task<(bool Success, string ErrorMessage)> CreateBill(CreateBillRequest request, CancellationToken cancellationToken = default)
         {
             if (request == null)
-                return (false, "Dữ liệu hóa đơn không được null.");
+                return (false, "Bill data cannot be null.");
 
-            // Kiểm tra các trường bắt buộc
             var validationResults = new List<ValidationResult>();
             var validationContext = new ValidationContext(request);
             if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
                 return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
 
-            // Kiểm tra từng mục hóa đơn
             if (request.Items.Any(item => !item.IsValidItem()))
-                return (false, "Mỗi mục hóa đơn phải có chính xác một trong FoodId, MedicineId hoặc BreedId.");
+                return (false, "Each bill item must have exactly one of FoodId, MedicineId, or BreedId.");
 
             var checkError = new Ref<CheckError>();
-
-            // Kiểm tra UserRequestId
             var user = await _userRepository.GetById(request.UserRequestId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi kiểm tra người dùng: {checkError.Value.Message}");
-            if (user == null || !user.IsActive)
-                return (false, "Người dùng không tồn tại hoặc không hoạt động.");
+            if (checkError.Value?.IsError == true) return (false, $"Error checking user: {checkError.Value.Message}");
+            if (user == null || !user.IsActive) return (false, "User not found or inactive.");
 
-            // Kiểm tra LivestockCircleId
             var livestockCircle = await _livestockCircleRepository.GetById(request.LivestockCircleId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi kiểm tra chu kỳ chăn nuôi: {checkError.Value.Message}");
-            if (livestockCircle == null || !livestockCircle.IsActive)
-                return (false, "Chu kỳ chăn nuôi không tồn tại hoặc không hoạt động.");
+            if (checkError.Value?.IsError == true) return (false, $"Error checking livestock circle: {checkError.Value.Message}");
+            if (livestockCircle == null || !livestockCircle.IsActive) return (false, "Livestock circle not found or inactive.");
 
-            // Kiểm tra các mục hóa đơn
             foreach (var item in request.Items)
             {
-                if (item.FoodId.HasValue)
-                {
-                    var food = await _foodRepository.GetById(item.FoodId.Value, checkError);
-                    if (checkError.Value?.IsError == true)
-                        return (false, $"Lỗi khi kiểm tra thức ăn: {checkError.Value.Message}");
-                    if (food == null || !food.IsActive)
-                        return (false, $"Thức ăn với ID {item.FoodId} không tồn tại hoặc không hoạt động.");
-                }
-                else if (item.MedicineId.HasValue)
-                {
-                    var medicine = await _medicineRepository.GetById(item.MedicineId.Value, checkError);
-                    if (checkError.Value?.IsError == true)
-                        return (false, $"Lỗi khi kiểm tra thuốc: {checkError.Value.Message}");
-                    if (medicine == null || !medicine.IsActive)
-                        return (false, $"Thuốc với ID {item.MedicineId} không tồn tại hoặc không hoạt động.");
-                }
-                else if (item.BreedId.HasValue)
-                {
-                    var breed = await _breedRepository.GetById(item.BreedId.Value, checkError);
-                    if (checkError.Value?.IsError == true)
-                        return (false, $"Lỗi khi kiểm tra giống: {checkError.Value.Message}");
-                    if (breed == null || !breed.IsActive)
-                        return (false, $"Giống với ID {item.BreedId} không tồn tại hoặc không hoạt động.");
-                }
+                var (isValid, errorMessage) = await ValidateItem(item, cancellationToken);
+                if (!isValid) return (false, errorMessage);
             }
 
-            // Tạo Bill
             var bill = new Bill
             {
                 UserRequestId = request.UserRequestId,
                 LivestockCircleId = request.LivestockCircleId,
                 Name = request.Name,
                 Note = request.Note,
-                Status = "Đang duyệt",
+                Status = StatusConstant.REQUESTED,
                 Total = request.Items.Sum(i => i.Stock),
                 Weight = request.Weight
             };
 
             try
             {
-                // Thêm Bill
                 _billRepository.Insert(bill);
-
-                // Thêm các BillItem
                 foreach (var item in request.Items)
                 {
                     var billItem = new BillItem
@@ -137,13 +167,12 @@ namespace Infrastructure.Services.Implements
                     };
                     _billItemRepository.Insert(billItem);
                 }
-
                 await _billRepository.CommitAsync(cancellationToken);
                 return (true, null);
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi tạo hóa đơn: {ex.Message}");
+                return (false, $"Error creating bill: {ex.Message}");
             }
         }
 
@@ -151,22 +180,17 @@ namespace Infrastructure.Services.Implements
         {
             var checkError = new Ref<CheckError>();
             var billItem = await _billItemRepository.GetById(billItemId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi lấy thông tin mục hóa đơn: {checkError.Value.Message}");
-            if (billItem == null || !billItem.IsActive)
-                return (false, "Mục hóa đơn không tồn tại hoặc không hoạt động.");
+            if (checkError.Value?.IsError == true) return (false, $"Error retrieving bill item: {checkError.Value.Message}");
+            if (billItem == null || !billItem.IsActive) return (false, "Bill item not found or inactive.");
 
             var bill = await _billRepository.GetById(billItem.BillId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi lấy thông tin hóa đơn: {checkError.Value.Message}");
-            if (bill == null || !bill.IsActive)
-                return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
+            if (checkError.Value?.IsError == true) return (false, $"Error retrieving bill: {checkError.Value.Message}");
+            if (bill == null || !bill.IsActive) return (false, "Bill not found or inactive.");
 
             try
             {
                 billItem.IsActive = false;
                 bill.Total -= billItem.Stock;
-
                 _billItemRepository.Update(billItem);
                 _billRepository.Update(bill);
                 await _billRepository.CommitAsync(cancellationToken);
@@ -174,7 +198,7 @@ namespace Infrastructure.Services.Implements
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi xóa mục hóa đơn: {ex.Message}");
+                return (false, $"Error disabling bill item: {ex.Message}");
             }
         }
 
@@ -182,10 +206,8 @@ namespace Infrastructure.Services.Implements
         {
             var checkError = new Ref<CheckError>();
             var bill = await _billRepository.GetById(billId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi lấy thông tin hóa đơn: {checkError.Value.Message}");
-            if (bill == null || !bill.IsActive)
-                return (false, "Hóa đơn không tồn tại hoặc đã bị vô hiệu hóa.");
+            if (checkError.Value?.IsError == true) return (false, $"Error retrieving bill: {checkError.Value.Message}");
+            if (bill == null || !bill.IsActive) return (false, "Bill not found or inactive.");
 
             try
             {
@@ -196,40 +218,31 @@ namespace Infrastructure.Services.Implements
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi vô hiệu hóa hóa đơn: {ex.Message}");
+                return (false, $"Error disabling bill: {ex.Message}");
             }
         }
 
-        public async Task<(PaginationSet<BillItemResponse> Result, string ErrorMessage)> GetBillItemsByBillId(
-            Guid billId, ListingRequest request, CancellationToken cancellationToken = default)
+        public async Task<(PaginationSet<BillItemResponse> Result, string ErrorMessage)> GetBillItemsByBillId(Guid billId, ListingRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
-                if (request == null)
-                    return (null, "Yêu cầu không được null.");
-                if (request.PageIndex < 1 || request.PageSize < 1)
-                    return (null, "PageIndex và PageSize phải lớn hơn 0.");
+                if (request == null) return (null, "Request cannot be null.");
+                if (request.PageIndex < 1 || request.PageSize < 1) return (null, "PageIndex and PageSize must be greater than 0.");
 
                 var validFields = typeof(BillItem).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
-                if (invalidFields.Any())
-                    return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+                if (invalidFields.Any()) return (null, $"Invalid filter fields: {string.Join(", ", invalidFields)}");
 
                 var checkError = new Ref<CheckError>();
                 var bill = await _billRepository.GetById(billId, checkError);
-                if (checkError.Value?.IsError == true)
-                    return (null, $"Lỗi khi lấy thông tin hóa đơn: {checkError.Value.Message}");
-                if (bill == null)
-                    return (null, "Hóa đơn không tồn tại.");
+                if (checkError.Value?.IsError == true) return (null, $"Error retrieving bill: {checkError.Value.Message}");
+                if (bill == null) return (null, "Bill not found.");
 
                 var query = _billItemRepository.GetQueryable(x => x.BillId == billId && x.IsActive);
 
-                if (request.SearchString?.Any() == true)
-                    query = query.SearchString(request.SearchString);
-
-                if (request.Filter?.Any() == true)
-                    query = query.Filter(request.Filter);
+                if (request.SearchString?.Any() == true) query = query.SearchString(request.SearchString);
+                if (request.Filter?.Any() == true) query = query.Filter(request.Filter);
 
                 var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
 
@@ -257,20 +270,16 @@ namespace Infrastructure.Services.Implements
             }
             catch (Exception ex)
             {
-                return (null, $"Lỗi khi lấy danh sách mục hóa đơn: {ex.Message}");
+                return (null, $"Error retrieving bill items: {ex.Message}");
             }
         }
-    
 
-        public async Task<(BillResponse Bill, string ErrorMessage)> GetBillById(Guid billId,
-            CancellationToken cancellationToken = default)
+        public async Task<(BillResponse Bill, string ErrorMessage)> GetBillById(Guid billId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
             var bill = await _billRepository.GetById(billId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (null, $"Lỗi khi lấy thông tin hóa đơn: {checkError.Value.Message}");
-            if (bill == null)
-                return (null, "Hóa đơn không tồn tại.");
+            if (checkError.Value?.IsError == true) return (null, $"Error retrieving bill: {checkError.Value.Message}");
+            if (bill == null) return (null, "Bill not found.");
 
             var response = new BillResponse
             {
@@ -287,29 +296,22 @@ namespace Infrastructure.Services.Implements
             return (response, null);
         }
 
-        public async Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetPaginatedBillList(
-            ListingRequest request, CancellationToken cancellationToken = default)
+        public async Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetPaginatedBillList(ListingRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
-                if (request == null)
-                    return (null, "Yêu cầu không được null.");
-                if (request.PageIndex < 1 || request.PageSize < 1)
-                    return (null, "PageIndex và PageSize phải lớn hơn 0.");
+                if (request == null) return (null, "Request cannot be null.");
+                if (request.PageIndex < 1 || request.PageSize < 1) return (null, "PageIndex and PageSize must be greater than 0.");
 
                 var validFields = typeof(Bill).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
-                if (invalidFields.Any())
-                    return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+                if (invalidFields.Any()) return (null, $"Invalid filter fields: {string.Join(", ", invalidFields)}");
 
                 var query = _billRepository.GetQueryable(x => x.IsActive);
 
-                if (request.SearchString?.Any() == true)
-                    query = query.SearchString(request.SearchString);
-
-                if (request.Filter?.Any() == true)
-                    query = query.Filter(request.Filter);
+                if (request.SearchString?.Any() == true) query = query.SearchString(request.SearchString);
+                if (request.Filter?.Any() == true) query = query.Filter(request.Filter);
 
                 var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
 
@@ -338,204 +340,142 @@ namespace Infrastructure.Services.Implements
             }
             catch (Exception ex)
             {
-                return (null, $"Lỗi khi lấy danh sách hóa đơn: {ex.Message}");
+                return (null, $"Error retrieving bill list: {ex.Message}");
             }
         }
 
-        public async Task<(bool Success, string ErrorMessage)> UpdateBill(Guid billId,
-            UpdateBillRequest request, CancellationToken cancellationToken = default)
-        {         
-                if (request == null)
-                    return (false, "Dữ liệu hóa đơn không được null.");
+        public async Task<(bool Success, string ErrorMessage)> UpdateBill(Guid billId, UpdateBillRequest request, CancellationToken cancellationToken = default)
+        {
+            if (request == null)
+                return (false, "Bill data cannot be null.");
 
-                var validationResults = new List<ValidationResult>();
-                var validationContext = new ValidationContext(request);
-                if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
-                    return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
+            var validationResults = new List<ValidationResult>();
+            var validationContext = new ValidationContext(request);
+            if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
+                return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
 
-                var checkError = new Ref<CheckError>();
-                var bill = await _billRepository.GetById(billId, checkError);
-                if (checkError.Value?.IsError == true)
-                    return (false, $"Lỗi khi lấy thông tin hóa đơn: {checkError.Value.Message}");
-                if (bill == null || !bill.IsActive)
-                    return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
+            var checkError = new Ref<CheckError>();
+            var bill = await _billRepository.GetById(billId, checkError);
+            if (checkError.Value?.IsError == true) return (false, $"Error retrieving bill: {checkError.Value.Message}");
+            if (bill == null || !bill.IsActive) return (false, "Bill not found or inactive.");
 
-                // Kiểm tra các thao tác với BillItem
-                if (request.ItemOperations != null)
+            if (request.ItemOperations != null)
+            {
+                foreach (var op in request.ItemOperations)
                 {
-                    foreach (var op in request.ItemOperations)
-                    {
-                        if (string.IsNullOrEmpty(op.OperationType))
-                            return (false, "Loại thao tác không được để trống.");
+                    if (string.IsNullOrEmpty(op.OperationType))
+                        return (false, "Operation type cannot be empty.");
 
-                        if (!new[] { "Add", "Update", "Remove" }.Contains(op.OperationType, StringComparer.OrdinalIgnoreCase))
-                            return (false, $"Loại thao tác không hợp lệ: {op.OperationType}. Phải là 'Add', 'Update', hoặc 'Remove'.");
+                    if (!new[] { "Add", "Update", "Remove" }.Contains(op.OperationType, StringComparer.OrdinalIgnoreCase))
+                        return (false, $"Invalid operation type: {op.OperationType}. Must be 'Add', 'Update', or 'Remove'.");
 
-                        if (op.OperationType.Equals("Add", StringComparison.OrdinalIgnoreCase) || op.OperationType.Equals("Update", StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (op.ItemData == null)
-                                return (false, $"Dữ liệu mục hóa đơn là bắt buộc cho thao tác {op.OperationType}.");
-                            if (!op.ItemData.IsValidItem())
-                                return (false, $"Mục hóa đơn cho thao tác {op.OperationType} phải có chính xác một trong FoodId, MedicineId hoặc BreedId.");
+                    if ((op.OperationType.Equals("Add", StringComparison.OrdinalIgnoreCase) || op.OperationType.Equals("Update", StringComparison.OrdinalIgnoreCase)) && op.ItemData == null)
+                        return (false, $"Item data is required for {op.OperationType} operation.");
+                    if (!op.ItemData.IsValidItem())
+                        return (false, $"Bill item for {op.OperationType} operation must have exactly one of FoodId, MedicineId, or BreedId.");
 
-                            // Kiểm tra tham chiếu Food, Medicine, Breed
-                            if (op.ItemData.FoodId.HasValue)
-                            {
-                                var food = await _foodRepository.GetById(op.ItemData.FoodId.Value, checkError);
-                                if (checkError.Value?.IsError == true)
-                                    return (false, $"Lỗi khi kiểm tra thức ăn: {checkError.Value.Message}");
-                                if (food == null || !food.IsActive)
-                                    return (false, $"Thức ăn với ID {op.ItemData.FoodId} không tồn tại hoặc không hoạt động.");
-                            }
-                            else if (op.ItemData.MedicineId.HasValue)
-                            {
-                                var medicine = await _medicineRepository.GetById(op.ItemData.MedicineId.Value, checkError);
-                                if (checkError.Value?.IsError == true)
-                                    return (false, $"Lỗi khi kiểm tra thuốc: {checkError.Value.Message}");
-                                if (medicine == null || !medicine.IsActive)
-                                    return (false, $"Thuốc với ID {op.ItemData.MedicineId} không tồn tại hoặc không hoạt động.");
-                            }
-                            else if (op.ItemData.BreedId.HasValue)
-                            {
-                                var breed = await _breedRepository.GetById(op.ItemData.BreedId.Value, checkError);
-                                if (checkError.Value?.IsError == true)
-                                    return (false, $"Lỗi khi kiểm tra giống: {checkError.Value.Message}");
-                                if (breed == null || !breed.IsActive)
-                                    return (false, $"Giống với ID {op.ItemData.BreedId} không tồn tại hoặc không hoạt động.");
-                            }
+                    if (op.OperationType.Equals("Update", StringComparison.OrdinalIgnoreCase) && !op.ItemId.HasValue)
+                        return (false, "ItemId is required for Update operation.");
+                    if (op.OperationType.Equals("Remove", StringComparison.OrdinalIgnoreCase) && !op.ItemId.HasValue)
+                        return (false, "ItemId is required for Remove operation.");
 
-                            if (op.OperationType.Equals("Update", StringComparison.OrdinalIgnoreCase) && !op.ItemId.HasValue)
-                                return (false, "ItemId là bắt buộc cho thao tác Update.");
-                        }
-                        else if (op.OperationType.Equals("Remove", StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (!op.ItemId.HasValue)
-                                return (false, "ItemId là bắt buộc cho thao tác Remove.");
-                        }
-                    }
-                }
-
-                try
-                {
-                    // Cập nhật Bill
-                    bill.Name = request.Name;
-                    bill.Note = request.Note;
-                    bill.Weight = request.Weight;
-
-                    // Xử lý BillItems
-                    if (request.ItemOperations != null && request.ItemOperations.Any())
-                    {
-                        var existingItems = await _billItemRepository.GetQueryable(x => x.BillId == billId && x.IsActive)
-                            .ToListAsync(cancellationToken);
-
-                        foreach (var op in request.ItemOperations)
-                        {
-                            if (op.OperationType.Equals("Add", StringComparison.OrdinalIgnoreCase))
-                            {
-                                var newItem = new BillItem
-                                {
-                                    BillId = bill.Id,
-                                    FoodId = op.ItemData.FoodId,
-                                    MedicineId = op.ItemData.MedicineId,
-                                    BreedId = op.ItemData.BreedId,
-                                    Stock = op.ItemData.Stock
-                                };
-                                _billItemRepository.Insert(newItem);
-                            }
-                            else if (op.OperationType.Equals("Update", StringComparison.OrdinalIgnoreCase))
-                            {
-                                var item = existingItems.FirstOrDefault(x => x.Id == op.ItemId.Value);
-                                if (item == null || !item.IsActive)
-                                    return (false, $"Mục hóa đơn với ID {op.ItemId} không tồn tại hoặc không hoạt động.");
-
-                                item.FoodId = op.ItemData.FoodId;
-                                item.MedicineId = op.ItemData.MedicineId;
-                                item.BreedId = op.ItemData.BreedId;
-                                item.Stock = op.ItemData.Stock;
-                                _billItemRepository.Update(item);
-                            }
-                            else if (op.OperationType.Equals("Remove", StringComparison.OrdinalIgnoreCase))
-                            {
-                                var item = existingItems.FirstOrDefault(x => x.Id == op.ItemId.Value);
-                                if (item == null || !item.IsActive)
-                                    return (false, $"Mục hóa đơn với ID {op.ItemId} không tồn tại hoặc không hoạt động.");
-
-                                item.IsActive = false;
-                                _billItemRepository.Update(item);
-                            }
-                        }
-                    }
-
-                    // Cập nhật Total
-                    var activeItems = await _billItemRepository.GetQueryable(x => x.BillId == billId && x.IsActive)
-                        .ToListAsync(cancellationToken);
-                    bill.Total = activeItems.Sum(x => x.Stock);
-
-                    _billRepository.Update(bill);
-                    await _billRepository.CommitAsync(cancellationToken);
-                    return (true, null);
-                }
-                catch (Exception ex)
-                {
-                    return (false, $"Lỗi khi cập nhật hóa đơn: {ex.Message}");
+                    var (isValid, errorMessage) = await ValidateItem(op.ItemData, cancellationToken);
+                    if (!isValid) return (false, errorMessage);
                 }
             }
 
-        // Lấy danh sách hóa đơn chỉ chứa các mục hóa đơn thuộc loại được chỉ định (Food, Medicine hoặc Breed)
-        public async Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetBillsByItemType(
-            ListingRequest request, string itemType, CancellationToken cancellationToken = default)
+            try
+            {
+                bill.Name = request.Name;
+                bill.Note = request.Note;
+                bill.Weight = request.Weight;
+
+                if (request.ItemOperations != null && request.ItemOperations.Any())
+                {
+                    var existingItems = await _billItemRepository.GetQueryable(x => x.BillId == billId && x.IsActive)
+                        .ToListAsync(cancellationToken);
+
+                    foreach (var op in request.ItemOperations)
+                    {
+                        if (op.OperationType.Equals("Add", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var newItem = new BillItem
+                            {
+                                BillId = bill.Id,
+                                FoodId = op.ItemData.FoodId,
+                                MedicineId = op.ItemData.MedicineId,
+                                BreedId = op.ItemData.BreedId,
+                                Stock = op.ItemData.Stock
+                            };
+                            _billItemRepository.Insert(newItem);
+                        }
+                        else if (op.OperationType.Equals("Update", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var item = existingItems.FirstOrDefault(x => x.Id == op.ItemId.Value);
+                            if (item == null || !item.IsActive) return (false, $"Bill item with ID {op.ItemId} not found or inactive.");
+
+                            item.FoodId = op.ItemData.FoodId;
+                            item.MedicineId = op.ItemData.MedicineId;
+                            item.BreedId = op.ItemData.BreedId;
+                            item.Stock = op.ItemData.Stock;
+                            _billItemRepository.Update(item);
+                        }
+                        else if (op.OperationType.Equals("Remove", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var item = existingItems.FirstOrDefault(x => x.Id == op.ItemId.Value);
+                            if (item == null || !item.IsActive) return (false, $"Bill item with ID {op.ItemId} not found or inactive.");
+
+                            item.IsActive = false;
+                            _billItemRepository.Update(item);
+                        }
+                    }
+                }
+
+                var activeItems = await _billItemRepository.GetQueryable(x => x.BillId == billId && x.IsActive)
+                    .ToListAsync(cancellationToken);
+                bill.Total = activeItems.Sum(x => x.Stock);
+
+                _billRepository.Update(bill);
+                await _billRepository.CommitAsync(cancellationToken);
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error updating bill: {ex.Message}");
+            }
+        }
+
+        public async Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetBillsByItemType(ListingRequest request, string itemType, CancellationToken cancellationToken = default)
         {
             try
             {
-                // Kiểm tra request không được null
-                if (request == null)
-                    return (null, "Yêu cầu không được null.");
+                if (request == null) return (null, "Request cannot be null.");
+                if (request.PageIndex < 1 || request.PageSize < 1) return (null, "PageIndex and PageSize must be greater than 0.");
 
-                // Kiểm tra PageIndex và PageSize phải lớn hơn 0
-                if (request.PageIndex < 1 || request.PageSize < 1)
-                    return (null, "PageIndex và PageSize phải lớn hơn 0.");
-
-                // Kiểm tra các trường lọc có hợp lệ không
                 var validFields = typeof(Bill).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
-                if (invalidFields.Any())
-                    return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+                if (invalidFields.Any()) return (null, $"Invalid filter fields: {string.Join(", ", invalidFields)}");
 
-                // Kiểm tra loại mục hóa đơn hợp lệ
                 if (!new[] { "Food", "Medicine", "Breed" }.Contains(itemType, StringComparer.OrdinalIgnoreCase))
-                    return (null, $"Loại mục hóa đơn không hợp lệ: {itemType}. Phải là 'Food', 'Medicine', hoặc 'Breed'.");
+                    return (null, $"Invalid item type: {itemType}. Must be 'Food', 'Medicine', or 'Breed'.");
 
-                // Xác định điều kiện lọc BillItems dựa trên itemType
-                IQueryable<BillItem> billItemQuery = itemType.ToLower() switch
+                var billItemQuery = itemType.ToLower() switch
                 {
                     "food" => _billItemRepository.GetQueryable(x => x.IsActive && x.FoodId.HasValue && !x.MedicineId.HasValue && !x.BreedId.HasValue),
                     "medicine" => _billItemRepository.GetQueryable(x => x.IsActive && x.MedicineId.HasValue && !x.FoodId.HasValue && !x.BreedId.HasValue),
                     "breed" => _billItemRepository.GetQueryable(x => x.IsActive && x.BreedId.HasValue && !x.FoodId.HasValue && !x.MedicineId.HasValue),
-                    _ => throw new InvalidOperationException("Loại mục hóa đơn không được hỗ trợ.")
+                    _ => throw new InvalidOperationException("Unsupported item type.")
                 };
 
-                // Lấy danh sách BillId chỉ chứa các mục hóa đơn thuộc loại được chỉ định
-                var billIds = await billItemQuery
-                    .Select(x => x.BillId)
-                    .Distinct()
-                    .ToListAsync(cancellationToken);
-
-                // Lấy các hóa đơn thỏa mãn điều kiện
+                var billIds = await billItemQuery.Select(x => x.BillId).Distinct().ToListAsync(cancellationToken);
                 var query = _billRepository.GetQueryable(x => x.IsActive && billIds.Contains(x.Id));
 
-                // Áp dụng tìm kiếm nếu có chuỗi tìm kiếm
-                if (request.SearchString?.Any() == true)
-                    query = query.SearchString(request.SearchString);
+                if (request.SearchString?.Any() == true) query = query.SearchString(request.SearchString);
+                if (request.Filter?.Any() == true) query = query.Filter(request.Filter);
 
-                // Áp dụng bộ lọc nếu có
-                if (request.Filter?.Any() == true)
-                    query = query.Filter(request.Filter);
-
-                // Phân trang kết quả
                 var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
 
-                // Chuyển đổi kết quả sang BillResponse
                 var responses = paginationResult.Items.Select(b => new BillResponse
                 {
                     Id = b.Id,
@@ -548,7 +488,6 @@ namespace Infrastructure.Services.Implements
                     IsActive = b.IsActive
                 }).ToList();
 
-                // Tạo đối tượng phân trang trả về
                 var result = new PaginationSet<BillResponse>
                 {
                     PageIndex = paginationResult.PageIndex,
@@ -562,61 +501,86 @@ namespace Infrastructure.Services.Implements
             }
             catch (Exception ex)
             {
-                // Trả về lỗi nếu có ngoại lệ xảy ra
-                return (null, $"Lỗi khi lấy danh sách hóa đơn chỉ chứa {itemType.ToLower()}: {ex.Message}");
+                return (null, $"Error retrieving bills by {itemType.ToLower()}: {ex.Message}");
             }
         }
 
-        // Thay đổi trạng thái của hóa đơn
-        public async Task<(bool Success, string ErrorMessage)> ChangeBillStatus(
-            Guid billId, string newStatus, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> ChangeBillStatus(Guid billId, string newStatus, CancellationToken cancellationToken = default)
         {
             try
             {
-                // Kiểm tra trạng thái mới có hợp lệ không
-                var validStatuses = new[] { "Đang duyệt", "Đã duyệt", "Hủy", "Hoàn thành" };
+                var validStatuses = new[] { StatusConstant.REQUESTED, StatusConstant.APPROVED, StatusConstant.CONFIRMED, StatusConstant.REJECTED, StatusConstant.COMPLETED, StatusConstant.CANCELLED };
                 if (string.IsNullOrEmpty(newStatus) || !validStatuses.Contains(newStatus, StringComparer.OrdinalIgnoreCase))
-                    return (false, $"Trạng thái không hợp lệ: {newStatus}. Trạng thái phải là một trong: {string.Join(", ", validStatuses)}.");
+                    return (false, $"Invalid status: {newStatus}. Must be one of: {string.Join(", ", validStatuses)}.");
 
-                // Kiểm tra sự tồn tại của hóa đơn
                 var checkError = new Ref<CheckError>();
                 var bill = await _billRepository.GetById(billId, checkError);
-                if (checkError.Value?.IsError == true)
-                    return (false, $"Lỗi khi lấy thông tin hóa đơn: {checkError.Value.Message}");
-                if (bill == null || !bill.IsActive)
-                    return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
+                if (checkError.Value?.IsError == true) return (false, $"Error retrieving bill: {checkError.Value.Message}");
+                if (bill == null || !bill.IsActive) return (false, "Bill not found or inactive.");
 
-                // Kiểm tra trạng thái hiện tại để đảm bảo chuyển đổi hợp lệ
                 if (bill.Status.Equals(newStatus, StringComparison.OrdinalIgnoreCase))
-                    return (false, $"Hóa đơn đã ở trạng thái {newStatus}.");
-
-                // Cập nhật trạng thái hóa đơn
-                bill.Status = newStatus;
+                    return (false, $"Bill is already in status {newStatus}.");
 
                 try
                 {
-                    // Cập nhật vào cơ sở dữ liệu
+                    bill.Status = newStatus;
+                  //  bill.UpdatedAt = DateTime.UtcNow;
+
+                    if (newStatus == StatusConstant.APPROVED)
+                    {
+                        var billItems = await _billItemRepository.GetQueryable(x => x.BillId == billId && x.IsActive).ToListAsync(cancellationToken);
+                        foreach (var item in billItems)
+                        {
+                            await UpdateStock(item, item.Stock, cancellationToken);
+                        }
+                    }
+                    else if (newStatus == StatusConstant.CONFIRMED)
+                    {
+                        var billItems = await _billItemRepository.GetQueryable(x => x.BillId == billId && x.IsActive).ToListAsync(cancellationToken);
+                        foreach (var item in billItems)
+                        {
+                            if (item.FoodId.HasValue)
+                            {
+                                var lcFood = await _livestockCircleFoodRepository.GetQueryable(x => x.LivestockCircleId == bill.LivestockCircleId && x.FoodId == item.FoodId).FirstOrDefaultAsync(cancellationToken);
+                                if (lcFood == null)
+                                {
+                                    lcFood = new LivestockCircleFood { LivestockCircleId = bill.LivestockCircleId, FoodId = item.FoodId.Value, Remaining = 0 };
+                                    _livestockCircleFoodRepository.Insert(lcFood);
+                                }
+                                lcFood.Remaining += item.Stock;
+                                _livestockCircleFoodRepository.Update(lcFood);
+                            }
+                            else if (item.MedicineId.HasValue)
+                            {
+                                var lcMedicine = await _livestockCircleMedicineRepository.GetQueryable(x => x.LivestockCircleId == bill.LivestockCircleId && x.MedicineId == item.MedicineId).FirstOrDefaultAsync(cancellationToken);
+                                if (lcMedicine == null)
+                                {
+                                    lcMedicine = new LivestockCircleMedicine { LivestockCircleId = bill.LivestockCircleId, MedicineId = item.MedicineId.Value, Remaining = 0 };
+                                    _livestockCircleMedicineRepository.Insert(lcMedicine);
+                                }
+                                lcMedicine.Remaining += item.Stock;
+                                _livestockCircleMedicineRepository.Update(lcMedicine);
+                            }
+                            else if (item.BreedId.HasValue)
+                            {
+                                await UpdateLivestockCircle(bill.LivestockCircleId, item.Stock, 0, null, cancellationToken); // Cần thêm DeadUnit và AverageWeight nếu có
+                            }
+                        }
+                    }
+
                     _billRepository.Update(bill);
                     await _billRepository.CommitAsync(cancellationToken);
                     return (true, null);
                 }
                 catch (Exception ex)
                 {
-                    return (false, $"Lỗi khi cập nhật trạng thái hóa đơn: {ex.Message}");
+                    return (false, $"Error updating bill status: {ex.Message}");
                 }
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi thay đổi trạng thái hóa đơn: {ex.Message}");
+                return (false, $"Error changing bill status: {ex.Message}");
             }
         }
     }
-
-
 }
-
-
-
-
-    
-
