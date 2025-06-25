@@ -44,5 +44,13 @@ namespace Domain.Services.Interfaces
             ListingRequest request,
             CancellationToken cancellationToken = default);
 
+        // Lấy danh sách chuồng trại cho admin với thông tin có LivestockCircle đang hoạt động hay không
+        Task<(PaginationSet<AdminBarnResponse> Result, string ErrorMessage)> GetPaginatedAdminBarnListAsync(
+            ListingRequest request, CancellationToken cancellationToken = default);
+
+        // Lấy chi tiết chuồng trại cho admin, bao gồm thông tin LivestockCircle đang hoạt động (nếu có)
+        Task<(AdminBarnDetailResponse Barn, string ErrorMessage)> GetAdminBarnDetailAsync(
+            Guid barnId, CancellationToken cancellationToken = default);
+
     }
 }

@@ -92,5 +92,54 @@ namespace SEP490_BackendAPI.Controllers
                 return BadRequest(errorMessage);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Lấy danh sách chuồng trại phân trang cho admin, bao gồm trạng thái có LivestockCircle đang hoạt động.
+        /// </summary>
+        [HttpPost("getPaginatedBarnListAdmin")]
+        public async Task<IActionResult> GetPaginatedAdminBarnList([FromBody] ListingRequest request, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var (result, errorMessage) = await _barnService.GetPaginatedAdminBarnListAsync(request, cancellationToken);
+                if (result == null)
+                    return BadRequest(new { Message = errorMessage });
+
+                return Ok(new
+                {
+                    Data = result.Items,
+                    PageIndex = result.PageIndex,
+                    Count = result.Count,
+                    TotalCount = result.TotalCount,
+                    TotalPages = result.TotalPages
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = $"Lỗi khi lấy danh sách chuồng trại: {ex.Message}" });
+            }
+        }
+
+        /// <summary>
+        /// Lấy chi tiết chuồng trại cho admin, bao gồm thông tin LivestockCircle đang hoạt động (nếu có).
+        /// </summary>
+        [HttpGet("getBarnDetailAdmin/{barnId}")]
+        public async Task<IActionResult> GetAdminBarnDetail(Guid barnId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var (barn, errorMessage) = await _barnService.GetAdminBarnDetailAsync(barnId, cancellationToken);
+                if (barn == null)
+                    return NotFound(new { Message = errorMessage });
+
+                return Ok(barn);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = $"Lỗi khi lấy chi tiết chuồng trại: {ex.Message}" });
+            }
+        }
+
     }
 }
+
