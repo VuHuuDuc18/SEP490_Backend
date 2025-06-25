@@ -358,5 +358,10 @@ namespace Infrastructure.Identity.Services
             await _userManager.UpdateAsync(user);
             return new Response<string>(user.Id.ToString(), message: $"Account Updated Successfully.");
         }
+        public async Task<Response<User>> GetAccountByEmailAsync(string email){
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return new Response<User>($"No Accounts Registered with {email}.");
+            return new Response<User>(user, message: $"Account Retrieved Successfully.");
+        }
     }
 }

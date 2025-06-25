@@ -103,5 +103,10 @@ namespace WebApi.Controllers
         {
             return Ok(await _accountService.UpdateAccountAsync(request));
         }
+        [HttpGet("get-account-by-email")]
+        public async Task<IActionResult> GetAccountByEmail([FromQuery]string email)
+        {
+            return Ok(await _accountService.GetAccountByEmailAsync(email));
+        }
     }
 }
