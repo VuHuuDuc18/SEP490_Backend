@@ -23,5 +23,6 @@ namespace Application.Interfaces
         Task<Response<string>> DisableAccountAsync(string email);
         Task<Response<string>> EnableAccountAsync(string email);
         Task<Response<List<User>>> GetAllAccountsAsync();
+        Task<Response<string>> UpdateAccountAsync(UpdateAccountRequest request);
     }
 }

@@ -98,5 +98,10 @@ namespace WebApi.Controllers
         {
             return Ok(await _accountService.GetAllAccountsAsync());
         }
+        [HttpPut("update-account")]
+        public async Task<IActionResult> UpdateAccount([FromBody]UpdateAccountRequest request)
+        {
+            return Ok(await _accountService.UpdateAccountAsync(request));
+        }
     }
 }

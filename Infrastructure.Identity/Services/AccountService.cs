@@ -346,5 +346,17 @@ namespace Infrastructure.Identity.Services
             var users = await _userManager.Users.ToListAsync();
             return new Response<List<User>>(users, message: $"All Accounts Retrieved Successfully.");
         }
+        public async Task<Response<string>> UpdateAccountAsync(UpdateAccountRequest request)
+        {
+            var user = await _userManager.FindByIdAsync(request.UserId);
+            if (user == null) return new Response<string>($"No Accounts Registered with {request.UserId}.");
+            if (!string.IsNullOrEmpty(request.Email)) user.Email = request.Email;
+            if (!string.IsNullOrEmpty(request.FirstName)) user.FirstName = request.FirstName;
+            if (!string.IsNullOrEmpty(request.LastName)) user.LastName = request.LastName;
+            if (!string.IsNullOrEmpty(request.PhoneNumber)) user.PhoneNumber = request.PhoneNumber;
+            if (!string.IsNullOrEmpty(request.UserName)) user.UserName = request.UserName;
+            await _userManager.UpdateAsync(user);
+            return new Response<string>(user.Id.ToString(), message: $"Account Updated Successfully.");
+        }
     }
 }
