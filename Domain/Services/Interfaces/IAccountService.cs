@@ -1,6 +1,7 @@
-﻿using Domain.Dto.Request.Account;
-using Application.Wrappers;
+﻿using Application.Wrappers;
 using Domain.Dto.Request;
+using Domain.Dto.Request.Account;
+using Entities.EntityModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,5 +20,8 @@ namespace Application.Interfaces
         Task<Response<string>> ResetPassword(ResetPasswordRequest model);
         Task<Response<AuthenticationResponse>> RefreshTokenAsync(string token, string ipAddress);
         Task<Response<string>> RevokeTokenAsync(string token, string ipAddress);
+        Task<Response<string>> DisableAccountAsync(string email);
+        Task<Response<string>> EnableAccountAsync(string email);
+        Task<Response<List<User>>> GetAllAccountsAsync();
     }
 }

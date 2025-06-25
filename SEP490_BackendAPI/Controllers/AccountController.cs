@@ -83,5 +83,20 @@ namespace WebApi.Controllers
         {
             return Ok(await _accountService.DeleteAccount(request.Email));
         }
+        [HttpPost("disable-account")]
+        public async Task<IActionResult> DisableAccount([FromBody]string email)
+        {
+            return Ok(await _accountService.DisableAccountAsync(email));
+        }
+        [HttpPost("enable-account")]
+        public async Task<IActionResult> EnableAccount([FromBody]string email)
+        {
+            return Ok(await _accountService.EnableAccountAsync(email));
+        }
+        [HttpGet("get-all-accounts")]
+        public async Task<IActionResult> GetAllAccounts()
+        {
+            return Ok(await _accountService.GetAllAccountsAsync());
+        }
     }
 }

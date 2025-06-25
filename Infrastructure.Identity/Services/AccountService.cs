@@ -98,7 +98,7 @@ namespace Infrastructure.Identity.Services
             var userWithSameUserName = await _userManager.FindByNameAsync(request.UserName);            
             if (userWithSameUserName != null)
             {
-                throw new ApiException($"Username '{request.UserName}' is already taken.");
+                return new Response<string>($"Username '{request.UserName}' is already taken.");
             }
             var user = new User
             {
@@ -117,16 +117,17 @@ namespace Infrastructure.Identity.Services
                     var verificationUri = await SendVerificationEmail(user, origin);
                     //TODO: Attach Email Service here and configure it via appsettings
                     //await _emailService.SendAsync(new Application.DTOs.Email.EmailRequest() { From = "mail@codewithmukesh.com", To = user.Email, Body = $"Please confirm your account by visiting this URL {verificationUri}", Subject = "Confirm Registration" });
-                    return new Response<string>(user.Id.ToString(), message: $"User Registered. Please confirm your account by visiting this URL {"verificationUri"}");
+                    //return new Response<string>(user.Id.ToString(), message: $"User Registered. Please confirm your account by visiting this URL {"verificationUri"}");
+                    return new Response<string>(user.Id.ToString(), message: $"User Registered. An email has been sent to {user.Email} to confirm your account.");
                 }
                 else
                 {
-                    throw new ApiException($"{result.Errors}");
+                    return new Response<string>($"{result.Errors}");
                 }
             }
             else
             {
-                throw new ApiException($"Email {request.Email} is already registered.");
+                return new Response<string>($"Email {request.Email} is already registered.");
             }
         }
 
@@ -314,6 +315,36 @@ namespace Infrastructure.Identity.Services
             await _context.SaveChangesAsync();
 
             return new Response<string>("Token revoked successfully");
+        }
+
+        public async Task<Response<string>> DisableAccountAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return new Response<string>($"No Accounts Registered with {email}.");
+            if (!user.IsActive)
+            {
+                return new Response<string>($"Account already disabled - {email}.");
+            }
+            user.IsActive = false;
+            await _userManager.UpdateAsync(user);
+            return new Response<string>(email, message: $"Account Disabled Successfully.");
+        }
+        public async Task<Response<string>> EnableAccountAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return new Response<string>($"No Accounts Registered with {email}.");
+            if (user.IsActive)
+            {
+                return new Response<string>($"Account already enabled - {email}.");
+            }
+            user.IsActive = true;
+            await _userManager.UpdateAsync(user);
+            return new Response<string>(email, message: $"Account Enabled Successfully.");
+        }
+        public async Task<Response<List<User>>> GetAllAccountsAsync()
+        {
+            var users = await _userManager.Users.ToListAsync();
+            return new Response<List<User>>(users, message: $"All Accounts Retrieved Successfully.");
         }
     }
 }
