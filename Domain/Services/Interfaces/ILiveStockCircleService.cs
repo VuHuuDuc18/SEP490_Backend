@@ -80,6 +80,8 @@ namespace Domain.Services.Interfaces
             CancellationToken cancellationToken = default);
 
         public Task<bool> ReleaseBarn(Guid id);
-        public Task<PaginationSet<LivestockCircleResponse>> GetAssignedBarn(Guid tsid, ListingRequest req);
+        public Task<PaginationSet<LivestockCircleResponse>> GetAssignedBarn(Guid tsid,ListingRequest req);
+
+        public Task<PaginationSet<LiveStockCircleHistoryItem>> GetLivestockCircleHistory(Guid barnId,ListingRequest req);
     }
 }

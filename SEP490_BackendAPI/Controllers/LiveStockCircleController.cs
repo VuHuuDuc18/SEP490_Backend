@@ -139,5 +139,26 @@ namespace SEP490_BackendAPI.Controllers
 
 
         }
+        [HttpPost("admin/livestockCircleHistory/{id}")]
+        public async Task<IActionResult> GetLivestockCircleHistory([FromRoute]Guid barnId,[FromBody] ListingRequest req)
+        {
+            //Guid technicalStaffId;
+            try
+            {
+                
+                var result = await _livestockCircleService.GetLivestockCircleHistory(barnId, req);
+                if (result.Items == null)
+                    return StatusCode(StatusCodes.Status500InternalServerError);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("User không hợp lệ");
+            }
+
+
+
+        }
     }
 }
