@@ -39,6 +39,7 @@ namespace Infrastructure.Services.Implements
             // insert barn
             BarnPlan barnPlanDetail = new BarnPlan()
             {
+                LivestockCircleId = req.livstockCircleId,
                 Id = Guid.NewGuid(),
                 Note = req.Note,
                 StartDate = formatedStartDate,
