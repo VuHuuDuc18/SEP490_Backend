@@ -22,6 +22,12 @@ namespace SEP490_BackendAPI.Controllers
             var result = await _barnPlanService.GetById(id);
             return Ok(result);
         }
+        [HttpGet("getbyliveStockid/{id}")]
+        public async Task<IActionResult> getByLiveStockCircleId([FromQuery] Guid id)
+        {
+            var result = await _barnPlanService.GetByLiveStockCircleId(id);
+            return Ok(result);
+        }
         [HttpPost("create")]
         public async Task<IActionResult> createBarnPlan([FromBody]CreateBarnPlanRequest req)
         {
