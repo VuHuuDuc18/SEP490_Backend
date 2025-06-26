@@ -149,7 +149,45 @@ namespace Infrastructure.Services.Implements
             return await _barnplanrepo.CommitAsync() > 0;
 
         }
+        public async Task<ViewBarnPlanResponse> GetByLiveStockCircleId(Guid id)
+        {
+            var barnPlanDetail = await _barnplanrepo.GetQueryable(x=>x.IsActive)
+                .Where(it => it.EndDate <= DateTime.Now && it.StartDate >= DateTime.Now && it.LivestockCircleId == id)
+                .FirstOrDefaultAsync();
+            if (barnPlanDetail == null)
+            {
+                throw new Exception("Không tìm thấy kế hoạch cho chuồng ");
+            }
+            ViewBarnPlanResponse result = new ViewBarnPlanResponse()
+            {
+                Id = barnPlanDetail.Id,
+                EndDate = barnPlanDetail.EndDate,
+                StartDate = barnPlanDetail.StartDate,
+                Note = barnPlanDetail.Note,
+                foodPlans = await _bpfoodrepo.GetQueryable(x => x.IsActive)
+                                        .Where(x => x.BarnPlanId == id)
+                                        .Include(x => x.Food)
+                                        .Select(it => new Domain.Dto.Response.BarnPlan.FoodPlan()
+                                        {
+                                            FoodId = it.FoodId,
+                                            FoodName = it.Food.FoodName,
+                                            Note = it.Note,
+                                            Stock = it.Stock
+                                        }).ToListAsync(),
+                medicinePlans = await _bpmedicinerepo.GetQueryable(x => x.IsActive)
+                                        .Where(x => x.BarnPlanId == id)
+                                        .Include(x => x.Medicine)
+                                        .Select(it => new Domain.Dto.Response.BarnPlan.MedicinePlan()
+                                        {
+                                            MedicineId = it.MedicineId,
+                                            MedicineName = it.Medicine.MedicineName,
+                                            Note = it.Note,
+                                            Stock = it.Stock
+                                        }).ToListAsync(),
+            };
+            return result;
 
+        }
         public async Task<ViewBarnPlanResponse> GetById(Guid id)
         {
             var barnPlanDetail = await _barnplanrepo.GetById(id);
@@ -294,6 +332,9 @@ namespace Infrastructure.Services.Implements
                 throw new ArgumentException("Đã đặt kế hoạch cho ngày này");
             }
         }
-        #endregion
+
+       
+        #endregion 
+       
     }
 }
