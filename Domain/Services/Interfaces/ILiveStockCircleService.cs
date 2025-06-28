@@ -85,5 +85,6 @@ namespace Domain.Services.Interfaces
         public Task<PaginationSet<LivestockCircleResponse>> GetAssignedBarn(Guid tsid,ListingRequest req);
         // danh sach lich su chan nuoi cua 1 chuong
         public Task<PaginationSet<LiveStockCircleHistoryItem>> GetLivestockCircleHistory(Guid barnId,ListingRequest req);
+
     }
 }

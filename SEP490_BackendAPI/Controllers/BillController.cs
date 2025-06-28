@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Domain.Dto.Request;
 using Domain.Dto.Request.Bill;
+using Domain.Dto.Request.Bill.Admin;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Bill;
 using Domain.Services.Interfaces;
@@ -92,6 +93,12 @@ namespace SEP490_BackendAPI.Controllers
             if (bill == null)
                 return NotFound(new { error = "Hóa đơn không tồn tại." });
             return Ok(bill);
+        }
+        [HttpPost("admin/updateBill")]
+        public async Task<IActionResult> UpdateBill([FromRoute]Admin_UpdateBarnRequest request)
+        {
+            var result = _billService.AdminUpdateBill(request);
+            return Ok(result);
         }
     }
 }

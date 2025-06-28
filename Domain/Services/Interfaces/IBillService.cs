@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.Dto.Request.Bill.Admin;
 
 namespace Domain.Services.Interfaces
 {
@@ -51,5 +52,8 @@ namespace Domain.Services.Interfaces
         // Lấy danh sách hóa đơn chỉ chứa các mục hóa đơn thuộc loại được chỉ định (Food, Medicine hoặc Breed)
         Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetBillsByItemType(
            ListingRequest request, string itemType, CancellationToken cancellationToken = default);
+
+        // admin update bill breed
+        public Task<bool> AdminUpdateBill(Admin_UpdateBarnRequest request);
     }
 }

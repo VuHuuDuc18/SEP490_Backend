@@ -15,6 +15,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Domain.Dto.Request.Bill.Admin;
 
 namespace Infrastructure.Services.Implements
 {
@@ -505,6 +506,7 @@ namespace Infrastructure.Services.Implements
             }
         }
 
+
         public async Task<(bool Success, string ErrorMessage)> ChangeBillStatus(Guid billId, string newStatus, CancellationToken cancellationToken = default)
         {
             try
@@ -524,7 +526,7 @@ namespace Infrastructure.Services.Implements
                 try
                 {
                     bill.Status = newStatus;
-                  //  bill.UpdatedAt = DateTime.UtcNow;
+                    //  bill.UpdatedAt = DateTime.UtcNow;
 
                     if (newStatus == StatusConstant.APPROVED)
                     {
@@ -580,6 +582,37 @@ namespace Infrastructure.Services.Implements
             catch (Exception ex)
             {
                 return (false, $"Error changing bill status: {ex.Message}");
+            }
+        }
+
+        public async Task<bool> AdminUpdateBill(Admin_UpdateBarnRequest request)
+        {
+            try
+            {
+                var BillToUpdate = await _billRepository.GetQueryable(x => x.IsActive).FirstOrDefaultAsync(it => it.LivestockCircleId == request.LivestockCicleId);
+                if (BillToUpdate == null || !BillToUpdate.Status.Equals(StatusConstant.REQUESTED))
+                {
+                    return false;
+                }
+                var UpdatedBreed = await _billItemRepository.GetQueryable(x => x.IsActive).FirstOrDefaultAsync(it => it.BillId == BillToUpdate.Id);
+                UpdatedBreed.BreedId = request.BreedId;
+                UpdatedBreed.Stock = request.Stock;
+
+                _billItemRepository.Update(UpdatedBreed);
+                await _billItemRepository.CommitAsync();
+
+                // cap nhat livestockCircle
+                var UpdatedLivestockCircle = await _livestockCircleRepository.GetById(request.LivestockCicleId);
+                UpdatedLivestockCircle.BreedId = request.BreedId;
+
+                _livestockCircleRepository.Update(UpdatedLivestockCircle);
+                await _livestockCircleRepository.CommitAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new ArgumentException(ex.Message);
             }
         }
     }

@@ -5,17 +5,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Dto.Request.Barn.Admin
+namespace Domain.Dto.Request.Bill.Admin
 {
     public class Admin_UpdateBarnRequest
     {
+        [Required]
+        public Guid LivestockCicleId { get; set; }
         [Required]
         public Guid BarnId { get; set; }
         [Required]
         public Guid BreedId { get; set; }
         [Required]
-        [Range(1,10000)]
-        public int Stock {  get; set; }
+        [Range(1, 100001, ErrorMessage = "Số lượng phải trong 0 - 100001.")]
+        public int Stock { get; set; }
+        
 
     }
 }
