@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Security.Claims;
 using Entities.EntityModel;
+using Domain.Helper.Constants;
 
 namespace SEP490_BackendAPI.Controllers
 {
@@ -159,6 +160,20 @@ namespace SEP490_BackendAPI.Controllers
 
 
 
+        }
+        [HttpPost("changeStatus")]
+        public async Task<IActionResult> ChangeStatus([FromBody]ChangeStatusRequest req)
+        {
+            if (req.Status.Equals(StatusConstant.RELEASESTAT))
+            {
+                var result = await _livestockCircleService.ReleaseBarn(req.LivestockCircleId);
+                return Ok(result);
+            }
+            else
+            {
+                var result = await _livestockCircleService.ChangeStatus(req.LivestockCircleId, req.Status);
+                return Ok(result.Success?result.Success : result.ErrorMessage);
+            }
         }
     }
 }

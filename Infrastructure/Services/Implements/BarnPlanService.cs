@@ -63,7 +63,7 @@ namespace Infrastructure.Services.Implements
             return true;
         }
 
-        public async Task<PaginationSet<ViewBarnPlanResponse>> ListingHistoryBarnPlan(ListingRequest request)
+        public async Task<PaginationSet<ViewBarnPlanResponse>> ListingHistoryBarnPlan(Guid livestockCircleId, ListingRequest request)
         {
             try
             {
@@ -80,7 +80,7 @@ namespace Infrastructure.Services.Implements
 
 
 
-                var query = _barnplanrepo.GetQueryable(x => x.IsActive);
+                var query = _barnplanrepo.GetQueryable(x => x.IsActive).Where(it=>it.LivestockCircleId == livestockCircleId);
 
                 if (request.SearchString?.Any() == true)
                     query = query.SearchString(request.SearchString);
