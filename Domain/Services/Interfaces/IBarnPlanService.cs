@@ -17,6 +17,6 @@ namespace Domain.Services.Interfaces
         public Task<bool> CreateBarnPlan(CreateBarnPlanRequest req);
         public Task<bool> UpdateBarnPlan(UpdateBarnPlanRequest req);
         public Task<bool> DisableBarnPlan(Guid id);
-        public Task<PaginationSet<ViewBarnPlanResponse>> ListingHistoryBarnPlan(ListingRequest req);
+        public Task<PaginationSet<ViewBarnPlanResponse>> ListingHistoryBarnPlan(Guid livestockCircleId,ListingRequest req);
     }
 }

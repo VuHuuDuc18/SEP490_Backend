@@ -79,9 +79,11 @@ namespace Domain.Services.Interfaces
             string status,
             CancellationToken cancellationToken = default);
 
+        // cap nhat trang thai xuat chuong cho 1 lua nuoi
         public Task<bool> ReleaseBarn(Guid id);
+        //lay danh sach cac chuong duoc giao quan ly
         public Task<PaginationSet<LivestockCircleResponse>> GetAssignedBarn(Guid tsid,ListingRequest req);
-
+        // danh sach lich su chan nuoi cua 1 chuong
         public Task<PaginationSet<LiveStockCircleHistoryItem>> GetLivestockCircleHistory(Guid barnId,ListingRequest req);
     }
 }
