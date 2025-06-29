@@ -13,14 +13,14 @@ namespace Domain.Services.Interfaces
     public interface IBillService
     {
 
-        Task<(bool Success, string ErrorMessage)> CreateBill(
-            CreateBillRequest request,
-            CancellationToken cancellationToken = default);
+        //Task<(bool Success, string ErrorMessage)> CreateBill(
+        //    CreateBillRequest request,
+        //    CancellationToken cancellationToken = default);
 
-        Task<(bool Success, string ErrorMessage)> UpdateBill(
-            Guid billId,
-            UpdateBillRequest request,
-            CancellationToken cancellationToken = default);
+        //Task<(bool Success, string ErrorMessage)> UpdateBill(
+        //    Guid billId,
+        //    UpdateBillRequest request,
+        //    CancellationToken cancellationToken = default);
 
         Task<(bool Success, string ErrorMessage)> DisableBillItem(Guid billItemId, CancellationToken cancellationToken = default);
         Task<(bool Success, string ErrorMessage)> DisableBill(Guid billId, CancellationToken cancellationToken = default);
