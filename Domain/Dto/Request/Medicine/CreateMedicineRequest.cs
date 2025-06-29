@@ -12,6 +12,9 @@ namespace Domain.Dto.Request.Medicine
         [Required(ErrorMessage = "Tên thuốc là bắt buộc.")]
         public string MedicineName { get; set; }
 
+        [Required(ErrorMessage = "Mã thuốc là bắt buộc.")]
+        public string MedicineCode { get; set; }
+
         [Required(ErrorMessage = "ID danh mục thuốc là bắt buộc.")]
         public Guid MedicineCategoryId { get; set; }
 

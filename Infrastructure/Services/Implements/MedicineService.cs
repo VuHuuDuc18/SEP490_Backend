@@ -53,8 +53,11 @@ namespace Infrastructure.Services.Implements
             }
 
             var checkError = new Ref<CheckError>();
+
+            string medicineName = request.MedicineName + " - " + request.MedicineCode;
+
             var exists = await _medicineRepository.CheckExist(
-                x => x.MedicineName == request.MedicineName && x.MedicineCategoryId == request.MedicineCategoryId && x.IsActive,
+                x => x.MedicineName == medicineName && x.MedicineCategoryId == request.MedicineCategoryId && x.IsActive,
                 checkError,
                 cancellationToken);
 
@@ -62,11 +65,11 @@ namespace Infrastructure.Services.Implements
                 return (false, $"Lỗi khi kiểm tra thuốc tồn tại: {checkError.Value.Message}");
 
             if (exists)
-                return (false, $"Thuốc với tên '{request.MedicineName}' trong danh mục này đã tồn tại.");
+                return (false, $"Thuốc với tên '{medicineName}' trong danh mục này đã tồn tại.");
 
             var medicine = new Medicine
             {
-                MedicineName = request.MedicineName,
+                MedicineName = medicineName,
                 MedicineCategoryId = request.MedicineCategoryId,
                 Stock = request.Stock,
             };
@@ -145,8 +148,10 @@ namespace Infrastructure.Services.Implements
                 return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
             }
 
+            string medicineName = request.MedicineName + " - " + request.MedicineCode;
+
             var exists = await _medicineRepository.CheckExist(
-                x => x.MedicineName == request.MedicineName && x.MedicineCategoryId == request.MedicineCategoryId && x.Id != MedicineId && x.IsActive,
+                x => x.MedicineName == medicineName && x.MedicineCategoryId == request.MedicineCategoryId && x.Id != MedicineId && x.IsActive,
                 checkError,
                 cancellationToken);
 
@@ -154,11 +159,11 @@ namespace Infrastructure.Services.Implements
                 return (false, $"Lỗi khi kiểm tra thuốc tồn tại: {checkError.Value.Message}");
 
             if (exists)
-                return (false, $"Thuốc với tên '{request.MedicineName}' trong danh mục này đã tồn tại.");
+                return (false, $"Thuốc với tên '{medicineName}' trong danh mục này đã tồn tại.");
 
             try
             {
-                existing.MedicineName = request.MedicineName;
+                existing.MedicineName = medicineName;
                 existing.MedicineCategoryId = request.MedicineCategoryId;
                 existing.Stock = request.Stock;
 

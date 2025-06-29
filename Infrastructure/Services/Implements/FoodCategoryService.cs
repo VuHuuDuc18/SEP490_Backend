@@ -13,6 +13,8 @@ using Domain.Dto.Response;
 using Domain.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Domain.Extensions;
+using Domain.Dto.Request.Category;
+using Domain.Dto.Response.Category;
 
 namespace Infrastructure.Services.Implements
 {
