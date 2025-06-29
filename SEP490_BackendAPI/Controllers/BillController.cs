@@ -93,5 +93,48 @@ namespace SEP490_BackendAPI.Controllers
                 return NotFound(new { error = "Hóa đơn không tồn tại." });
             return Ok(bill);
         }
+<<<<<<< Updated upstream
+=======
+        [HttpPost("admin/updateBill")]
+        public async Task<IActionResult> UpdateBill([FromRoute]Admin_UpdateBarnRequest request)
+        {
+            var result = await _billService.AdminUpdateBill(request);
+            return Ok(result);
+        }
+
+        [HttpPost("getPaginatedBillList")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetPaginatedBills([FromBody] ListingRequest request)
+        {
+            var (result, errorMessage) = await _billService.GetPaginatedBillList(request);
+            if (errorMessage != null)
+                return BadRequest(new { error = errorMessage });
+            return Ok(result);
+        }
+
+        [HttpPost("getBillsByItemType")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetBillsByItemTypeAsync(string itemType, [FromBody] ListingRequest request)
+        {
+            var (result, errorMessage) = await _billService.GetBillsByItemType(request, itemType);
+            if (errorMessage != null)
+                return BadRequest(new { error = errorMessage });
+            return Ok(result);
+        }
+
+        [HttpPatch("changeStatus/{billId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ChangeBillStatus(Guid billId, [FromQuery] string newStatus)
+        {
+            var (success, errorMessage) = await _billService.ChangeBillStatus(billId, newStatus);
+            if (!success)
+                return BadRequest(new { error = errorMessage });
+            return Ok(new { message = $"Trạng thái hóa đơn đã được thay đổi thành {newStatus} thành công." });
+        }
+
+>>>>>>> Stashed changes
     }
 }
