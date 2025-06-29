@@ -277,6 +277,7 @@ namespace Infrastructure.Services.Implements
             if (food == null)
                 return (null, "Không tìm thấy thức ăn.");
 
+
             var images = await _imageFoodRepository.GetQueryable(x => x.FoodId == FoodId).ToListAsync(cancellationToken);
             var foodCategoryResponse = new FoodCategoryResponse()
             {
@@ -284,6 +285,7 @@ namespace Infrastructure.Services.Implements
                 Name = food.FoodCategory.Name,
                 Description = food.FoodCategory.Description
             };
+
             var response = new FoodResponse
             {
                 Id = food.Id,
