@@ -13,6 +13,15 @@ namespace Domain.Services.Interfaces
     public interface IBillService
     {
 
+        Task<(bool Success, string ErrorMessage)> CreateBill(
+            CreateBillRequest request,
+            CancellationToken cancellationToken = default);
+
+        Task<(bool Success, string ErrorMessage)> UpdateBill(
+            Guid billId,
+            UpdateBillRequest request,
+            CancellationToken cancellationToken = default);
+
         Task<(bool Success, string ErrorMessage)> DisableBillItem(Guid billItemId, CancellationToken cancellationToken = default);
         Task<(bool Success, string ErrorMessage)> DisableBill(Guid billId, CancellationToken cancellationToken = default);
         Task<(PaginationSet<BillItemResponse> Result, string ErrorMessage)> GetBillItemsByBillId(Guid billId, ListingRequest request, CancellationToken cancellationToken = default);
@@ -26,6 +35,8 @@ namespace Domain.Services.Interfaces
         Task<(bool Success, string ErrorMessage)> RequestFood(CreateRequestDto request, CancellationToken cancellationToken = default);
         Task<(bool Success, string ErrorMessage)> RequestMedicine(CreateRequestDto request, CancellationToken cancellationToken = default);
         Task<(bool Success, string ErrorMessage)> RequestBreed(CreateRequestDto request, CancellationToken cancellationToken = default);
+        public Task<bool> AdminUpdateBill(Admin_UpdateBarnRequest request);
+
 
     }
 }
