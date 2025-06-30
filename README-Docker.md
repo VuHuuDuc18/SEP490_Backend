@@ -13,10 +13,10 @@
 # Hoặc copy content và tạo file local
 
 # Khởi động toàn bộ system
-docker-compose -f docker-compose.remote.yml up -d
+docker-compose -f docker-compose.dev.yml up -d
 
 # Kiểm tra status
-docker-compose -f docker-compose.remote.yml ps
+docker-compose -f docker-compose.dev.yml ps
 ```
 
 ### 3. Endpoints có sẵn
@@ -46,18 +46,18 @@ docker-compose -f docker-compose.remote.yml ps
 
 ```bash
 # Xem logs
-docker-compose -f docker-compose.remote.yml logs -f api
-docker-compose -f docker-compose.remote.yml logs -f sqlserver
+docker-compose -f docker-compose.dev.yml logs -f api
+docker-compose -f docker-compose.dev.yml logs -f sqlserver
 
 # Stop services
-docker-compose -f docker-compose.remote.yml down
+docker-compose -f docker-compose.dev.yml down
 
 # Stop và xóa data
-docker-compose -f docker-compose.remote.yml down -v
+docker-compose -f docker-compose.dev.yml down -v
 
 # Update to latest version
-docker-compose -f docker-compose.remote.yml pull
-docker-compose -f docker-compose.remote.yml up -d
+docker-compose -f docker-compose.dev.yml pull
+docker-compose -f docker-compose.dev.yml up -d
 ```
 
 ### 6. 🔧 Troubleshooting
