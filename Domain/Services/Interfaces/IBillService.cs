@@ -40,5 +40,6 @@ namespace Domain.Services.Interfaces
         Task<(bool Success, string ErrorMessage)> RequestFood(CreateFoodRequestDto request, CancellationToken cancellationToken = default);
         Task<(bool Success, string ErrorMessage)> RequestMedicine(CreateMedicineRequestDto request, CancellationToken cancellationToken = default);
         Task<(bool Success, string ErrorMessage)> RequestBreed(CreateBreedRequestDto request, CancellationToken cancellationToken = default);
+        public Task<bool> AdminUpdateBill(Admin_UpdateBarnRequest request);
     }
 }
