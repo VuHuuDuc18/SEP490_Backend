@@ -8,6 +8,7 @@ namespace Domain.Helper.Constants
 {
     public static class StatusConstant
     {
+        public readonly static string PENDINGSTAT = "PENDING";
         public readonly static string GROWINGSTAT = "GROWING";
         public readonly static string RELEASESTAT = "RELEASE";
         public readonly static string DONESTAT = "DONE";

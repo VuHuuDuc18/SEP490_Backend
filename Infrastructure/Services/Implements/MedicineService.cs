@@ -272,6 +272,7 @@ namespace Infrastructure.Services.Implements
             if (medicine == null)
                 return (null, "Không tìm thấy thuốc.");
 
+
             var medicineCategoryResponse = new MedicineCategoryResponse()
             {
                 Id = medicine.MedicineCategory.Id,
@@ -279,6 +280,7 @@ namespace Infrastructure.Services.Implements
                 Description = medicine.MedicineCategory.Description
             };
             var images = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == MedicineId).ToListAsync(cancellationToken);
+
             var response = new MedicineResponse
             {
                 Id = medicine.Id,

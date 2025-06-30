@@ -275,7 +275,8 @@ namespace Infrastructure.Services.Implements
                 Id = breed.BreedCategory.Id,
                 Name = breed.BreedCategory.Name,
                 Description = breed.BreedCategory.Description
-            };
+            }; 
+
             var response = new BreedResponse
             {
                 Id = breed.Id,

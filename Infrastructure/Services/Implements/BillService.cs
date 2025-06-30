@@ -1,4 +1,4 @@
-﻿using Domain.Dto.Request;
+using Domain.Dto.Request;
 using Domain.Dto.Request.Bill;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Bill;
@@ -15,6 +15,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Domain.Dto.Request.Bill.Admin;
 
 namespace Infrastructure.Services.Implements
 {
@@ -340,6 +341,7 @@ namespace Infrastructure.Services.Implements
                 return (null, $"Lỗi khi lấy danh sách hóa đơn theo {itemCategory.ToLower()}: {ex.Message}");
             }
         }
+
 
         public async Task<(bool Success, string ErrorMessage)> ChangeBillStatus(Guid billId, string newStatus, CancellationToken cancellationToken = default)
         {
@@ -931,6 +933,37 @@ namespace Infrastructure.Services.Implements
             catch (Exception ex)
             {
                 return (false, $"Lỗi khi tạo yêu cầu giống: {ex.Message}");
+            }
+        }
+
+        public async Task<bool> AdminUpdateBill(Admin_UpdateBarnRequest request)
+        {
+            try
+            {
+                var BillToUpdate = await _billRepository.GetQueryable(x => x.IsActive).FirstOrDefaultAsync(it => it.LivestockCircleId == request.LivestockCicleId);
+                if (BillToUpdate == null || !BillToUpdate.Status.Equals(StatusConstant.REQUESTED))
+                {
+                    return false;
+                }
+                var UpdatedBreed = await _billItemRepository.GetQueryable(x => x.IsActive).FirstOrDefaultAsync(it => it.BillId == BillToUpdate.Id);
+                UpdatedBreed.BreedId = request.BreedId;
+                UpdatedBreed.Stock = request.Stock;
+
+                _billItemRepository.Update(UpdatedBreed);
+                await _billItemRepository.CommitAsync();
+
+                // cap nhat livestockCircle
+                var UpdatedLivestockCircle = await _livestockCircleRepository.GetById(request.LivestockCicleId);
+                UpdatedLivestockCircle.BreedId = request.BreedId;
+
+                _livestockCircleRepository.Update(UpdatedLivestockCircle);
+                await _livestockCircleRepository.CommitAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new ArgumentException(ex.Message);
             }
         }
     }

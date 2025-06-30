@@ -1,5 +1,6 @@
 ﻿using Domain.Dto.Request;
 using Domain.Dto.Request.Bill;
+using Domain.Dto.Request.Bill.Admin;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Bill;
 using Domain.Services.Interfaces;
@@ -198,6 +199,12 @@ namespace SEP490_BackendAPI.Controllers
                 return NotFound(new { error = "Hóa đơn không tồn tại." });
             return Ok(bill);
         }
+        [HttpPost("admin/updateBill")]
+        public async Task<IActionResult> UpdateBill([FromRoute]Admin_UpdateBarnRequest request)
+        {
+            var result = _billService.AdminUpdateBill(request);
+            return Ok(result);
+        }
 
         [HttpPost("get-paginated-bills")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -231,5 +238,7 @@ namespace SEP490_BackendAPI.Controllers
                 return BadRequest(new { error = errorMessage });
             return Ok(new { message = $"Trạng thái hóa đơn đã được thay đổi thành {newStatus} thành công." });
         }
+
+
     }
 }

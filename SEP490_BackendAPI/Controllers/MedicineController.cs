@@ -59,9 +59,9 @@ namespace SEP490_BackendAPI.Controllers
         /// Lấy thông tin một loại thuốc theo ID.
         /// </summary>
         [HttpGet("getMedicineById/{MedicineId}")]
-        public async Task<IActionResult> GetMedicineById(Guid id, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetMedicineById([FromRoute]Guid MedicineId, CancellationToken cancellationToken = default)
         {
-            var (medicine, errorMessage) = await _medicineService.GetMedicineById(id, cancellationToken);
+            var (medicine, errorMessage) = await _medicineService.GetMedicineById(MedicineId, cancellationToken);
             if (medicine == null)
                 return NotFound(errorMessage ?? "Không tìm thấy thuốc.");
             return Ok(medicine);
