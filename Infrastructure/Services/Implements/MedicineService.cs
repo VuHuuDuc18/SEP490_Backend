@@ -54,7 +54,7 @@ namespace Infrastructure.Services.Implements
 
             var checkError = new Ref<CheckError>();
 
-            string medicineName = request.MedicineName + " - " + request.MedicineCode;
+            string medicineName = request.MedicineName + "/" + request.MedicineCode;
 
             var exists = await _medicineRepository.CheckExist(
                 x => x.MedicineName == medicineName && x.MedicineCategoryId == request.MedicineCategoryId && x.IsActive,
@@ -148,7 +148,7 @@ namespace Infrastructure.Services.Implements
                 return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
             }
 
-            string medicineName = request.MedicineName + " - " + request.MedicineCode;
+            string medicineName = request.MedicineName + "/" + request.MedicineCode;
 
             var exists = await _medicineRepository.CheckExist(
                 x => x.MedicineName == medicineName && x.MedicineCategoryId == request.MedicineCategoryId && x.Id != MedicineId && x.IsActive,
