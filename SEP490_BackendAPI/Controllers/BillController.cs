@@ -239,6 +239,37 @@ namespace SEP490_BackendAPI.Controllers
             return Ok(new { message = $"Trạng thái hóa đơn đã được thay đổi thành {newStatus} thành công." });
         }
 
+        [HttpPut("update/food/{billId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdateBillFood(Guid billId, [FromBody] UpdateBillFoodDto request)
+        {
+            var (success, errorMessage) = await _billService.UpdateBillFood(billId, request);
+            if (!success)
+                return BadRequest(new { error = errorMessage });
+            return Ok(new { message = "Hóa đơn với mặt hàng thức ăn đã được cập nhật thành công." });
+        }
 
+        [HttpPut("update/medicine/{billId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdateBillMedicine(Guid billId, [FromBody] UpdateBillMedicineDto request)
+        {
+            var (success, errorMessage) = await _billService.UpdateBillMedicine(billId, request);
+            if (!success)
+                return BadRequest(new { error = errorMessage });
+            return Ok(new { message = "Hóa đơn với mặt hàng thuốc đã được cập nhật thành công." });
+        }
+
+        [HttpPut("update/breed/{billId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdateBillBreed(Guid billId, [FromBody] UpdateBillBreedDto request)
+        {
+            var (success, errorMessage) = await _billService.UpdateBillBreed(billId, request);
+            if (!success)
+                return BadRequest(new { error = errorMessage });
+            return Ok(new { message = "Hóa đơn với mặt hàng giống đã được cập nhật thành công." });
+        }
     }
 }

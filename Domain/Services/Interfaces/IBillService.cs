@@ -1,11 +1,11 @@
 ﻿using Domain.Dto.Request;
 using Domain.Dto.Request.Bill;
+using Domain.Dto.Request.Bill.Admin;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Bill;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Domain.Dto.Request.Bill.Admin;
 
 namespace Domain.Services.Interfaces
 {
@@ -40,6 +40,9 @@ namespace Domain.Services.Interfaces
         Task<(bool Success, string ErrorMessage)> RequestFood(CreateFoodRequestDto request, CancellationToken cancellationToken = default);
         Task<(bool Success, string ErrorMessage)> RequestMedicine(CreateMedicineRequestDto request, CancellationToken cancellationToken = default);
         Task<(bool Success, string ErrorMessage)> RequestBreed(CreateBreedRequestDto request, CancellationToken cancellationToken = default);
+        Task<(bool Success, string ErrorMessage)> UpdateBillFood(Guid billId, UpdateBillFoodDto request, CancellationToken cancellationToken = default);
+        Task<(bool Success, string ErrorMessage)> UpdateBillMedicine(Guid billId, UpdateBillMedicineDto request, CancellationToken cancellationToken = default);
+        Task<(bool Success, string ErrorMessage)> UpdateBillBreed(Guid billId, UpdateBillBreedDto request, CancellationToken cancellationToken = default);
         public Task<bool> AdminUpdateBill(Admin_UpdateBarnRequest request);
     }
 }
