@@ -29,6 +29,6 @@ namespace Domain.Dto.Request.Account
         public string ConfirmPassword { get; set; }
 
         [Required]
-        public string Role { get; set; }
+        public string RoleName { get; set; }
     }
 }
