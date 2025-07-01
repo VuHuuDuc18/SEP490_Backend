@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 
 namespace Domain.Dto.Request.Bill
 {
-    public class UpdateBillDto
-    {
         public class UpdateBillFoodDto
         {
             [Required(ErrorMessage = "Phải cung cấp danh sách mặt hàng thức ăn.")]
@@ -26,5 +24,5 @@ namespace Domain.Dto.Request.Bill
             [Required(ErrorMessage = "Phải cung cấp danh sách mặt hàng giống.")]
             public List<BreedItemRequest> BreedItems { get; set; } = new List<BreedItemRequest>();
         }
-    }
+    
 }

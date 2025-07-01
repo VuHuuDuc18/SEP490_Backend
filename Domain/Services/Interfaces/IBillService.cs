@@ -1,5 +1,6 @@
 ﻿using Domain.Dto.Request;
 using Domain.Dto.Request.Bill;
+using Domain.Dto.Request.Bill.Admin;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Bill;
 using System;
@@ -42,5 +43,6 @@ namespace Domain.Services.Interfaces
         Task<(bool Success, string ErrorMessage)> UpdateBillFood(Guid billId, UpdateBillFoodDto request, CancellationToken cancellationToken = default);
         Task<(bool Success, string ErrorMessage)> UpdateBillMedicine(Guid billId, UpdateBillMedicineDto request, CancellationToken cancellationToken = default);
         Task<(bool Success, string ErrorMessage)> UpdateBillBreed(Guid billId, UpdateBillBreedDto request, CancellationToken cancellationToken = default);
+        public Task<bool> AdminUpdateBill(Admin_UpdateBarnRequest request);
     }
 }
