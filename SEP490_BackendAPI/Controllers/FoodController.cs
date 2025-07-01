@@ -38,7 +38,7 @@ namespace SEP490_BackendAPI.Controllers
         /// Cập nhật thông tin một loại thức ăn, bao gồm upload ảnh và thumbnail.
         /// </summary>
         [HttpPut("update/{FoodId}")]
-        public async Task<IActionResult> UpdateFood(Guid FoodId, [FromBody] UpdateFoodRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> UpdateFood([FromRoute] Guid FoodId, [FromBody] UpdateFoodRequest request, CancellationToken cancellationToken = default)
         {
 
             var (success, errorMessage) = await _foodService.UpdateFood(FoodId, request, cancellationToken);
@@ -48,7 +48,7 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpDelete("disable/{FoodId}")]
-        public async Task<IActionResult> UpdateFood(Guid FoodId, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> DisableFood([FromRoute] Guid FoodId, CancellationToken cancellationToken = default)
         {
             var (success, errorMessage) = await _foodService.DisableFood(FoodId, cancellationToken);
             if (!success)
@@ -60,7 +60,7 @@ namespace SEP490_BackendAPI.Controllers
         /// Lấy thông tin một loại thức ăn theo ID.
         /// </summary>
         [HttpGet("getFoodById/{FoodId}")]
-        public async Task<IActionResult> GetFoodById(Guid FoodId, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetFoodById([FromRoute] Guid FoodId, CancellationToken cancellationToken = default)
         {
             var (food, errorMessage) = await _foodService.GetFoodById(FoodId, cancellationToken);
             if (food == null)

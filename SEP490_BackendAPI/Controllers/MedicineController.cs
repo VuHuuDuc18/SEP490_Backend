@@ -38,7 +38,7 @@ namespace SEP490_BackendAPI.Controllers
         /// Cập nhật thông tin một loại thuốc, bao gồm upload ảnh và thumbnail.
         /// </summary>
         [HttpPut("update/{MedicineId}")]
-        public async Task<IActionResult> UpdateMedicine(Guid MedicineId, [FromBody] UpdateMedicineRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> UpdateMedicine([FromRoute] Guid MedicineId, [FromBody] UpdateMedicineRequest request, CancellationToken cancellationToken = default)
         {
             var (success, errorMessage) = await _medicineService.UpdateMedicine(MedicineId, request, cancellationToken);
             if (!success)
@@ -47,7 +47,7 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpDelete("disable/{MedicineId}")]
-        public async Task<IActionResult> DisableMedicine(Guid MedicineId, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> DisableMedicine([FromRoute] Guid MedicineId, CancellationToken cancellationToken = default)
         {
             var (success, errorMessage) = await _medicineService.DisableMedicine(MedicineId,cancellationToken);
             if (!success)
