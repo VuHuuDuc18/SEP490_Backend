@@ -1,4 +1,4 @@
-﻿
+
 using Domain.Services.Implements;
 using Domain.Services.Interfaces;
 using Domain.Settings;
@@ -25,6 +25,7 @@ namespace Infrastructure
             //Add Cloudiary Config to DI Container
             services.Configure<CloudinaryConfig>(configuration.GetSection("Cloudinary"));
             //Register services
+            services.AddTransient<IBarnPlanService, BarnPlanService>();
             services.AddTransient<IUserService, UserService>();
             services.AddScoped<IBarnService, BarnService>();
             services.AddScoped<IFoodService, FoodService>();
@@ -40,6 +41,9 @@ namespace Infrastructure
             services.AddScoped<CloudinaryCloudService>();
 
             //Add repo
+            services.AddScoped<IRepository<BarnPlan>, Repository<BarnPlan>>();
+            services.AddScoped<IRepository<BarnPlanFood>, Repository<BarnPlanFood>>();
+            services.AddScoped<IRepository<BarnPlanMedicine>, Repository<BarnPlanMedicine>>();
             services.AddScoped<IRepository<Role>, Repository<Role>>();
             services.AddScoped<IRepository<Bill>, Repository<Bill>>();
             services.AddScoped<IRepository<BillItem>, Repository<BillItem>>();

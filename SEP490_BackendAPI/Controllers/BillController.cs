@@ -1,5 +1,6 @@
 ﻿using Domain.Dto.Request;
 using Domain.Dto.Request.Bill;
+using Domain.Dto.Request.Bill.Admin;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Bill;
 using Domain.Services.Interfaces;
@@ -199,6 +200,12 @@ namespace SEP490_BackendAPI.Controllers
                 return NotFound(new { error = "Hóa đơn không tồn tại." });
             return Ok(bill);
         }
+        [HttpPost("admin/updateBill")]
+        public async Task<IActionResult> UpdateBill([FromRoute]Admin_UpdateBarnRequest request)
+        {
+            var result = _billService.AdminUpdateBill(request);
+            return Ok(result);
+        }
 
         [HttpPost("get-paginated-bills")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -231,39 +238,6 @@ namespace SEP490_BackendAPI.Controllers
             if (!success)
                 return BadRequest(new { error = errorMessage });
             return Ok(new { message = $"Trạng thái hóa đơn đã được thay đổi thành {newStatus} thành công." });
-        }
-
-        [HttpPut("update/food/{billId}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateBillFood(Guid billId, [FromBody] UpdateBillFoodDto request)
-        {
-            var (success, errorMessage) = await _billService.UpdateBillFood(billId, request);
-            if (!success)
-                return BadRequest(new { error = errorMessage });
-            return Ok(new { message = "Hóa đơn với mặt hàng thức ăn đã được cập nhật thành công." });
-        }
-
-        [HttpPut("update/medicine/{billId}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateBillMedicine(Guid billId, [FromBody] UpdateBillMedicineDto request)
-        {
-            var (success, errorMessage) = await _billService.UpdateBillMedicine(billId, request);
-            if (!success)
-                return BadRequest(new { error = errorMessage });
-            return Ok(new { message = "Hóa đơn với mặt hàng thuốc đã được cập nhật thành công." });
-        }
-
-        [HttpPut("update/breed/{billId}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateBillBreed(Guid billId, [FromBody] UpdateBillBreedDto request)
-        {
-            var (success, errorMessage) = await _billService.UpdateBillBreed(billId, request);
-            if (!success)
-                return BadRequest(new { error = errorMessage });
-            return Ok(new { message = "Hóa đơn với mặt hàng giống đã được cập nhật thành công." });
         }
     }
 }

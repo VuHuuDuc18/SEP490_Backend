@@ -5,12 +5,21 @@ using Domain.Dto.Response.Bill;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using static Domain.Dto.Request.Bill.UpdateBillDto;
 
 namespace Domain.Services.Interfaces
 {
     public interface IBillService
     {
+
+        //Task<(bool Success, string ErrorMessage)> CreateBill(
+        //    CreateBillRequest request,
+        //    CancellationToken cancellationToken = default);
+
+        //Task<(bool Success, string ErrorMessage)> UpdateBill(
+        //    Guid billId,
+        //    UpdateBillRequest request,
+        //    CancellationToken cancellationToken = default);
+
         Task<(bool Success, string ErrorMessage)> DisableBillItem(Guid billItemId, CancellationToken cancellationToken = default);
         Task<(bool Success, string ErrorMessage)> DisableBill(Guid billId, CancellationToken cancellationToken = default);
         Task<(PaginationSet<BillItemResponse> Result, string ErrorMessage)> GetBillItemsByBillId(Guid billId, ListingRequest request, CancellationToken cancellationToken = default);
