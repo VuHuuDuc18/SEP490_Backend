@@ -26,7 +26,7 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpPut("update/{FoodCategoryId}")]
-        public async Task<IActionResult> UpdateFoodCategory(Guid FoodCategoryId, [FromBody] UpdateCategoryRequest request)
+        public async Task<IActionResult> UpdateFoodCategory([FromRoute] Guid FoodCategoryId, [FromBody] UpdateCategoryRequest request)
         {
             var (success, errorMessage) = await _foodCategoryService.UpdateFoodCategory(FoodCategoryId, request);
             if (!success)
@@ -35,7 +35,7 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpDelete("disable/{FoodCategoryId}")]
-        public async Task<IActionResult> DisableFoodCategory(Guid FoodCategoryId)
+        public async Task<IActionResult> DisableFoodCategory([FromRoute] Guid FoodCategoryId)
         {
             var (success, errorMessage) = await _foodCategoryService.DisableFoodCategory(FoodCategoryId);
             if (!success)
@@ -44,7 +44,7 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpGet("getFoodCategoryById/{FoodCategoryId}")]
-        public async Task<IActionResult> GetFoodCategoryById(Guid FoodCategoryId)
+        public async Task<IActionResult> GetFoodCategoryById([FromRoute] Guid FoodCategoryId)
         {
             var (category, errorMessage) = await _foodCategoryService.GetFoodCategoryById(FoodCategoryId);
             if (category == null)
@@ -53,7 +53,7 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpGet("getFoodCategoryByName/{name}")]
-        public async Task<IActionResult> GetFoodCategoryByName(string name)
+        public async Task<IActionResult> GetFoodCategoryByName([FromRoute] string name)
         {
             var (category, errorMessage) = await _foodCategoryService.GetFoodCategoryByName(name);
             if (category == null)

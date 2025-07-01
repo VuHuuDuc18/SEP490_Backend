@@ -57,7 +57,7 @@ namespace SEP490_BackendAPI.Controllers
         [HttpPost("add/food-item/{billId}")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> AddFoodItemToBill(Guid billId, [FromBody] AddFoodItemToBillDto request)
+        public async Task<IActionResult> AddFoodItemToBill([FromRoute] Guid billId, [FromBody] AddFoodItemToBillDto request)
         {
             var (success, errorMessage) = await _billService.AddFoodItemToBill(billId, request);
             if (!success)
@@ -68,7 +68,7 @@ namespace SEP490_BackendAPI.Controllers
         [HttpPost("add/medicine-item/{billId}")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> AddMedicineItemToBill(Guid billId, [FromBody] AddMedicineItemToBillDto request)
+        public async Task<IActionResult> AddMedicineItemToBill([FromRoute] Guid billId, [FromBody] AddMedicineItemToBillDto request)
         {
             var (success, errorMessage) = await _billService.AddMedicineItemToBill(billId, request);
             if (!success)
@@ -79,7 +79,7 @@ namespace SEP490_BackendAPI.Controllers
         [HttpPost("add/breed-item/{billId}")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> AddBreedItemToBill(Guid billId, [FromBody] AddBreedItemToBillDto request)
+        public async Task<IActionResult> AddBreedItemToBill([FromRoute] Guid billId, [FromBody] AddBreedItemToBillDto request)
         {
             var (success, errorMessage) = await _billService.AddBreedItemToBill(billId, request);
             if (!success)
@@ -90,7 +90,7 @@ namespace SEP490_BackendAPI.Controllers
         [HttpPut("update/food-item/{billId}/{itemId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateFoodItemInBill(Guid billId, Guid itemId, [FromBody] UpdateFoodItemInBillDto request)
+        public async Task<IActionResult> UpdateFoodItemInBill([FromRoute] Guid billId, [FromRoute] Guid itemId, [FromBody] UpdateFoodItemInBillDto request)
         {
             var (success, errorMessage) = await _billService.UpdateFoodItemInBill(billId, itemId, request);
             if (!success)
@@ -101,7 +101,7 @@ namespace SEP490_BackendAPI.Controllers
         [HttpPut("update/medicine-item/{billId}/{itemId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateMedicineItemInBill(Guid billId, Guid itemId, [FromBody] UpdateMedicineItemInBillDto request)
+        public async Task<IActionResult> UpdateMedicineItemInBill([FromRoute] Guid billId, [FromRoute] Guid itemId, [FromBody] UpdateMedicineItemInBillDto request)
         {
             var (success, errorMessage) = await _billService.UpdateMedicineItemInBill(billId, itemId, request);
             if (!success)
@@ -112,7 +112,7 @@ namespace SEP490_BackendAPI.Controllers
         [HttpPut("update/breed-item/{billId}/{itemId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateBreedItemInBill(Guid billId, Guid itemId, [FromBody] UpdateBreedItemInBillDto request)
+        public async Task<IActionResult> UpdateBreedItemInBill([FromRoute] Guid billId, [FromRoute] Guid itemId, [FromBody] UpdateBreedItemInBillDto request)
         {
             var (success, errorMessage) = await _billService.UpdateBreedItemInBill(billId, itemId, request);
             if (!success)
@@ -123,7 +123,7 @@ namespace SEP490_BackendAPI.Controllers
         [HttpDelete("delete/food-item/{billId}/{itemId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> DeleteFoodItemFromBill(Guid billId, Guid itemId)
+        public async Task<IActionResult> DeleteFoodItemFromBill([FromRoute] Guid billId, [FromRoute] Guid itemId)
         {
             var (success, errorMessage) = await _billService.DeleteFoodItemFromBill(billId, itemId);
             if (!success)
@@ -134,7 +134,7 @@ namespace SEP490_BackendAPI.Controllers
         [HttpDelete("delete/medicine-item/{billId}/{itemId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> DeleteMedicineItemFromBill(Guid billId, Guid itemId)
+        public async Task<IActionResult> DeleteMedicineItemFromBill([FromRoute] Guid billId, [FromRoute] Guid itemId)
         {
             var (success, errorMessage) = await _billService.DeleteMedicineItemFromBill(billId, itemId);
             if (!success)
@@ -145,7 +145,7 @@ namespace SEP490_BackendAPI.Controllers
         [HttpDelete("delete/breed-item/{billId}/{itemId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> DeleteBreedItemFromBill(Guid billId, Guid itemId)
+        public async Task<IActionResult> DeleteBreedItemFromBill([FromRoute] Guid billId, [FromRoute] Guid itemId)
         {
             var (success, errorMessage) = await _billService.DeleteBreedItemFromBill(billId, itemId);
             if (!success)
@@ -156,7 +156,7 @@ namespace SEP490_BackendAPI.Controllers
         [HttpPatch("disable/bill-item/{billItemId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> DisableBillItem(Guid billItemId)
+        public async Task<IActionResult> DisableBillItem([FromRoute] Guid billItemId)
         {
             var (success, errorMessage) = await _billService.DisableBillItem(billItemId);
             if (!success)
@@ -167,7 +167,7 @@ namespace SEP490_BackendAPI.Controllers
         [HttpPatch("disable/bill/{billId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> DisableBill(Guid billId)
+        public async Task<IActionResult> DisableBill([FromRoute] Guid billId)
         {
             var (success, errorMessage) = await _billService.DisableBill(billId);
             if (!success)
@@ -178,7 +178,7 @@ namespace SEP490_BackendAPI.Controllers
         [HttpPost("get-bill-items/{billId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetBillItemsByBillId(Guid billId, [FromBody] ListingRequest request)
+        public async Task<IActionResult> GetBillItemsByBillId([FromRoute] Guid billId, [FromBody] ListingRequest request)
         {
             var (result, errorMessage) = await _billService.GetBillItemsByBillId(billId, request);
             if (errorMessage != null)
@@ -190,7 +190,7 @@ namespace SEP490_BackendAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetBillById(Guid billId)
+        public async Task<IActionResult> GetBillById([FromRoute] Guid billId)
         {
             var (bill, errorMessage) = await _billService.GetBillById(billId);
             if (errorMessage != null)
@@ -231,7 +231,7 @@ namespace SEP490_BackendAPI.Controllers
         [HttpPatch("change-status/{billId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> ChangeBillStatus(Guid billId, [FromQuery] string newStatus)
+        public async Task<IActionResult> ChangeBillStatus([FromRoute] Guid billId, [FromQuery] string newStatus)
         {
             var (success, errorMessage) = await _billService.ChangeBillStatus(billId, newStatus);
             if (!success)
@@ -242,7 +242,7 @@ namespace SEP490_BackendAPI.Controllers
         [HttpPut("update/food/{billId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateBillFood(Guid billId, [FromBody] UpdateBillFoodDto request)
+        public async Task<IActionResult> UpdateBillFood([FromRoute] Guid billId, [FromBody] UpdateBillFoodDto request)
         {
             var (success, errorMessage) = await _billService.UpdateBillFood(billId, request);
             if (!success)
@@ -253,7 +253,7 @@ namespace SEP490_BackendAPI.Controllers
         [HttpPut("update/medicine/{billId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateBillMedicine(Guid billId, [FromBody] UpdateBillMedicineDto request)
+        public async Task<IActionResult> UpdateBillMedicine([FromRoute] Guid billId, [FromBody] UpdateBillMedicineDto request)
         {
             var (success, errorMessage) = await _billService.UpdateBillMedicine(billId, request);
             if (!success)
@@ -264,7 +264,7 @@ namespace SEP490_BackendAPI.Controllers
         [HttpPut("update/breed/{billId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateBillBreed(Guid billId, [FromBody] UpdateBillBreedDto request)
+        public async Task<IActionResult> UpdateBillBreed([FromRoute] Guid billId, [FromBody] UpdateBillBreedDto request)
         {
             var (success, errorMessage) = await _billService.UpdateBillBreed(billId, request);
             if (!success)
