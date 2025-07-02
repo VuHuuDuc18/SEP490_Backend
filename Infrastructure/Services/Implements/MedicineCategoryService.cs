@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Dto.Request;
 using Domain.Dto.Response;
 using Domain.Extensions;
+using Domain.Dto.Response.Medicine;
 
 namespace Infrastructure.Services.Implements
 {
@@ -258,6 +259,18 @@ namespace Infrastructure.Services.Implements
             {
                 return (null, $"Lỗi khi lấy danh sách phân trang: {ex.Message}");
             }
+        }
+
+        public async Task<List<MedicineCategoryResponse>> GetAllMedicineCategory()
+        {
+            var data = await _medicineCategoryRepository.GetQueryable(x=>x.IsActive).ToListAsync();
+            return data.Select(it=> new MedicineCategoryResponse()
+            {
+                //IsActive = it.IsActive,
+                Name = it.Name,
+                Description = it.Description,
+                Id = it.Id
+            }).ToList();
         }
     }
 }
