@@ -43,7 +43,7 @@ namespace SEP490_BackendAPI.Controllers
         /// Cập nhật thông tin một giống loài, bao gồm upload ảnh và thumbnail.
         /// </summary>
         [HttpPut("update/{BreedId}")]
-        public async Task<IActionResult> UpdateBreed(Guid BreedId, [FromBody] UpdateBreedRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> UpdateBreed([FromRoute] Guid BreedId, [FromBody] UpdateBreedRequest request, CancellationToken cancellationToken = default)
         {
             var (success, errorMessage) = await _breedService.UpdateBreed(BreedId, request, cancellationToken);
             if (!success)
@@ -52,7 +52,7 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpPut("disable/{BreedId}")]
-        public async Task<IActionResult> DisableBreed(Guid BreedId,CancellationToken cancellationToken = default)
+        public async Task<IActionResult> DisableBreed([FromRoute] Guid BreedId,CancellationToken cancellationToken = default)
         {
             var (success, errorMessage) = await _breedService.DisableBreed(BreedId,cancellationToken);
             if (!success)
@@ -64,7 +64,7 @@ namespace SEP490_BackendAPI.Controllers
         /// Lấy thông tin một giống loài theo ID.
         /// </summary>
         [HttpGet("getBreedById/{BreedId}")]
-        public async Task<IActionResult> GetBreedById(Guid BreedId, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetBreedById([FromRoute] Guid BreedId, CancellationToken cancellationToken = default)
         {
             var (breed, errorMessage) = await _breedService.GetBreedById(BreedId, cancellationToken);
             if (breed == null)

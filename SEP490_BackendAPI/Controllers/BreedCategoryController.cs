@@ -1,4 +1,5 @@
 ﻿using Domain.Dto.Request;
+using Domain.Dto.Request.Category;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
@@ -36,7 +37,7 @@ namespace Controllers
         /// Cập nhật thông tin một danh mục giống loài.
         /// </summary>
         [HttpPut("update/{BreedCategoryId}")]
-        public async Task<IActionResult> UpdateBreedCategory(Guid BreedCategoryId, [FromBody] UpdateCategoryRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> UpdateBreedCategory([FromRoute] Guid BreedCategoryId, [FromBody] UpdateCategoryRequest request, CancellationToken cancellationToken = default)
         {
             var (success, errorMessage) = await _breedCategoryService.UpdateBreedCategory(BreedCategoryId, request, cancellationToken);
             if (!success)
@@ -45,7 +46,7 @@ namespace Controllers
         }
 
         [HttpDelete("disable/{BreedCategoryId}")]
-        public async Task<IActionResult> DisableBreedCategory(Guid BreedCategoryId, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> DisableBreedCategory([FromRoute] Guid BreedCategoryId, CancellationToken cancellationToken = default)
         {
             var (success, errorMessage) = await _breedCategoryService.DisableBreedCategory(BreedCategoryId,  cancellationToken);
             if (!success)
@@ -57,7 +58,7 @@ namespace Controllers
         /// Lấy thông tin một danh mục giống loài theo ID.
         /// </summary>
         [HttpGet("getBreedCategoryById/{BreedCategoryId}")]
-        public async Task<IActionResult> GetBreedCategoryById(Guid BreedCategoryId, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetBreedCategoryById([FromRoute] Guid BreedCategoryId, CancellationToken cancellationToken = default)
         {
             var (breedCategory, errorMessage) = await _breedCategoryService.GetBreedCategoryById(BreedCategoryId, cancellationToken);
             if (breedCategory == null)
@@ -69,7 +70,7 @@ namespace Controllers
         /// Lấy danh sách tất cả danh mục giống loài đang hoạt động với bộ lọc name.
         /// </summary>
         [HttpGet("getBreedCategoryByName/{name}")]
-        public async Task<IActionResult> GetBreedCategoryByName(string name = null, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetBreedCategoryByName([FromRoute] string name = null, CancellationToken cancellationToken = default)
         {
             var (breedCategories, errorMessage) = await _breedCategoryService.GetBreedCategoryByName(name, cancellationToken);
             if (breedCategories == null)
