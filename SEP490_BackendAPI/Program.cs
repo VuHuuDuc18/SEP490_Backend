@@ -13,12 +13,13 @@ using Domain.Services;
 using Infrastructure.DBContext;
 using Infrastructure.Repository;
 using Domain.Settings;
+using System.Threading.Tasks;
 
 namespace SEP490_BackendAPI
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
             //cors
@@ -41,26 +42,25 @@ namespace SEP490_BackendAPI
 
             // Add Service
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-            //builder.Services.AddTransient<IUserService,UserService>() ;
 
             // Add services to the container.
             builder.Services.AddSwaggerExtensions();
 
-            var servicesProvider = builder.Services.BuildServiceProvider();
-            ServicesExtentions.SeedIdentity(servicesProvider);
-
-            //builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            //    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             
             var app = builder.Build();
+            
+            await app.MigrateDatabaseAsync();
+            //var servicesProvider = builder.Services.BuildServiceProvider();
+            //ServicesExtentions.SeedIdentity(servicesProvider);
+
 
             // Configure the HTTP request pipeline.
             //if (app.Environment.IsDevelopment())
             //{
-                app.UseSwagger();
+            app.UseSwagger();
                 app.UseSwaggerUI();
             //}
 
