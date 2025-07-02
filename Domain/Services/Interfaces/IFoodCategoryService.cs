@@ -1,5 +1,6 @@
 ﻿using Domain.Dto.Request;
 using Domain.Dto.Response;
+using Domain.Dto.Response.Food;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,5 +42,7 @@ namespace Domain.Services.Interfaces
         Task<(PaginationSet<CategoryResponse> Result, string ErrorMessage)> GetPaginatedFoodCategoryList(
             ListingRequest request,
             CancellationToken cancellationToken = default);
+
+        public Task<List<FoodCategoryResponse>> GetAllCategory();
     }
 }

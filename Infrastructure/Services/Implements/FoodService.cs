@@ -24,17 +24,19 @@ namespace Infrastructure.Services.Implements
     public class FoodService : IFoodService
     {
         private readonly IRepository<Food> _foodRepository;
+        private readonly IRepository<FoodCategory> _foodCategoryRepository;
         private readonly IRepository<ImageFood> _imageFoodRepository;
         private readonly CloudinaryCloudService _cloudinaryCloudService;
 
         /// <summary>
         /// Khởi tạo service với repository của Food và CloudinaryCloudService.
         /// </summary>
-        public FoodService(IRepository<Food> foodRepository, IRepository<ImageFood> imageFoodRepository, CloudinaryCloudService cloudinaryCloudService)
+        public FoodService(IRepository<Food> foodRepository, IRepository<ImageFood> imageFoodRepository, CloudinaryCloudService cloudinaryCloudService, IRepository<FoodCategory> fcrepo)
         {
             _foodRepository = foodRepository ?? throw new ArgumentNullException(nameof(foodRepository));
             _imageFoodRepository = imageFoodRepository ?? throw new ArgumentNullException(nameof(imageFoodRepository));
             _cloudinaryCloudService = cloudinaryCloudService ?? throw new ArgumentNullException(nameof(cloudinaryCloudService));
+            _foodCategoryRepository = fcrepo;
         }
 
         /// <summary>
@@ -296,7 +298,7 @@ namespace Infrastructure.Services.Implements
                 IsActive = food.IsActive,
                 ImageLinks = images.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
                 Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink,
-               // Folder = images.FirstOrDefault()?.ImageLink.Split('/')[4] // Lấy folder từ URL (giả định cấu trúc URL)
+                // Folder = images.FirstOrDefault()?.ImageLink.Split('/')[4] // Lấy folder từ URL (giả định cấu trúc URL)
             };
             return (response, null);
         }
@@ -340,7 +342,7 @@ namespace Infrastructure.Services.Implements
                         IsActive = food.IsActive,
                         ImageLinks = images.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
                         Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink,
-                       // Folder = images.FirstOrDefault()?.ImageLink.Split('/')[4] // Lấy folder từ URL (giả định cấu trúc URL)
+                        // Folder = images.FirstOrDefault()?.ImageLink.Split('/')[4] // Lấy folder từ URL (giả định cấu trúc URL)
                     });
                 }
                 return (responses, null);
@@ -419,6 +421,60 @@ namespace Infrastructure.Services.Implements
             catch (Exception ex)
             {
                 return (null, $"Lỗi khi lấy danh sách phân trang: {ex.Message}");
+            }
+        }
+
+        public async Task<bool> ExcelDataHandle(List<CellFoodItem> data)
+        {
+            try
+            {
+                foreach (CellFoodItem item in data)
+                {
+                    var FoodDetail = await _foodRepository.GetQueryable(x => x.IsActive).FirstOrDefaultAsync(x => StringKeyComparer.CompareStrings(x.FoodName, item.Ten));
+                    var ListCategory = await _foodCategoryRepository.GetQueryable(x => x.IsActive).ToListAsync();
+                    if (FoodDetail == null)
+                    {
+                        // add food
+                        var FoodCategoryDetail = ListCategory.FirstOrDefault(x => StringKeyComparer.CompareStrings(x.Name, item.Phan_Loai));
+                        if (FoodCategoryDetail == null)
+                        {
+                            // add category
+                            var FoodCategoryToInsert = new FoodCategory()
+                            {
+                                Name = item.Phan_Loai,
+                                Description = item.Phan_Loai
+                            };
+
+                            _foodCategoryRepository.Insert(FoodCategoryToInsert);
+                            await _foodCategoryRepository.CommitAsync();
+                            //gan lai
+                            FoodCategoryDetail = FoodCategoryToInsert;
+                        }
+
+                        // create new food
+                        Food FoodToInsert = new Food()
+                        {
+                            FoodName = item.Ten,
+                            FoodCategoryId = FoodCategoryDetail.Id,
+                            Stock = item.So_luong,
+                            WeighPerUnit = item.Trong_luong_Theo_Kg
+                        };
+                        _foodRepository.Insert(FoodToInsert);
+                    }
+                    else
+                    {
+                        FoodDetail.Stock += item.So_luong;
+                    }
+                    // update stock
+
+
+                }
+
+                return await _foodRepository.CommitAsync() > 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Loi du lieu");
             }
         }
     }

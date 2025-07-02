@@ -1,5 +1,6 @@
 ﻿using Domain.Dto.Request;
 using Domain.Dto.Request.Food;
+using Domain.Dto.Request.Medicine;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Food;
 using System;
@@ -41,5 +42,7 @@ namespace Domain.Services.Interfaces
         Task<(PaginationSet<FoodResponse> Result, string ErrorMessage)> GetPaginatedFoodList(
             ListingRequest request,
             CancellationToken cancellationToken = default);
+
+        public Task<bool> ExcelDataHandle(List<CellFoodItem> data);
     }
 }

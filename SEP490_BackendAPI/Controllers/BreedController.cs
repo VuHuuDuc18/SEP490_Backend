@@ -1,9 +1,13 @@
 ﻿using Domain.Dto.Request;
 using Domain.Dto.Request.Breed;
 using Domain.Services.Interfaces;
+using ExcelControl.Handler;
+using Infrastructure.Services.Implements;
 using Microsoft.AspNetCore.Mvc;
+using OfficeOpenXml;
 using System.Threading;
 using System.Threading.Tasks;
+using Domain.Dto.Response.Breed;
 
 namespace SEP490_BackendAPI.Controllers
 {
@@ -12,13 +16,15 @@ namespace SEP490_BackendAPI.Controllers
     public class BreedController : ControllerBase
     {
         private readonly IBreedService _breedService;
+        private readonly IBreedCategoryService _breedCategoryService;
 
         /// <summary>
         /// Khởi tạo controller với service để xử lý logic giống loài.
         /// </summary>
-        public BreedController(IBreedService breedService)
+        public BreedController(IBreedService breedService, IBreedCategoryService breedCategoryService)
         {
             _breedService = breedService ?? throw new ArgumentNullException(nameof(breedService));
+            _breedCategoryService = breedCategoryService;
         }
 
         /// <summary>
@@ -88,6 +94,46 @@ namespace SEP490_BackendAPI.Controllers
             if (errorMessage != null)
                 return BadRequest(errorMessage);
             return Ok(result);
+        }
+        [HttpPost("import")]
+        public async Task<IActionResult> ImportPersonExcel(IFormFile file)
+        {
+            try
+            {
+                ExcelPackage.License.SetNonCommercialPersonal(Domain.Helper.Constants.LienceConstant.NonCommercialPersonal);
+
+                if (file == null || file.Length == 0)
+                    return BadRequest("No file uploaded.");
+
+                List<CellBreedItem> items;
+                using (var stream = new MemoryStream())
+                {
+
+                    await file.CopyToAsync(stream);
+                    stream.Position = 0;
+                    items = ExportExcelHelper.ImportExcelFile<CellBreedItem>(stream);
+                }
+
+                return Ok(await _breedService.ExcelDataHandle(items));
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi dữ liệu file");
+            }
+        }
+        [HttpGet("download-template")]
+        public async Task<IActionResult> DownloadTemplate()
+        {
+            ExcelPackage.License.SetNonCommercialPersonal(Domain.Helper.Constants.LienceConstant.NonCommercialPersonal);
+            var CategoryList = new List<BreedCategoryResponse>();
+
+            CategoryList = await _breedCategoryService.GetAllCategory();
+
+            var fileBytes = ExportExcelHelper.GenerateExcelTemplateAndData<CellBreedItem, BreedCategoryResponse>("Bảng thuốc", "Phân loại mẫu thuốc", CategoryList);
+            string fileName = $"breed-Import-Data-{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+            return File(fileBytes,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        fileName);
         }
     }
 }

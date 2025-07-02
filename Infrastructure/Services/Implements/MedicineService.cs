@@ -414,10 +414,11 @@ namespace Infrastructure.Services.Implements
             foreach (var it in data)
             {
                 var MedicineDetail = await _medicineRepository.GetQueryable(x => x.IsActive).FirstOrDefaultAsync(x => x.MedicineName.Contains(it.Ma_dang_ky));
+                var ListCategory = await _medicineCategoryRepository.GetQueryable(x => x.IsActive).ToListAsync();
                 if (MedicineDetail == null)
                 {
                     // add thuoc
-                    var MedicineCategoryDetail = await _medicineCategoryRepository.GetQueryable(x => x.IsActive).FirstOrDefaultAsync(x => x.Name.Equals(it.Phan_Loai_Thuoc));
+                    var MedicineCategoryDetail = ListCategory.FirstOrDefault(x => StringKeyComparer.CompareStrings(x.Name, it.Phan_Loai_Thuoc));
                     if (MedicineCategoryDetail == null)
                     {
                         // add category
