@@ -219,9 +219,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
             var wokerResponse = new WokerResponse()
             {
                 Id = barn.Worker.Id,
-                FirstName = barn.Worker.FirstName,
-                LastName = barn.Worker.LastName,
-                MiddleName = barn.Worker.MiddleName,
+                FullName = barn.Worker.FullName,
                 Email = barn.Worker.Email
             };
           
@@ -258,9 +256,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                     var wokerResponse = new WokerResponse()
                     {
                         Id = barn.Worker.Id,
-                        FirstName = barn.Worker.FirstName,
-                        LastName = barn.Worker.LastName,
-                        MiddleName = barn.Worker.MiddleName,
+                        FullName = barn.Worker.FullName,
                         Email = barn.Worker.Email
                     };
 
@@ -315,9 +311,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                     var wokerResponse = new WokerResponse()
                     {
                         Id = barn.Worker.Id,
-                        FirstName = barn.Worker.FirstName,
-                        LastName = barn.Worker.LastName,
-                        MiddleName = barn.Worker.MiddleName,
+                        FullName = barn.Worker.FullName,
                         Email = barn.Worker.Email
                     };
 

@@ -1,6 +1,7 @@
 ﻿using Application.Wrappers;
 using Domain.Dto.Request;
 using Domain.Dto.Request.Account;
+using Domain.Dto.Request.User;
 using Entities.EntityModel;
 using System;
 using System.Collections.Generic;

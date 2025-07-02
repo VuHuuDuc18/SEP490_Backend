@@ -7,6 +7,7 @@ using Application.Interfaces;
 using Domain.Dto.Request;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Domain.Dto.Request.User;
 
 namespace WebApi.Controllers
 {

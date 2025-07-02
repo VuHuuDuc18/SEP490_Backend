@@ -32,6 +32,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Domain.Dto.Request.User;
 namespace Infrastructure.Services.Implements
 {
     public class UserService : IUserService
@@ -45,7 +46,7 @@ namespace Infrastructure.Services.Implements
         private readonly RoleManager<Role> _roleManager;
         private readonly JWTSettings _jwtSettings;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        
+
         public UserService(UserManager<User> userManager,
            RoleManager<Role> roleManager,
            IOptions<JWTSettings> jwtSettings,
@@ -201,36 +202,35 @@ namespace Infrastructure.Services.Implements
 
         public async Task<Response<string>> CreateAccountAsync(CreateNewAccountRequest request, string origin)
         {
-            var userWithSameUserName = await _userManager.FindByNameAsync(request.UserName);
-            if (userWithSameUserName != null)
-            {
-                return new Response<string>($"Username '{request.UserName}' is already taken.");
-            }
+            //Check username exists
+            //var userWithSameUserName = await _userManager.FindByNameAsync(request.UserName);
+            //if (userWithSameUserName != null)
+            //{
+            //    return new Response<string>($"Username '{request.UserName}' is already taken.");
+            //}
+            //check email used
+            //var userWithSameEmail = await _userManager.FindByEmailAsync(request.Email);
+            //if (userWithSameEmail != null) return new Response<string>($"Email {request.Email} is already registered.");
+
+            //Create new user
             var user = new User
             {
                 Email = request.Email,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                UserName = request.UserName
+                FullName = request.FullName,
+                PhoneNumber = request.PhoneNumber,
+                IsActive = true
             };
-            var userWithSameEmail = await _userManager.FindByEmailAsync(request.Email);
-            if (userWithSameEmail == null)
+            user.CreatedBy = user.Id;
+            var result = await _userManager.CreateAsync(user, request.Password);
+            if (result.Succeeded)
             {
-                var result = await _userManager.CreateAsync(user, request.Password);
-                if (result.Succeeded)
-                {
-                    await _userManager.AddToRoleAsync(user, request.RoleName);
-                    var verificationUri = await SendVerificationEmail(user, origin);
-                    return new Response<string>(user.Id.ToString(), message: $"User Registered. An email has been sent to {user.Email} to confirm your account.");
-                }
-                else
-                {
-                    return new Response<string>($"{result.Errors}");
-                }
+                await _userManager.AddToRoleAsync(user, request.RoleName);
+                var verificationUri = await SendVerificationEmail(user, origin);
+                return new Response<string>(user.Id.ToString(), message: $"User Registered. An email has been sent to {user.Email} to confirm your account.");
             }
             else
             {
-                return new Response<string>($"Email {request.Email} is already registered.");
+                return new Response<string>($"{result.Errors}");
             }
         }
 
@@ -338,17 +338,40 @@ namespace Infrastructure.Services.Implements
             return new Response<string>("Token revoked successfully");
         }
 
-        public async Task<Response<string>> UpdateAccountAsync(UpdateAccountRequest request)
+        public async Task<Response<string>> UpdateAccountAsync(UserUpdateAccountRequest request)
         {
-            var user = await _userManager.FindByIdAsync(request.UserId);
-            if (user == null) return new Response<string>($"No Accounts Registered with {request.UserId}.");
+            // Lấy current user từ JWT token claims
+            var currentUser = _httpContextAccessor.HttpContext?.User;
+            if (currentUser == null)
+            {
+                return new Response<string>("Không thể xác định người dùng hiện tại.");
+            }
+
+            // Lấy userId từ claims
+            var userIdClaim = currentUser.FindFirst("uid")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return new Response<string>("Không tìm thấy thông tin người dùng trong token.");
+            }
+
+            // Tìm user theo userId
+            var user = await _userManager.FindByIdAsync(userIdClaim);
+            if (user == null)
+            {
+                return new Response<string>($"Không tìm thấy tài khoản với ID {userIdClaim}.");
+            }
             if (!string.IsNullOrEmpty(request.Email)) user.Email = request.Email;
-            if (!string.IsNullOrEmpty(request.FirstName)) user.FirstName = request.FirstName;
-            if (!string.IsNullOrEmpty(request.LastName)) user.LastName = request.LastName;
             if (!string.IsNullOrEmpty(request.PhoneNumber)) user.PhoneNumber = request.PhoneNumber;
             if (!string.IsNullOrEmpty(request.UserName)) user.UserName = request.UserName;
-            await _userManager.UpdateAsync(user);
-            return new Response<string>(user.Id.ToString(), message: $"Account Updated Successfully.");
+            user.UpdatedDate = DateTime.UtcNow;
+            user.UpdatedBy = Guid.Parse(userIdClaim);
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                return new Response<string>("Cập nhập không thành công.");
+            }
+
+            return new Response<string>(user.Id.ToString(), message: $"Thông tin đã được cập nhập.");
         }
 
         public async Task<Response<User>> GetUserProfile()
@@ -369,7 +392,7 @@ namespace Infrastructure.Services.Implements
 
             // Tìm user theo userId
             var user = await _userManager.FindByIdAsync(userIdClaim);
-            if (user == null) 
+            if (user == null)
             {
                 return new Response<User>($"Không tìm thấy tài khoản với ID {userIdClaim}.");
             }
@@ -441,5 +464,7 @@ namespace Infrastructure.Services.Implements
                 UserId = userId
             };
         }
+
+
     }
 }

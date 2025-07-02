@@ -8,6 +8,7 @@ using Domain.Dto.Request;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Domain.Services.Interfaces;
+using Domain.Dto.Request.User;
 
 namespace WebApi.Controllers
 {
@@ -79,8 +80,8 @@ namespace WebApi.Controllers
             else
                 return HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
         }
-        [HttpPut("update-account")]
-        public async Task<IActionResult> UpdateAccount([FromBody]UpdateAccountRequest request)
+        [HttpPatch("update-profile")]
+        public async Task<IActionResult> UpdateProfile([FromBody]UserUpdateAccountRequest request)
         {
             return Ok(await _userServices.UpdateAccountAsync(request));
         }

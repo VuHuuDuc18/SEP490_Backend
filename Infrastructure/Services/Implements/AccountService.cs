@@ -22,6 +22,7 @@ using Domain.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.Identity.Models;
 using Infrastructure.Identity.Contexts;
+using Domain.Dto.Request.User;
 namespace Infrastructure.Services.Implements
 {
     public class AccountService : IAccountService
@@ -61,17 +62,15 @@ namespace Infrastructure.Services.Implements
         }
         public async Task<Response<string>> CreateAccountAsync(CreateNewAccountRequest request, string origin)
         {
-            var userWithSameUserName = await _userManager.FindByNameAsync(request.UserName);            
+            var userWithSameUserName = await _userManager.FindByNameAsync(request.FullName);            
             if (userWithSameUserName != null)
             {
-                return new Response<string>($"Username '{request.UserName}' is already taken.");
+                return new Response<string>($"Username '{request.FullName}' is already taken.");
             }
             var user = new User
             {
                 Email = request.Email,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                UserName = request.UserName
+                FullName = request.FullName
             };
             var userWithSameEmail = await _userManager.FindByEmailAsync(request.Email);
             if (userWithSameEmail == null)
@@ -167,8 +166,6 @@ namespace Infrastructure.Services.Implements
             var user = await _userManager.FindByIdAsync(request.UserId);
             if (user == null) return new Response<string>($"No Accounts Registered with {request.UserId}.");
             if (!string.IsNullOrEmpty(request.Email)) user.Email = request.Email;
-            if (!string.IsNullOrEmpty(request.FirstName)) user.FirstName = request.FirstName;
-            if (!string.IsNullOrEmpty(request.LastName)) user.LastName = request.LastName;
             if (!string.IsNullOrEmpty(request.PhoneNumber)) user.PhoneNumber = request.PhoneNumber;
             if (!string.IsNullOrEmpty(request.UserName)) user.UserName = request.UserName;
             await _userManager.UpdateAsync(user);

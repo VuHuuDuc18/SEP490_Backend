@@ -1,6 +1,7 @@
 ﻿using Application.Wrappers;
 using Domain.Dto.Request;
 using Domain.Dto.Request.Account;
+using Domain.Dto.Request.User;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Account;
 using Entities.EntityModel;
@@ -25,7 +26,7 @@ namespace Domain.Services.Interfaces
         Task<Response<string>> ResetPassword(ResetPasswordRequest model);
         Task<Response<AuthenticationResponse>> RefreshTokenAsync(string token, string ipAddress);
         Task<Response<string>> RevokeTokenAsync(string token, string ipAddress);
-        Task<Response<string>> UpdateAccountAsync(UpdateAccountRequest request);
+        Task<Response<string>> UpdateAccountAsync(UserUpdateAccountRequest request);
         Task<Response<User>> GetUserProfile();
     }
 }
