@@ -47,5 +47,7 @@ namespace Domain.Services.Interfaces
         Task<(PaginationSet<CategoryResponse> Result, string ErrorMessage)> GetPaginatedFoodCategoryList(
             ListingRequest request,
             CancellationToken cancellationToken = default);
+
+        public Task<List<FoodCategoryResponse>> GetAllCategory();
     }
 }

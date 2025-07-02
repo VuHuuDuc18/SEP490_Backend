@@ -24,17 +24,19 @@ namespace Infrastructure.Services.Implements
     public class MedicineService : IMedicineService
     {
         private readonly IRepository<Medicine> _medicineRepository;
+        private readonly IRepository<MedicineCategory> _medicineCategoryRepository;
         private readonly IRepository<ImageMedicine> _imageMedicineRepository;
         private readonly CloudinaryCloudService _cloudinaryCloudService;
 
         /// <summary>
         /// Khởi tạo service với repository của Medicine và CloudinaryCloudService.
         /// </summary>
-        public MedicineService(IRepository<Medicine> medicineRepository, IRepository<ImageMedicine> imageMedicineRepository, CloudinaryCloudService cloudinaryCloudService)
+        public MedicineService(IRepository<Medicine> medicineRepository, IRepository<ImageMedicine> imageMedicineRepository, CloudinaryCloudService cloudinaryCloudService, IRepository<MedicineCategory> medicineCategoryRepository)
         {
             _medicineRepository = medicineRepository ?? throw new ArgumentNullException(nameof(medicineRepository));
             _imageMedicineRepository = imageMedicineRepository ?? throw new ArgumentNullException(nameof(imageMedicineRepository));
             _cloudinaryCloudService = cloudinaryCloudService ?? throw new ArgumentNullException(nameof(cloudinaryCloudService));
+            _medicineCategoryRepository = medicineCategoryRepository;
         }
 
         /// <summary>
@@ -128,7 +130,7 @@ namespace Infrastructure.Services.Implements
         /// <summary>
         /// Cập nhật thông tin một loại thuốc, bao gồm upload ảnh và thumbnail lên Cloudinary trong folder được chỉ định.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> UpdateMedicine(Guid MedicineId, UpdateMedicineRequest request,CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> UpdateMedicine(Guid MedicineId, UpdateMedicineRequest request, CancellationToken cancellationToken = default)
         {
             if (request == null)
                 return (false, "Dữ liệu thuốc không được null.");
@@ -286,11 +288,11 @@ namespace Infrastructure.Services.Implements
                 Id = medicine.Id,
                 MedicineName = medicine.MedicineName,
                 MedicineCategory = medicineCategoryResponse,
-                Stock = medicine.Stock,              
+                Stock = medicine.Stock,
                 IsActive = medicine.IsActive,
                 ImageLinks = images.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
                 Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink,
-               // Folder = images.FirstOrDefault()?.ImageLink.Split('/')[4] // Lấy folder từ URL (giả định cấu trúc URL)
+                // Folder = images.FirstOrDefault()?.ImageLink.Split('/')[4] // Lấy folder từ URL (giả định cấu trúc URL)
             };
             return (response, null);
         }
@@ -329,11 +331,11 @@ namespace Infrastructure.Services.Implements
                         Id = medicine.Id,
                         MedicineName = medicine.MedicineName,
                         MedicineCategory = medicineCategoryResponse,
-                        Stock = medicine.Stock,                      
+                        Stock = medicine.Stock,
                         IsActive = medicine.IsActive,
                         ImageLinks = images.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
                         Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink,
-                       // Folder = images.FirstOrDefault()?.ImageLink.Split('/')[4] // Lấy folder từ URL (giả định cấu trúc URL)
+                        // Folder = images.FirstOrDefault()?.ImageLink.Split('/')[4] // Lấy folder từ URL (giả định cấu trúc URL)
                     });
                 }
                 return (responses, null);
@@ -410,6 +412,50 @@ namespace Infrastructure.Services.Implements
             {
                 return (null, $"Lỗi khi lấy danh sách phân trang: {ex.Message}");
             }
+        }
+
+        public async Task<bool> ExcelDataHandle(List<CellMedicineItem> data)
+        {
+            foreach (var it in data)
+            {
+                var MedicineDetail = await _medicineRepository.GetQueryable(x => x.IsActive).FirstOrDefaultAsync(x => x.MedicineName.Contains(it.Ma_dang_ky));
+                var ListCategory = await _medicineCategoryRepository.GetQueryable(x => x.IsActive).ToListAsync();
+                if (MedicineDetail == null)
+                {
+                    // add thuoc
+                    var MedicineCategoryDetail = ListCategory.FirstOrDefault(x => StringKeyComparer.CompareStrings(x.Name, it.Phan_Loai_Thuoc));
+                    if (MedicineCategoryDetail == null)
+                    {
+                        // add category
+                        var MedicineCategoryToInsert = new MedicineCategory()
+                        {
+                            Name = it.Phan_Loai_Thuoc,
+                            Description = it.Phan_Loai_Thuoc
+                        };
+                        // luu db
+                        _medicineCategoryRepository.Insert(MedicineCategoryToInsert);
+                        await _medicineCategoryRepository.CommitAsync();
+                        // gan lai du lieu chung
+                        MedicineCategoryDetail = MedicineCategoryToInsert;
+                    }
+
+                    Medicine MedicineToInsert = new Medicine()
+                    {
+                        MedicineName = it.Ten_Thuoc + "/" + it.Ma_dang_ky,
+                        Stock = it.So_luong,
+                        MedicineCategoryId = MedicineCategoryDetail.Id                        
+                    };
+                    _medicineRepository.Insert(MedicineToInsert);
+                }
+                else
+                {
+                    // add sos luong
+                    MedicineDetail.Stock += it.So_luong;
+
+                }
+            }
+           ;
+            return await _medicineRepository.CommitAsync() > 0;
         }
     }
 }

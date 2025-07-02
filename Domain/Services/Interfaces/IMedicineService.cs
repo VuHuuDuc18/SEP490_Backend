@@ -42,5 +42,9 @@ namespace Domain.Services.Interfaces
         Task<(PaginationSet<MedicineResponse> Result, string ErrorMessage)> GetPaginatedMedicineList(
            ListingRequest request,
            CancellationToken cancellationToken = default);
+
+        public Task<bool> ExcelDataHandle(List<CellMedicineItem> data);
+
+
     }
 }

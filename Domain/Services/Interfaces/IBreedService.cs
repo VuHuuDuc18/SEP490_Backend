@@ -1,5 +1,6 @@
 ﻿using Domain.Dto.Request;
 using Domain.Dto.Request.Breed;
+using Domain.Dto.Request.Medicine;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Breed;
 using Domain.Dto.Response.Medicine;
@@ -43,5 +44,6 @@ namespace Domain.Services.Interfaces
         Task<(PaginationSet<BreedResponse> Result, string ErrorMessage)> GetPaginatedBreedList(
            ListingRequest request,
            CancellationToken cancellationToken = default);
+        public Task<bool> ExcelDataHandle(List<CellBreedItem> data);
     }
 }
