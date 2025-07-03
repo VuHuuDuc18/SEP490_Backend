@@ -2,7 +2,9 @@ using Domain.Dto.Request;
 using Domain.Dto.Request.Bill;
 using Domain.Dto.Request.Bill.Admin;
 using Domain.Dto.Response;
+using Domain.Dto.Response.Barn;
 using Domain.Dto.Response.Bill;
+using Domain.Dto.Response.Food;
 using Domain.Extensions;
 using Domain.Helper.Constants;
 using Domain.Services.Interfaces;
@@ -28,6 +30,7 @@ namespace Infrastructure.Services.Implements
         private readonly IRepository<Food> _foodRepository;
         private readonly IRepository<Medicine> _medicineRepository;
         private readonly IRepository<Breed> _breedRepository;
+        private readonly IRepository<Barn> _barnRepository;
         private readonly IRepository<LivestockCircleFood> _livestockCircleFoodRepository;
         private readonly IRepository<LivestockCircleMedicine> _livestockCircleMedicineRepository;
 
@@ -39,8 +42,10 @@ namespace Infrastructure.Services.Implements
             IRepository<Food> foodRepository,
             IRepository<Medicine> medicineRepository,
             IRepository<Breed> breedRepository,
+            IRepository<Barn> barnRepository,
             IRepository<LivestockCircleFood> livestockCircleFoodRepository,
             IRepository<LivestockCircleMedicine> livestockCircleMedicineRepository)
+
         {
             _billRepository = billRepository ?? throw new ArgumentNullException(nameof(billRepository));
             _billItemRepository = billItemRepository ?? throw new ArgumentNullException(nameof(billItemRepository));
@@ -51,6 +56,7 @@ namespace Infrastructure.Services.Implements
             _breedRepository = breedRepository ?? throw new ArgumentNullException(nameof(breedRepository));
             _livestockCircleFoodRepository = livestockCircleFoodRepository ?? throw new ArgumentNullException(nameof(livestockCircleFoodRepository));
             _livestockCircleMedicineRepository = livestockCircleMedicineRepository ?? throw new ArgumentNullException(nameof(livestockCircleMedicineRepository));
+            _barnRepository = barnRepository ?? throw new ArgumentNullException(nameof(barnRepository));
         }
 
         private async Task<(bool Success, string ErrorMessage)> ValidateItem(Guid itemId, int quantity, bool isFood, bool isMedicine, bool isBreed, CancellationToken cancellationToken)
@@ -218,15 +224,49 @@ namespace Infrastructure.Services.Implements
             var bill = await _billRepository.GetById(billId, checkError);
             if (checkError.Value?.IsError == true) return (null, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
             if (bill == null) return (null, "Hóa đơn không tồn tại.");
-
+            var userRequest = await _userRepository.GetById(bill.UserRequestId, checkError);
+            var lscInfo = await _livestockCircleRepository.GetById(bill.LivestockCircleId, checkError);
+            var barnInfo = await _barnRepository.GetById(lscInfo.BarnId, checkError);
+            var wokerInfo = await _userRepository.GetById(barnInfo.WorkerId, checkError);
+            var userRequestResponse = new UserRequestResponse
+            {
+                Id = userRequest.Id,
+                FirstName = userRequest.FirstName,
+                LastName = userRequest.LastName,
+                MiddleName = userRequest.MiddleName,
+                Email = userRequest.Email
+            };
+            var workerReponse = new WokerResponse
+            {
+                Id = wokerInfo.Id,
+                FirstName = wokerInfo.FirstName,
+                LastName = wokerInfo.LastName,
+                MiddleName = wokerInfo.MiddleName,
+                Email = wokerInfo.Email
+            };
+            var barnInfoResponse = new BarnDetailResponse
+            {
+                Id = barnInfo.Id,
+                Address = barnInfo.Address,
+                BarnName = barnInfo.BarnName,
+                Image = barnInfo.Image,
+                Worker = workerReponse
+            };
+            var lscInfoResponse = new LivestockCircleBillResponse
+            {
+                Id= lscInfo.Id,
+                BarnDetailResponse = barnInfoResponse,
+                LivestockCircleName = lscInfo.LivestockCircleName,
+            };
             var response = new BillResponse
             {
                 Id = bill.Id,
-                UserRequestId = bill.UserRequestId,
-                LivestockCircleId = bill.LivestockCircleId,
+                UserRequest = userRequestResponse,
+                LivestockCircle = lscInfoResponse,
                 Name = bill.Name,
                 Note = bill.Note,
                 Total = bill.Total,
+                Status = bill.Status,
                 Weight = bill.Weight,
                 IsActive = bill.IsActive
             };
@@ -253,17 +293,56 @@ namespace Infrastructure.Services.Implements
 
                 var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
 
-                var responses = paginationResult.Items.Select(b => new BillResponse
+                var responses = new List<BillResponse>();
+                foreach (var bill in paginationResult.Items)
                 {
-                    Id = b.Id,
-                    UserRequestId = b.UserRequestId,
-                    LivestockCircleId = b.LivestockCircleId,
-                    Name = b.Name,
-                    Note = b.Note,
-                    Total = b.Total,
-                    Weight = b.Weight,
-                    IsActive = b.IsActive
-                }).ToList();
+                    var userRequest = await _userRepository.GetById(bill.UserRequestId);
+                    var lscInfo = await _livestockCircleRepository.GetById(bill.LivestockCircleId);
+                    var barnInfo = await _barnRepository.GetById(lscInfo.BarnId);
+                    var wokerInfo = await _userRepository.GetById(barnInfo.WorkerId);
+                    var userRequestResponse = new UserRequestResponse
+                    {
+                        Id = userRequest.Id,
+                        FirstName = userRequest.FirstName,
+                        LastName = userRequest.LastName,
+                        MiddleName = userRequest.MiddleName,
+                        Email = userRequest.Email
+                    };
+                    var workerReponse = new WokerResponse
+                    {
+                        Id = wokerInfo.Id,
+                        FirstName = wokerInfo.FirstName,
+                        LastName = wokerInfo.LastName,
+                        MiddleName = wokerInfo.MiddleName,
+                        Email = wokerInfo.Email
+                    };
+                    var barnInfoResponse = new BarnDetailResponse
+                    {
+                        Id = barnInfo.Id,
+                        Address = barnInfo.Address,
+                        BarnName = barnInfo.BarnName,
+                        Image = barnInfo.Image,
+                        Worker = workerReponse
+                    };
+                    var lscInfoResponse = new LivestockCircleBillResponse
+                    {
+                        Id = lscInfo.Id,
+                        BarnDetailResponse = barnInfoResponse,
+                        LivestockCircleName = lscInfo.LivestockCircleName,
+                    };
+                    responses.Add(new BillResponse
+                    {
+                        Id = bill.Id,
+                        UserRequest = userRequestResponse,
+                        LivestockCircle = lscInfoResponse,
+                        Name = bill.Name,
+                        Note = bill.Note,
+                        Total = bill.Total,
+                        Status = bill.Status,
+                        Weight = bill.Weight,
+                        IsActive = bill.IsActive
+                    });
+                }
 
                 var result = new PaginationSet<BillResponse>
                 {
@@ -282,7 +361,7 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-        public async Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetBillsByItemType(ListingRequest request, string itemCategory, CancellationToken cancellationToken = default)
+        public async Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetBillRequestByType(ListingRequest request,string billType, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -293,37 +372,64 @@ namespace Infrastructure.Services.Implements
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any()) return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
-
-                if (!new[] { "Food", "Medicine", "Breed" }.Contains(itemCategory, StringComparer.OrdinalIgnoreCase))
-                    return (null, $"Loại mặt hàng không hợp lệ: {itemCategory}. Phải là 'Food', 'Medicine' hoặc 'Breed'.");
-
-                var billItemQuery = itemCategory.ToLower() switch
-                {
-                    "food" => _billItemRepository.GetQueryable(x => x.IsActive && x.FoodId.HasValue && !x.MedicineId.HasValue && !x.BreedId.HasValue),
-                    "medicine" => _billItemRepository.GetQueryable(x => x.IsActive && x.MedicineId.HasValue && !x.FoodId.HasValue && !x.BreedId.HasValue),
-                    "breed" => _billItemRepository.GetQueryable(x => x.IsActive && x.BreedId.HasValue && !x.FoodId.HasValue && !x.MedicineId.HasValue),
-                    _ => throw new InvalidOperationException("Loại mặt hàng không được hỗ trợ.")
-                };
-
-                var billIds = await billItemQuery.Select(x => x.BillId).Distinct().ToListAsync(cancellationToken);
-                var query = _billRepository.GetQueryable(x => x.IsActive && billIds.Contains(x.Id));
+                 // lay bill theo loai Food, Medicine hay Breed va lay nhung bill chx dc Approval
+                var query = _billRepository.GetQueryable(x => x.IsActive && x.TypeBill.Equals(billType) && x.Status.Equals(StatusConstant.REQUESTED));
 
                 if (request.SearchString?.Any() == true) query = query.SearchString(request.SearchString);
                 if (request.Filter?.Any() == true) query = query.Filter(request.Filter);
 
                 var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
 
-                var responses = paginationResult.Items.Select(b => new BillResponse
+                var responses = new List<BillResponse>();
+                foreach (var bill in paginationResult.Items)
                 {
-                    Id = b.Id,
-                    UserRequestId = b.UserRequestId,
-                    LivestockCircleId = b.LivestockCircleId,
-                    Name = b.Name,
-                    Note = b.Note,
-                    Total = b.Total,
-                    Weight = b.Weight,
-                    IsActive = b.IsActive
-                }).ToList();
+                    var userRequest = await _userRepository.GetById(bill.UserRequestId);
+                    var lscInfo = await _livestockCircleRepository.GetById(bill.LivestockCircleId);
+                    var barnInfo = await _barnRepository.GetById(lscInfo.BarnId);
+                    var wokerInfo = await _userRepository.GetById(barnInfo.WorkerId);
+                    var userRequestResponse = new UserRequestResponse
+                    {
+                        Id = userRequest.Id,
+                        FirstName = userRequest.FirstName,
+                        LastName = userRequest.LastName,
+                        MiddleName = userRequest.MiddleName,
+                        Email = userRequest.Email
+                    };
+                    var workerReponse = new WokerResponse
+                    {
+                        Id = wokerInfo.Id,
+                        FirstName = wokerInfo.FirstName,
+                        LastName = wokerInfo.LastName,
+                        MiddleName = wokerInfo.MiddleName,
+                        Email = wokerInfo.Email
+                    };
+                    var barnInfoResponse = new BarnDetailResponse
+                    {
+                        Id = barnInfo.Id,
+                        Address = barnInfo.Address,
+                        BarnName = barnInfo.BarnName,
+                        Image = barnInfo.Image,
+                        Worker = workerReponse
+                    };
+                    var lscInfoResponse = new LivestockCircleBillResponse
+                    {
+                        Id = lscInfo.Id,
+                        BarnDetailResponse = barnInfoResponse,
+                        LivestockCircleName = lscInfo.LivestockCircleName,
+                    };
+                    responses.Add(new BillResponse
+                    {
+                        Id = bill.Id,
+                        UserRequest = userRequestResponse,
+                        LivestockCircle = lscInfoResponse,
+                        Name = bill.Name,
+                        Note = bill.Note,
+                        Total = bill.Total,
+                        Status = bill.Status,
+                        Weight = bill.Weight,
+                        IsActive = bill.IsActive
+                    });
+                }
 
                 var result = new PaginationSet<BillResponse>
                 {
@@ -338,9 +444,10 @@ namespace Infrastructure.Services.Implements
             }
             catch (Exception ex)
             {
-                return (null, $"Lỗi khi lấy danh sách hóa đơn theo {itemCategory.ToLower()}: {ex.Message}");
+                return (null, $"Lỗi khi lấy danh sách hóa đơn: {ex.Message}");
             }
         }
+
 
 
         public async Task<(bool Success, string ErrorMessage)> ChangeBillStatus(Guid billId, string newStatus, CancellationToken cancellationToken = default)
@@ -799,11 +906,12 @@ namespace Infrastructure.Services.Implements
 
             var bill = new Bill
             {
-                UserRequestId =request.UserRequestId, 
+                UserRequestId = request.UserRequestId,
                 LivestockCircleId = request.LivestockCircleId,
                 Name = $"Yêu cầu thức ăn - {DateTime.UtcNow}",
                 Note = request.Note,
                 Status = StatusConstant.REQUESTED,
+                TypeBill = "Food",
                 Total = request.FoodItems.Sum(x => x.Quantity),
                 Weight = 0
             };
@@ -856,6 +964,7 @@ namespace Infrastructure.Services.Implements
                 Name = $"Yêu cầu thuốc - {DateTime.UtcNow}",
                 Note = request.Note,
                 Status = StatusConstant.REQUESTED,
+                TypeBill = "Medicine",
                 Total = request.MedicineItems.Sum(x => x.Quantity),
                 Weight = 0
             };
@@ -908,6 +1017,7 @@ namespace Infrastructure.Services.Implements
                 Name = $"Yêu cầu giống - {DateTime.UtcNow}",
                 Note = request.Note,
                 Status = StatusConstant.REQUESTED,
+                TypeBill = "Breed",
                 Total = request.BreedItems.Sum(x => x.Quantity),
                 Weight = 0
             };
