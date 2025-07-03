@@ -16,6 +16,10 @@ using Domain.Extensions;
 using Domain.Dto.Request.Category;
 using Domain.Dto.Response.Category;
 
+using Domain.Dto.Response.Food;
+using Domain.Dto.Response.Medicine;
+
+
 namespace Infrastructure.Services.Implements
 {
     public class FoodCategoryService : IFoodCategoryService

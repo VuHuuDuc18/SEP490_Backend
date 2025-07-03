@@ -15,6 +15,10 @@ using Domain.Extensions;
 using Domain.Dto.Request.Category;
 using Domain.Dto.Response.Category;
 
+using Domain.Dto.Response.Breed;
+using Domain.Dto.Response.Food;
+
+
 namespace Infrastructure.Services.Implements
 {
     public class BreedCategoryService : IBreedCategoryService
