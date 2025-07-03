@@ -16,6 +16,7 @@ namespace Domain.Dto.Request.Account
         [Required]
         public string NewPassword { get; set; }
         [Required]
+        [Compare("NewPassword")]
         public string ConfirmPassword { get; set; }
 
     }

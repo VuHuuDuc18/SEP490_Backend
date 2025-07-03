@@ -19,7 +19,7 @@ services:
 
   # .NET API from Docker Hub
   api:
-    image: nhtxd/lsep490_backend-api:latest
+    image: nhtxd/sep490_backend-api:latest
     container_name: lcfm_api
     environment:
       - ASPNETCORE_ENVIRONMENT=Production

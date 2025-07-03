@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace Domain.Dto.Request.Account
+namespace Domain.Dto.Request.User
 {
     public class CreateNewAccountRequest
     {
