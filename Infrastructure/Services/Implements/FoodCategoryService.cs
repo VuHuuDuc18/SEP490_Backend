@@ -265,5 +265,17 @@ namespace Infrastructure.Services.Implements
                 return (null, $"Lỗi khi lấy danh sách phân trang: {ex.Message}");
             }
         }
+
+        public async Task<List<FoodCategoryResponse>> GetAllCategory()
+        {
+            var data = await _foodCategoryRepository.GetQueryable(x => x.IsActive).ToListAsync();
+            return data.Select(it => new FoodCategoryResponse()
+            {
+                //IsActive = it.IsActive,
+                Name = it.Name,
+                Description = it.Description,
+                Id = it.Id
+            }).ToList();
+        }
     }
 }

@@ -44,5 +44,7 @@ namespace Domain.Services.Interfaces
         Task<(PaginationSet<CategoryResponse> Result, string ErrorMessage)> GetPaginatedBreedCategoryList(
             ListingRequest request,
             CancellationToken cancellationToken = default);
+
+        public Task<List<BreedCategoryResponse>> GetAllCategory();
     }
 }

@@ -8,12 +8,16 @@ namespace Domain.Helper.Constants
 {
     public static class StatusConstant
     {
+        // Livestock Circle status
+
         public readonly static string PENDINGSTAT = "PENDING";
         public readonly static string GROWINGSTAT = "GROWING";
         public readonly static string RELEASESTAT = "RELEASE";
         public readonly static string DONESTAT = "DONE";
 
         // Trạng thái cho luồng request
+        // Bill Status
+
         public readonly static string REQUESTED = "REQUESTED"; // Yêu cầu đã được gửi
         public readonly static string APPROVED = "APPROVED";   // Yêu cầu đã được duyệt
         public readonly static string CONFIRMED = "CONFIRMED"; // Yêu cầu đã được xác nhận nhận

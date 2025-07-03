@@ -43,5 +43,7 @@ namespace Domain.Services.Interfaces
         Task<(PaginationSet<CategoryResponse> Result, string ErrorMessage)> GetPaginatedMedicineCategoryList(
             ListingRequest request,
             CancellationToken cancellationToken = default);
+
+        public Task<List<MedicineCategoryResponse>> GetAllMedicineCategory();
     }
 }
