@@ -65,20 +65,7 @@ namespace Infrastructure.Services.Implements
             _httpContextAccessor = httpContextAccessor;
         }
         #region Old Code
-        //public async Task<Response<string>> ChangePassword(ChangePasswordRequest req)
-        //{
-        //    User user = await _userManager.FindByIdAsync(req.UserId.ToString());
-        //    if (user == null)
-        //    {
-        //        return new Response<string>("Tài khoản không tồn tại");
-        //    }
-        //    var result = await _userManager.ChangePasswordAsync(user, req.OldPassword, req.NewPassword);
-        //    if (!result.Succeeded)
-        //    {
-        //        return new Response<string>("Mật khẩu cũ không khớp");
-        //    }
-        //    return new Response<string>("Đổi mật khẩu thành công!");
-        //}
+        
 
         //public async Task<bool> CreateAccount(CreateAccountRequest req)
         //{
@@ -209,8 +196,8 @@ namespace Infrastructure.Services.Implements
             //    return new Response<string>($"Username '{request.UserName}' is already taken.");
             //}
             //check email used
-            //var userWithSameEmail = await _userManager.FindByEmailAsync(request.Email);
-            //if (userWithSameEmail != null) return new Response<string>($"Email {request.Email} is already registered.");
+            var userWithSameEmail = await _userManager.FindByEmailAsync(request.Email);
+            if (userWithSameEmail != null) return new Response<string>($"Email {request.Email} is already registered.");
 
             //Create new user
             var user = new User
@@ -230,7 +217,12 @@ namespace Infrastructure.Services.Implements
             }
             else
             {
-                return new Response<string>($"{result.Errors}");
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Tạo tài khoản không thành công.",
+                    Errors = result.Errors.Select(x => x.Description).ToList()
+                };
             }
         }
 
@@ -277,20 +269,40 @@ namespace Infrastructure.Services.Implements
             }
         }
 
+        public async Task<Response<string>> ChangePassword(ChangePasswordRequest req)
+        {
+            User user = await _userManager.FindByIdAsync(req.UserId.ToString());
+            if (user == null)
+            {
+                return new Response<string>("Tài khoản không tồn tại");
+            }
+            var result = await _userManager.ChangePasswordAsync(user, req.OldPassword, req.NewPassword);
+            if (!result.Succeeded)
+            {
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Đổi mật khẩu không thành công.",
+                    Errors = result.Errors.Select(x => x.Description).ToList()
+                };
+            }
+            return new Response<string>("", "Đổi mật khẩu thành công!");
+        }
+
         public async Task<Response<AuthenticationResponse>> RefreshTokenAsync(string token, string ipAddress)
         {
             var refreshToken = await _context.RefreshTokens
                 .FirstOrDefaultAsync(x => x.Token == token);
 
             if (refreshToken == null)
-                return new Response<AuthenticationResponse>("Invalid refresh token");
+                return new Response<AuthenticationResponse>("Refresh token không hợp lệ");
 
             if (!refreshToken.IsActive)
-                return new Response<AuthenticationResponse>("Token expired");
+                return new Response<AuthenticationResponse>("Refresh token đã hết hạn");
 
             var user = await _userManager.FindByIdAsync(refreshToken.UserId.ToString());
             if (user == null)
-                return new Response<AuthenticationResponse>("User not found");
+                return new Response<AuthenticationResponse>("Không tìm thấy tài khoản");
 
             // Generate new JWT token
             var jwtToken = await GenerateJWToken(user);
@@ -326,16 +338,16 @@ namespace Infrastructure.Services.Implements
                 .FirstOrDefaultAsync(x => x.Token == token);
 
             if (refreshToken == null)
-                return new Response<string>("Invalid refresh token");
+                return new Response<string>("Refresh token không hợp lệ");
 
             if (!refreshToken.IsActive)
-                return new Response<string>("Token already revoked");
+                return new Response<string>("Refresh token đã bị hủy");
 
             refreshToken.Revoked = DateTime.UtcNow;
             refreshToken.RevokedByIp = ipAddress;
             await _context.SaveChangesAsync();
 
-            return new Response<string>("Token revoked successfully");
+            return new Response<string>("Hủy refresh token thành công");
         }
 
         public async Task<Response<string>> UpdateAccountAsync(UserUpdateAccountRequest request)
@@ -362,16 +374,22 @@ namespace Infrastructure.Services.Implements
             }
             if (!string.IsNullOrEmpty(request.Email)) user.Email = request.Email;
             if (!string.IsNullOrEmpty(request.PhoneNumber)) user.PhoneNumber = request.PhoneNumber;
-            if (!string.IsNullOrEmpty(request.UserName)) user.UserName = request.UserName;
+            if (!string.IsNullOrEmpty(request.FullName)) user.FullName = request.FullName;
+            
             user.UpdatedDate = DateTime.UtcNow;
             user.UpdatedBy = Guid.Parse(userIdClaim);
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
             {
-                return new Response<string>("Cập nhập không thành công.");
+                return new Response<string>()
+                {
+                    Errors = result.Errors.Select(x=>x.Description).ToList(),
+                    Succeeded = result.Succeeded,
+                    Message = "Cập nhập không thành công."
+                };
             }
 
-            return new Response<string>(user.Id.ToString(), message: $"Thông tin đã được cập nhập.");
+            return new Response<string>(null, message: $"Thông tin đã được cập nhập.");
         }
 
         public async Task<Response<User>> GetUserProfile()
