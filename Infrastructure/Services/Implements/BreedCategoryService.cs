@@ -12,9 +12,10 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Dto.Request;
 using Domain.Dto.Response;
 using Domain.Extensions;
-
 using Domain.Dto.Response.Breed;
 using Domain.Dto.Response.Food;
+using Domain.Dto.Response.Category;
+using Domain.Dto.Request.Category;
 
 
 namespace Infrastructure.Services.Implements

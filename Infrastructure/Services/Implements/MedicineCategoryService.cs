@@ -14,6 +14,8 @@ using Domain.Dto.Request;
 using Domain.Dto.Response;
 using Domain.Extensions;
 using Domain.Dto.Response.Medicine;
+using Domain.Dto.Response.Category;
+using Domain.Dto.Request.Category;
 
 namespace Infrastructure.Services.Implements
 {
