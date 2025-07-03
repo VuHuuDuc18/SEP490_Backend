@@ -15,7 +15,6 @@ using Domain.Dto.Request.Breed;
 using Domain.Dto.Response.Breed;
 using Domain.Dto.Response;
 using Domain.Dto.Request;
-using Domain.Dto.Response.Food;
 using Domain.Extensions;
 using Infrastructure.Extensions;
 
@@ -24,17 +23,19 @@ namespace Infrastructure.Services.Implements
     public class BreedService : IBreedService
     {
         private readonly IRepository<Breed> _breedRepository;
+        private readonly IRepository<BreedCategory> _breedCategoryRepository;
         private readonly IRepository<ImageBreed> _imageBreedRepository;
         private readonly CloudinaryCloudService _cloudinaryCloudService;
 
         /// <summary>
         /// Khởi tạo service với repository của Breed và CloudinaryCloudService.
         /// </summary>
-        public BreedService(IRepository<Breed> breedRepository, IRepository<ImageBreed> imageBreedRepository, CloudinaryCloudService cloudinaryCloudService)
+        public BreedService(IRepository<Breed> breedRepository, IRepository<ImageBreed> imageBreedRepository, CloudinaryCloudService cloudinaryCloudService, IRepository<BreedCategory> breedCategoryRepository)
         {
             _breedRepository = breedRepository ?? throw new ArgumentNullException(nameof(breedRepository));
             _imageBreedRepository = imageBreedRepository ?? throw new ArgumentNullException(nameof(imageBreedRepository));
             _cloudinaryCloudService = cloudinaryCloudService ?? throw new ArgumentNullException(nameof(cloudinaryCloudService));
+            _breedCategoryRepository = breedCategoryRepository;
         }
 
         /// <summary>
@@ -405,6 +406,60 @@ namespace Infrastructure.Services.Implements
             catch (Exception ex)
             {
                 return (null, $"Lỗi khi lấy danh sách phân trang: {ex.Message}");
+            }
+        }
+
+        public async Task<bool> ExcelDataHandle(List<CellBreedItem> data)
+        {
+            try
+            {
+                foreach (CellBreedItem item in data)
+                {
+                    var breedDetail = await _breedRepository.GetQueryable(x => x.IsActive).FirstOrDefaultAsync(x => StringKeyComparer.CompareStrings(x.BreedName, item.Ten));
+                    var ListCategory = await _breedCategoryRepository.GetQueryable(x => x.IsActive).ToListAsync();
+                    if (breedDetail == null)
+                    {
+                        // add breed
+                        var breedCategoryDetail = ListCategory.FirstOrDefault(x => StringKeyComparer.CompareStrings(x.Name, item.Phan_Loai));
+                        if (breedCategoryDetail == null)
+                        {
+                            // add category
+                            var breedCategoryToInsert = new BreedCategory()
+                            {
+                                Name = item.Phan_Loai,
+                                Description = item.Phan_Loai
+                            };
+
+                            _breedCategoryRepository.Insert(breedCategoryToInsert);
+                            await _breedCategoryRepository.CommitAsync();
+                            //gan lai
+                            breedCategoryDetail = breedCategoryToInsert;
+                        }
+
+                        // create new breed
+                        Breed breedToInsert = new Breed()
+                        {
+                            BreedName = item.Ten,
+                            BreedCategoryId = breedCategoryDetail.Id,
+                            Stock = item.So_luong,
+                            //WeighPerUnit = item.Trong_luong_Theo_Kg
+                        };
+                        _breedRepository.Insert(breedToInsert);
+                    }
+                    else
+                    {
+                        breedDetail.Stock += item.So_luong;
+                    }
+                    // update stock
+
+
+                }
+
+                return await _breedRepository.CommitAsync() > 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Loi du lieu");
             }
         }
     }
