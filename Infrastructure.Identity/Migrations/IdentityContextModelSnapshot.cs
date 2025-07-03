@@ -83,6 +83,9 @@ namespace Infrastructure.Identity.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<Guid>("LivestockCircleId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Note")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -97,6 +100,8 @@ namespace Infrastructure.Identity.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LivestockCircleId");
 
                     b.ToTable("BarnPlans");
                 });
@@ -219,6 +224,10 @@ namespace Infrastructure.Identity.Migrations
 
                     b.Property<int>("Total")
                         .HasColumnType("int");
+
+                    b.Property<string>("TypeBill")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
@@ -1326,6 +1335,17 @@ namespace Infrastructure.Identity.Migrations
                         .IsRequired();
 
                     b.Navigation("Worker");
+                });
+
+            modelBuilder.Entity("Entities.EntityModel.BarnPlan", b =>
+                {
+                    b.HasOne("Entities.EntityModel.LivestockCircle", "LivestockCircle")
+                        .WithMany()
+                        .HasForeignKey("LivestockCircleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LivestockCircle");
                 });
 
             modelBuilder.Entity("Entities.EntityModel.BarnPlanFood", b =>

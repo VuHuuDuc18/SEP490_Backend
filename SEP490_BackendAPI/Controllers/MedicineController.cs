@@ -2,8 +2,15 @@
 using Domain.Dto.Request.Medicine;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using OfficeOpenXml;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
+using ExcelControl.Handler;
+using OfficeOpenXml.DataValidation;
+using System.IO;
+using System;
+using Domain.Dto.Response.Medicine;
 
 namespace SEP490_BackendAPI.Controllers
 {
@@ -12,13 +19,15 @@ namespace SEP490_BackendAPI.Controllers
     public class MedicineController : ControllerBase
     {
         private readonly IMedicineService _medicineService;
+        private readonly IMedicineCategoryService _medicineCategoryService;
 
         /// <summary>
         /// Khởi tạo controller với service để xử lý logic thuốc.
         /// </summary>
-        public MedicineController(IMedicineService medicineService)
+        public MedicineController(IMedicineService medicineService, IMedicineCategoryService medicineCategoryService)
         {
             _medicineService = medicineService ?? throw new ArgumentNullException(nameof(medicineService));
+            _medicineCategoryService = medicineCategoryService;
         }
 
         /// <summary>
@@ -38,7 +47,7 @@ namespace SEP490_BackendAPI.Controllers
         /// Cập nhật thông tin một loại thuốc, bao gồm upload ảnh và thumbnail.
         /// </summary>
         [HttpPut("update/{MedicineId}")]
-        public async Task<IActionResult> UpdateMedicine(Guid MedicineId, [FromBody] UpdateMedicineRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> UpdateMedicine([FromRoute] Guid MedicineId, [FromBody] UpdateMedicineRequest request, CancellationToken cancellationToken = default)
         {
             var (success, errorMessage) = await _medicineService.UpdateMedicine(MedicineId, request, cancellationToken);
             if (!success)
@@ -47,9 +56,9 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpDelete("disable/{MedicineId}")]
-        public async Task<IActionResult> DisableMedicine(Guid MedicineId, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> DisableMedicine([FromRoute] Guid MedicineId, CancellationToken cancellationToken = default)
         {
-            var (success, errorMessage) = await _medicineService.DisableMedicine(MedicineId,cancellationToken);
+            var (success, errorMessage) = await _medicineService.DisableMedicine(MedicineId, cancellationToken);
             if (!success)
                 return BadRequest(errorMessage);
             return Ok();
@@ -59,9 +68,9 @@ namespace SEP490_BackendAPI.Controllers
         /// Lấy thông tin một loại thuốc theo ID.
         /// </summary>
         [HttpGet("getMedicineById/{MedicineId}")]
-        public async Task<IActionResult> GetMedicineById(Guid id, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetMedicineById([FromRoute] Guid MedicineId, CancellationToken cancellationToken = default)
         {
-            var (medicine, errorMessage) = await _medicineService.GetMedicineById(id, cancellationToken);
+            var (medicine, errorMessage) = await _medicineService.GetMedicineById(MedicineId, cancellationToken);
             if (medicine == null)
                 return NotFound(errorMessage ?? "Không tìm thấy thuốc.");
             return Ok(medicine);
@@ -89,6 +98,80 @@ namespace SEP490_BackendAPI.Controllers
             if (errorMessage != null)
                 return BadRequest(errorMessage);
             return Ok(result);
+        }
+        [HttpPost("export")]
+        //public async Task<ActionResult> Export(ListingRequest request)
+        //{
+        //    // ExcelPackage package = new ExcelPackage();
+        //    //B1: set linence
+
+        //    ExcelPackage.License.SetNonCommercialPersonal("Vu Duc");
+        //    // nhan data
+        //    var model = await _medicineService.GetPaginatedMedicineList(request);
+
+        //    using (var excelPackage = new ExcelPackage())
+        //    {
+        //        //B2 fill data
+        //        // Thêm sheet với dữ liệu
+        //        ExportExcelHelper.AddSheetToExcelFile(excelPackage, model.Result.Items, "People", "Danh sách nhân viên");
+
+        //        // Lưu file vào thư mục tạm và lấy tên file
+        //        string fileName = ExportExcelHelper.SaveExcelFile(excelPackage, "API User", "Báo cáo nhân viên");
+
+        //        //B3 xuat data
+        //        if (string.IsNullOrWhiteSpace(fileName) || fileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+        //            return BadRequest("Invalid file name.");
+
+        //        var path = Path.Combine(Path.GetTempPath(), fileName);
+        //        if (!System.IO.File.Exists(path))
+        //            return NotFound("File not found.");
+
+        //        var bytes = System.IO.File.ReadAllBytes(path);
+        //        return File(bytes,
+        //                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        //                    fileName);
+        //    }
+        //}
+        [HttpPost("import")]
+        public async Task<IActionResult> ImportPersonExcel(IFormFile file)
+        {
+            try
+            {
+
+
+                ExcelPackage.License.SetNonCommercialPersonal(Domain.Helper.Constants.LienceConstant.NonCommercialPersonal);
+
+                if (file == null || file.Length == 0)
+                    return BadRequest("No file uploaded.");
+
+                List<CellMedicineItem> items;
+                using (var stream = new MemoryStream())
+                {
+
+                    await file.CopyToAsync(stream);
+                    stream.Position = 0;
+                    items = ExportExcelHelper.ImportExcelFile<CellMedicineItem>(stream);
+                }
+                
+                return Ok(await _medicineService.ExcelDataHandle(items));
+            }catch (Exception ex)
+            {
+                throw new Exception("Lỗi dữ liệu file");
+            }
+        }
+        [HttpGet("download-template")]
+        public async Task<IActionResult> DownloadTemplate()
+        {
+            ExcelPackage.License.SetNonCommercialPersonal(Domain.Helper.Constants.LienceConstant.NonCommercialPersonal);
+            var MedicineCategoryList = new List<MedicineCategoryResponse>();
+
+            MedicineCategoryList = await _medicineCategoryService.GetAllMedicineCategory();
+
+            var fileBytes = ExportExcelHelper.GenerateExcelTemplateAndData<CellMedicineItem, MedicineCategoryResponse>("Bảng thuốc", "Phân loại mẫu thuốc", MedicineCategoryList);
+            string fileName = $"Medicine-Import-Data-{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+            return File(fileBytes,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        fileName);
         }
     }
 }

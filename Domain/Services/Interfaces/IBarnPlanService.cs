@@ -13,9 +13,10 @@ namespace Domain.Services.Interfaces
     public interface IBarnPlanService
     {
         public Task<ViewBarnPlanResponse>  GetById(Guid id);
+        public Task<ViewBarnPlanResponse> GetByLiveStockCircleId(Guid id);
         public Task<bool> CreateBarnPlan(CreateBarnPlanRequest req);
         public Task<bool> UpdateBarnPlan(UpdateBarnPlanRequest req);
         public Task<bool> DisableBarnPlan(Guid id);
-        public Task<PaginationSet<ViewBarnPlanResponse>> ListingHistoryBarnPlan(ListingRequest req);
+        public Task<PaginationSet<ViewBarnPlanResponse>> ListingHistoryBarnPlan(Guid livestockCircleId,ListingRequest req);
     }
 }
