@@ -231,17 +231,13 @@ namespace Infrastructure.Services.Implements
             var userRequestResponse = new UserRequestResponse
             {
                 Id = userRequest.Id,
-                FirstName = userRequest.FirstName,
-                LastName = userRequest.LastName,
-                MiddleName = userRequest.MiddleName,
+                FullName = userRequest.FullName,
                 Email = userRequest.Email
             };
             var workerReponse = new WokerResponse
             {
                 Id = wokerInfo.Id,
-                FirstName = wokerInfo.FirstName,
-                LastName = wokerInfo.LastName,
-                MiddleName = wokerInfo.MiddleName,
+                FullName = wokerInfo.FullName,
                 Email = wokerInfo.Email
             };
             var barnInfoResponse = new BarnDetailResponse
@@ -303,17 +299,13 @@ namespace Infrastructure.Services.Implements
                     var userRequestResponse = new UserRequestResponse
                     {
                         Id = userRequest.Id,
-                        FirstName = userRequest.FirstName,
-                        LastName = userRequest.LastName,
-                        MiddleName = userRequest.MiddleName,
+                        FullName = userRequest.FullName,
                         Email = userRequest.Email
                     };
                     var workerReponse = new WokerResponse
                     {
                         Id = wokerInfo.Id,
-                        FirstName = wokerInfo.FirstName,
-                        LastName = wokerInfo.LastName,
-                        MiddleName = wokerInfo.MiddleName,
+                        FullName = wokerInfo.FullName,
                         Email = wokerInfo.Email
                     };
                     var barnInfoResponse = new BarnDetailResponse
@@ -390,17 +382,13 @@ namespace Infrastructure.Services.Implements
                     var userRequestResponse = new UserRequestResponse
                     {
                         Id = userRequest.Id,
-                        FirstName = userRequest.FirstName,
-                        LastName = userRequest.LastName,
-                        MiddleName = userRequest.MiddleName,
+                        FullName = userRequest.FullName,
                         Email = userRequest.Email
                     };
                     var workerReponse = new WokerResponse
                     {
                         Id = wokerInfo.Id,
-                        FirstName = wokerInfo.FirstName,
-                        LastName = wokerInfo.LastName,
-                        MiddleName = wokerInfo.MiddleName,
+                        FullName = wokerInfo.FullName,
                         Email = wokerInfo.Email
                     };
                     var barnInfoResponse = new BarnDetailResponse
