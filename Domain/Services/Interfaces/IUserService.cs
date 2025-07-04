@@ -15,11 +15,8 @@ namespace Domain.Services.Interfaces
 {
     public interface IUserService
     {
-        //public Task<bool> CreateAccount(CreateAccountRequest req);
-        //public Task<bool> ResetPassword(Guid id);
-        //public Task<PaginationSet<AccountResponse>> GetListAccount(ListingRequest req);
         Task<Response<AuthenticationResponse>> LoginAsync(AuthenticationRequest request, string ipAddress);
-        Task<Response<string>> CreateAccountAsync(CreateNewAccountRequest request, string origin);
+        Task<Response<string>> CreateCustomerAccountAsync(CreateNewAccountRequest request, string origin);
         Task<Response<string>> ConfirmEmailAsync(string userId, string code);
         Task ForgotPassword(ForgotPasswordRequest model, string origin);
         Task<Response<string>> ResetPassword(ResetPasswordRequest model);

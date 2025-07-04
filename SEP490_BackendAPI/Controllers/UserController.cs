@@ -35,7 +35,7 @@ namespace WebApi.Controllers
             {
                 origin = Request.Headers["Referer"].ToString() ?? "https://localhost:7074";
             }
-            return Ok(await _userServices.CreateAccountAsync(request, origin));
+            return Ok(await _userServices.CreateCustomerAccountAsync(request, origin));
         }
 
         [HttpGet("confirm-email")]

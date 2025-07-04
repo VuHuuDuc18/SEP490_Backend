@@ -64,83 +64,7 @@ namespace Infrastructure.Services.Implements
             _context = context;
             _httpContextAccessor = httpContextAccessor;
         }
-        #region Old Code
         
-
-        //public async Task<bool> CreateAccount(CreateAccountRequest req)
-        //{
-        //    // bien
-        //    var userPassword = PasswordGenerate.GenerateRandomCode();
-        //    string roleName = (await _rolerepo.GetById(req.RoleId)).Name;
-
-        //    // ínert
-        //    _userrepo.Insert(new User()
-        //    {
-        //        Email = req.Email,
-        //        Password = userPassword,
-        //        RoleId = req.RoleId,
-        //        UserName = req.UserName
-        //    });
-
-
-        //    // send mail
-        //    if (await _userrepo.CommitAsync() > 0)
-        //    {
-        //        string Body = MailBodyGenerate.BodyCreateAccount(req.Email, userPassword);
-        //        await _emailservice.SendEmailAsync(req.Email, EmailConstant.EMAILSUBJECTCREATEACCOUNT, Body);
-        //    }
-        //    else
-        //    {
-        //        throw new Exception("Không thể tạo tài khoản");
-        //    }
-        //    return true;
-        //}
-
-
-        //public async Task<PaginationSet<AccountResponse>> GetListAccount(ListingRequest req)
-        //{
-        //    var AccountItems = _userrepo.GetQueryable()
-        //        .Select(it => new AccountResponse()
-        //        {
-        //            Id = it.Id,
-        //            UserName = it.UserName,
-        //            IsActive = it.IsActive,
-        //            RoleName = it.Role.RoleName,
-        //        });
-        //    if (req.Filter != null)
-        //    {
-        //        AccountItems = AccountItems.Filter(req.Filter);
-        //    }
-
-        //    if (req.SearchString != null)
-        //    {
-        //        AccountItems = AccountItems.SearchString(req.SearchString);
-        //    }
-
-
-        //    var result = await AccountItems.Pagination(req.PageIndex, req.PageSize, req.Sort);
-        //    return result;
-        //}
-
-        //public async Task<bool> ResetPassword(Guid id)
-        //{
-        //    var userPassword = Extensions.PasswordGenerate.GenerateRandomCode();
-        //    // update
-        //    var user = await _userrepo.GetById(id);
-        //    user.Password = userPassword;
-        //    //send mail
-        //    if (await _userrepo.CommitAsync() > 0)
-        //    {
-        //        string Body = Extensions.MailBodyGenerate.BodyResetPassword(user.Email, userPassword);
-        //        await _emailservice.SendEmailAsync(user.Email, EmailConstant.EMAILSUBJECTRESETPASSWORD, Body);
-        //    }
-        //    else
-        //    {
-        //        throw new Exception("Không thể đổi mật khẩu");
-        //    }
-        //    return await _userrepo.CommitAsync() > 0;
-        //}
-        #endregion
 
 
         public async Task<Response<AuthenticationResponse>> LoginAsync(AuthenticationRequest request, string ipAddress)
@@ -187,14 +111,9 @@ namespace Infrastructure.Services.Implements
 
         }
 
-        public async Task<Response<string>> CreateAccountAsync(CreateNewAccountRequest request, string origin)
+        public async Task<Response<string>> CreateCustomerAccountAsync(CreateNewAccountRequest request, string origin)
         {
-            //Check username exists
-            //var userWithSameUserName = await _userManager.FindByNameAsync(request.UserName);
-            //if (userWithSameUserName != null)
-            //{
-            //    return new Response<string>($"Username '{request.UserName}' is already taken.");
-            //}
+
             //check email used
             var userWithSameEmail = await _userManager.FindByEmailAsync(request.Email);
             if (userWithSameEmail != null) return new Response<string>($"Email {request.Email} is already registered.");
@@ -211,7 +130,7 @@ namespace Infrastructure.Services.Implements
             var result = await _userManager.CreateAsync(user, request.Password);
             if (result.Succeeded)
             {
-                await _userManager.AddToRoleAsync(user, request.RoleName);
+                await _userManager.AddToRoleAsync(user, RoleConstant.Customer);
                 var verificationUri = await SendVerificationEmail(user, origin);
                 return new Response<string>(user.Id.ToString(), message: $"User Registered. An email has been sent to {user.Email} to confirm your account.");
             }
@@ -372,10 +291,31 @@ namespace Infrastructure.Services.Implements
             {
                 return new Response<string>($"Không tìm thấy tài khoản với ID {userIdClaim}.");
             }
-            if (!string.IsNullOrEmpty(request.Email)) user.Email = request.Email;
-            if (!string.IsNullOrEmpty(request.PhoneNumber)) user.PhoneNumber = request.PhoneNumber;
-            if (!string.IsNullOrEmpty(request.FullName)) user.FullName = request.FullName;
+            bool isChanged = false;
+            if (!string.IsNullOrEmpty(request.Email) && user.Email != request.Email)
+            {
+                user.Email = request.Email;
+                isChanged = true;
+            }
             
+            if (!string.IsNullOrEmpty(request.PhoneNumber) && user.PhoneNumber != request.PhoneNumber)
+            {
+                user.PhoneNumber = request.PhoneNumber;
+                isChanged = true;
+            }
+            if (!string.IsNullOrEmpty(request.FullName) && user.FullName != request.FullName)
+            {
+                user.FullName = request.FullName;
+                isChanged = true;
+            }
+            if (!isChanged)
+            {
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Không có thông tin thay đổi."
+                };
+            }
             user.UpdatedDate = DateTime.UtcNow;
             user.UpdatedBy = Guid.Parse(userIdClaim);
             var result = await _userManager.UpdateAsync(user);
@@ -383,7 +323,7 @@ namespace Infrastructure.Services.Implements
             {
                 return new Response<string>()
                 {
-                    Errors = result.Errors.Select(x=>x.Description).ToList(),
+                    Errors = result.Errors.Select(x => x.Description).ToList(),
                     Succeeded = result.Succeeded,
                     Message = "Cập nhập không thành công."
                 };

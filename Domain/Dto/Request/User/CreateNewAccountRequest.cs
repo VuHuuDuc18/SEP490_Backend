@@ -26,7 +26,5 @@ namespace Domain.Dto.Request.User
         [Compare("Password")]
         public string ConfirmPassword { get; set; }
 
-        [Required]
-        public string RoleName { get; set; }
     }
 }
