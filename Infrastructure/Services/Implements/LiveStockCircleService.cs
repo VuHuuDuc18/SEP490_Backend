@@ -663,9 +663,7 @@ namespace Infrastructure.Services.Implements
                         {
                             Id= livestockCircleData.Barn.WorkerId,
                             Email = livestockCircleData.Barn.Worker.Email,
-                            FirstName = livestockCircleData.Barn.Worker.FirstName,
-                            MiddleName = livestockCircleData.Barn.Worker.MiddleName,
-                            LastName = livestockCircleData.Barn.Worker.LastName
+                            FullName = livestockCircleData.Barn.Worker.FullName,
                         }
                     }
                 };
