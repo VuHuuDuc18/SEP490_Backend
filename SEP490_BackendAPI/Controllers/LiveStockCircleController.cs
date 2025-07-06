@@ -175,5 +175,17 @@ namespace SEP490_BackendAPI.Controllers
                 return Ok(result.Success?result.Success : result.ErrorMessage);
             }
         }
-    }
+        [HttpPost("sale/getBarn")]
+        public async Task<IActionResult> getReleasedBarn([FromBody]ListingRequest req)
+        {
+            var result = await _livestockCircleService.GetReleasedLivestockCircleList(req);
+            return Ok(result);
+        }
+        [HttpGet("sale/getBarnById/{id}")]
+        public async Task<IActionResult> getReleasedBarnById([FromRoute]Guid id)
+        {
+            var result = await _livestockCircleService.GetReleasedLivestockCircleById(id);
+            return Ok(result);
+        }
+    } 
 }
