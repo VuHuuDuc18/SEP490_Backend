@@ -14,6 +14,7 @@ namespace Domain.Helper.Constants
         public readonly static string GROWINGSTAT = "GROWING";
         public readonly static string RELEASESTAT = "RELEASE";
         public readonly static string DONESTAT = "DONE";
+        public readonly static string CANCELSTAT = "CANCEL"; 
 
         // Trạng thái cho luồng request
         // Bill Status
@@ -24,5 +25,14 @@ namespace Domain.Helper.Constants
         public readonly static string REJECTED = "REJECTED";   // Yêu cầu bị từ chối
         public readonly static string COMPLETED = "COMPLETED"; // Yêu cầu hoàn tất (đã cập nhật kho)
         public readonly static string CANCELLED = "CANCELLED"; // Yêu cầu bị hủy
+
+
+    }
+    public static class OrderStatus
+    {
+        public readonly static string PENDING = "PENDING";
+        public readonly static string APPROVED = "APPROVED";
+        public readonly static string DENIED = "DENIED";
+        public readonly static string CANCELED = "CANCELED";
     }
 }
