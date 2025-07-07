@@ -26,7 +26,6 @@ namespace Infrastructure.Services.Implements
 
         private readonly IRepository<ImageLivestockCircle> _livestockCircleImageRepo;
         private readonly IRepository<Breed> _breedRepository;
->
 
         /// <summary>
         /// Khởi tạo service với repository của LivestockCircle.
@@ -579,7 +578,7 @@ namespace Infrastructure.Services.Implements
                     EndDate = c.EndDate,
                     TotalUnit = c.TotalUnit,
                     DeadUnit = c.DeadUnit,
-                    AverageWeight = c.AverageWeight,                    
+                    AverageWeight = c.AverageWeight,
                     BreedId = c.BreedId,
                     BreedName = c.Breed.BreedName
                 }).Pagination(request.PageIndex, request.PageSize, request.Sort);
@@ -617,7 +616,7 @@ namespace Infrastructure.Services.Implements
                 if (request.Filter?.Any() == true)
                     query = query.Filter(request.Filter);
 
-                var result = await query.Include(it => it.Breed).ThenInclude(it=>it.BreedCategory).Include(it => it.Barn)
+                var result = await query.Include(it => it.Breed).ThenInclude(it => it.BreedCategory).Include(it => it.Barn)
                     .Select(it => new ReleasedLivetockItem
                     {
                         LivestockCircleId = it.Id,
@@ -625,11 +624,11 @@ namespace Infrastructure.Services.Implements
                         BreedCategoryName = it.Breed.BreedCategory.Name,
                         BreedName = it.Breed.BreedName,
                         TotalUnit = it.TotalUnit,
-                      
+
                     })
                     .Pagination(request.PageIndex, request.PageSize, request.Sort);
 
-              
+
                 return result;
             }
             catch (Exception ex)
@@ -656,7 +655,7 @@ namespace Infrastructure.Services.Implements
                     throw new Exception("Giống nuôi không khả dụng");
 
                 }
-                
+
                 var LivestockCircleToCreate = new LivestockCircle()
                 {
                     AverageWeight = 0,
@@ -668,7 +667,7 @@ namespace Infrastructure.Services.Implements
                     TechicalStaffId = request.TechicalStaffId,
                     Status = StatusConstant.PENDINGSTAT,
                     TotalUnit = request.TotalUnit,
-                    LivestockCircleName =request.LivestockCircleName,   
+                    LivestockCircleName = request.LivestockCircleName,
                     //
                     EndDate = DateTime.Now,
                     StartDate = DateTime.Now,
@@ -683,18 +682,20 @@ namespace Infrastructure.Services.Implements
                     throw new Exception("Không thể tạo lứa mới");
                 }
 
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new Exception("Dữ liệu nhận được lỗi");
-
+            }
+        }
         public async Task<ReleasedLivetockDetail> GetReleasedLivestockCircleById(Guid livestockCircleId)
         {
             try
             {
-                var livestockCircleData = await _livestockCircleRepository.GetQueryable(it=>it.IsActive)
-                    .Include(it=>it.Breed).ThenInclude(it=>it.BreedCategory)
-                    .Include(it=>it.Barn).ThenInclude(it=>it.Worker)
-                    .FirstOrDefaultAsync(it=>it.Id == livestockCircleId);
+                var livestockCircleData = await _livestockCircleRepository.GetQueryable(it => it.IsActive)
+                    .Include(it => it.Breed).ThenInclude(it => it.BreedCategory)
+                    .Include(it => it.Barn).ThenInclude(it => it.Worker)
+                    .FirstOrDefaultAsync(it => it.Id == livestockCircleId);
                 ReleasedLivetockDetail result = new ReleasedLivetockDetail()
                 {
                     AverageWeight = livestockCircleData.AverageWeight,
@@ -715,7 +716,7 @@ namespace Infrastructure.Services.Implements
                         IsActive = livestockCircleData.Barn.IsActive,
                         Worker = new WokerResponse()
                         {
-                            Id= livestockCircleData.Barn.WorkerId,
+                            Id = livestockCircleData.Barn.WorkerId,
                             Email = livestockCircleData.Barn.Worker.Email,
                             FullName = livestockCircleData.Barn.Worker.FullName,
                         }
@@ -723,10 +724,14 @@ namespace Infrastructure.Services.Implements
                 };
                 return result;
 
-            }catch (Exception)
+            }
+            catch (Exception)
             {
                 throw new Exception("Mã ID không hợp lệ");
             }
         }
     }
 }
+
+
+
