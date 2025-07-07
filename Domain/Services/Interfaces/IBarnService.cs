@@ -67,7 +67,7 @@ namespace Domain.Services.Interfaces
         /// Lấy thông tin của chuồng đang được Release bao gồm thông tin chu kỳ nuôi và giống.
         /// </summary>
         Task<Response<ReleaseBarnDetailResponse>> GetReleaseBarnDetail(
-            ListingRequest request,
+            Guid BarnId,
             CancellationToken cancellationToken = default);
 
     }

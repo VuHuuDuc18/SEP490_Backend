@@ -146,6 +146,12 @@ namespace SEP490_BackendAPI.Controllers
             return Ok(await _barnService.GetPaginatedReleaseBarnListAsync(request, cancellationToken));
         }
 
+        [HttpGet("customer/getReleaseBarnDetail/{BarnId}")]
+        public async Task<IActionResult> getReleaseBarnDetail(Guid BarnId, CancellationToken cancellationToken = default)
+        {
+            return Ok(await _barnService.GetReleaseBarnDetail(BarnId, cancellationToken));
+        }
+
     }
 }
 
