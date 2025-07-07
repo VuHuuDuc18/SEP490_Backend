@@ -23,13 +23,15 @@ namespace Infrastructure.Services.Implements
     public class LivestockCircleService : ILivestockCircleService
     {
         private readonly IRepository<LivestockCircle> _livestockCircleRepository;
+        private readonly IRepository<ImageLivestockCircle> _livestockCircleImageRepo;
 
         /// <summary>
         /// Khởi tạo service với repository của LivestockCircle.
         /// </summary>
-        public LivestockCircleService(IRepository<LivestockCircle> livestockCircleRepository)
+        public LivestockCircleService(IRepository<LivestockCircle> livestockCircleRepository, IRepository<ImageLivestockCircle> livestockCircleImageRepo)
         {
             _livestockCircleRepository = livestockCircleRepository ?? throw new ArgumentNullException(nameof(livestockCircleRepository));
+            _livestockCircleImageRepo = livestockCircleImageRepo;
         }
 
         /// <summary>
@@ -480,7 +482,7 @@ namespace Infrastructure.Services.Implements
             try
             {
                 if (request == null)
-                    throw new Exception( "Yêu cầu không được null.");
+                    throw new Exception("Yêu cầu không được null.");
                 if (request.PageIndex < 1 || request.PageSize < 1)
                     throw new Exception("PageIndex và PageSize phải lớn hơn 0.");
 
@@ -562,42 +564,114 @@ namespace Infrastructure.Services.Implements
                 if (request.Filter?.Any() == true)
                     query = query.Filter(request.Filter);
 
-                var paginationResult = await query.Include(it=>it.Barn)
-                                                    .Pagination(request.PageIndex, request.PageSize, request.Sort);
-
-                var responses = new List<LiveStockCircleHistoryItem>();
-                foreach (var c in paginationResult.Items)
+                var result = await query.Include(it => it.Barn).Select(c => new LiveStockCircleHistoryItem()
                 {
-                    responses.Add(new LiveStockCircleHistoryItem
-                    {
-                        Id = c.Id,
-                        LivestockCircleName = c.LivestockCircleName,
-                        Status = c.Status,
-                        StartDate = c.StartDate,
-                        EndDate = c.EndDate,
-                        TotalUnit = c.TotalUnit,
-                        DeadUnit = c.DeadUnit,
-                        AverageWeight = c.AverageWeight,
-                        
-                        BreedId = c.BreedId,
-                        BreedName = c.Breed.BreedName
-                    });
-                }
+                    Id = c.Id,
+                    LivestockCircleName = c.LivestockCircleName,
+                    Status = c.Status,
+                    StartDate = c.StartDate,
+                    EndDate = c.EndDate,
+                    TotalUnit = c.TotalUnit,
+                    DeadUnit = c.DeadUnit,
+                    AverageWeight = c.AverageWeight,
 
-                var result = new PaginationSet<LiveStockCircleHistoryItem>
-                {
-                    PageIndex = paginationResult.PageIndex,
-                    Count = responses.Count,
-                    TotalCount = paginationResult.TotalCount,
-                    TotalPages = paginationResult.TotalPages,
-                    Items = responses
-                };
+                    BreedId = c.BreedId,
+                    BreedName = c.Breed.BreedName
+                }).Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+
 
                 return result;
             }
             catch (Exception ex)
             {
                 throw new Exception($"Lỗi khi lấy danh sách phân trang: {ex.Message}");
+            }
+        }
+
+        public async Task<PaginationSet<ReleasedLivetockItem>> GetReleasedLivestockCircleList(ListingRequest request)
+        {
+            try
+            {
+                if (request == null)
+                    throw new Exception("Yêu cầu không được null.");
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                    throw new Exception("PageIndex và PageSize phải lớn hơn 0.");
+
+                var validFields = typeof(Barn).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any())
+                    throw new Exception($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+
+                var query = _livestockCircleRepository.GetQueryable(x => x.IsActive);
+
+                if (request.SearchString?.Any() == true)
+                    query = query.SearchString(request.SearchString);
+
+                if (request.Filter?.Any() == true)
+                    query = query.Filter(request.Filter);
+
+                var result = await query.Include(it => it.Breed).ThenInclude(it=>it.BreedCategory).Include(it => it.Barn)
+                    .Select(it => new ReleasedLivetockItem
+                    {
+                        LivestockCircleId = it.Id,
+                        BarnName = it.Barn.BarnName,
+                        BreedCategoryName = it.Breed.BreedCategory.Name,
+                        BreedName = it.Breed.BreedName,
+                        TotalUnit = it.TotalUnit,
+                      
+                    })
+                    .Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+              
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi lấy danh sách phân trang: {ex.Message}");
+            }
+        }
+
+        public async Task<ReleasedLivetockDetail> GetReleasedLivestockCircleById(Guid livestockCircleId)
+        {
+            try
+            {
+                var livestockCircleData = await _livestockCircleRepository.GetQueryable(it=>it.IsActive)
+                    .Include(it=>it.Breed).ThenInclude(it=>it.BreedCategory)
+                    .Include(it=>it.Barn).ThenInclude(it=>it.Worker)
+                    .FirstOrDefaultAsync(it=>it.Id == livestockCircleId);
+                ReleasedLivetockDetail result = new ReleasedLivetockDetail()
+                {
+                    AverageWeight = livestockCircleData.AverageWeight,
+                    BadUnitNumber = livestockCircleData.BadUnitNumber,
+                    EndDate = livestockCircleData.EndDate,
+                    StartDate = livestockCircleData.StartDate,
+                    BreedName = livestockCircleData.Breed.BreedName,
+                    BreedCategoryName = livestockCircleData.Breed.BreedCategory.Name,
+                    GoodUnitNumber = livestockCircleData.GoodUnitNumber,
+                    TotalUnit = livestockCircleData.TotalUnit,
+                    LivestockCircleId = livestockCircleData.Id,
+                    BarnDetail = new BarnResponse()
+                    {
+                        Id = livestockCircleData.BarnId,
+                        Address = livestockCircleData.Barn.Address,
+                        Image = livestockCircleData.Barn.Image,
+                        BarnName = livestockCircleData.Barn.BarnName,
+                        IsActive = livestockCircleData.Barn.IsActive,
+                        Worker = new WokerResponse()
+                        {
+                            Id= livestockCircleData.Barn.WorkerId,
+                            Email = livestockCircleData.Barn.Worker.Email,
+                            FullName = livestockCircleData.Barn.Worker.FullName,
+                        }
+                    }
+                };
+                return result;
+
+            }catch (Exception)
+            {
+                throw new Exception("Mã ID không hợp lệ");
             }
         }
     }
