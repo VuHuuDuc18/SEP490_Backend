@@ -9,10 +9,10 @@ namespace Domain.Dto.Response.Barn
 {
     public class ReleaseBarnResponse
     {
-        public Guid BarnId { get; set; }
+        public Guid Id { get; set; }
         public string BarnName { get; set; }
-        public string BarnAddress { get; set; }
-        public string BarnImage { get; set; }
+        public string Address { get; set; }
+        public string Image { get; set; }
 
         public int TotalUnit { get; set; }
         public int Age { get; set; }

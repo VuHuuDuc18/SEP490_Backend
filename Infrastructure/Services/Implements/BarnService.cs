@@ -18,6 +18,11 @@ using Domain.Dto.Response;
 using Infrastructure.Extensions;
 using Domain.Extensions;
 using Application.Wrappers;
+using Domain.Helper.Constants;
+using Domain.Helper;
+using Microsoft.IdentityModel.Tokens;
+using Domain.Dto.Response.Breed;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 
 namespace Infrastructure.Services.Implements
@@ -26,6 +31,8 @@ namespace Infrastructure.Services.Implements
     {
         private readonly IRepository<Barn> _barnRepository;
         private readonly IRepository<User> _userRepository;
+        private readonly IRepository<ImageLivestockCircle> _imageLiveStockCircleRepository;
+        private readonly IRepository<ImageBreed> _imageBreedeRepository;
         private readonly IRepository<LivestockCircle> _livestockCircleRepository;
         private readonly CloudinaryCloudService _cloudinaryCloudService;
 
@@ -33,12 +40,16 @@ namespace Infrastructure.Services.Implements
             IRepository<Barn> barnRepository,
             IRepository<User> userRepository,
             IRepository<LivestockCircle> livestockCircleRepository,
+            IRepository<ImageLivestockCircle> imageLiveStockCircleRepository,
+            IRepository<ImageBreed> imageBreedeRepository,
             CloudinaryCloudService cloudinaryCloudService)
         {
             _barnRepository = barnRepository ?? throw new ArgumentNullException(nameof(barnRepository));
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _livestockCircleRepository = livestockCircleRepository ?? throw new ArgumentNullException(nameof(livestockCircleRepository));
             _cloudinaryCloudService = cloudinaryCloudService ?? throw new ArgumentNullException(nameof(cloudinaryCloudService));
+            _imageLiveStockCircleRepository = imageLiveStockCircleRepository?? throw new ArgumentNullException(nameof(imageLiveStockCircleRepository));
+            _imageBreedeRepository = imageBreedeRepository ?? throw new ArgumentNullException(nameof(imageBreedeRepository));
         }
 
         /// <summary>
@@ -506,7 +517,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
         /// <summary>
         /// Lấy danh sách phân trang chuồng trại đang có sẵn cho khách hàng, bao gồm thông tin LivestockCircle đang hoạt động
         /// </summary>
-        public async Task<Response<PaginationSet<ReleaseBarnResponse>>> GetPaginatedReleaseBarnList(
+        public async Task<Response<PaginationSet<ReleaseBarnResponse>>> GetPaginatedReleaseBarnListAsync(
             ListingRequest request,
             CancellationToken cancellationToken = default)
         {
@@ -545,10 +556,10 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                     .ThenInclude(x => x.BreedCategory)
                     .Select(x => new ReleaseBarnResponse()
                     {
-                        BarnId = x.Id,
+                        Id = x.Barn.Id,
                         BarnName = x.Barn.BarnName,
-                        BarnAddress = x.Barn.Address,
-                        BarnImage = x.Barn.Image,
+                        Address = x.Barn.Address,
+                        Image = x.Barn.Image,
 
                         TotalUnit = x.TotalUnit,
                         DeadUnit = x.DeadUnit,
@@ -568,21 +579,55 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                     query = query.Filter(request.Filter);
 
                 var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
-                var result = new PaginationSet<ReleaseBarnResponse>()
-                {
-                    PageIndex = paginationResult.PageIndex,
-                    Count = paginationResult.Count,
-                    TotalPages = paginationResult.TotalPages,
-                    TotalCount = paginationResult.TotalCount,
-                    Items = paginationResult.Items
-                };
-
-                return new Response<PaginationSet<ReleaseBarnResponse>>(result, "Lấy dữ liệu thành công.");
+                
+                return new Response<PaginationSet<ReleaseBarnResponse>>(paginationResult, "Lấy dữ liệu thành công.");
             }
             catch (Exception ex)
             {
                 return new Response<PaginationSet<ReleaseBarnResponse>>($"Lỗi khi lấy danh sách phân trang: {ex.Message}");
             }
+        }
+
+        public async Task<Response<ReleaseBarnDetailResponse>> GetReleaseBarnDetail(
+            Guid BarnId,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                //get current live stock circle
+                var liveStockCircle = _livestockCircleRepository.GetQueryable(x => x.IsActive && x.Barn.Id == BarnId && x.Status == StatusConstant.RELEASESTAT).FirstOrDefault();
+                if (liveStockCircle == null)
+                {
+                    return new Response<ReleaseBarnDetailResponse>("Không tìm thấy thông tin chuồng nuôi.");
+                }
+                //get livestock circle images
+                var circleImages = _imageLiveStockCircleRepository.GetQueryable(x=>x.IsActive && x.LivestockCircleId == liveStockCircle.Id)
+                    .Select(x=> AutoMapperHelper.AutoMap<ImageLivestockCircle, ImageLivestockCircleResponse>(x))
+                    .ToList();
+                //get breed images
+                var breedImages = _imageBreedeRepository.GetQueryable(x => x.IsActive && x.BreedId == liveStockCircle.BreedId).Select(x=> x.ImageLink).ToList();
+                //map data to response object
+                var result = AutoMapperHelper.AutoMap<Barn,ReleaseBarnDetailResponse>(liveStockCircle.Barn);
+                result.LiveStockCircle = AutoMapperHelper.AutoMap<LivestockCircle, LiveStockCircleResponse>(liveStockCircle);
+                result.Breed = AutoMapperHelper.AutoMap<Breed, BreedResponse>(liveStockCircle.Breed);
+                result.Breed.Thumbnail = breedImages.FirstOrDefault();
+                result.Breed.BreedCategory = AutoMapperHelper.AutoMap<BreedCategory, BreedCategoryResponse>(liveStockCircle.Breed.BreedCategory);
+                result.LiveStockCircle.Images = circleImages;
+                result.Breed.ImageLinks = breedImages;
+
+                return new Response<ReleaseBarnDetailResponse>(result, "Lấy thông tin thành công.");
+            }
+            catch (Exception e)
+            {
+                return new Response<ReleaseBarnDetailResponse>("Không thế lấy thông tin chuồng nuôi.")
+                {
+                    Errors = new List<string>(){
+                        e.Message
+                    }
+                };
+
+            }
+            
         }
 
     }
