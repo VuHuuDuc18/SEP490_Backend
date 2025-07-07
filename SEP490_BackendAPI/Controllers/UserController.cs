@@ -26,6 +26,7 @@ namespace WebApi.Controllers
         {
             return Ok(await _userServices.LoginAsync(request, GenerateIPAddress()));
         }
+
         [HttpPost("create-account")]
         public async Task<IActionResult> CreateAccountAsync(CreateNewAccountRequest request)
         {
@@ -34,8 +35,9 @@ namespace WebApi.Controllers
             {
                 origin = Request.Headers["Referer"].ToString() ?? "https://localhost:7074";
             }
-            return Ok(await _userServices.CreateAccountAsync(request, origin));
+            return Ok(await _userServices.CreateCustomerAccountAsync(request, origin));
         }
+
         [HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmEmailAsync([FromQuery]string userId, [FromQuery]string code)
         {
@@ -46,6 +48,7 @@ namespace WebApi.Controllers
             }
             return Ok(await _userServices.ConfirmEmailAsync(userId, code));
         }
+
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest model)
         {
@@ -57,38 +60,50 @@ namespace WebApi.Controllers
             await _userServices.ForgotPassword(model, origin);
             return Ok();
         }
+
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword(ResetPasswordRequest model)
         {
             
             return Ok(await _userServices.ResetPassword(model));
         }
+
+        [HttpPatch("change-password")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordRequest model)
+        {
+            return Ok(await _userServices.ChangePassword(model));
+        }
+
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
         {
             return Ok(await _userServices.RefreshTokenAsync(request.Token, GenerateIPAddress()));
         }
+
         [HttpPost("revoke-token")]
         public async Task<IActionResult> RevokeToken([FromBody] RefreshTokenRequest request)
         {
             return Ok(await _userServices.RevokeTokenAsync(request.Token, GenerateIPAddress()));
         }
+
+        [HttpPatch("update-profile")]
+        public async Task<IActionResult> UpdateProfile([FromBody]UserUpdateAccountRequest request)
+        {
+            return Ok(await _userServices.UpdateAccountAsync(request));
+        }
+
+        [HttpGet("profile")]
+        public async Task<IActionResult> Profile()
+        {
+            return Ok(await _userServices.GetUserProfile());
+        }
+
         private string GenerateIPAddress()
         {
             if (Request.Headers.ContainsKey("X-Forwarded-For"))
                 return Request.Headers["X-Forwarded-For"];
             else
                 return HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
-        }
-        [HttpPatch("update-profile")]
-        public async Task<IActionResult> UpdateProfile([FromBody]UserUpdateAccountRequest request)
-        {
-            return Ok(await _userServices.UpdateAccountAsync(request));
-        }
-        [HttpGet("profile")]
-        public async Task<IActionResult> Profile()
-        {
-            return Ok(await _userServices.GetUserProfile());
         }
     }
 }

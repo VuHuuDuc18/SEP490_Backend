@@ -8,6 +8,7 @@ using Domain.Dto.Request;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Domain.Dto.Request.User;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace WebApi.Controllers
 {
@@ -21,7 +22,7 @@ namespace WebApi.Controllers
             _accountService = accountService;
         }
         [HttpPost("create-account")]
-        public async Task<IActionResult> CreateAccountAsync(CreateNewAccountRequest request)
+        public async Task<IActionResult> CreateAccountAsync(CreateAccountRequest request)
         {
             var origin = Request.Headers["origin"].ToString();
             if (string.IsNullOrEmpty(origin))
@@ -31,18 +32,18 @@ namespace WebApi.Controllers
             return Ok(await _accountService.CreateAccountAsync(request, origin));
         }
        
-        [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword(ResetPasswordRequest model)
-        {
+        //[HttpPost("reset-password")]
+        //public async Task<IActionResult> ResetPassword(ResetPasswordRequest model)
+        //{
             
-            return Ok(await _accountService.ResetPassword(model));
-        }
+        //    return Ok(await _accountService.ResetPassword(model));
+        //}
         
-        [HttpDelete("delete-account")]
-        public async Task<IActionResult> DeleteAccount([FromBody]DeleteAccountRequest request)
-        {
-            return Ok(await _accountService.DeleteAccount(request.Email));
-        }
+        //[HttpDelete("delete-account")]
+        //public async Task<IActionResult> DeleteAccount([FromBody]DeleteAccountRequest request)
+        //{
+        //    return Ok(await _accountService.DeleteAccount(request.Email));
+        //}
         [HttpPost("disable-account")]
         public async Task<IActionResult> DisableAccount([FromBody]string email)
         {
@@ -67,6 +68,13 @@ namespace WebApi.Controllers
         public async Task<IActionResult> GetAccountByEmail([FromQuery]string email)
         {
             return Ok(await _accountService.GetAccountByEmailAsync(email));
+        }
+
+        [HttpPost("get-list-account")]
+        public async Task<IActionResult> GetListAccountAsync(ListingRequest req)
+        {
+            var result = await _accountService.GetListAccount(req);
+            return Ok(result);
         }
     }
 }
