@@ -17,6 +17,7 @@ using Domain.Dto.Request;
 using Domain.Dto.Response;
 using Infrastructure.Extensions;
 using Domain.Extensions;
+using Application.Wrappers;
 
 
 namespace Infrastructure.Services.Implements
@@ -225,7 +226,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                 FullName = barn.Worker.FullName,
                 Email = barn.Worker.Email
             };
-          
+
             var response = new BarnResponse
             {
                 Id = barn.Id,
@@ -280,7 +281,9 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                 return (null, $"Lỗi khi lấy danh sách chuồng trại theo người gia công: {ex.Message}");
             }
         }
-
+        /// <summary>
+        /// Lấy danh sách chuồng trại phân trang cho người gia công.
+        /// </summary>
         public async Task<(PaginationSet<BarnResponse> Result, string ErrorMessage)> GetPaginatedBarnList(
             ListingRequest request,
             CancellationToken cancellationToken = default)
@@ -346,8 +349,9 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
             }
         }
 
-
-        // Lấy danh sách chuồng trại phân trang cho admin, bao gồm trạng thái có LivestockCircle đang hoạt động hay không
+        /// <summary>
+        /// Lấy danh sách chuồng trại phân trang cho admin, bao gồm trạng thái có LivestockCircle đang hoạt động hay không
+        /// </summary>
         public async Task<(PaginationSet<AdminBarnResponse> Result, string ErrorMessage)> GetPaginatedAdminBarnListAsync(
             ListingRequest request, CancellationToken cancellationToken = default)
         {
@@ -430,7 +434,9 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
             }
         }
 
-        // Lấy chi tiết chuồng trại cho admin, bao gồm thông tin LivestockCircle đang hoạt động (nếu có)
+        /// <summary>
+        /// Lấy chi tiết chuồng trại cho admin, bao gồm thông tin LivestockCircle đang hoạt động (nếu có)
+        /// </summary>
         public async Task<(AdminBarnDetailResponse Barn, string ErrorMessage)> GetAdminBarnDetailAsync(
             Guid barnId, CancellationToken cancellationToken = default)
         {
@@ -494,6 +500,87 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
             catch (Exception ex)
             {
                 return (null, $"Lỗi khi lấy chi tiết chuồng trại: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Lấy danh sách phân trang chuồng trại đang có sẵn cho khách hàng, bao gồm thông tin LivestockCircle đang hoạt động
+        /// </summary>
+        public async Task<Response<PaginationSet<ReleaseBarnResponse>>> GetPaginatedReleaseBarnList(
+            ListingRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (request == null)
+                    return new Response<PaginationSet<ReleaseBarnResponse>>("Yêu cầu không được null.");
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                    return new Response<PaginationSet<ReleaseBarnResponse>>("PageIndex và PageSize phải lớn hơn 0.");
+
+                var validFields = typeof(ReleaseBarnResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any())
+                    return new Response<PaginationSet<ReleaseBarnResponse>>($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}")
+                    {
+                        Errors = new List<string>()
+                        {
+                            $"Trường hợp lệ: {string.Join(",",validFields)}"
+                        }
+                    };
+                if (!validFields.Contains(request.Sort?.Field))
+                {
+                    return new Response<PaginationSet<ReleaseBarnResponse>>($"Trường sắp xếp không hợp lệ: {request.Sort?.Field}")
+                    {
+                        Errors = new List<string>()
+                        {
+                            $"Trường hợp lệ: {string.Join(",",validFields)}"
+                        }
+                    };
+                }
+
+                var query = _livestockCircleRepository.GetQueryable(x => x.IsActive)
+                    .Include(x => x.Barn)
+                    .Include(x => x.Breed)
+                    .ThenInclude(x => x.BreedCategory)
+                    .Select(x => new ReleaseBarnResponse()
+                    {
+                        BarnId = x.Id,
+                        BarnName = x.Barn.BarnName,
+                        BarnAddress = x.Barn.Address,
+                        BarnImage = x.Barn.Image,
+
+                        TotalUnit = x.TotalUnit,
+                        DeadUnit = x.DeadUnit,
+                        GoodUnitNumber = x.GoodUnitNumber,
+                        BadUnitNumber = x.BadUnitNumber,
+                        AverageWeight = x.AverageWeight,
+                        BreedCategory = x.Breed.BreedCategory.Name,
+                        Breed = x.Breed.BreedName
+
+                    });
+
+                if (request.SearchString?.Any() == true)
+                    query = query.SearchString(request.SearchString);
+
+                if (request.Filter?.Any() == true)
+                    query = query.Filter(request.Filter);
+
+                var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
+                var result = new PaginationSet<ReleaseBarnResponse>()
+                {
+                    PageIndex = paginationResult.PageIndex,
+                    Count = paginationResult.Count,
+                    TotalPages = paginationResult.TotalPages,
+                    TotalCount = paginationResult.TotalCount,
+                    Items = paginationResult.Items
+                };
+
+                return new Response<PaginationSet<ReleaseBarnResponse>>(result, "Lấy dữ liệu thành công.");
+            }
+            catch (Exception ex)
+            {
+                return new Response<PaginationSet<ReleaseBarnResponse>>($"Lỗi khi lấy danh sách phân trang: {ex.Message}");
             }
         }
 
