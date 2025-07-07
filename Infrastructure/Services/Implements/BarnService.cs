@@ -506,7 +506,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
         /// <summary>
         /// Lấy danh sách phân trang chuồng trại đang có sẵn cho khách hàng, bao gồm thông tin LivestockCircle đang hoạt động
         /// </summary>
-        public async Task<Response<PaginationSet<ReleaseBarnResponse>>> GetPaginatedReleaseBarnList(
+        public async Task<Response<PaginationSet<ReleaseBarnResponse>>> GetPaginatedReleaseBarnListAsync(
             ListingRequest request,
             CancellationToken cancellationToken = default)
         {
@@ -545,10 +545,10 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                     .ThenInclude(x => x.BreedCategory)
                     .Select(x => new ReleaseBarnResponse()
                     {
-                        BarnId = x.Id,
+                        Id = x.Id,
                         BarnName = x.Barn.BarnName,
-                        BarnAddress = x.Barn.Address,
-                        BarnImage = x.Barn.Image,
+                        Address = x.Barn.Address,
+                        Image = x.Barn.Image,
 
                         TotalUnit = x.TotalUnit,
                         DeadUnit = x.DeadUnit,
@@ -568,16 +568,8 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                     query = query.Filter(request.Filter);
 
                 var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
-                var result = new PaginationSet<ReleaseBarnResponse>()
-                {
-                    PageIndex = paginationResult.PageIndex,
-                    Count = paginationResult.Count,
-                    TotalPages = paginationResult.TotalPages,
-                    TotalCount = paginationResult.TotalCount,
-                    Items = paginationResult.Items
-                };
-
-                return new Response<PaginationSet<ReleaseBarnResponse>>(result, "Lấy dữ liệu thành công.");
+                
+                return new Response<PaginationSet<ReleaseBarnResponse>>(paginationResult, "Lấy dữ liệu thành công.");
             }
             catch (Exception ex)
             {

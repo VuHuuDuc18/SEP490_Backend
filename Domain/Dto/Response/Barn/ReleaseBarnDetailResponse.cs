@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Dto.Response.Barn
 {
-    public class ReleaseBarnResponse
+    public class ReleaseBarnDetailResponse
     {
         public Guid Id { get; set; }
         public string BarnName { get; set; }

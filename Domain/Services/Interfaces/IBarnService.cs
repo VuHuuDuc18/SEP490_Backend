@@ -59,7 +59,14 @@ namespace Domain.Services.Interfaces
         /// <summary>
         /// Lấy danh sách phân trang tìm kiếm lọc các barn có lứa nuôi với trạng thái là RELEASE.
         /// </summary>
-        Task<Response<PaginationSet<ReleaseBarnResponse>>> GetPaginatedReleaseBarnList(
+        Task<Response<PaginationSet<ReleaseBarnResponse>>> GetPaginatedReleaseBarnListAsync(
+            ListingRequest request,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Lấy thông tin của chuồng đang được Release bao gồm thông tin chu kỳ nuôi và giống.
+        /// </summary>
+        Task<Response<ReleaseBarnDetailResponse>> GetReleaseBarnDetail(
             ListingRequest request,
             CancellationToken cancellationToken = default);
 
