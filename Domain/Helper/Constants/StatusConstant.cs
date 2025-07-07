@@ -35,4 +35,12 @@ namespace Domain.Helper.Constants
         public readonly static string DENIED = "DENIED";
         public readonly static string CANCELED = "CANCELED";
     }
+
+    public static class TypeBill 
+    {
+        public readonly static string FOOD = "Food";
+        public readonly static string MEDICINE = "Medicine";
+        public readonly static string BREED = "Breed";
+    }
+
 }

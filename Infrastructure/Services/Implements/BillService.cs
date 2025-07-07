@@ -29,6 +29,9 @@ namespace Infrastructure.Services.Implements
         private readonly IRepository<LivestockCircle> _livestockCircleRepository;
         private readonly IRepository<Food> _foodRepository;
         private readonly IRepository<Medicine> _medicineRepository;
+        private readonly IRepository<ImageFood> _foodImageRepository;
+        private readonly IRepository<ImageMedicine> _medicineImageRepository;
+        private readonly IRepository<ImageBreed> _breedImageRepository;
         private readonly IRepository<Breed> _breedRepository;
         private readonly IRepository<Barn> _barnRepository;
         private readonly IRepository<LivestockCircleFood> _livestockCircleFoodRepository;
@@ -44,7 +47,11 @@ namespace Infrastructure.Services.Implements
             IRepository<Breed> breedRepository,
             IRepository<Barn> barnRepository,
             IRepository<LivestockCircleFood> livestockCircleFoodRepository,
-            IRepository<LivestockCircleMedicine> livestockCircleMedicineRepository)
+            IRepository<LivestockCircleMedicine> livestockCircleMedicineRepository,
+            IRepository<ImageFood> foodImageRepository,
+            IRepository<ImageMedicine> medicineImageRepository,
+            IRepository<ImageBreed> breedImageRepository
+            )
 
         {
             _billRepository = billRepository ?? throw new ArgumentNullException(nameof(billRepository));
@@ -57,6 +64,9 @@ namespace Infrastructure.Services.Implements
             _livestockCircleFoodRepository = livestockCircleFoodRepository ?? throw new ArgumentNullException(nameof(livestockCircleFoodRepository));
             _livestockCircleMedicineRepository = livestockCircleMedicineRepository ?? throw new ArgumentNullException(nameof(livestockCircleMedicineRepository));
             _barnRepository = barnRepository ?? throw new ArgumentNullException(nameof(barnRepository));
+            _foodImageRepository = foodImageRepository;
+            _medicineImageRepository = medicineImageRepository;
+            _breedImageRepository = breedImageRepository;
         }
 
         private async Task<(bool Success, string ErrorMessage)> ValidateItem(Guid itemId, int quantity, bool isFood, bool isMedicine, bool isBreed, CancellationToken cancellationToken)
@@ -184,22 +194,74 @@ namespace Infrastructure.Services.Implements
                 if (bill == null) return (null, "Hóa đơn không tồn tại.");
 
                 var query = _billItemRepository.GetQueryable(x => x.BillId == billId && x.IsActive);
+                
 
                 if (request.SearchString?.Any() == true) query = query.SearchString(request.SearchString);
                 if (request.Filter?.Any() == true) query = query.Filter(request.Filter);
 
                 var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
+                var responses = new List<BillItemResponse>();
 
-                var responses = paginationResult.Items.Select(i => new BillItemResponse
+                foreach (var billItem in paginationResult.Items)
                 {
-                    Id = i.Id,
-                    BillId = i.BillId,
-                    FoodId = i.FoodId,
-                    MedicineId = i.MedicineId,
-                    BreedId = i.BreedId,
-                    Stock = i.Stock,
-                    IsActive = i.IsActive
-                }).ToList();
+                    if (bill.TypeBill == TypeBill.FOOD)
+                    {
+                        var food = await _foodRepository.GetById(billItem.FoodId.Value, checkError);
+                        var images = await _foodImageRepository.GetQueryable(x => x.FoodId == food.Id).ToListAsync(cancellationToken);
+                        var foodResponse = new FoodBillResponse
+                        {
+                            Id = food.Id,
+                            FoodName = food.FoodName,
+                            Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                        };
+                        responses = paginationResult.Items.Select(i => new BillItemResponse
+                        {
+                            Id = i.Id,
+                           // BillId = i.BillId,
+                            Food = foodResponse,
+                            Stock = i.Stock,
+                            IsActive = i.IsActive
+                        }).ToList();
+                    } else if(bill.TypeBill == TypeBill.MEDICINE)
+                    {
+                        var medicine = await _medicineRepository.GetById(billItem.MedicineId.Value, checkError);
+                        var images = await _medicineImageRepository.GetQueryable(x => x.MedicineId == medicine.Id).ToListAsync(cancellationToken);
+                        var medicineResponse = new MedicineBillResponse
+                        {
+                            Id = medicine.Id,
+                            MedicineName = medicine.MedicineName,
+                            Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                        };
+                        responses = paginationResult.Items.Select(i => new BillItemResponse
+                        {
+                            Id = i.Id,
+                         //  BillId = i.BillId,
+                            Medicine = medicineResponse,
+                            Stock = i.Stock,
+                            IsActive = i.IsActive
+                        }).ToList();
+                    } else
+                    {
+                        var breed = await _breedRepository.GetById(billItem.BreedId.Value, checkError);
+                        var images = await _breedImageRepository.GetQueryable(x => x.BreedId == breed.Id).ToListAsync(cancellationToken);
+                        var breedResponse = new BreedBillResponse
+                        {
+                            Id = breed.Id,
+                            BreedName = breed.BreedName,
+                            Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                        };
+                        responses = paginationResult.Items.Select(i => new BillItemResponse
+                        {
+                            Id = i.Id,
+                           // BillId = i.BillId,
+                            Breed = breedResponse,
+                            Stock = i.Stock,
+                            IsActive = i.IsActive
+                        }).ToList();
+                    }
+                }
+                 
+                
 
                 var result = new PaginationSet<BillItemResponse>
                 {
@@ -886,10 +948,20 @@ namespace Infrastructure.Services.Implements
                 return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
 
             var checkError = new Ref<CheckError>();
+            float weight = 0;
             foreach (var foodItem in request.FoodItems)
             {
                 var (isValid, errorMessage) = await ValidateItem(foodItem.ItemId, foodItem.Quantity, true, false, false, cancellationToken);
-                if (!isValid) return (false, errorMessage);
+
+                if (isValid)
+                {
+                    var food = await _foodRepository.GetById(foodItem.ItemId);
+                    weight += food.WeighPerUnit * foodItem.Quantity;
+                }
+                else
+                {
+                    return (false, errorMessage);
+                }
             }
 
             var bill = new Bill
@@ -899,9 +971,9 @@ namespace Infrastructure.Services.Implements
                 Name = $"Yêu cầu thức ăn - {DateTime.UtcNow}",
                 Note = request.Note,
                 Status = StatusConstant.REQUESTED,
-                TypeBill = "Food",
+                TypeBill = TypeBill.FOOD,
                 Total = request.FoodItems.Sum(x => x.Quantity),
-                Weight = 0
+                Weight = weight
             };
 
             try
@@ -952,7 +1024,7 @@ namespace Infrastructure.Services.Implements
                 Name = $"Yêu cầu thuốc - {DateTime.UtcNow}",
                 Note = request.Note,
                 Status = StatusConstant.REQUESTED,
-                TypeBill = "Medicine",
+                TypeBill = TypeBill.MEDICINE,
                 Total = request.MedicineItems.Sum(x => x.Quantity),
                 Weight = 0
             };
@@ -1005,7 +1077,7 @@ namespace Infrastructure.Services.Implements
                 Name = $"Yêu cầu giống - {DateTime.UtcNow}",
                 Note = request.Note,
                 Status = StatusConstant.REQUESTED,
-                TypeBill = "Breed",
+                TypeBill = TypeBill.BREED,
                 Total = request.BreedItems.Sum(x => x.Quantity),
                 Weight = 0
             };
@@ -1084,7 +1156,7 @@ namespace Infrastructure.Services.Implements
             if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
                 return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
 
-            // Chuyển danh sách mới thành dictionary để dễ so sánh
+          
             var newItemsDict = request.FoodItems.ToDictionary(x => x.ItemId, x => x.Quantity);
 
             try
@@ -1097,8 +1169,16 @@ namespace Infrastructure.Services.Implements
                 {
                     if (!currentItems.ContainsKey(newItem.ItemId))
                     {
+                        var food = new Food();
                         var (isValid, errorMessage) = await ValidateItem(newItem.ItemId, newItem.Quantity, true, false, false, cancellationToken);
-                        if (!isValid) return (false, errorMessage);
+                        if (isValid)
+                        {
+                             food = await _foodRepository.GetById(newItem.ItemId);
+                        }
+                        else
+                        {
+                            return (false, errorMessage);
+                        }
 
                         var billItem = new BillItem
                         {
@@ -1110,6 +1190,7 @@ namespace Infrastructure.Services.Implements
                         };
                         _billItemRepository.Insert(billItem);
                         bill.Total += newItem.Quantity;
+                        bill.Weight += food.WeighPerUnit * newItem.Quantity;
                     }
                 }
 
@@ -1120,18 +1201,30 @@ namespace Infrastructure.Services.Implements
                     {
                         if (newQuantity != currentItem.Stock)
                         {
+                            var food = new Food();
                             var (isValid, errorMessage) = await ValidateItem(currentItem.FoodId.Value, newQuantity, true, false, false, cancellationToken);
-                            if (!isValid) return (false, errorMessage);
+                            if (isValid)
+                            {
+                                food = await _foodRepository.GetById(currentItem.FoodId.Value);
+                            }
+                            else
+                            {
+                                return (false, errorMessage);
+                            }
 
                             bill.Total -= currentItem.Stock;
+                            bill.Weight -= food.WeighPerUnit * currentItem.Stock;
                             currentItem.Stock = newQuantity;
                             bill.Total += newQuantity;
+                            bill.Weight += food.WeighPerUnit * newQuantity;
                             _billItemRepository.Update(currentItem);
                         }
                     }
                     else if (newItemsDict.All(x => x.Key != currentItem.FoodId.Value))
                     {
+                        var food = await _foodRepository.GetById(currentItem.FoodId.Value);
                         bill.Total -= currentItem.Stock;
+                        bill.Weight -= food.WeighPerUnit * currentItem.Stock;
                         currentItem.IsActive = false;
                         _billItemRepository.Update(currentItem);
                     }
