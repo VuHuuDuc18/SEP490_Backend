@@ -19,6 +19,7 @@ using Domain.Dto.Response;
 using Domain.Extensions;
 using Infrastructure.Extensions;
 using Infrastructure.Services;
+using Domain.Helper.Constants;
 
 namespace Domain.Services.Implements
 {
@@ -79,9 +80,9 @@ namespace Domain.Services.Implements
             {
                 LivestockCircleId = requestDto.LivestockCircleId,
                 DeadUnit = requestDto.DeadUnit,
-                GoodUnit = requestDto.GoodUnit,
+                GoodUnit = livestockCircle.GoodUnitNumber - requestDto.DeadUnit - requestDto.BadUnit,
                 AgeInDays = ageInDays,
-                Status = "Hoạt Động",
+                Status = DailyReportStatus.TODAY,
                 BadUnit = requestDto.BadUnit,
                 Note = requestDto.Note,
                 IsActive = true
@@ -94,6 +95,7 @@ namespace Domain.Services.Implements
 
                 livestockCircle.DeadUnit += requestDto.DeadUnit;
                 livestockCircle.BadUnitNumber += requestDto.BadUnit;
+                livestockCircle.GoodUnitNumber -= livestockCircle.GoodUnitNumber - requestDto.DeadUnit - requestDto.BadUnit;
                 _livestockCircleRepository.Update(livestockCircle);
                 await _livestockCircleRepository.CommitAsync(cancellationToken);
 
@@ -226,12 +228,13 @@ namespace Domain.Services.Implements
                 // Cập nhật LivestockCircle
                 livestockCircle.DeadUnit = livestockCircle.DeadUnit - existing.DeadUnit + requestDto.DeadUnit;
                 livestockCircle.BadUnitNumber = livestockCircle.BadUnitNumber - existing.BadUnit + requestDto.BadUnit;
+                livestockCircle.GoodUnitNumber = livestockCircle.GoodUnitNumber + existing.DeadUnit + existing.BadUnit - requestDto.BadUnit - requestDto.DeadUnit;
                 _livestockCircleRepository.Update(livestockCircle);
 
                 // Cập nhật DailyReport
                 existing.LivestockCircleId = requestDto.LivestockCircleId;
                 existing.DeadUnit = requestDto.DeadUnit;
-                existing.GoodUnit = requestDto.GoodUnit;
+                existing.GoodUnit = livestockCircle.GoodUnitNumber + existing.DeadUnit + existing.BadUnit - requestDto.BadUnit - requestDto.DeadUnit;
                 existing.BadUnit = requestDto.BadUnit;
                 existing.Note = requestDto.Note;
                 _dailyReportRepository.Update(existing);
