@@ -60,23 +60,24 @@ namespace Infrastructure.Services.Implements
         public async Task<Response<List<User>>> GetAllAccountsAsync()
         {
             var users = await _userManager.Users.ToListAsync();
-            return new Response<List<User>>(users, message: $"All Accounts Retrieved Successfully.");
+            return new Response<List<User>>(users, message: $"Lấy danh sách tài khoản thành công.");
         }
         public async Task<Response<User>> GetAccountByEmailAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
-            if (user == null) return new Response<User>($"No Accounts Registered with {email}.");
-            return new Response<User>(user, message: $"Account Retrieved Successfully.");
+            if (user == null) return new Response<User>($"Không tìm thấy tài khoản với email {email}.");
+            return new Response<User>(user, message: $"Lấy tài khoản thành công.");
         }
         public async Task<Response<string>> CreateAccountAsync(CreateAccountRequest request, string origin)
         {
-            var userWithSameUserName = await _userManager.FindByNameAsync(request.FullName);
-            if (userWithSameUserName != null)
-            {
-                return new Response<string>($"Username '{request.FullName}' is already taken.");
-            }
+            //var userWithSameUserName = await _userManager.FindByNameAsync(request.FullName);
+            //if (userWithSameUserName != null)
+            //{
+            //    return new Response<string>($"Tên đăng nhập '{request.FullName}' đã tồn tại.");
+            //}
             var user = new User
             {
+                UserName = request.Email,
                 Email = request.Email,
                 FullName = request.FullName
             };
@@ -88,16 +89,19 @@ namespace Infrastructure.Services.Implements
                 {
                     await _userManager.AddToRoleAsync(user, request.RoleName);
                     var verificationUri = await SendVerificationEmail(user, origin);
-                    return new Response<string>(user.Id.ToString(), message: $"User Registered. An email has been sent to {user.Email} to confirm your account.");
+                    return new Response<string>(user.Id.ToString(), message: $"Đã tạo tài khoản. Một email đã được gửi đến {user.Email} để xác thực tài khoản.");
                 }
                 else
                 {
-                    return new Response<string>($"{result.Errors}");
+                    return new Response<string>($"Lỗi khi tạo tài khoản.")
+                    {
+                        Errors = result.Errors.Select(x => x.Description).ToList()
+                    };
                 }
             }
             else
             {
-                return new Response<string>($"Email {request.Email} is already registered.");
+                return new Response<string>($"Email {request.Email} đã được đăng ký.");
             }
         }
         public async Task<Response<string>> ResetPassword(ResetPasswordRequest model)
@@ -107,25 +111,31 @@ namespace Infrastructure.Services.Implements
             var result = await _userManager.ResetPasswordAsync(account, model.Token, model.Password);
             if (result.Succeeded)
             {
-                return new Response<string>(model.Email, message: $"Password Resetted.");
+                return new Response<string>(model.Email, message: $"Đã đặt lại mật khẩu.");
             }
             else
             {
-                throw new ApiException($"Error occured while reseting the password.");
+                return new Response<string>($"Lỗi khi đặt lại mật khẩu.")
+                {
+                    Errors = result.Errors.Select(x => x.Description).ToList()
+                };
             }
         }
         public async Task<Response<string>> DeleteAccount(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
-            if (user == null) return new Response<string>($"No Accounts Registered with {email}.");
+            if (user == null) return new Response<string>($"Không tìm thấy tài khoản với email {email}.");
             var result = await _userManager.DeleteAsync(user);
             if (result.Succeeded)
             {
-                return new Response<string>(email, message: $"Account Deleted Successfully.");
+                return new Response<string>(email, message: $"Đã xóa tài khoản.");
             }
             else
             {
-                throw new ApiException($"Error occured while deleting the account.");
+                return new Response<string>($"Lỗi khi xóa tài khoản.")
+                {
+                    Errors = result.Errors.Select(x => x.Description).ToList()
+                };
             }
         }
         public async Task<Response<string>> RevokeTokenAsync(string token, string ipAddress)
@@ -134,50 +144,50 @@ namespace Infrastructure.Services.Implements
                 .FirstOrDefaultAsync(x => x.Token == token);
 
             if (refreshToken == null)
-                return new Response<string>("Invalid refresh token");
+                return new Response<string>("Token không hợp lệ.");
 
             if (!refreshToken.IsActive)
-                return new Response<string>("Token already revoked");
+                return new Response<string>("Token đã bị hủy.");
 
             refreshToken.Revoked = DateTime.UtcNow;
             refreshToken.RevokedByIp = ipAddress;
             await _context.SaveChangesAsync();
 
-            return new Response<string>("Token revoked successfully");
+            return new Response<string>("","Token đã bị hủy.");
         }
         public async Task<Response<string>> DisableAccountAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
-            if (user == null) return new Response<string>($"No Accounts Registered with {email}.");
+            if (user == null) return new Response<string>($"Không tìm thấy tài khoản với email {email}.");
             if (!user.IsActive)
             {
-                return new Response<string>($"Account already disabled - {email}.");
+                return new Response<string>($"Tài khoản đã bị vô hiệu hóa - {email}.");
             }
             user.IsActive = false;
             await _userManager.UpdateAsync(user);
-            return new Response<string>(email, message: $"Account Disabled Successfully.");
+            return new Response<string>(email, message: $"Tài khoản đã bị vô hiệu hóa.");
         }
         public async Task<Response<string>> EnableAccountAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
-            if (user == null) return new Response<string>($"No Accounts Registered with {email}.");
+            if (user == null) return new Response<string>($"Không tìm thấy tài khoản với email {email}.");
             if (user.IsActive)
             {
-                return new Response<string>($"Account already enabled - {email}.");
+                return new Response<string>($"Tài khoản đã được kích hoạt - {email}.");
             }
             user.IsActive = true;
             await _userManager.UpdateAsync(user);
-            return new Response<string>(email, message: $"Account Enabled Successfully.");
+            return new Response<string>(email, message: $"Tài khoản đã được kích hoạt.");
         }
         public async Task<Response<string>> UpdateAccountAsync(UpdateAccountRequest request)
         {
             var user = await _userManager.FindByIdAsync(request.UserId);
-            if (user == null) return new Response<string>($"No Accounts Registered with {request.UserId}.");
+            if (user == null) return new Response<string>($"Không tìm thấy tài khoản với {request.UserId}.");
             if (!string.IsNullOrEmpty(request.Email)) user.Email = request.Email;
             if (!string.IsNullOrEmpty(request.PhoneNumber)) user.PhoneNumber = request.PhoneNumber;
-            if (!string.IsNullOrEmpty(request.UserName)) user.UserName = request.UserName;
+            if (!string.IsNullOrEmpty(request.FullName)) user.FullName = request.FullName;
             await _userManager.UpdateAsync(user);
-            return new Response<string>(user.Id.ToString(), message: $"Account Updated Successfully.");
+            return new Response<string>(user.Id.ToString(), message: $"Tài khoản đã được cập nhật.");
         }
         #region Old Code
 
