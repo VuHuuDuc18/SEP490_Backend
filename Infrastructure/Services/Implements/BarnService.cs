@@ -556,8 +556,9 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                         BadUnitNumber = x.BadUnitNumber,
                         AverageWeight = x.AverageWeight,
                         BreedCategory = x.Breed.BreedCategory.Name,
-                        Breed = x.Breed.BreedName
-
+                        Breed = x.Breed.BreedName,
+                        StartDate = x.StartDate,
+                        Age = (DateTime.UtcNow - x.StartDate).Days < 0 ? 0 : (DateTime.UtcNow - x.StartDate).Days
                     });
 
                 if (request.SearchString?.Any() == true)

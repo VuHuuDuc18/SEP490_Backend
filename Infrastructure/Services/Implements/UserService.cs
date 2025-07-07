@@ -46,6 +46,7 @@ namespace Infrastructure.Services.Implements
         private readonly RoleManager<Role> _roleManager;
         private readonly JWTSettings _jwtSettings;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly Guid _currentUserId;
 
         public UserService(UserManager<User> userManager,
            RoleManager<Role> roleManager,
@@ -63,6 +64,18 @@ namespace Infrastructure.Services.Implements
             this._emailService = emailService;
             _context = context;
             _httpContextAccessor = httpContextAccessor;
+
+            _currentUserId = Guid.Empty;
+            // Lấy current user từ JWT token claims
+            var currentUser = _httpContextAccessor.HttpContext?.User;
+            if (currentUser != null)
+            {
+                var userIdClaim = currentUser.FindFirst("uid")?.Value;
+                if (!string.IsNullOrEmpty(userIdClaim))
+                {
+                    _currentUserId = Guid.Parse(userIdClaim);
+                }
+            }
         }
         
 
@@ -72,18 +85,17 @@ namespace Infrastructure.Services.Implements
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
             {
-                return new Response<AuthenticationResponse>($"No Accounts Registered with {request.Email}.");
-                //throw new ApiException($"No Accounts Registered with {request.Email}.");
+                return new Response<AuthenticationResponse>($"Không tìm thấy tài khoản với email {request.Email}.");
             }
             var result = await _signInManager.PasswordSignInAsync(user.UserName, request.Password, false, lockoutOnFailure: false);
             if (!result.Succeeded)
             {
                 //throw new ApiException($"Invalid Credentials for '{request.Email}'.");
-                return new Response<AuthenticationResponse>($"Invalid Credentials for '{request.Email}'.");
+                return new Response<AuthenticationResponse>($"Mật khẩu không chính xác.");
             }
             if (!user.EmailConfirmed)
             {
-                return new Response<AuthenticationResponse>($"Account Not Confirmed for '{request.Email}'.");
+                return new Response<AuthenticationResponse>($"Tài khoản chưa được xác thực.");
                 //throw new ApiException($"Account Not Confirmed for '{request.Email}'.");
             }
             try
@@ -101,11 +113,12 @@ namespace Infrastructure.Services.Implements
                 response.Roles = rolesList.ToList();
                 response.IsVerified = user.EmailConfirmed;
                 response.RefreshToken = refreshToken.Token;
-                return new Response<AuthenticationResponse>(response, $"Authenticated {user.UserName}");
+                return new Response<AuthenticationResponse>(response, $"Đăng nhập thành công.");
             }
             catch (Exception ex)
             {
                 return new Response<AuthenticationResponse>(ex.Message) { Errors = new List<string>() { ex.Message } };
+                //throw new ApiException(ex.Message);
             }
 
 
@@ -116,23 +129,26 @@ namespace Infrastructure.Services.Implements
 
             //check email used
             var userWithSameEmail = await _userManager.FindByEmailAsync(request.Email);
-            if (userWithSameEmail != null) return new Response<string>($"Email {request.Email} is already registered.");
+            if (userWithSameEmail != null) return new Response<string>($"Email {request.Email} đã được đăng ký.");
 
+            var userId = Guid.NewGuid();
             //Create new user
             var user = new User
             {
+                Id = userId,
                 Email = request.Email,
                 FullName = request.FullName,
                 PhoneNumber = request.PhoneNumber,
-                IsActive = true
+                IsActive = true,
+                CreatedBy = userId,
+                CreatedDate = DateTime.UtcNow,
             };
-            user.CreatedBy = user.Id;
             var result = await _userManager.CreateAsync(user, request.Password);
             if (result.Succeeded)
             {
                 await _userManager.AddToRoleAsync(user, RoleConstant.Customer);
                 var verificationUri = await SendVerificationEmail(user, origin);
-                return new Response<string>(user.Id.ToString(), message: $"User Registered. An email has been sent to {user.Email} to confirm your account.");
+                return new Response<string>(user.Id.ToString(), message: $"Đã tạo tài khoản. Một email đã được gửi đến {user.Email} để xác thực tài khoản.");
             }
             else
             {
@@ -152,11 +168,16 @@ namespace Infrastructure.Services.Implements
             var result = await _userManager.ConfirmEmailAsync(user, code);
             if (result.Succeeded)
             {
-                return new Response<string>(user.Id.ToString(), message: $"Account Confirmed for {user.Email}.");
+                return new Response<string>(user.Id.ToString(), message: $"Tài khoản đã được xác thực.");
             }
             else
             {
-                throw new ApiException($"An error occured while confirming {user.Email}.");
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Xác thực tài khoản không thành công.",
+                    Errors = result.Errors.Select(x => x.Description).ToList()
+                };
             }
         }
 
@@ -176,15 +197,20 @@ namespace Infrastructure.Services.Implements
         public async Task<Response<string>> ResetPassword(ResetPasswordRequest model)
         {
             var account = await _userManager.FindByEmailAsync(model.Email);
-            if (account == null) throw new ApiException($"No Accounts Registered with {model.Email}.");
+            if (account == null) return new Response<string>($"Không tìm thấy tài khoản với email {model.Email}.");
             var result = await _userManager.ResetPasswordAsync(account, model.Token, model.Password);
             if (result.Succeeded)
             {
-                return new Response<string>(model.Email, message: $"Password Resetted.");
+                return new Response<string>(model.Email, message: $"Đã đặt lại mật khẩu.");
             }
             else
             {
-                throw new ApiException($"Error occured while reseting the password.");
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Đặt lại mật khẩu không thành công.",
+                    Errors = result.Errors.Select(x => x.Description).ToList()
+                };
             }
         }
 
@@ -193,7 +219,7 @@ namespace Infrastructure.Services.Implements
             User user = await _userManager.FindByIdAsync(req.UserId.ToString());
             if (user == null)
             {
-                return new Response<string>("Tài khoản không tồn tại");
+                return new Response<string>("Không tìm thấy tài khoản");
             }
             var result = await _userManager.ChangePasswordAsync(user, req.OldPassword, req.NewPassword);
             if (!result.Succeeded)
@@ -214,14 +240,14 @@ namespace Infrastructure.Services.Implements
                 .FirstOrDefaultAsync(x => x.Token == token);
 
             if (refreshToken == null)
-                return new Response<AuthenticationResponse>("Refresh token không hợp lệ");
+                return new Response<AuthenticationResponse>("Token không hợp lệ");
 
             if (!refreshToken.IsActive)
-                return new Response<AuthenticationResponse>("Refresh token đã hết hạn");
+                return new Response<AuthenticationResponse>("Token đã hết hạn");
 
             var user = await _userManager.FindByIdAsync(refreshToken.UserId.ToString());
             if (user == null)
-                return new Response<AuthenticationResponse>("Không tìm thấy tài khoản");
+                return new Response<AuthenticationResponse>("Không tìm thấy tài khoản.");
 
             // Generate new JWT token
             var jwtToken = await GenerateJWToken(user);
@@ -248,7 +274,7 @@ namespace Infrastructure.Services.Implements
                 RefreshToken = newRefreshToken.Token
             };
 
-            return new Response<AuthenticationResponse>(response, $"Token refreshed for {user.UserName}");
+            return new Response<AuthenticationResponse>(response, $"Token đã được cập nhật.");
         }
 
         public async Task<Response<string>> RevokeTokenAsync(string token, string ipAddress)
@@ -257,39 +283,34 @@ namespace Infrastructure.Services.Implements
                 .FirstOrDefaultAsync(x => x.Token == token);
 
             if (refreshToken == null)
-                return new Response<string>("Refresh token không hợp lệ");
+                return new Response<string>("Token không hợp lệ");
 
             if (!refreshToken.IsActive)
-                return new Response<string>("Refresh token đã bị hủy");
+                return new Response<string>("Token đã bị hủy");
 
             refreshToken.Revoked = DateTime.UtcNow;
             refreshToken.RevokedByIp = ipAddress;
             await _context.SaveChangesAsync();
 
-            return new Response<string>("Hủy refresh token thành công");
+            return new Response<string>("","Hủy token thành công.");
         }
 
         public async Task<Response<string>> UpdateAccountAsync(UserUpdateAccountRequest request)
         {
-            // Lấy current user từ JWT token claims
-            var currentUser = _httpContextAccessor.HttpContext?.User;
-            if (currentUser == null)
+            if (_currentUserId == Guid.Empty)
             {
-                return new Response<string>("Không thể xác định người dùng hiện tại.");
-            }
-
-            // Lấy userId từ claims
-            var userIdClaim = currentUser.FindFirst("uid")?.Value;
-            if (string.IsNullOrEmpty(userIdClaim))
-            {
-                return new Response<string>("Không tìm thấy thông tin người dùng trong token.");
+                return new Response<string>("Không thể xác định người dùng hiện tại. Đăng nhập lại.");
             }
 
             // Tìm user theo userId
-            var user = await _userManager.FindByIdAsync(userIdClaim);
+            var user = await _userManager.FindByIdAsync(_currentUserId.ToString());
             if (user == null)
             {
-                return new Response<string>($"Không tìm thấy tài khoản với ID {userIdClaim}.");
+                return new Response<string>($"Không tìm thấy tài khoản."){
+                    Errors = new List<string>(){
+                        $"Không tìm thấy tài khoản với ID:{_currentUserId}"
+                    }
+                };
             }
             bool isChanged = false;
             if (!string.IsNullOrEmpty(request.Email) && user.Email != request.Email)
@@ -317,7 +338,7 @@ namespace Infrastructure.Services.Implements
                 };
             }
             user.UpdatedDate = DateTime.UtcNow;
-            user.UpdatedBy = Guid.Parse(userIdClaim);
+            user.UpdatedBy = _currentUserId;
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
             {
@@ -334,25 +355,20 @@ namespace Infrastructure.Services.Implements
 
         public async Task<Response<User>> GetUserProfile()
         {
-            // Lấy current user từ JWT token claims
-            var currentUser = _httpContextAccessor.HttpContext?.User;
-            if (currentUser == null)
+            if (_currentUserId == Guid.Empty)
             {
-                return new Response<User>("Không thể xác định người dùng hiện tại.");
+                return new Response<User>("Không thể xác định người dùng hiện tại. Đăng nhập lại.");
             }
-
-            // Lấy userId từ claims
-            var userIdClaim = currentUser.FindFirst("uid")?.Value;
-            if (string.IsNullOrEmpty(userIdClaim))
-            {
-                return new Response<User>("Không tìm thấy thông tin người dùng trong token.");
-            }
-
+            var userIdClaim = _currentUserId.ToString();
             // Tìm user theo userId
             var user = await _userManager.FindByIdAsync(userIdClaim);
             if (user == null)
             {
-                return new Response<User>($"Không tìm thấy tài khoản với ID {userIdClaim}.");
+                return new Response<User>($"Không tìm thấy tài khoản."){
+                    Errors = new List<string>(){
+                        $"Không tìm thấy tài khoản với ID:{_currentUserId}"
+                    }
+                };
             }
 
             return new Response<User>(user, message: "Lấy thông tin tài khoản thành công.");
