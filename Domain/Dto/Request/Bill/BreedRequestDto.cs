@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace Domain.Dto.Request
+
+namespace Domain.Dto.Request.Bill
+
 {
     public class CreateBreedRequestDto
     {

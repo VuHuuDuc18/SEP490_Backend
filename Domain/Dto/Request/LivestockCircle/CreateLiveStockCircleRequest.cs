@@ -15,15 +15,6 @@ namespace Domain.Dto.Request.LivestockCircle
         [Required(ErrorMessage = "Tên chu kỳ chăn nuôi là bắt buộc.")]
         public string LivestockCircleName { get; set; }
 
-        [Required(ErrorMessage = "Trạng thái là bắt buộc.")]
-        public string Status { get; set; }
-
-        [Required(ErrorMessage = "Ngày bắt đầu là bắt buộc.")]
-        public DateTime StartDate { get; set; }
-
-        //[Required(ErrorMessage = "Ngày kết thúc là bắt buộc.")]
-        //public DateTime EndDate { get; set; }
-
         [Required(ErrorMessage = "Tổng số đơn vị giống là bắt buộc.")]
         public int TotalUnit { get; set; }
 

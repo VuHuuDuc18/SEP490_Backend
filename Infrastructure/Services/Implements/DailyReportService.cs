@@ -72,7 +72,7 @@ namespace Domain.Services.Implements
                 return (false, "Vòng chăn nuôi không tồn tại.");
 
             // Tính số ngày tuổi
-            var ageInDays = (DateTime.UtcNow.Date - livestockCircle.StartDate.Date).Days;
+            var ageInDays = (DateTime.UtcNow.Date - ((DateTime)livestockCircle.StartDate).Date).Days;
             if (ageInDays < 0)
                 return (false, "Ngày tạo vòng chăn nuôi không hợp lệ.");
 

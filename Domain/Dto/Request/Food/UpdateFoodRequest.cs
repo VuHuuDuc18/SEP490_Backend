@@ -9,6 +9,7 @@ namespace Domain.Dto.Request.Food
 {
     public class UpdateFoodRequest
     {
+
         [Required(ErrorMessage = "Tên thức ăn là bắt buộc.")]
         public string FoodName { get; set; }
 

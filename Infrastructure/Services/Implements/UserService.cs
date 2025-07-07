@@ -32,7 +32,12 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Domain.Extensions;
+
 using Domain.Dto.Request.User;
+using Domain.Dto.Response.User;
+using Domain.Dto.Response.BarnPlan;
+
 namespace Infrastructure.Services.Implements
 {
     public class UserService : IUserService
@@ -160,6 +165,96 @@ namespace Infrastructure.Services.Implements
                 };
             }
         }
+
+        //    // send mail
+        //    if (await _userrepo.CommitAsync() > 0)
+        //    {
+        //        string Body = Extensions.MailBodyGenerate.BodyCreateAccount(req.Email, userPassword, roleName);
+        //        await _emailservice.SendEmailAsync(req.Email, EmailConstant.EMAILSUBJECTCREATEACCOUNT, Body);
+        //    }
+        //    else
+        //    {
+        //        throw new Exception("Không thể tạo tài khoản");
+        //    }
+        //    return true;
+        //}
+
+
+        //public async Task<PaginationSet<AccountResponse>> GetListAccount(ListingRequest req)
+        //{
+        //    var AccountItems = _userrepo.GetQueryable()
+        //        .Select(it => new AccountResponse()
+        //        {
+        //            Id = it.Id,
+        //            UserName = it.UserName,
+        //            IsActive = it.IsActive,
+        //            RoleName = it.Role.RoleName,
+        //        });
+        //    if (req.Filter != null)
+        //    {
+        //        AccountItems = AccountItems.Filter(req.Filter);
+        //    }
+
+        //    if (req.SearchString != null)
+        //    {
+        //        AccountItems = AccountItems.SearchString(req.SearchString);
+        //    }
+
+
+        //    var result = await AccountItems.Pagination(req.PageIndex, req.PageSize, req.Sort);
+        //    return result;
+        //}
+
+        //public async Task<bool> ResetPassword(Guid id)
+        //{
+        //    var userPassword = Extensions.PasswordGenerate.GenerateRandomCode();
+        //    // update
+        //    var user = await _userrepo.GetById(id);
+        //    user.Password = userPassword;
+        //    //send mail
+        //    if (await _userrepo.CommitAsync() > 0)
+        //    {
+        //        string Body = Extensions.MailBodyGenerate.BodyResetPassword(user.Email, userPassword);
+        //        await _emailservice.SendEmailAsync(user.Email, EmailConstant.EMAILSUBJECTRESETPASSWORD, Body);
+        //    }
+        //    else
+        //    {
+        //        throw new Exception("Không thể đổi mật khẩu");
+        //    }
+        //    return await _userrepo.CommitAsync() > 0;
+
+        //        var validFields = typeof(BillItem).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        //        var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+        //            .Select(f => f.Field).ToList() ?? new List<string>();
+        //        if (invalidFields.Any())
+        //            throw new Exception($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+
+
+
+        //        var query = _userrepo.GetQueryable(x => x.IsActive).Where(it => it.Role == livestockCircleId);
+
+        //        if (request.SearchString?.Any() == true)
+        //            query = query.SearchString(request.SearchString);
+
+        //        if (request.Filter?.Any() == true)
+        //            query = query.Filter(request.Filter);
+
+        //        var result = await query.Select(i => new ViewBarnPlanResponse
+        //        {
+        //            Id = i.Id,
+        //            EndDate = i.EndDate,
+        //            foodPlans = null,
+        //            medicinePlans = null,
+        //            Note = i.Note,
+        //            StartDate = i.StartDate
+        //        }).Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+        //        return (result);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new Exception($"Lỗi khi lấy danh sách: {ex.Message}");
+        //    }}
 
         public async Task<Response<string>> ConfirmEmailAsync(string userId, string code)
         {

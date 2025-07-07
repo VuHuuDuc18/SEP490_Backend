@@ -14,9 +14,7 @@ namespace Domain.Services.Interfaces
         /// <summary>
         /// Tạo một chu kỳ chăn nuôi mới với kiểm tra hợp lệ.
         /// </summary>
-        Task<(bool Success, string ErrorMessage)> CreateLiveStockCircle(
-            CreateLivestockCircleRequest request, 
-            CancellationToken cancellationToken = default);
+        public Task<Guid> CreateLiveStockCircle(CreateLivestockCircleRequest request);
 
         /// <summary>
         /// Cập nhật thông tin một chu kỳ chăn nuôi.
