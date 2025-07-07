@@ -94,15 +94,15 @@ namespace SEP490_BackendAPI.Controllers
             }
         }
 
-        Thiếu HttpPost ở đây nè đi ngủ thôi
-        public async Task<IActionResult> RequestBreed([FromBody] CreateBreedRequestDto request)
-        {
-            var (success, errorMessage) = await _billService.RequestBreed(request);
-            if (!success)
-                return BadRequest(new { error = errorMessage });
-            return Ok(new { message = "Yêu cầu Breed được tạo thành công." });
+        //Thiếu HttpPost ở đây nè đi ngủ thôi
+        //public async Task<IActionResult> RequestBreed([FromBody] CreateBreedRequestDto request)
+        //{
+        //    var (success, errorMessage) = await _billService.RequestBreed(request);
+        //    if (!success)
+        //        return BadRequest(new { error = errorMessage });
+        //    return Ok(new { message = "Yêu cầu Breed được tạo thành công." });
 
-        }
+        //}
 
         //[HttpPost("add/food-item/{billId}")]
         //[ProducesResponseType(StatusCodes.Status201Created)]
