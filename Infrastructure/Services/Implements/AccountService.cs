@@ -14,6 +14,7 @@ using Infrastructure.Identity.Contexts;
 using Infrastructure.Identity.Helpers;
 using Infrastructure.Identity.Models;
 using Infrastructure.Repository;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
@@ -38,13 +39,16 @@ namespace Infrastructure.Services.Implements
         private readonly JWTSettings _jwtSettings;
         private readonly IdentityContext _context;
         private readonly IRepository<User> _userRepository;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly Guid _currentUserId;
         public AccountService(UserManager<User> userManager,
             RoleManager<Role> roleManager,
             IOptions<JWTSettings> jwtSettings,
             SignInManager<User> signInManager,
             IEmailService emailService,
             IdentityContext context,
-            IRepository<User> userRepository
+            IRepository<User> userRepository,
+            IHttpContextAccessor httpContextAccessor
         )
         {
             _userManager = userManager;
@@ -54,6 +58,19 @@ namespace Infrastructure.Services.Implements
             this._emailService = emailService;
             _context = context;
             _userRepository = userRepository;
+            _httpContextAccessor = httpContextAccessor;
+
+            _currentUserId = Guid.Empty;
+            // Lấy current user từ JWT token claims
+            var currentUser = _httpContextAccessor.HttpContext?.User;
+            if (currentUser != null)
+            {
+                var userIdClaim = currentUser.FindFirst("uid")?.Value;
+                if (!string.IsNullOrEmpty(userIdClaim))
+                {
+                    _currentUserId = Guid.Parse(userIdClaim);
+                }
+            }
         }
 
 
@@ -70,16 +87,15 @@ namespace Infrastructure.Services.Implements
         }
         public async Task<Response<string>> CreateAccountAsync(CreateAccountRequest request, string origin)
         {
-            //var userWithSameUserName = await _userManager.FindByNameAsync(request.FullName);
-            //if (userWithSameUserName != null)
-            //{
-            //    return new Response<string>($"Tên đăng nhập '{request.FullName}' đã tồn tại.");
-            //}
+            
             var user = new User
             {
                 UserName = request.Email,
                 Email = request.Email,
-                FullName = request.FullName
+                FullName = request.FullName,
+                IsActive = true,
+                CreatedBy = _currentUserId,
+                CreatedDate = DateTime.UtcNow,
             };
             var userWithSameEmail = await _userManager.FindByEmailAsync(request.Email);
             if (userWithSameEmail == null)
@@ -164,6 +180,8 @@ namespace Infrastructure.Services.Implements
                 return new Response<string>($"Tài khoản đã bị vô hiệu hóa - {email}.");
             }
             user.IsActive = false;
+            user.UpdatedBy = _currentUserId;
+            user.UpdatedDate = DateTime.UtcNow;
             await _userManager.UpdateAsync(user);
             return new Response<string>(email, message: $"Tài khoản đã bị vô hiệu hóa.");
         }
@@ -176,16 +194,20 @@ namespace Infrastructure.Services.Implements
                 return new Response<string>($"Tài khoản đã được kích hoạt - {email}.");
             }
             user.IsActive = true;
+            user.UpdatedBy = _currentUserId;
+            user.UpdatedDate = DateTime.UtcNow;
             await _userManager.UpdateAsync(user);
             return new Response<string>(email, message: $"Tài khoản đã được kích hoạt.");
         }
         public async Task<Response<string>> UpdateAccountAsync(UpdateAccountRequest request)
         {
             var user = await _userManager.FindByIdAsync(request.UserId);
-            if (user == null) return new Response<string>($"Không tìm thấy tài khoản với {request.UserId}.");
+            if (user == null) return new Response<string>($"Không tìm thấy tài khoản với ID:{request.UserId}.");
             if (!string.IsNullOrEmpty(request.Email)) user.Email = request.Email;
             if (!string.IsNullOrEmpty(request.PhoneNumber)) user.PhoneNumber = request.PhoneNumber;
             if (!string.IsNullOrEmpty(request.FullName)) user.FullName = request.FullName;
+            user.UpdatedBy = _currentUserId;
+            user.UpdatedDate = DateTime.UtcNow;
             await _userManager.UpdateAsync(user);
             return new Response<string>(user.Id.ToString(), message: $"Tài khoản đã được cập nhật.");
         }
@@ -209,9 +231,15 @@ namespace Infrastructure.Services.Implements
                     accountItems.Add(new AccountResponse()
                     {
                         Id = user.Id,
+                        Email = user.Email,
                         FullName = user.FullName,
                         IsActive = user.IsActive,
-                        RoleName = role
+                        RoleName = role,
+                        CreatedAt = user.CreatedDate,
+                        CreatedBy = user.CreatedBy,
+                        UpdatedAt = user.UpdatedDate,
+                        UpdatedBy = user.UpdatedBy
+                        
                     });
                 }
 
