@@ -36,8 +36,8 @@ namespace Domain.Dto.Response.Barn
             public Guid Id { get; set; }
             public string LivestockCircleName { get; set; }
             public string Status { get; set; }
-            public DateTime StartDate { get; set; }
-            public DateTime EndDate { get; set; }
+            public DateTime? StartDate { get; set; }
+            public DateTime? EndDate { get; set; }
             public int TotalUnit { get; set; }
             public int DeadUnit { get; set; }
             public float AverageWeight { get; set; }

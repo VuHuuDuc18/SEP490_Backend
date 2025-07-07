@@ -1,9 +1,12 @@
 ﻿using Domain.Dto.Request;
 using Domain.Dto.Request.Bill;
 using Domain.Dto.Request.Bill.Admin;
+using Domain.Dto.Request.Breed;
+using Domain.Dto.Request.LivestockCircle;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Bill;
 using Domain.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
@@ -15,10 +18,11 @@ namespace SEP490_BackendAPI.Controllers
     public class BillController : ControllerBase
     {
         private readonly IBillService _billService;
-
-        public BillController(IBillService billService)
+        private readonly ILivestockCircleService _livestockCircleService;
+        public BillController(IBillService billService, ILivestockCircleService livestockCircleService)
         {
             _billService = billService ?? throw new ArgumentNullException(nameof(billService)); // Kiểm tra null cho billService
+            _livestockCircleService = livestockCircleService;
         }
 
         [HttpPost("request/food")]
@@ -46,12 +50,57 @@ namespace SEP490_BackendAPI.Controllers
         [HttpPost("request/breed")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+
+        [Authorize(Roles = "Company Admin")]
+        public async Task<IActionResult> RequestBreed([FromBody] AdminCreateBreedBillRequest request)
+
+        {
+            try
+            {
+                var createLivestockCircleRequest = new CreateLivestockCircleRequest()
+                {
+                    BarnId = request.BarnId,
+                    BreedId = request.BreedId,
+                    LivestockCircleName = request.LivestockCircleName,
+                    TechicalStaffId = request.TechnicalStaffId,
+                    TotalUnit = request.Stock
+                };
+                var livestockCircleId = await _livestockCircleService.CreateLiveStockCircle(createLivestockCircleRequest);
+
+                var BillBreedToRequest = new CreateBreedRequestDto()
+                {
+                    LivestockCircleId = livestockCircleId,
+                    Note = request.Note,
+                    UserRequestId = Guid.Parse(User.FindFirst("uid")?.Value),
+                    BreedItems = new List<BreedItemRequest>()
+                    {
+                        new BreedItemRequest()
+                        {
+                            ItemId = request.BreedId,
+                            Quantity = request.Stock
+                        }
+                    }
+                };
+
+                var result = await _billService.RequestBreed(BillBreedToRequest);
+                if (!result.Success)
+                    return BadRequest(new { error = result.ErrorMessage });
+                return Ok(new { message = "Yêu cầu Breed được tạo thành công." });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+
         public async Task<IActionResult> RequestBreed([FromBody] CreateBreedRequestDto request)
         {
             var (success, errorMessage) = await _billService.RequestBreed(request);
             if (!success)
                 return BadRequest(new { error = errorMessage });
             return Ok(new { message = "Yêu cầu Breed được tạo thành công." });
+
         }
 
         //[HttpPost("add/food-item/{billId}")]
@@ -200,7 +249,7 @@ namespace SEP490_BackendAPI.Controllers
             return Ok(bill);
         }
         [HttpPost("admin/updateBill")]
-        public async Task<IActionResult> UpdateBill([FromRoute]Admin_UpdateBarnRequest request)
+        public async Task<IActionResult> UpdateBill([FromBody] Admin_UpdateBarnRequest request)
         {
             var result = _billService.AdminUpdateBill(request);
             return Ok(result);
@@ -222,6 +271,8 @@ namespace SEP490_BackendAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetRequestFood([FromBody] ListingRequest request)
         {
+
+   
             var (result, errorMessage) = await _billService.GetBillRequestByType(request, "Food" );
             if (errorMessage != null)
                 return BadRequest(new { error = errorMessage });

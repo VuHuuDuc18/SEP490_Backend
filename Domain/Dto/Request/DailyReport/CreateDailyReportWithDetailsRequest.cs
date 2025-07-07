@@ -25,8 +25,17 @@ namespace Domain.Dto.Request.DailyReport
         public int BadUnit { get; set; }
         //public int AgeInDays { get; set; }
         public string Note { get; set; }
-        public List<string> ImageLinks { get; set; } = new List<string>();
-        public string Thumbnail { get; set; }
+
+        /// <summary>
+        /// Danh sách liên kết ảnh (upload lên Cloudinary).
+        /// </summary>
+        public List<string>? ImageLinks { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Liên kết ảnh thumbnail (upload lên Cloudinary).
+        /// </summary>
+        public string? Thumbnail { get; set; }
+
         public List<CreateFoodReportRequest> FoodReports { get; set; }
         public List<CreateMedicineReportRequest> MedicineReports { get; set; }
 

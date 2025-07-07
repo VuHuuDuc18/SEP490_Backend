@@ -1110,11 +1110,16 @@ namespace Infrastructure.Services.Implements
         {
             try
             {
-                var BillToUpdate = await _billRepository.GetQueryable(x => x.IsActive).FirstOrDefaultAsync(it => it.LivestockCircleId == request.LivestockCicleId);
+                var BillToUpdate = await _billRepository.GetById(request.BillId);
                 if (BillToUpdate == null || !BillToUpdate.Status.Equals(StatusConstant.REQUESTED))
                 {
                     return false;
                 }
+                if ( !(await ValidBreedStock(request.BreedId, request.Stock)))
+                {
+                    throw new Exception("Giống không khả dụng hoặc giống không đủ số lượng");
+                }
+
                 var UpdatedBreed = await _billItemRepository.GetQueryable(x => x.IsActive).FirstOrDefaultAsync(it => it.BillId == BillToUpdate.Id);
                 UpdatedBreed.BreedId = request.BreedId;
                 UpdatedBreed.Stock = request.Stock;
@@ -1123,7 +1128,7 @@ namespace Infrastructure.Services.Implements
                 await _billItemRepository.CommitAsync();
 
                 // cap nhat livestockCircle
-                var UpdatedLivestockCircle = await _livestockCircleRepository.GetById(request.LivestockCicleId);
+                var UpdatedLivestockCircle = await _livestockCircleRepository.GetById(BillToUpdate.LivestockCircleId);
                 UpdatedLivestockCircle.BreedId = request.BreedId;
 
                 _livestockCircleRepository.Update(UpdatedLivestockCircle);
@@ -1156,7 +1161,7 @@ namespace Infrastructure.Services.Implements
             if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
                 return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
 
-          
+
             var newItemsDict = request.FoodItems.ToDictionary(x => x.ItemId, x => x.Quantity);
 
             try
@@ -1169,6 +1174,7 @@ namespace Infrastructure.Services.Implements
                 {
                     if (!currentItems.ContainsKey(newItem.ItemId))
                     {
+
                         var food = new Food();
                         var (isValid, errorMessage) = await ValidateItem(newItem.ItemId, newItem.Quantity, true, false, false, cancellationToken);
                         if (isValid)
@@ -1180,6 +1186,7 @@ namespace Infrastructure.Services.Implements
                             return (false, errorMessage);
                         }
 
+
                         var billItem = new BillItem
                         {
                             BillId = bill.Id,
@@ -1190,7 +1197,9 @@ namespace Infrastructure.Services.Implements
                         };
                         _billItemRepository.Insert(billItem);
                         bill.Total += newItem.Quantity;
+
                         bill.Weight += food.WeighPerUnit * newItem.Quantity;
+
                     }
                 }
 
@@ -1201,6 +1210,7 @@ namespace Infrastructure.Services.Implements
                     {
                         if (newQuantity != currentItem.Stock)
                         {
+
                             var food = new Food();
                             var (isValid, errorMessage) = await ValidateItem(currentItem.FoodId.Value, newQuantity, true, false, false, cancellationToken);
                             if (isValid)
@@ -1217,14 +1227,17 @@ namespace Infrastructure.Services.Implements
                             currentItem.Stock = newQuantity;
                             bill.Total += newQuantity;
                             bill.Weight += food.WeighPerUnit * newQuantity;
+
                             _billItemRepository.Update(currentItem);
                         }
                     }
                     else if (newItemsDict.All(x => x.Key != currentItem.FoodId.Value))
                     {
+
                         var food = await _foodRepository.GetById(currentItem.FoodId.Value);
                         bill.Total -= currentItem.Stock;
                         bill.Weight -= food.WeighPerUnit * currentItem.Stock;
+
                         currentItem.IsActive = false;
                         _billItemRepository.Update(currentItem);
                     }
@@ -1326,6 +1339,13 @@ namespace Infrastructure.Services.Implements
         {
             if (request == null) return (false, "Dữ liệu yêu cầu là bắt buộc.");
             if (!request.BreedItems.Any()) return (false, "Phải cung cấp danh sách mặt hàng giống.");
+            foreach(var it in request.BreedItems)
+            {
+                if (!(await ValidBreedStock(it.ItemId, it.Quantity)))
+                {
+                    throw new Exception("Giống không khả dụng hoặc không đủ số lượng");
+                }
+            }
 
             var checkError = new Ref<CheckError>();
             var bill = await _billRepository.GetById(billId, checkError);
@@ -1403,5 +1423,22 @@ namespace Infrastructure.Services.Implements
                 return (false, $"Lỗi khi cập nhật hóa đơn với mặt hàng giống: {ex.Message}");
             }
         }
+
+
+        // Common func
+        protected async Task<bool> ValidBreedStock(Guid breedId, int stock)
+        {
+            var BreedToValid = await _breedRepository.GetById(breedId);
+            if (BreedToValid == null)
+            {
+                return false;
+            }
+            if (BreedToValid.Stock < stock)
+            {
+                return false;
+            }
+            return true;
+        }
+
     }
 }

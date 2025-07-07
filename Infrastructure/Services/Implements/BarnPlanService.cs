@@ -88,9 +88,7 @@ namespace Infrastructure.Services.Implements
                 if (request.Filter?.Any() == true)
                     query = query.Filter(request.Filter);
 
-                var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
-
-                var responses = paginationResult.Items.Select(i => new ViewBarnPlanResponse
+                var result = await query.Select(i => new ViewBarnPlanResponse
                 {
                     Id = i.Id,
                     EndDate = i.EndDate,
@@ -98,16 +96,7 @@ namespace Infrastructure.Services.Implements
                     medicinePlans = null,
                     Note = i.Note,
                     StartDate = i.StartDate
-                }).ToList();
-
-                var result = new PaginationSet<ViewBarnPlanResponse>
-                {
-                    PageIndex = paginationResult.PageIndex,
-                    Count = responses.Count,
-                    TotalCount = paginationResult.TotalCount,
-                    TotalPages = paginationResult.TotalPages,
-                    Items = responses
-                };
+                }).Pagination(request.PageIndex, request.PageSize, request.Sort);               
 
                 return (result);
             }
