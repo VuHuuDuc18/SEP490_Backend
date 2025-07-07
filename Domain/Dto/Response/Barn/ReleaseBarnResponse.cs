@@ -15,11 +15,13 @@ namespace Domain.Dto.Response.Barn
         public string BarnImage { get; set; }
 
         public int TotalUnit { get; set; }
+        public int Age { get; set; }
         public int DeadUnit { get; set; }
         public int GoodUnitNumber { get; set; }
         public int BadUnitNumber { get; set; }
         public float AverageWeight { get; set; }
         public string BreedCategory{ get; set; }
         public string Breed{ get; set; }
+        public DateTime StartDate { get; set; }
     }
 }
