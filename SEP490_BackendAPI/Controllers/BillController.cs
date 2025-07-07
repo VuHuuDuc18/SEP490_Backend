@@ -8,6 +8,7 @@ using Domain.Dto.Response.Bill;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OfficeOpenXml.FormulaParsing.FormulaExpressions.CompileResults;
 using System;
 using System.Threading.Tasks;
 
@@ -93,7 +94,7 @@ namespace SEP490_BackendAPI.Controllers
             }
         }
 
-
+        Thiếu HttpPost ở đây nè đi ngủ thôi
         public async Task<IActionResult> RequestBreed([FromBody] CreateBreedRequestDto request)
         {
             var (success, errorMessage) = await _billService.RequestBreed(request);
@@ -251,7 +252,7 @@ namespace SEP490_BackendAPI.Controllers
         [HttpPost("admin/updateBill")]
         public async Task<IActionResult> UpdateBill([FromBody] Admin_UpdateBarnRequest request)
         {
-            var result = _billService.AdminUpdateBill(request);
+            var result = await _billService.AdminUpdateBill(request);
             return Ok(result);
         }
 
