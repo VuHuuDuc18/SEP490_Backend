@@ -7,6 +7,8 @@ using Application.Interfaces;
 using Domain.Dto.Request;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Domain.Dto.Request.User;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace WebApi.Controllers
 {
@@ -19,13 +21,8 @@ namespace WebApi.Controllers
         {
             _accountService = accountService;
         }
-        [HttpPost("login")]
-        public async Task<IActionResult> LoginAsync(AuthenticationRequest request)
-        {
-            return Ok(await _accountService.LoginAsync(request, GenerateIPAddress()));
-        }
         [HttpPost("create-account")]
-        public async Task<IActionResult> CreateAccountAsync(CreateNewAccountRequest request)
+        public async Task<IActionResult> CreateAccountAsync(CreateAccountRequest request)
         {
             var origin = Request.Headers["origin"].ToString();
             if (string.IsNullOrEmpty(origin))
@@ -34,54 +31,50 @@ namespace WebApi.Controllers
             }
             return Ok(await _accountService.CreateAccountAsync(request, origin));
         }
-        [HttpGet("confirm-email")]
-        public async Task<IActionResult> ConfirmEmailAsync([FromQuery]string userId, [FromQuery]string code)
-        {
-            var origin = Request.Headers["origin"].ToString();
-            if (string.IsNullOrEmpty(origin))
-            {
-                origin = Request.Headers["Referer"].ToString() ?? "https://localhost:7074";
-            }
-            return Ok(await _accountService.ConfirmEmailAsync(userId, code));
-        }
-        [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest model)
-        {
-            var origin = Request.Headers["origin"].ToString();
-            if (string.IsNullOrEmpty(origin))
-            {
-                origin = Request.Headers["Referer"].ToString() ?? "https://localhost:7074";
-            }
-            await _accountService.ForgotPassword(model, origin);
-            return Ok();
-        }
-        [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword(ResetPasswordRequest model)
-        {
+       
+        //[HttpPost("reset-password")]
+        //public async Task<IActionResult> ResetPassword(ResetPasswordRequest model)
+        //{
             
-            return Ok(await _accountService.ResetPassword(model));
-        }
-        [HttpPost("refresh-token")]
-        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+        //    return Ok(await _accountService.ResetPassword(model));
+        //}
+        
+        //[HttpDelete("delete-account")]
+        //public async Task<IActionResult> DeleteAccount([FromBody]DeleteAccountRequest request)
+        //{
+        //    return Ok(await _accountService.DeleteAccount(request.Email));
+        //}
+        [HttpPost("disable-account")]
+        public async Task<IActionResult> DisableAccount([FromBody]string email)
         {
-            return Ok(await _accountService.RefreshTokenAsync(request.Token, GenerateIPAddress()));
+            return Ok(await _accountService.DisableAccountAsync(email));
         }
-        [HttpPost("revoke-token")]
-        public async Task<IActionResult> RevokeToken([FromBody] RefreshTokenRequest request)
+        [HttpPost("enable-account")]
+        public async Task<IActionResult> EnableAccount([FromBody]string email)
         {
-            return Ok(await _accountService.RevokeTokenAsync(request.Token, GenerateIPAddress()));
+            return Ok(await _accountService.EnableAccountAsync(email));
         }
-        private string GenerateIPAddress()
+        [HttpGet("get-all-accounts")]
+        public async Task<IActionResult> GetAllAccounts()
         {
-            if (Request.Headers.ContainsKey("X-Forwarded-For"))
-                return Request.Headers["X-Forwarded-For"];
-            else
-                return HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+            return Ok(await _accountService.GetAllAccountsAsync());
         }
-        [HttpDelete("delete-account")]
-        public async Task<IActionResult> DeleteAccount([FromBody]DeleteAccountRequest request)
+        [HttpPut("update-account")]
+        public async Task<IActionResult> UpdateAccount([FromBody]UpdateAccountRequest request)
         {
-            return Ok(await _accountService.DeleteAccount(request.Email));
+            return Ok(await _accountService.UpdateAccountAsync(request));
+        }
+        [HttpGet("get-account-by-email")]
+        public async Task<IActionResult> GetAccountByEmail([FromQuery]string email)
+        {
+            return Ok(await _accountService.GetAccountByEmailAsync(email));
+        }
+
+        [HttpPost("get-list-account")]
+        public async Task<IActionResult> GetListAccountAsync(ListingRequest req)
+        {
+            var result = await _accountService.GetListAccount(req);
+            return Ok(result);
         }
     }
 }

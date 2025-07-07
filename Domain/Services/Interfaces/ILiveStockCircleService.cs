@@ -84,5 +84,8 @@ namespace Domain.Services.Interfaces
         // danh sach lich su chan nuoi cua 1 chuong
         public Task<PaginationSet<LiveStockCircleHistoryItem>> GetLivestockCircleHistory(Guid barnId,ListingRequest req);
 
+        public Task<PaginationSet<ReleasedLivetockItem>> GetReleasedLivestockCircleList(ListingRequest req);
+        public Task<ReleasedLivetockDetail> GetReleasedLivestockCircleById(Guid livestockCircleId);
+
     }
 }

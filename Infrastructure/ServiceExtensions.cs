@@ -1,4 +1,5 @@
 
+using Application.Interfaces;
 using Domain.Services.Implements;
 using Domain.Services.Interfaces;
 using Domain.Settings;
@@ -39,6 +40,7 @@ namespace Infrastructure
             services.AddScoped<IDailyReportService, DailyReportService>();
             services.AddScoped<IBillService, BillService>();
             services.AddScoped<CloudinaryCloudService>();
+            services.AddScoped<IAccountService, AccountService>();
 
             //Add repo
             services.AddScoped<IRepository<BarnPlan>, Repository<BarnPlan>>();

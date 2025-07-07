@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # SQL Server Database
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: lcfm_sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=MyStrongPassword123!
+      - MSSQL_PID=Express
+    ports:
+      - "1434:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - lcfm_network
+    restart: unless-stopped
+
+  # .NET API from Docker Hub
+  api:
+    image: nhtxd/sep490_backend-api:latest
+    container_name: lcfm_api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Data Source=lcfm_sqlserver;Initial Catalog=LCFMSystem;User Id=sa;Password=MyStrongPassword123!;TrustServerCertificate=true;Connect Timeout=60;Command Timeout=300;
+    ports:
+      - "8080:80"
+    depends_on:
+      - sqlserver
+    networks:
+      - lcfm_network
+    restart: unless-stopped
+
+volumes:
+  sqlserver_data:
+
+networks:
+  lcfm_network:
+    driver: bridge

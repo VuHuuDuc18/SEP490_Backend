@@ -8,6 +8,7 @@ using Domain.Dto.Response.Barn;
 using Domain.Dto.Request;
 using Domain.Dto.Response.Medicine;
 using Domain.Dto.Response;
+using Application.Wrappers;
 namespace Domain.Services.Interfaces
 {
     public interface IBarnService
@@ -44,13 +45,23 @@ namespace Domain.Services.Interfaces
             ListingRequest request,
             CancellationToken cancellationToken = default);
 
-        // Lấy danh sách chuồng trại cho admin với thông tin có LivestockCircle đang hoạt động hay không
+        /// <summary>
+        /// Lấy danh sách chuồng trại cho admin với thông tin có LivestockCircle đang hoạt động hay không
+        /// </summary>
         Task<(PaginationSet<AdminBarnResponse> Result, string ErrorMessage)> GetPaginatedAdminBarnListAsync(
             ListingRequest request, CancellationToken cancellationToken = default);
-
-        // Lấy chi tiết chuồng trại cho admin, bao gồm thông tin LivestockCircle đang hoạt động (nếu có)
+        /// <summary>
+        /// Lấy chi tiết chuồng trại cho admin, bao gồm thông tin LivestockCircle đang hoạt động (nếu có)
+        /// </summary>
         Task<(AdminBarnDetailResponse Barn, string ErrorMessage)> GetAdminBarnDetailAsync(
             Guid barnId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Lấy danh sách phân trang tìm kiếm lọc các barn có lứa nuôi với trạng thái là RELEASE.
+        /// </summary>
+        Task<Response<PaginationSet<ReleaseBarnResponse>>> GetPaginatedReleaseBarnList(
+            ListingRequest request,
+            CancellationToken cancellationToken = default);
 
     }
 }

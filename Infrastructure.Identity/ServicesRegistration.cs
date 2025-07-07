@@ -3,7 +3,6 @@ using Application.Wrappers;
 using Domain.Settings;
 using Entities.EntityModel;
 using Infrastructure.Identity.Contexts;
-using Infrastructure.Identity.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -37,7 +36,6 @@ namespace Infrastructure.Identity
                 .AddEntityFrameworkStores<IdentityContext>()
                 .AddDefaultTokenProviders();
             #region Services
-            services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IdentityContext>();
             #endregion
             services.Configure<JWTSettings>(configuration.GetSection("appJwt"));

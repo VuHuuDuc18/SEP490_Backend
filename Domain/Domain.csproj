@@ -9,11 +9,9 @@
 
   <ItemGroup>
     <Folder Include="Extensions\" />
-<<<<<<< Updated upstream
     <Folder Include="Helper\Constants\" />
     <Folder Include="Services\" />
-=======
->>>>>>> Stashed changes
+
 </ItemGroup>
 
 <ItemGroup>
@@ -25,9 +23,5 @@
 <ItemGroup>
   <ProjectReference Include="..\Entities\Entities.csproj" />
 </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Dto\Request\Food\" />
-  </ItemGroup>
 
 </Project>

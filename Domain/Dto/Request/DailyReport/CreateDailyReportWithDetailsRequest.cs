@@ -16,16 +16,15 @@ namespace Domain.Dto.Request.DailyReport
         [Range(0, int.MaxValue, ErrorMessage = "Số lượng chết phải là số không âm.")]
         public int DeadUnit { get; set; }
 
-        [Required(ErrorMessage = "Số lượng tốt là bắt buộc.")]
-        [Range(0, int.MaxValue, ErrorMessage = "Số lượng tốt phải là số không âm.")]
-        public int GoodUnit { get; set; }
+        //[Required(ErrorMessage = "Số lượng tốt là bắt buộc.")]
+        //[Range(0, int.MaxValue, ErrorMessage = "Số lượng tốt phải là số không âm.")]
+        //public int GoodUnit { get; set; }
 
         [Required(ErrorMessage = "Số lượng xấu là bắt buộc.")]
         [Range(0, int.MaxValue, ErrorMessage = "Số lượng xấu phải là số không âm.")]
         public int BadUnit { get; set; }
-        public int AgeInDays { get; set; }
+        //public int AgeInDays { get; set; }
         public string Note { get; set; }
-
 
         /// <summary>
         /// Danh sách liên kết ảnh (upload lên Cloudinary).
@@ -36,6 +35,7 @@ namespace Domain.Dto.Request.DailyReport
         /// Liên kết ảnh thumbnail (upload lên Cloudinary).
         /// </summary>
         public string? Thumbnail { get; set; }
+
         public List<CreateFoodReportRequest> FoodReports { get; set; }
         public List<CreateMedicineReportRequest> MedicineReports { get; set; }
 

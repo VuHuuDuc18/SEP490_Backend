@@ -13,8 +13,21 @@ namespace Domain.Dto.Request.Account
         [EmailAddress]
         public string Email { get; set; }
         [Required]
-        public string UserName { get; set; }
+        public string FullName { get; set; }
+
         [Required]
-        public Guid RoleId { get; set; }
+        [Phone]
+        public string PhoneNumber { get; set; }
+
+        [Required]
+        [MinLength(6)]
+        public string Password { get; set; }
+
+        [Required]
+        [Compare("Password")]
+        public string ConfirmPassword { get; set; }
+
+        [Required]
+        public string RoleName { get; set; }
     }
 }
