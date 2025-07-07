@@ -10,9 +10,9 @@ namespace Domain.Dto.Request.Bill.Admin
     public class Admin_UpdateBarnRequest
     {
         [Required]
-        public Guid LivestockCicleId { get; set; }
-        [Required]
-        public Guid BarnId { get; set; }
+        public Guid BillId { get; set; }
+        //[Required]
+       // public Guid BarnId { get; set; }
         [Required]
         public Guid BreedId { get; set; }
         [Required]

@@ -9,8 +9,11 @@
 
   <ItemGroup>
     <Folder Include="Extensions\" />
+<<<<<<< Updated upstream
     <Folder Include="Helper\Constants\" />
     <Folder Include="Services\" />
+=======
+>>>>>>> Stashed changes
 </ItemGroup>
 
 <ItemGroup>

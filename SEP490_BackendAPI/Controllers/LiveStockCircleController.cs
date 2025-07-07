@@ -26,15 +26,15 @@ namespace SEP490_BackendAPI.Controllers
         /// <summary>
         /// Tạo một chu kỳ chăn nuôi mới.
         /// </summary>
-        [HttpPost("create")]
-        public async Task<IActionResult> Create([FromBody] CreateLivestockCircleRequest request, CancellationToken cancellationToken = default)
-        {
-            var (success, errorMessage) = await _livestockCircleService.CreateLiveStockCircle(request, cancellationToken);
-            if (!success)
-                return BadRequest(new { error = errorMessage });
+        //[HttpPost("create")]
+        //public async Task<IActionResult> Create([FromBody] CreateLivestockCircleRequest request, CancellationToken cancellationToken = default)
+        //{
+        //    var (success, errorMessage) = await _livestockCircleService.CreateLiveStockCircle(request, cancellationToken);
+        //    if (!success)
+        //        return BadRequest(new { error = errorMessage });
 
-            return StatusCode(StatusCodes.Status201Created);
-        }
+        //    return StatusCode(StatusCodes.Status201Created);
+        //}
 
         /// <summary>
         /// Cập nhật thông tin một chu kỳ chăn nuôi.

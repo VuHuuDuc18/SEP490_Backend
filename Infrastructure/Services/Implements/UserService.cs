@@ -15,8 +15,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Domain.Extensions;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+<<<<<<< Updated upstream
 using Domain.Extensions;
 
+=======
+using Domain.Dto.Request.User;
+using Domain.Dto.Response.User;
+using Domain.Dto.Response.BarnPlan;
+>>>>>>> Stashed changes
 namespace Infrastructure.Services.Implements
 {
     public class UserService : IUserService
@@ -63,7 +69,16 @@ namespace Infrastructure.Services.Implements
         //        UserName = req.UserName
         //    });
 
+        //public Task<PaginationSet<UserItemResponse>> GetUserListByRole(string RoleName, ListingRequest request)
+        //{
+        //    try
+        //    {
+        //        if (request == null)
+        //            throw new Exception("Yêu cầu không được null.");
+        //        if (request.PageIndex < 1 || request.PageSize < 1)
+        //            throw new Exception("PageIndex và PageSize phải lớn hơn 0.");
 
+<<<<<<< Updated upstream
         //    // send mail
         //    if (await _userrepo.CommitAsync() > 0)
         //    {
@@ -120,6 +135,40 @@ namespace Infrastructure.Services.Implements
         //        throw new Exception("Không thể đổi mật khẩu");
         //    }
         //    return await _userrepo.CommitAsync() > 0;
+=======
+        //        var validFields = typeof(BillItem).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        //        var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+        //            .Select(f => f.Field).ToList() ?? new List<string>();
+        //        if (invalidFields.Any())
+        //            throw new Exception($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+
+
+
+        //        var query = _userrepo.GetQueryable(x => x.IsActive).Where(it => it.Role == livestockCircleId);
+
+        //        if (request.SearchString?.Any() == true)
+        //            query = query.SearchString(request.SearchString);
+
+        //        if (request.Filter?.Any() == true)
+        //            query = query.Filter(request.Filter);
+
+        //        var result = await query.Select(i => new ViewBarnPlanResponse
+        //        {
+        //            Id = i.Id,
+        //            EndDate = i.EndDate,
+        //            foodPlans = null,
+        //            medicinePlans = null,
+        //            Note = i.Note,
+        //            StartDate = i.StartDate
+        //        }).Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+        //        return (result);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new Exception($"Lỗi khi lấy danh sách: {ex.Message}");
+        //    }
+>>>>>>> Stashed changes
         //}
     }
 }
