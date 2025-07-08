@@ -15,7 +15,6 @@ using Org.BouncyCastle.Asn1.X509;
 using Domain.Dto.Response.DailyReport;
 using Domain.Dto.Request;
 using Domain.Dto.Response;
-using Domain.Extensions;
 using Infrastructure.Extensions;
 using Infrastructure.Services;
 using Domain.Helper.Constants;

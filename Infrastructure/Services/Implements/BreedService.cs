@@ -14,7 +14,6 @@ using Domain.Dto.Request.Breed;
 using Domain.Dto.Response.Breed;
 using Domain.Dto.Response;
 using Domain.Dto.Request;
-using Domain.Extensions;
 using Infrastructure.Extensions;
 
 namespace Infrastructure.Services.Implements

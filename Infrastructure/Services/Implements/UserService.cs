@@ -4,7 +4,7 @@ using Domain.Dto.Request;
 using Domain.Dto.Request.Account;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Account;
-using Domain.Extensions;
+using Infrastructure.Extensions;
 using Domain.Helper.Constants;
 using Domain.Settings;
 using Entities.EntityModel;
@@ -30,7 +30,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using Domain.Extensions;
 
 using Domain.Dto.Request.User;
 using Domain.Dto.Response.User;

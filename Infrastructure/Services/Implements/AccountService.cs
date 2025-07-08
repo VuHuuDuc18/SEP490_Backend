@@ -5,13 +5,12 @@ using Domain.Dto.Request.Account;
 using Domain.Dto.Request.User;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Account;
-using Domain.Extensions;
 using Domain.Helper.Constants;
 using Domain.IServices;
 using Domain.Settings;
 using Entities.EntityModel;
 using Infrastructure.Identity.Contexts;
-using Infrastructure.Identity.Helpers;
+using Infrastructure.Extensions;
 using Infrastructure.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -339,7 +338,7 @@ namespace Infrastructure.Services.Implements
             var verificationUri = QueryHelpers.AddQueryString(_enpointUri.ToString(), "userId", user.Id.ToString());
             verificationUri = QueryHelpers.AddQueryString(verificationUri, "code", code);
             //Email Service Call Here
-            _emailService.SendEmailAsync(user.Email, EmailConstant.EMAILSUBJECTCONFIRMEMAIL, MailBodyGenerate.BodyCreateConfirmEmail(user.Email, verificationUri));
+            await _emailService.SendEmailAsync(user.Email, EmailConstant.EMAILSUBJECTCONFIRMEMAIL, MailBodyGenerate.BodyCreateConfirmEmail(user.Email, verificationUri));
             return verificationUri;
         }
     }

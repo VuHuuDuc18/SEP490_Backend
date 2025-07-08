@@ -3,7 +3,7 @@ using Domain.Dto.Request.BarnPlan;
 using Domain.Dto.Response;
 using Domain.Dto.Response.BarnPlan;
 using Domain.Dto.Response.Bill;
-using Domain.Extensions;
+using Infrastructure.Extensions;
 using Domain.IServices;
 using Entities.EntityModel;
 using Infrastructure.Core;

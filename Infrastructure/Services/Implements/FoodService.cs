@@ -14,7 +14,6 @@ using Domain.Dto.Request.Food;
 using Domain.Dto.Response.Food;
 using Domain.Dto.Response;
 using Domain.Dto.Request;
-using Domain.Extensions;
 using Infrastructure.Extensions;
 using Domain.Dto.Response.Breed;
 

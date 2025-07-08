@@ -15,7 +15,6 @@ using Domain.Dto.Response.Medicine;
 using Domain.Dto.Response;
 using Domain.Dto.Request;
 using Domain.Dto.Response.Food;
-using Domain.Extensions;
 using Infrastructure.Extensions;
 
 namespace Infrastructure.Services.Implements

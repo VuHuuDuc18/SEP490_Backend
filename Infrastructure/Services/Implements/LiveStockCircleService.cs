@@ -13,7 +13,7 @@ using Domain.Dto.Request.LivestockCircle;
 using Domain.Dto.Response.LivestockCircle;
 using Domain.Dto.Request;
 using Domain.Dto.Response;
-using Domain.Extensions;
+using Infrastructure.Extensions;
 using Domain.Helper.Constants;
 using Domain.Dto.Response.Barn;
 using Domain.IServices;
