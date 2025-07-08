@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Domain.Dto.Request;
 
-namespace Domain.Extensions
+namespace Infrastructure.Extensions
 {
     public static class SearchStringExtension
     {

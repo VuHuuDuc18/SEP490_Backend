@@ -10,8 +10,6 @@
   <ItemGroup>
 
     <Folder Include="Core\" />
-
-    <Folder Include="Migrations\" />
     <Folder Include="Repository\" />
   </ItemGroup>
 
@@ -38,6 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ExcelControl\ExcelControl.csproj" />
     <ProjectReference Include="..\Infrastructure.Identity\Infrastructure.Identity.csproj" />
   </ItemGroup>
 

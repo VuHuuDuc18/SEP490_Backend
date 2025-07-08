@@ -5,7 +5,7 @@ using Domain.Dto.Response;
 using Domain.Dto.Response.Barn;
 using Domain.Dto.Response.Bill;
 using Domain.Dto.Response.Food;
-using Domain.Extensions;
+using Infrastructure.Extensions;
 using Domain.Helper.Constants;
 using Domain.IServices;
 using Entities.EntityModel;

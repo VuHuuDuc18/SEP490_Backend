@@ -8,8 +8,8 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Extensions
-{
+namespace Infrastructure.Extensions
+{ 
     public static class PagingExtension
     {
         public static async Task<PaginationSet<T>> Pagination<T>(this IQueryable<T> sourse, int pageIndex, int pageSize, SearchObjectForCondition sortExpressions)

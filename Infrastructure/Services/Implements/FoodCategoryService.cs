@@ -11,7 +11,7 @@ using System.ComponentModel.DataAnnotations;
 using Domain.Dto.Request;
 using Domain.Dto.Response;
 using Microsoft.EntityFrameworkCore;
-using Domain.Extensions;
+using Infrastructure.Extensions;
 using Domain.Dto.Response.Food;
 using Domain.Dto.Response.Medicine;
 using Domain.Dto.Request.Category;
