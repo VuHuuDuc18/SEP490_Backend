@@ -6,12 +6,10 @@ using Domain.Dto.Response;
 using Domain.Dto.Response.Account;
 using Domain.Extensions;
 using Domain.Helper.Constants;
-using Domain.Services.Interfaces;
 using Domain.Settings;
 using Entities.EntityModel;
 using Infrastructure.Identity.Contexts;
 using Infrastructure.Identity.Helpers;
-using Infrastructure.Identity.Models;
 using Infrastructure.Repository;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
@@ -37,6 +35,7 @@ using Domain.Extensions;
 using Domain.Dto.Request.User;
 using Domain.Dto.Response.User;
 using Domain.Dto.Response.BarnPlan;
+using Domain.IServices;
 
 namespace Infrastructure.Services.Implements
 {

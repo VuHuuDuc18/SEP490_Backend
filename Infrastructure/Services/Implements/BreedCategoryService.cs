@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
-using Domain.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Domain.Dto.Request;
 using Domain.Dto.Response;
@@ -16,6 +15,7 @@ using Domain.Dto.Response.Breed;
 using Domain.Dto.Response.Food;
 using Domain.Dto.Response.Category;
 using Domain.Dto.Request.Category;
+using Domain.IServices;
 
 
 namespace Infrastructure.Services.Implements

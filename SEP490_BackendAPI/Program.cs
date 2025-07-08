@@ -9,7 +9,7 @@ using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.Resource;
 using SEP490_BackendAPI.Extensions;
 using Microsoft.EntityFrameworkCore.Design;
-using Domain.Services;
+using Domain.IServices;
 using Infrastructure.DBContext;
 using Infrastructure.Repository;
 using Domain.Settings;

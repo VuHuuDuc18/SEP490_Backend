@@ -1,5 +1,4 @@
-﻿using Domain.Services.Interfaces;
-using Entities.EntityModel;
+﻿using Entities.EntityModel;
 using Infrastructure.Core;
 using Infrastructure.Repository;
 using System;
@@ -21,7 +20,7 @@ using Infrastructure.Extensions;
 using Infrastructure.Services;
 using Domain.Helper.Constants;
 
-namespace Domain.Services.Implements
+namespace Domain.IServices.Implements
 {
     public class DailyReportService : IDailyReportService
     {

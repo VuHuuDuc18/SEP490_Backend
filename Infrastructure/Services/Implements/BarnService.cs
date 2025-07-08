@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
-using Domain.Services.Interfaces;
 using Infrastructure.Core;
 using Infrastructure.Repository;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +22,7 @@ using Domain.Helper;
 using Microsoft.IdentityModel.Tokens;
 using Domain.Dto.Response.Breed;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Domain.IServices;
 
 
 namespace Infrastructure.Services.Implements

@@ -8,7 +8,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
-using Domain.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Domain.Dto.Request.LivestockCircle;
 using Domain.Dto.Response.LivestockCircle;
@@ -17,6 +16,7 @@ using Domain.Dto.Response;
 using Domain.Extensions;
 using Domain.Helper.Constants;
 using Domain.Dto.Response.Barn;
+using Domain.IServices;
 
 namespace Infrastructure.Services.Implements
 {

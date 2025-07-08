@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Services.Interfaces
+namespace Domain.IServices
 {
     public interface IUserService
     {

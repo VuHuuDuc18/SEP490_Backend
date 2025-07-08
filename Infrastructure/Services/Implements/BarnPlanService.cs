@@ -4,7 +4,7 @@ using Domain.Dto.Response;
 using Domain.Dto.Response.BarnPlan;
 using Domain.Dto.Response.Bill;
 using Domain.Extensions;
-using Domain.Services.Interfaces;
+using Domain.IServices;
 using Entities.EntityModel;
 using Infrastructure.Core;
 using Infrastructure.Repository;

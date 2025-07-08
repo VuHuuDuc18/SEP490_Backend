@@ -1,6 +1,6 @@
 ﻿using Domain.Dto.Request;
 using Domain.Dto.Request.Category;
-using Domain.Services.Interfaces;
+using Domain.IServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace SEP490_BackendAPI.Controllers

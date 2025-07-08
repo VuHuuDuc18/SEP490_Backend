@@ -9,7 +9,7 @@ using Domain.Dto.Request;
 using Domain.Dto.Response.Medicine;
 using Domain.Dto.Response;
 using Application.Wrappers;
-namespace Domain.Services.Interfaces
+namespace Domain.IServices
 {
     public interface IBarnService
     {
