@@ -1,5 +1,4 @@
-﻿using Application.Interfaces;
-using Application.Wrappers;
+﻿using Application.Wrappers;
 using Domain.Settings;
 using Entities.EntityModel;
 using Infrastructure.Identity.Contexts;
