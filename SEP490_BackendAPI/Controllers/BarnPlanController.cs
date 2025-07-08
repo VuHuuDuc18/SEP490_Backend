@@ -1,6 +1,6 @@
 ﻿using Domain.Dto.Request;
 using Domain.Dto.Request.BarnPlan;
-using Domain.Services.Interfaces;
+using Domain.IServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

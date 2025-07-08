@@ -1,7 +1,7 @@
 ﻿using Domain.Dto.Request;
 using Domain.Dto.Request.Food;
 using Domain.Dto.Response.Food;
-using Domain.Services.Interfaces;
+using Domain.IServices;
 using ExcelControl.Handler;
 using Infrastructure.Services.Implements;
 using Microsoft.AspNetCore.Mvc;

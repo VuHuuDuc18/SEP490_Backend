@@ -1,6 +1,6 @@
 ﻿using Domain.Dto.Request;
 using Domain.Dto.Request.DailyReport;
-using Domain.Services.Interfaces;
+using Domain.IServices;
 using Entities.EntityModel;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;

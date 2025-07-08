@@ -7,7 +7,7 @@ using Domain.Dto.Response.Bill;
 using Domain.Dto.Response.Food;
 using Domain.Extensions;
 using Domain.Helper.Constants;
-using Domain.Services.Interfaces;
+using Domain.IServices;
 using Entities.EntityModel;
 using Infrastructure.Core;
 using Infrastructure.Repository;

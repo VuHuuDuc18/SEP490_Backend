@@ -1,7 +1,6 @@
 ﻿using Domain.Dto.Request;
 using Domain.Dto.Request.LivestockCircle;
 using Domain.Dto.Response;
-using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading;
@@ -9,6 +8,7 @@ using System.Threading.Tasks;
 using System.Security.Claims;
 using Entities.EntityModel;
 using Domain.Helper.Constants;
+using Domain.IServices;
 
 namespace SEP490_BackendAPI.Controllers
 {

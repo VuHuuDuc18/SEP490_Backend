@@ -7,7 +7,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Domain.Services.Interfaces
+namespace Domain.IServices
 {
     public interface IBillService
     {

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Domain.Services.Interfaces
+namespace Domain.IServices
 {
     public interface ILivestockCircleService
     {

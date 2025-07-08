@@ -1,7 +1,5 @@
-
-using Application.Interfaces;
-using Domain.Services.Implements;
-using Domain.Services.Interfaces;
+using Domain.IServices;
+using Domain.IServices.Implements;
 using Domain.Settings;
 using Entities.EntityModel;
 using Infrastructure.DBContext;

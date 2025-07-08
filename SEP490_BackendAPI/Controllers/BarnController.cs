@@ -1,6 +1,6 @@
 using Domain.Dto.Request;
 using Domain.Dto.Request.Barn;
-using Domain.Services.Interfaces;
+using Domain.IServices;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using System.Threading.Tasks;
