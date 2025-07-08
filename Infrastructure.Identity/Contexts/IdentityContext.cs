@@ -8,7 +8,6 @@ using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
-using Infrastructure.Identity.Models;
 namespace Infrastructure.Identity.Contexts
 {
     public class IdentityContext : IdentityDbContext<User,Role,Guid>

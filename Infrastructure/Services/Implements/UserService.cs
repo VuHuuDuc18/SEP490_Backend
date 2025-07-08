@@ -11,7 +11,6 @@ using Domain.Settings;
 using Entities.EntityModel;
 using Infrastructure.Identity.Contexts;
 using Infrastructure.Identity.Helpers;
-using Infrastructure.Identity.Models;
 using Infrastructure.Repository;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;

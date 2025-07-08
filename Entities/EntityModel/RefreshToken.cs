@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Infrastructure.Identity.Models
+namespace Entities.EntityModel
 {
     public class RefreshToken
     {
