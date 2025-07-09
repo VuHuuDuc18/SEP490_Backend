@@ -20,6 +20,7 @@ using Domain.Extensions;
 using Infrastructure.Extensions;
 using Infrastructure.Services;
 using Domain.Helper.Constants;
+using Domain.Dto.Response.Bill;
 
 namespace Domain.Services.Implements
 {
@@ -32,6 +33,10 @@ namespace Domain.Services.Implements
         private readonly IRepository<MedicineReport> _medicineReportRepository;
         private readonly IRepository<LivestockCircleMedicine> _livestockCircleMedicineRepository;
         private readonly IRepository<ImageDailyReport> _imageDailyReportRepository;
+        private readonly IRepository<Food> _foodRepository;
+        private readonly IRepository<Medicine> _medicineRepository;
+        private readonly IRepository<ImageFood> _foodImageRepository;
+        private readonly IRepository<ImageMedicine> _medicineImageRepository;
         private readonly CloudinaryCloudService _cloudinaryCloudService;
 
         public DailyReportService(
@@ -42,6 +47,10 @@ namespace Domain.Services.Implements
             IRepository<MedicineReport> medicineReportRepository,
             IRepository<LivestockCircleMedicine> livestockCircleMedicineRepository,
             IRepository<ImageDailyReport> imageDailyReportRepository,
+            IRepository<Food> foodRepository,
+            IRepository<Medicine> medicineRepository,
+            IRepository<ImageFood> foodImageRepository,
+            IRepository<ImageMedicine> medicineImageRepository,
             CloudinaryCloudService cloudinaryCloudService)
         {
             _dailyReportRepository = dailyReportRepository ?? throw new ArgumentNullException(nameof(dailyReportRepository));
@@ -52,6 +61,10 @@ namespace Domain.Services.Implements
             _livestockCircleMedicineRepository = livestockCircleMedicineRepository ?? throw new ArgumentNullException(nameof(livestockCircleMedicineRepository));
             _imageDailyReportRepository = imageDailyReportRepository ?? throw new ArgumentNullException(nameof(imageDailyReportRepository));
             _cloudinaryCloudService = cloudinaryCloudService ?? throw new ArgumentNullException(nameof(cloudinaryCloudService));
+            _foodRepository  = foodRepository ?? throw new ArgumentNullException( nameof(foodRepository));
+            _foodImageRepository = foodImageRepository;
+            _medicineImageRepository = medicineImageRepository;
+            _medicineRepository = medicineRepository ?? throw new ArgumentNullException(nameof(medicineRepository));
         }
 
         public async Task<(bool Success, string ErrorMessage)> CreateDailyReport(CreateDailyReportWithDetailsRequest requestDto, CancellationToken cancellationToken = default)
@@ -519,52 +532,93 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
 
         public async Task<(DailyReportResponse DailyReport, string ErrorMessage)> GetDailyReportById(Guid dailyReportId, CancellationToken cancellationToken = default)
         {
-            var checkError = new Ref<CheckError>();
-            var dailyReport = await _dailyReportRepository.GetById(dailyReportId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (null, $"Lỗi khi lấy thông tin báo cáo hàng ngày: {checkError.Value.Message}");
-            if (dailyReport == null)
-                return (null, "Không tìm thấy báo cáo hàng ngày.");
-
-            var foodReports = await _foodReportRepository.GetQueryable(x => x.ReportId == dailyReportId && x.IsActive).ToListAsync(cancellationToken);
-            var medicineReports = await _medicineReportRepository.GetQueryable(x => x.ReportId == dailyReportId && x.IsActive).ToListAsync(cancellationToken);
-            var imageReports = await _imageDailyReportRepository.GetQueryable(x => x.DailyReportId == dailyReportId && x.IsActive).ToListAsync(cancellationToken);
-
-            var response = new DailyReportResponse
+            try
             {
-                Id = dailyReport.Id,
-                LivestockCircleId = dailyReport.LivestockCircleId,
-                DeadUnit = dailyReport.DeadUnit,
-                GoodUnit = dailyReport.GoodUnit,
-                BadUnit = dailyReport.BadUnit,
-                AgeInDays = dailyReport.AgeInDays,
-                Status = dailyReport.Status,
-                Note = dailyReport.Note,
-                IsActive = dailyReport.IsActive,
-                ImageLinks = imageReports.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
-                Thumbnail = imageReports.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink,
-                FoodReports = foodReports.Select(fr => new FoodReportResponse
+                var checkError = new Ref<CheckError>();
+                var dailyReport = await _dailyReportRepository.GetById(dailyReportId, checkError);
+                if (checkError.Value?.IsError == true)
+                    return (null, $"Lỗi khi lấy thông tin báo cáo hàng ngày: {checkError.Value.Message}");
+                if (dailyReport == null)
+                    return (null, "Không tìm thấy báo cáo hàng ngày.");
+
+                var foodReports = await _foodReportRepository.GetQueryable(x => x.ReportId == dailyReportId && x.IsActive).ToListAsync(cancellationToken);
+                var medicineReports = await _medicineReportRepository.GetQueryable(x => x.ReportId == dailyReportId && x.IsActive).ToListAsync(cancellationToken);
+                var imageReports = await _imageDailyReportRepository.GetQueryable(x => x.DailyReportId == dailyReportId && x.IsActive).ToListAsync(cancellationToken);
+
+                var foodReportResponses = new List<FoodReportResponse>();
+                foreach (var foodReport in foodReports)
                 {
-                    Id = fr.Id,
-                    FoodId = fr.FoodId,
-                    ReportId = fr.ReportId,
-                    Quantity = fr.Quantity,
-                    IsActive = fr.IsActive
-                }).ToList(),
-                MedicineReports = medicineReports.Select(mr => new MedicineReportResponse
+                    var foodDetails = await _foodRepository.GetById(foodReport.FoodId);
+                    var foodImages = foodDetails != null
+                        ? await _foodImageRepository.GetQueryable(x => x.FoodId == foodReport.FoodId).ToListAsync(cancellationToken)
+                        : new List<ImageFood>();
+
+                    foodReportResponses.Add(new FoodReportResponse
+                    {
+                        Id = foodReport.Id,
+                        ReportId = foodReport.ReportId,
+                        Quantity = foodReport.Quantity,
+                        IsActive = foodReport.IsActive,
+                        Food = new FoodBillResponse
+                        {
+                            Id = foodDetails?.Id ?? Guid.Empty,
+                            FoodName = foodDetails?.FoodName,
+                            Thumbnail = foodImages.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                        }
+                    });
+                }
+
+                var medicineReportResponses = new List<MedicineReportResponse>();
+                foreach (var medicineReport in medicineReports)
                 {
-                    Id = mr.Id,
-                    MedicineId = mr.MedicineId,
-                    ReportId = mr.ReportId,
-                    Quantity = mr.Quantity,
-                    IsActive = mr.IsActive
-                }).ToList()
-            };
-            return (response, null);
+                    var medicineDetails = await _medicineRepository.GetById(medicineReport.MedicineId);
+                    var medicineImages = medicineDetails != null
+                        ? await _medicineImageRepository.GetQueryable(x => x.MedicineId == medicineReport.MedicineId).ToListAsync(cancellationToken)
+                        : new List<ImageMedicine>();
+
+                    medicineReportResponses.Add(new MedicineReportResponse
+                    {
+                        Id = medicineReport.Id,
+                        ReportId = medicineReport.ReportId,
+                        Quantity = medicineReport.Quantity,
+                        IsActive = medicineReport.IsActive,
+                        Medicine = new MedicineBillResponse
+                        {
+                            Id = medicineDetails?.Id ?? Guid.Empty,
+                            MedicineName = medicineDetails?.MedicineName,
+                            Thumbnail = medicineImages.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                        }
+                    });
+                }
+
+                var response = new DailyReportResponse
+                {
+                    Id = dailyReport.Id,
+                    LivestockCircleId = dailyReport.LivestockCircleId,
+                    DeadUnit = dailyReport.DeadUnit,
+                    GoodUnit = dailyReport.GoodUnit,
+                    BadUnit = dailyReport.BadUnit,
+                    AgeInDays = dailyReport.AgeInDays,
+                    //Status = dailyReport.Status,
+                    CreatedDate = dailyReport.CreatedDate,
+                    Note = dailyReport.Note,
+                    IsActive = dailyReport.IsActive,
+                    ImageLinks = imageReports.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
+                    Thumbnail = imageReports.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink,
+                    FoodReports = foodReportResponses,
+                    MedicineReports = medicineReportResponses
+                };
+
+                return (response, null);
+            }
+            catch (Exception ex)
+            {
+                return (null, $"Lỗi khi lấy thông tin báo cáo hàng ngày: {ex.Message}");
+            }
         }
 
         public async Task<(List<DailyReportResponse> DailyReports, string ErrorMessage)> GetDailyReportByLiveStockCircle(
-            Guid? livestockCircleId = null, CancellationToken cancellationToken = default)
+    Guid? livestockCircleId = null, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -582,6 +636,52 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                     var medicineReports = await _medicineReportRepository.GetQueryable(x => x.ReportId == report.Id && x.IsActive).ToListAsync(cancellationToken);
                     var imageReports = await _imageDailyReportRepository.GetQueryable(x => x.DailyReportId == report.Id && x.IsActive).ToListAsync(cancellationToken);
 
+                    var foodReportResponses = new List<FoodReportResponse>();
+                    foreach (var foodReport in foodReports)
+                    {
+                        var foodDetails = await _foodRepository.GetById(foodReport.FoodId);
+                        var foodImages = foodDetails != null
+                            ? await _foodImageRepository.GetQueryable(x => x.FoodId == foodReport.FoodId).ToListAsync(cancellationToken)
+                            : new List<ImageFood>();
+
+                        foodReportResponses.Add(new FoodReportResponse
+                        {
+                            Id = foodReport.Id,
+                            ReportId = foodReport.ReportId,
+                            Quantity = foodReport.Quantity,
+                            IsActive = foodReport.IsActive,
+                            Food = new FoodBillResponse
+                            {
+                                Id = foodDetails?.Id ?? Guid.Empty,
+                                FoodName = foodDetails?.FoodName,
+                                Thumbnail = foodImages.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                            }
+                        });
+                    }
+
+                    var medicineReportResponses = new List<MedicineReportResponse>();
+                    foreach (var medicineReport in medicineReports)
+                    {
+                        var medicineDetails = await _medicineRepository.GetById(medicineReport.MedicineId);
+                        var medicineImages = medicineDetails != null
+                            ? await _medicineImageRepository.GetQueryable(x => x.MedicineId == medicineReport.MedicineId).ToListAsync(cancellationToken)
+                            : new List<ImageMedicine>();
+
+                        medicineReportResponses.Add(new MedicineReportResponse
+                        {
+                            Id = medicineReport.Id,
+                            ReportId = medicineReport.ReportId,
+                            Quantity = medicineReport.Quantity,
+                            IsActive = medicineReport.IsActive,
+                            Medicine = new MedicineBillResponse
+                            {
+                                Id = medicineDetails?.Id ?? Guid.Empty,
+                                MedicineName = medicineDetails?.MedicineName,
+                                Thumbnail = medicineImages.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                            }
+                        });
+                    }
+
                     responses.Add(new DailyReportResponse
                     {
                         Id = report.Id,
@@ -591,28 +691,16 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                         BadUnit = report.BadUnit,
                         Note = report.Note,
                         AgeInDays = report.AgeInDays,
-                        Status = report.Status,
+                        //Status = report.Status,
+                        CreatedDate = report.CreatedDate,
                         IsActive = report.IsActive,
                         ImageLinks = imageReports.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
                         Thumbnail = imageReports.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink,
-                        FoodReports = foodReports.Select(fr => new FoodReportResponse
-                        {
-                            Id = fr.Id,
-                            FoodId = fr.FoodId,
-                            ReportId = fr.ReportId,
-                            Quantity = fr.Quantity,
-                            IsActive = fr.IsActive
-                        }).ToList(),
-                        MedicineReports = medicineReports.Select(mr => new MedicineReportResponse
-                        {
-                            Id = mr.Id,
-                            MedicineId = mr.MedicineId,
-                            ReportId = mr.ReportId,
-                            Quantity = mr.Quantity,
-                            IsActive = mr.IsActive
-                        }).ToList()
+                        FoodReports = foodReportResponses,
+                        MedicineReports = medicineReportResponses
                     });
                 }
+
                 return (responses, null);
             }
             catch (Exception ex)
@@ -656,15 +744,26 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
 
                 var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
 
-                var responses = paginationResult.Items.Select(fr => new FoodReportResponse
+                var responses = new List<FoodReportResponse>();
+                foreach (var report in paginationResult.Items)
                 {
-                    Id = fr.Id,
-                    FoodId = fr.FoodId,
-                    ReportId = fr.ReportId,
-                    Quantity = fr.Quantity,
-                    IsActive = fr.IsActive
-                }).ToList();
-
+                    var reportFoodReports = await _foodRepository.GetById(report.FoodId);
+                    var images = await _foodImageRepository.GetQueryable(x => x.FoodId == reportFoodReports.Id).ToListAsync(cancellationToken);
+                    var foodResponse = new FoodBillResponse
+                    {
+                        Id = reportFoodReports.Id,
+                        FoodName = reportFoodReports.FoodName,
+                        Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                    };
+                    responses.Add(new FoodReportResponse
+                    {
+                        Id = report.Id,
+                        Food = foodResponse,
+                        Quantity = report.Quantity,
+                        ReportId = report.Id,
+                        IsActive = report.IsActive
+                    });
+                }
                 var result = new PaginationSet<FoodReportResponse>
                 {
                     PageIndex = paginationResult.PageIndex,
@@ -717,14 +816,27 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
 
                 var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
 
-                var responses = paginationResult.Items.Select(mr => new MedicineReportResponse
+
+                var responses = new List<MedicineReportResponse>();
+                foreach (var report in paginationResult.Items)
                 {
-                    Id = mr.Id,
-                    MedicineId = mr.MedicineId,
-                    ReportId = mr.ReportId,
-                    Quantity = mr.Quantity,
-                    IsActive = mr.IsActive
-                }).ToList();
+                    var reportMedicineReports = await _medicineRepository.GetById(report.MedicineId);
+                    var images = await _medicineImageRepository.GetQueryable(x => x.MedicineId == reportMedicineReports.Id).ToListAsync(cancellationToken);
+                    var medicineResponse = new MedicineBillResponse
+                    {
+                        Id = reportMedicineReports.Id,
+                        MedicineName = reportMedicineReports.MedicineName,
+                        Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                    };
+                    responses.Add(new MedicineReportResponse
+                    {
+                        Id = report.Id,
+                        Medicine = medicineResponse,
+                        Quantity = report.Quantity,
+                        ReportId = report.Id,
+                        IsActive = report.IsActive
+                    });
+                }
 
                 var result = new PaginationSet<MedicineReportResponse>
                 {
@@ -743,9 +855,9 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
             }
         }
 
-    public async Task<(PaginationSet<DailyReportResponse> Result, string ErrorMessage)> GetPaginatedDailyReportList(
-                ListingRequest request,
-                CancellationToken cancellationToken = default)
+        public async Task<(PaginationSet<DailyReportResponse> Result, string ErrorMessage)> GetPaginatedDailyReportList(
+          ListingRequest request,
+          CancellationToken cancellationToken = default)
         {
             try
             {
@@ -772,10 +884,22 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
 
                 var reportIds = paginationResult.Items.Select(r => r.Id).ToList();
 
-                // Lấy  dữ liệu liên quan
+                
                 var foodReports = await _foodReportRepository.GetQueryable(x => reportIds.Contains(x.ReportId) && x.IsActive).ToListAsync(cancellationToken);
                 var medicineReports = await _medicineReportRepository.GetQueryable(x => reportIds.Contains(x.ReportId) && x.IsActive).ToListAsync(cancellationToken);
                 var imageReports = await _imageDailyReportRepository.GetQueryable(x => reportIds.Contains(x.DailyReportId) && x.IsActive).ToListAsync(cancellationToken);
+
+                // Nhóm food and medicine details
+                var foodIds = foodReports.Select(fr => fr.FoodId).Distinct().ToList();
+                var medicineIds = medicineReports.Select(mr => mr.MedicineId).Distinct().ToList();
+
+                var foodDetails = await _foodRepository.GetQueryable(x => foodIds.Contains(x.Id)).ToDictionaryAsync(x => x.Id, cancellationToken);
+                var medicineDetails = await _medicineRepository.GetQueryable(x => medicineIds.Contains(x.Id)).ToDictionaryAsync(x => x.Id, cancellationToken);
+
+                var foodImageQuery = _foodImageRepository.GetQueryable(x => foodIds.Contains(x.FoodId));
+                var medicineImageQuery = _medicineImageRepository.GetQueryable(x => medicineIds.Contains(x.MedicineId));
+                var foodImages = (await foodImageQuery.ToListAsync(cancellationToken)).GroupBy(x => x.FoodId).ToDictionary(g => g.Key, g => g.ToList());
+                var medicineImages = (await medicineImageQuery.ToListAsync(cancellationToken)).GroupBy(x => x.MedicineId).ToDictionary(g => g.Key, g => g.ToList());
 
                 // Nhóm data
                 var foodReportGroups = foodReports.GroupBy(x => x.ReportId).ToDictionary(g => g.Key, g => g.ToList());
@@ -789,6 +913,48 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                     var reportMedicineReports = medicineReportGroups.GetValueOrDefault(report.Id, new List<MedicineReport>());
                     var reportImages = imageReportGroups.GetValueOrDefault(report.Id, new List<ImageDailyReport>());
 
+                    var foodReportResponses = new List<FoodReportResponse>();
+                    foreach (var foodReport in reportFoodReports)
+                    {
+                        var foodDetail = foodDetails.GetValueOrDefault(foodReport.FoodId);
+                        var foodImageList = foodImages.GetValueOrDefault(foodReport.FoodId, new List<ImageFood>());
+
+                        foodReportResponses.Add(new FoodReportResponse
+                        {
+                            Id = foodReport.Id,
+                            ReportId = foodReport.ReportId,
+                            Quantity = foodReport.Quantity,
+                            IsActive = foodReport.IsActive,
+                            Food = new FoodBillResponse
+                            {
+                                Id = foodDetail?.Id ?? Guid.Empty,
+                                FoodName = foodDetail?.FoodName,
+                                Thumbnail = foodImageList.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                            }
+                        });
+                    }
+
+                    var medicineReportResponses = new List<MedicineReportResponse>();
+                    foreach (var medicineReport in reportMedicineReports)
+                    {
+                        var medicineDetail = medicineDetails.GetValueOrDefault(medicineReport.MedicineId);
+                        var medicineImageList = medicineImages.GetValueOrDefault(medicineReport.MedicineId, new List<ImageMedicine>());
+
+                        medicineReportResponses.Add(new MedicineReportResponse
+                        {
+                            Id = medicineReport.Id,
+                            ReportId = medicineReport.ReportId,
+                            Quantity = medicineReport.Quantity,
+                            IsActive = medicineReport.IsActive,
+                            Medicine = new MedicineBillResponse
+                            {
+                                Id = medicineDetail?.Id ?? Guid.Empty,
+                                MedicineName = medicineDetail?.MedicineName,
+                                Thumbnail = medicineImageList.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                            }
+                        });
+                    }
+
                     responses.Add(new DailyReportResponse
                     {
                         Id = report.Id,
@@ -798,26 +964,13 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                         BadUnit = report.BadUnit,
                         Note = report.Note,
                         AgeInDays = report.AgeInDays,
-                        Status = report.Status,
+                        //Status = report.Status,
+                        CreatedDate = report.CreatedDate,
                         IsActive = report.IsActive,
                         ImageLinks = reportImages.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
                         Thumbnail = reportImages.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink,
-                        FoodReports = reportFoodReports.Select(fr => new FoodReportResponse
-                        {
-                            Id = fr.Id,
-                            FoodId = fr.FoodId,
-                            ReportId = fr.ReportId,
-                            Quantity = fr.Quantity,
-                            IsActive = fr.IsActive
-                        }).ToList(),
-                        MedicineReports = reportMedicineReports.Select(mr => new MedicineReportResponse
-                        {
-                            Id = mr.Id,
-                            MedicineId = mr.MedicineId,
-                            ReportId = mr.ReportId,
-                            Quantity = mr.Quantity,
-                            IsActive = mr.IsActive
-                        }).ToList()
+                        FoodReports = foodReportResponses,
+                        MedicineReports = medicineReportResponses
                     });
                 }
 
@@ -889,6 +1042,52 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                 var medicineReports = await _medicineReportRepository.GetQueryable(x => x.ReportId == dailyReport.Id && x.IsActive).ToListAsync(cancellationToken);
                 var imageReports = await _imageDailyReportRepository.GetQueryable(x => x.DailyReportId == dailyReport.Id && x.IsActive).ToListAsync(cancellationToken);
 
+                var foodReportResponses = new List<FoodReportResponse>();
+                foreach (var foodReport in foodReports)
+                {
+                    var foodDetails = await _foodRepository.GetById(foodReport.FoodId);
+                    var foodImages = foodDetails != null
+                        ? await _foodImageRepository.GetQueryable(x => x.FoodId == foodReport.FoodId).ToListAsync(cancellationToken)
+                        : new List<ImageFood>();
+
+                    foodReportResponses.Add(new FoodReportResponse
+                    {
+                        Id = foodReport.Id,
+                        ReportId = foodReport.ReportId,
+                        Quantity = foodReport.Quantity,
+                        IsActive = foodReport.IsActive,
+                        Food = new FoodBillResponse
+                        {
+                            Id = foodDetails?.Id ?? Guid.Empty,
+                            FoodName = foodDetails?.FoodName,
+                            Thumbnail = foodImages.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                        }
+                    });
+                }
+
+                var medicineReportResponses = new List<MedicineReportResponse>();
+                foreach (var medicineReport in medicineReports)
+                {
+                    var medicineDetails = await _medicineRepository.GetById(medicineReport.MedicineId);
+                    var medicineImages = medicineDetails != null
+                        ? await _medicineImageRepository.GetQueryable(x => x.MedicineId == medicineReport.MedicineId).ToListAsync(cancellationToken)
+                        : new List<ImageMedicine>();
+
+                    medicineReportResponses.Add(new MedicineReportResponse
+                    {
+                        Id = medicineReport.Id,
+                        ReportId = medicineReport.ReportId,
+                        Quantity = medicineReport.Quantity,
+                        IsActive = medicineReport.IsActive,
+                        Medicine = new MedicineBillResponse
+                        {
+                            Id = medicineDetails?.Id ?? Guid.Empty,
+                            MedicineName = medicineDetails?.MedicineName,
+                            Thumbnail = medicineImages.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                        }
+                    });
+                }
+
                 var response = new DailyReportResponse
                 {
                     Id = dailyReport.Id,
@@ -897,27 +1096,14 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                     GoodUnit = dailyReport.GoodUnit,
                     BadUnit = dailyReport.BadUnit,
                     AgeInDays = dailyReport.AgeInDays,
-                    Status = dailyReport.Status,
+                    //Status = dailyReport.Status,
+                    CreatedDate = dailyReport.CreatedDate,
                     Note = dailyReport.Note,
                     IsActive = dailyReport.IsActive,
                     ImageLinks = imageReports.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
                     Thumbnail = imageReports.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink,
-                    FoodReports = foodReports.Select(fr => new FoodReportResponse
-                    {
-                        Id = fr.Id,
-                        FoodId = fr.FoodId,
-                        ReportId = fr.ReportId,
-                        Quantity = fr.Quantity,
-                        IsActive = fr.IsActive
-                    }).ToList(),
-                    MedicineReports = medicineReports.Select(mr => new MedicineReportResponse
-                    {
-                        Id = mr.Id,
-                        MedicineId = mr.MedicineId,
-                        ReportId = mr.ReportId,
-                        Quantity = mr.Quantity,
-                        IsActive = mr.IsActive
-                    }).ToList()
+                    FoodReports = foodReportResponses,
+                    MedicineReports = medicineReportResponses
                 };
 
                 return (response, null);
@@ -925,6 +1111,150 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
             catch (Exception ex)
             {
                 return (null, $"Lỗi khi lấy báo cáo hàng ngày hôm nay: {ex.Message}");
+            }
+        }
+
+        public async Task<(PaginationSet<DailyReportResponse> Result, string ErrorMessage)> GetPaginatedDailyReportListByLiveStockCircle(
+     Guid livestockCircleId,
+     ListingRequest request,
+     CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (request == null)
+                    return (null, "Yêu cầu không được null.");
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                    return (null, "PageIndex và PageSize phải lớn hơn 0.");
+
+                var checkError = new Ref<CheckError>();
+                var livestockCircle = await _livestockCircleRepository.GetById(livestockCircleId, checkError);
+                if (checkError.Value?.IsError == true)
+                    return (null, $"Lỗi khi lấy thông tin vòng chăn nuôi: {checkError.Value.Message}");
+                if (livestockCircle == null)
+                    return (null, "Vòng chăn nuôi không tồn tại.");
+
+                var validFields = typeof(DailyReport).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any())
+                    return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+
+                var query = _dailyReportRepository.GetQueryable(x => x.IsActive && x.LivestockCircleId == livestockCircleId);
+
+                if (request.SearchString?.Any() == true)
+                    query = query.SearchString(request.SearchString);
+
+                if (request.Filter?.Any() == true)
+                    query = query.Filter(request.Filter);
+
+                var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                var reportIds = paginationResult.Items.Select(r => r.Id).ToList();
+
+                
+                var foodReports = await _foodReportRepository.GetQueryable(x => reportIds.Contains(x.ReportId) && x.IsActive).ToListAsync(cancellationToken);
+                var medicineReports = await _medicineReportRepository.GetQueryable(x => reportIds.Contains(x.ReportId) && x.IsActive).ToListAsync(cancellationToken);
+                var imageReports = await _imageDailyReportRepository.GetQueryable(x => reportIds.Contains(x.DailyReportId) && x.IsActive).ToListAsync(cancellationToken);
+
+            
+                var foodIds = foodReports.Select(fr => fr.FoodId).Distinct().ToList();
+                var medicineIds = medicineReports.Select(mr => mr.MedicineId).Distinct().ToList();
+
+                var foodDetails = await _foodRepository.GetQueryable(x => foodIds.Contains(x.Id)).ToDictionaryAsync(x => x.Id, cancellationToken);
+                var medicineDetails = await _medicineRepository.GetQueryable(x => medicineIds.Contains(x.Id)).ToDictionaryAsync(x => x.Id, cancellationToken);
+
+                var foodImageQuery = _foodImageRepository.GetQueryable(x => foodIds.Contains(x.FoodId));
+                var medicineImageQuery = _medicineImageRepository.GetQueryable(x => medicineIds.Contains(x.MedicineId));
+                var foodImages = (await foodImageQuery.ToListAsync(cancellationToken)).GroupBy(x => x.FoodId).ToDictionary(g => g.Key, g => g.ToList());
+                var medicineImages = (await medicineImageQuery.ToListAsync(cancellationToken)).GroupBy(x => x.MedicineId).ToDictionary(g => g.Key, g => g.ToList());
+
+               
+                var foodReportGroups = foodReports.GroupBy(x => x.ReportId).ToDictionary(g => g.Key, g => g.ToList());
+                var medicineReportGroups = medicineReports.GroupBy(x => x.ReportId).ToDictionary(g => g.Key, g => g.ToList());
+                var imageReportGroups = imageReports.GroupBy(x => x.DailyReportId).ToDictionary(g => g.Key, g => g.ToList());
+
+                var responses = new List<DailyReportResponse>();
+                foreach (var report in paginationResult.Items)
+                {
+                    var reportFoodReports = foodReportGroups.GetValueOrDefault(report.Id, new List<FoodReport>());
+                    var reportMedicineReports = medicineReportGroups.GetValueOrDefault(report.Id, new List<MedicineReport>());
+                    var reportImages = imageReportGroups.GetValueOrDefault(report.Id, new List<ImageDailyReport>());
+
+                    var foodReportResponses = new List<FoodReportResponse>();
+                    foreach (var foodReport in reportFoodReports)
+                    {
+                        var foodDetail = foodDetails.GetValueOrDefault(foodReport.FoodId);
+                        var foodImageList = foodImages.GetValueOrDefault(foodReport.FoodId, new List<ImageFood>());
+
+                        foodReportResponses.Add(new FoodReportResponse
+                        {
+                            Id = foodReport.Id,
+                            ReportId = foodReport.ReportId,
+                            Quantity = foodReport.Quantity,
+                            IsActive = foodReport.IsActive,
+                            Food = new FoodBillResponse
+                            {
+                                Id = foodDetail?.Id ?? Guid.Empty,
+                                FoodName = foodDetail?.FoodName,
+                                Thumbnail = foodImageList.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                            }
+                        });
+                    }
+
+                    var medicineReportResponses = new List<MedicineReportResponse>();
+                    foreach (var medicineReport in reportMedicineReports)
+                    {
+                        var medicineDetail = medicineDetails.GetValueOrDefault(medicineReport.MedicineId);
+                        var medicineImageList = medicineImages.GetValueOrDefault(medicineReport.MedicineId, new List<ImageMedicine>());
+
+                        medicineReportResponses.Add(new MedicineReportResponse
+                        {
+                            Id = medicineReport.Id,
+                            ReportId = medicineReport.ReportId,
+                            Quantity = medicineReport.Quantity,
+                            IsActive = medicineReport.IsActive,
+                            Medicine = new MedicineBillResponse
+                            {
+                                Id = medicineDetail?.Id ?? Guid.Empty,
+                                MedicineName = medicineDetail?.MedicineName,
+                                Thumbnail = medicineImageList.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                            }
+                        });
+                    }
+
+                    responses.Add(new DailyReportResponse
+                    {
+                        Id = report.Id,
+                        LivestockCircleId = report.LivestockCircleId,
+                        DeadUnit = report.DeadUnit,
+                        GoodUnit = report.GoodUnit,
+                        BadUnit = report.BadUnit,
+                        Note = report.Note,
+                        AgeInDays = report.AgeInDays,
+                        //Status = report.Status,
+                        CreatedDate = report.CreatedDate,
+                        IsActive = report.IsActive,
+                        ImageLinks = reportImages.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
+                        Thumbnail = reportImages.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink,
+                        FoodReports = foodReportResponses,
+                        MedicineReports = medicineReportResponses
+                    });
+                }
+
+                var result = new PaginationSet<DailyReportResponse>
+                {
+                    PageIndex = paginationResult.PageIndex,
+                    Count = responses.Count,
+                    TotalCount = paginationResult.TotalCount,
+                    TotalPages = paginationResult.TotalPages,
+                    Items = responses
+                };
+
+                return (result, null);
+            }
+            catch (Exception ex)
+            {
+                return (null, $"Lỗi khi lấy danh sách phân trang báo cáo hàng ngày: {ex.Message}");
             }
         }
     }

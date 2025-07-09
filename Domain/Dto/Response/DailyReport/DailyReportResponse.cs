@@ -16,7 +16,8 @@ namespace Domain.Dto.Response.DailyReport
         public string Note { get; set; }
         public bool IsActive { get; set; }
         public int AgeInDays { get; set; }
-        public string Status { get; set; }
+        public DateTime CreatedDate { get; set; }
+        //public string Status { get; set; }
 
         /// <summary>
         /// Danh sách liên kết ảnh (upload lên Cloudinary).

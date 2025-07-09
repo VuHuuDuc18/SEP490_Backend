@@ -2,6 +2,7 @@
 using Domain.Dto.Request.DailyReport;
 using Domain.Dto.Response;
 using Domain.Dto.Response.DailyReport;
+using Entities.EntityModel;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -35,6 +36,11 @@ namespace Domain.Services.Interfaces
         /// Lấy danh sách tất cả báo cáo hàng ngày đang hoạt động với bộ lọc tùy chọn, bao gồm danh sách FoodReport và MedicineReport.
         /// </summary>
         Task<(List<DailyReportResponse> DailyReports, string ErrorMessage)> GetDailyReportByLiveStockCircle(Guid? livestockCircleId = null, CancellationToken cancellationToken = default);
+
+        Task<(PaginationSet<DailyReportResponse> Result, string ErrorMessage)> GetPaginatedDailyReportListByLiveStockCircle(
+               Guid livestockCircleId,
+               ListingRequest request,
+               CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Lấy danh sách tất cả thức ăn trong báo cáo hàng ngày.

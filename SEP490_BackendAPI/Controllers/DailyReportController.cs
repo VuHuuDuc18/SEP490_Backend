@@ -47,34 +47,43 @@ namespace Controllers
             return dailyReport != null ? Ok(dailyReport) : NotFound(errorMessage ?? "Không tìm thấy báo cáo hàng ngày.");
         }
 
-        [HttpGet("getDailyReportByLiveStockCircle")]
-        public async Task<IActionResult> GetDailyReportByLiveStockCircle([FromRoute] Guid? livestockCircleId = null, CancellationToken cancellationToken = default)
-        {
-            var (dailyReports, errorMessage) = await _dailyReportService.GetDailyReportByLiveStockCircle(livestockCircleId, cancellationToken);
-            return dailyReports != null ? Ok(dailyReports) : NotFound(errorMessage ?? "Không tìm thấy danh sách báo cáo hàng ngày.");
-        }
+        //[HttpGet("getDailyReportByLiveStockCircle/{livestockCircleId}")]
+        //public async Task<IActionResult> GetDailyReportByLiveStockCircle([FromRoute] Guid? livestockCircleId = null, CancellationToken cancellationToken = default)
+        //{
+        //    var (dailyReports, errorMessage) = await _dailyReportService.GetDailyReportByLiveStockCircle(livestockCircleId, cancellationToken);
+        //    return dailyReports != null ? Ok(dailyReports) : NotFound(errorMessage ?? "Không tìm thấy danh sách báo cáo hàng ngày.");
+        //}
 
-        [HttpPost("{dailyReportId}/food-details")]
-        public async Task<IActionResult> GetFoodReportDetails([FromRoute] Guid id, [FromBody] ListingRequest request)
+        [HttpPost("food-details/{dailyReportId}")]
+        public async Task<IActionResult> GetFoodReportDetails([FromRoute] Guid dailyReportId, [FromBody] ListingRequest request)
         {
-            var (foodReports, errorMessage) = await _dailyReportService.GetFoodReportDetails(id, request);
+            var (foodReports, errorMessage) = await _dailyReportService.GetFoodReportDetails(dailyReportId, request);
             return foodReports != null ? Ok(foodReports) : NotFound(errorMessage ?? "Không tìm thấy chi tiết báo cáo thức ăn.");
         }
 
-        [HttpPost("{dailyReportId}/medicine-details")]
-        public async Task<IActionResult> GetMedicineReportDetails([FromRoute] Guid id, [FromBody] ListingRequest request)
+        [HttpPost("medicine-details/{dailyReportId}")]
+        public async Task<IActionResult> GetMedicineReportDetails([FromRoute] Guid dailyReportId, [FromBody] ListingRequest request)
         {
-            var (medicineReports, errorMessage) = await _dailyReportService.GetMedicineReportDetails(id, request);
+            var (medicineReports, errorMessage) = await _dailyReportService.GetMedicineReportDetails(dailyReportId, request);
             return medicineReports != null ? Ok(medicineReports) : NotFound(errorMessage ?? "Không tìm thấy chi tiết báo cáo thuốc.");
         }
 
         /// <summary>
         /// Lấy danh sách phân trang tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn.
         /// </summary>
-        [HttpPost("getPaginatedDailyReportList")]
-        public async Task<IActionResult> GetPaginatedMedicines([FromBody] ListingRequest request)
+        //[HttpPost("getPaginatedDailyReportList")]
+        //public async Task<IActionResult> GetPaginatedDailyReport([FromBody] ListingRequest request)
+        //{
+        //    var (result, errorMessage) = await _dailyReportService.GetPaginatedDailyReportList(request);
+        //    if (errorMessage != null)
+        //        return BadRequest(errorMessage);
+        //    return Ok(result);
+        //}
+
+        [HttpPost("getPaginatedDailyReportListByLiveStockCircle/{livestockCircleId}")]
+        public async Task<IActionResult> GetPaginatedMedicines([FromRoute] Guid livestockCircleId, [FromBody] ListingRequest request)
         {
-            var (result, errorMessage) = await _dailyReportService.GetPaginatedDailyReportList(request);
+            var (result, errorMessage) = await _dailyReportService.GetPaginatedDailyReportListByLiveStockCircle(livestockCircleId,request);
             if (errorMessage != null)
                 return BadRequest(errorMessage);
             return Ok(result);
