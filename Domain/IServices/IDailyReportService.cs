@@ -36,6 +36,11 @@ namespace Domain.IServices
         /// </summary>
         Task<(List<DailyReportResponse> DailyReports, string ErrorMessage)> GetDailyReportByLiveStockCircle(Guid? livestockCircleId = null, CancellationToken cancellationToken = default);
 
+        Task<(PaginationSet<DailyReportResponse> Result, string ErrorMessage)> GetPaginatedDailyReportListByLiveStockCircle(
+               Guid livestockCircleId,
+               ListingRequest request,
+               CancellationToken cancellationToken = default);
+
         /// <summary>
         /// Lấy danh sách tất cả thức ăn trong báo cáo hàng ngày.
         /// </summary>
