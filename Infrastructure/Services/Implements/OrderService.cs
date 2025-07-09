@@ -12,6 +12,8 @@ using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using Domain.Helper.Constants;
+using Microsoft.AspNetCore.Mvc.Razor;
+using Domain.Helper;
 
 namespace Infrastructure.Services.Implements
 {
@@ -73,7 +75,17 @@ namespace Infrastructure.Services.Implements
                 }
             try
             {
-                
+                //Kiểm tra đơn hàng đã tồn tại chưa
+                var existingOrder =  _orderRepository.GetQueryable(x => x.CustomerId == _currentUserId && x.LivestockCircleId == request.LivestockCircleId);
+                if (existingOrder != null)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Đã tồn tại đơn hàng với chuồng nuôi hiện tại. Vui lòng kiểm tra lại các đơn hàng của bạn.",
+                    };
+                }
+                //Tạo đơn hàng mới
                 var order = new Order()
                 {
                     CustomerId = _currentUserId,
@@ -89,11 +101,11 @@ namespace Infrastructure.Services.Implements
                 var livestockCircle = await _livestockCircleRepository.GetById(request.LivestockCircleId);
                 if (livestockCircle == null)
                 {
-                    return new Response<string>("Lỗi khi tạo đơn.")
+                    return new Response<string>("Chuồng nuôi không khả dụng. Vui lòng thử lại sau.")
                     {
                         Errors = new List<string>()
                         {
-                            "Chu kì nuôi không tồn tại."
+                            "Không tìm thấy chu kì nuôi. ID: "+ request.LivestockCircleId
                         }
                     };
                 }
@@ -135,9 +147,31 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-        public Task<Response<ViewOrderDetailsResponse>> ViewOrderDetails(Guid OrderId, CancellationToken cancellationToken = default)
+        public async Task<Response<ViewOrderDetailsResponse>> ViewOrderDetails(Guid OrderId, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var order = await _orderRepository.GetById(OrderId);
+                if (order == null)
+                {
+                    return new Response<ViewOrderDetailsResponse>("Đơn hàng không tồn tại");
+                }
+                var result = AutoMapperHelper.AutoMap<Order, ViewOrderDetailsResponse>(order);
+                return new Response<ViewOrderDetailsResponse>()
+                {
+                    Succeeded = true,
+                    Message = "Xem chi tiết đơn hàng thành công",
+                    Data = result
+                };
+            } catch (Exception ex)
+            {
+                return new Response<ViewOrderDetailsResponse>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi xem chi tiết đơn hàng",
+                    Errors = new List<string>() { ex.Message }
+                };
+            }
         }
 
         public Task<Response<string>> UpdateOrder(UpdateOrderRequest request, CancellationToken cancellationToken = default)
