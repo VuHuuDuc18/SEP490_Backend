@@ -1,10 +1,12 @@
 using Domain.Dto.Request;
 using Domain.Dto.Request.Bill;
 using Domain.Dto.Request.Bill.Admin;
+using Domain.Dto.Request.Order;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Barn;
 using Domain.Dto.Response.Bill;
 using Domain.Dto.Response.Food;
+using Domain.Dto.Response.Order;
 using Domain.Extensions;
 using Domain.Helper.Constants;
 using Domain.Services.Interfaces;
@@ -450,7 +452,7 @@ namespace Infrastructure.Services.Implements
 
 
 
-        public async Task<(bool Success, string ErrorMessage)> ChangeBillStatus(Guid billId, string newStatus, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)>  ChangeBillStatus(Guid billId, string newStatus, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -1322,5 +1324,32 @@ namespace Infrastructure.Services.Implements
                 return (false, $"Lỗi khi cập nhật hóa đơn với mặt hàng giống: {ex.Message}");
             }
         }
+<<<<<<< Updated upstream
+=======
+
+
+        // Common func
+        protected async Task<bool> ValidBreedStock(Guid breedId, int stock)
+        {
+            var BreedToValid = await _breedRepository.GetById(breedId);
+            if (BreedToValid == null)
+            {
+                return false;
+            }
+            if (BreedToValid.Stock < stock)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        //public Task<StatisticsOrderResponse> GetStatisticsOrder(StatisticsOrderRequest request)
+        //{
+        //    DateTime from, to;
+        //    (from, to) = DateTimeExcutor.TimeRangeSetting(request);
+        //    var queryBreed = _breedRepository.GetQueryable();
+        //    var queryLivestockCircle = _livestockCircleRepository.GetQueryable();
+        //}
+>>>>>>> Stashed changes
     }
 }

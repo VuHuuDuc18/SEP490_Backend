@@ -99,7 +99,7 @@ namespace SEP490_BackendAPI.Controllers
                 return BadRequest(errorMessage);
             return Ok(result);
         }
-        [HttpPost("export")]
+        //[HttpPost("export")]
         //public async Task<ActionResult> Export(ListingRequest request)
         //{
         //    // ExcelPackage package = new ExcelPackage();

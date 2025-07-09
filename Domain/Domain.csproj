@@ -7,6 +7,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+<<<<<<< Updated upstream
+=======
+  <ItemGroup>
+    <Folder Include="Helper\Constants\" />
+    <Folder Include="Services\" />
+
+</ItemGroup>
+
+>>>>>>> Stashed changes
 <ItemGroup>
 	<PackageReference Include="FluentValidation" Version="12.0.0" />
 	<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

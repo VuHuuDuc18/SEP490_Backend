@@ -1,8 +1,10 @@
 ﻿using Domain.Dto.Request;
 using Domain.Dto.Request.Bill;
 using Domain.Dto.Request.Bill.Admin;
+using Domain.Dto.Request.Order;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Bill;
+using Domain.Dto.Response.Order;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,6 +30,7 @@ namespace Domain.Services.Interfaces
         Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetPaginatedBillList(ListingRequest request, CancellationToken cancellationToken = default);
         Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetBillRequestByType(ListingRequest request, string billType, CancellationToken cancellationToken = default);
         Task<(bool Success, string ErrorMessage)> ChangeBillStatus(Guid billId, string newStatus, CancellationToken cancellationToken = default);
+        #region
         Task<(bool Success, string ErrorMessage)> AddFoodItemToBill(Guid billId, AddFoodItemToBillDto request, CancellationToken cancellationToken = default);
         Task<(bool Success, string ErrorMessage)> AddMedicineItemToBill(Guid billId, AddMedicineItemToBillDto request, CancellationToken cancellationToken = default);
         Task<(bool Success, string ErrorMessage)> AddBreedItemToBill(Guid billId, AddBreedItemToBillDto request, CancellationToken cancellationToken = default);
@@ -37,6 +40,7 @@ namespace Domain.Services.Interfaces
         Task<(bool Success, string ErrorMessage)> DeleteFoodItemFromBill(Guid billId, Guid itemId, CancellationToken cancellationToken = default);
         Task<(bool Success, string ErrorMessage)> DeleteMedicineItemFromBill(Guid billId, Guid itemId, CancellationToken cancellationToken = default);
         Task<(bool Success, string ErrorMessage)> DeleteBreedItemFromBill(Guid billId, Guid itemId, CancellationToken cancellationToken = default);
+        #endregion
         Task<(bool Success, string ErrorMessage)> RequestFood(CreateFoodRequestDto request, CancellationToken cancellationToken = default);
         Task<(bool Success, string ErrorMessage)> RequestMedicine(CreateMedicineRequestDto request, CancellationToken cancellationToken = default);
         Task<(bool Success, string ErrorMessage)> RequestBreed(CreateBreedRequestDto request, CancellationToken cancellationToken = default);
@@ -44,5 +48,7 @@ namespace Domain.Services.Interfaces
         Task<(bool Success, string ErrorMessage)> UpdateBillMedicine(Guid billId, UpdateBillMedicineDto request, CancellationToken cancellationToken = default);
         Task<(bool Success, string ErrorMessage)> UpdateBillBreed(Guid billId, UpdateBillBreedDto request, CancellationToken cancellationToken = default);
         public Task<bool> AdminUpdateBill(Admin_UpdateBarnRequest request);
+        //public Task<StatisticsOrderResponse> GetStatisticsOrder(StatisticsOrderRequest request);
+
     }
 }

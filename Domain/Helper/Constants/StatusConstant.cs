@@ -34,5 +34,6 @@ namespace Domain.Helper.Constants
         public readonly static string APPROVED = "APPROVED";
         public readonly static string DENIED = "DENIED";
         public readonly static string CANCELED = "CANCELED";
+        public readonly static string DONE = "DONE";
     }
 }
