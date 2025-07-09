@@ -19,7 +19,7 @@ namespace Entities.EntityModel
         public float AverageWeight { get; set; }
         public int GoodUnitNumber { get; set; }
         public int BadUnitNumber { get; set; }
-
+        public DateTime? ReleaseDate { get; set; }
         public Guid BreedId { get; set; }
         public Guid BarnId { get; set; }
         public Guid TechicalStaffId { get; set; }   
