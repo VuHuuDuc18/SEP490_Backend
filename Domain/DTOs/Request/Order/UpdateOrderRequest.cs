@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Domain.DTOs.Request.Order
 {
     public class UpdateOrderRequest
     {
+        [Required(ErrorMessage = "OrderId không được để trống")]
+        public Guid OrderId { get; set; }
         public int? GoodUnitStock { get; set; }
         public int? BadUnitStock { get; set; }
         public DateTime? PickupDate { get; set; }
-        public DateTime? UpdatedDate { get; set; }
     }
 }

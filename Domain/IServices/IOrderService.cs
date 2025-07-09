@@ -1,18 +1,18 @@
 ﻿using Application.Wrappers;
+using Domain.Dto.Request;
+using Domain.Dto.Response;
+using Domain.Dto.Response.User;
 using Domain.DTOs.Request.Order;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Domain.IServices
 {
     public interface IOrderService
     {
-        Task<Response<string>> CreateOrder(CreateOrderRequest request, CancellationToken cancellationToken = default);
-        Response<ViewOrderDetailsResponse> ViewOrderDetails(Guid OrderId, CancellationToken cancellationToken = default);
-        Task<Response<string>> UpdateOrder(UpdateOrderRequest request, CancellationToken cancellationToken = default);
-        Task<Response<string>> CancelOrder(Guid OrderId, CancellationToken cancellationToken = default);
+        Task<Response<string>> CustomerCreateOrder(CreateOrderRequest request, CancellationToken cancellationToken = default);
+        Task<Response<OrderResponse>> CustomerOrderDetails(Guid OrderId, CancellationToken cancellationToken = default);
+        Task<Response<string>> CustomerUpdateOrder(UpdateOrderRequest request, CancellationToken cancellationToken = default);
+        Task<Response<string>> CustomerCancelOrder(Guid OrderId, CancellationToken cancellationToken = default);
+        Task<Response<List<OrderResponse>>> CustomerGetAllOrders(CancellationToken cancellationToken = default);
+        Task<Response<PaginationSet<OrderResponse>>> CustomerGetPagiantionList(ListingRequest request, CancellationToken cancellationToken = default);
     }
 }
