@@ -23,6 +23,7 @@ namespace Infrastructure
             //Add Cloudiary Config to DI Container
             services.Configure<CloudinaryConfig>(configuration.GetSection("Cloudinary"));
             //Register services
+            services.AddTransient<IOrderService, OrderService>();
             services.AddTransient<IBarnPlanService, BarnPlanService>();
             services.AddTransient<IUserService, UserService>();
             services.AddScoped<IBarnService, BarnService>();

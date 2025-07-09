@@ -22,8 +22,10 @@ namespace Domain.Dto.Response.Barn
     }
     public class LiveStockCircleResponse
     {
+        public Guid Id { get; set;}
         public string LivestockCircleName { get; set; }
         public DateTime? StartDate { get; set; }
+        public DateTime? ReleaseDate { get; set; }
         public int TotalUnit { get; set; }
         public int DeadUnit { get; set; }
         public float AverageWeight { get; set; }

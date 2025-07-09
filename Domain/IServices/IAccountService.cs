@@ -1,15 +1,9 @@
 ﻿using Application.Wrappers;
 using Domain.Dto.Request;
 using Domain.Dto.Request.Account;
-using Domain.Dto.Request.User;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Account;
 using Entities.EntityModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Domain.IServices
 {

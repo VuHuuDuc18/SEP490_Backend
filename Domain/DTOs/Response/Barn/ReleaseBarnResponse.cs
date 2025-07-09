@@ -23,5 +23,6 @@ namespace Domain.Dto.Response.Barn
         public string BreedCategory{ get; set; }
         public string Breed{ get; set; }
         public DateTime? StartDate { get; set; }
+        public DateTime? ReleaseDate { get; set; }
     }
 }

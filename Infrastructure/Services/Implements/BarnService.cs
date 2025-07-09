@@ -568,6 +568,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                         BreedCategory = x.Breed.BreedCategory.Name,
                         Breed = x.Breed.BreedName,
                         StartDate = x.StartDate,
+                        ReleaseDate = x.ReleaseDate,
                         Age = (DateTime.UtcNow - (DateTime)x.StartDate).Days < 0 ? 0 : (DateTime.UtcNow - (DateTime)x.StartDate).Days
                     });
 
