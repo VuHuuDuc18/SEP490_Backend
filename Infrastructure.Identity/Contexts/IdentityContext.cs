@@ -36,7 +36,8 @@ namespace Infrastructure.Identity.Contexts
         public virtual DbSet<ImageBreed> ImageBreeds { get; set; }
         public virtual DbSet<ImageLivestockCircle> ImageLivestockCircles { get; set; }
         public virtual DbSet<ImageDailyReport> ImageDailyReports { get; set; }
-        public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
+        public virtual DbSet<Notification> Notifications { get; set; }
 
         public IdentityContext(DbContextOptions<IdentityContext> options):base(options)
         {
