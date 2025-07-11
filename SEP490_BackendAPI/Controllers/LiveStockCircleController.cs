@@ -106,6 +106,8 @@ namespace SEP490_BackendAPI.Controllers
             return Ok(circles);
         }
 
+
+
         /// <summary>
         /// Lấy danh sách chu kỳ chăn nuôi theo ID của nhân viên kỹ thuật.
         /// </summary>
@@ -183,6 +185,38 @@ namespace SEP490_BackendAPI.Controllers
         {
             var result = await _livestockCircleService.GetReleasedLivestockCircleById(id);
             return Ok(result);
+        }
+
+        [HttpPost("getFoodRemaining/{liveStockCircleId}")]
+        public async Task<IActionResult> GetFoodRemaining(
+            [FromRoute]Guid liveStockCircleId,
+            [FromBody] ListingRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            var (foodRemainings, errorMessage) = await _livestockCircleService.GetFoodRemaining(liveStockCircleId, request, cancellationToken);
+
+            if (errorMessage != null)
+            {
+                return BadRequest(new { Error = errorMessage });
+            }
+
+            return Ok(foodRemainings);
+        }
+
+        [HttpPost("getMedcineRemaining/{liveStockCircleId}")]
+        public async Task<IActionResult> GetMedicineRemaining(
+            [FromRoute] Guid liveStockCircleId,
+            [FromBody] ListingRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            var (medicineRemainings, errorMessage) = await _livestockCircleService.GetMedicineRemaining(liveStockCircleId, request, cancellationToken);
+
+            if (errorMessage != null)
+            {
+                return BadRequest(new { Error = errorMessage });
+            }
+
+            return Ok(medicineRemainings);
         }
     } 
 }
