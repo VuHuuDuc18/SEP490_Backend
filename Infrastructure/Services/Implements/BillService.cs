@@ -282,57 +282,138 @@ namespace Infrastructure.Services.Implements
 
         public async Task<(BillResponse Bill, string ErrorMessage)> GetBillById(Guid billId, CancellationToken cancellationToken = default)
         {
-            var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetById(billId, checkError);
-            if (checkError.Value?.IsError == true) return (null, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
-            if (bill == null) return (null, "Hóa đơn không tồn tại.");
-            var userRequest = await _userRepository.GetById(bill.UserRequestId, checkError);
-            var lscInfo = await _livestockCircleRepository.GetById(bill.LivestockCircleId, checkError);
-            var barnInfo = await _barnRepository.GetById(lscInfo.BarnId, checkError);
-            var wokerInfo = await _userRepository.GetById(barnInfo.WorkerId, checkError);
-            var userRequestResponse = new UserRequestResponse
+            try
             {
-                Id = userRequest.Id,
-                FullName = userRequest.FullName,
-                Email = userRequest.Email
-            };
-            var workerReponse = new WokerResponse
-            {
-                Id = wokerInfo.Id,
-                FullName = wokerInfo.FullName,
-                Email = wokerInfo.Email
-            };
-            var barnInfoResponse = new BarnDetailResponse
-            {
-                Id = barnInfo.Id,
-                Address = barnInfo.Address,
-                BarnName = barnInfo.BarnName,
-                Image = barnInfo.Image,
-                Worker = workerReponse
-            };
-            var lscInfoResponse = new LivestockCircleBillResponse
-            {
-                Id= lscInfo.Id,
-                BarnDetailResponse = barnInfoResponse,
-                LivestockCircleName = lscInfo.LivestockCircleName,
-            };
-            var response = new BillResponse
-            {
-                Id = bill.Id,
-                UserRequest = userRequestResponse,
-                LivestockCircle = lscInfoResponse,
-                Name = bill.Name,
-                Note = bill.Note,
-                Total = bill.Total,
-                Status = bill.Status,
-                Weight = bill.Weight,
-                IsActive = bill.IsActive
-            };
+                var checkError = new Ref<CheckError>();
+                var bill = await _billRepository.GetById(billId, checkError);
+                if (checkError.Value?.IsError == true)
+                    return (null, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
+                if (bill == null)
+                    return (null, "Hóa đơn không tồn tại.");
 
-            return (response, null);
+                var userRequest = await _userRepository.GetById(bill.UserRequestId, checkError);
+                var lscInfo = await _livestockCircleRepository.GetById(bill.LivestockCircleId, checkError);
+                var barnInfo = await _barnRepository.GetById(lscInfo.BarnId, checkError);
+                var workerInfo = await _userRepository.GetById(barnInfo.WorkerId, checkError);
+
+                // Lấy danh sách BillItems
+                var billItems = await _billItemRepository.GetQueryable(x => x.BillId == billId && x.IsActive)
+                    .ToListAsync(cancellationToken);
+                var billItemResponses = new List<BillItemResponse>();
+
+                foreach (var billItem in billItems)
+                {
+                    if (bill.TypeBill == TypeBill.FOOD)
+                    {
+                        var food = await _foodRepository.GetById(billItem.FoodId.Value, checkError);
+                        var images = await _foodImageRepository.GetQueryable(x => x.FoodId == food.Id)
+                            .ToListAsync(cancellationToken);
+                        var foodResponse = new FoodBillResponse
+                        {
+                            Id = food.Id,
+                            FoodName = food.FoodName,
+                            Stock = food.Stock,
+                            Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                        };
+                        billItemResponses.Add(new BillItemResponse
+                        {
+                            Id = billItem.Id,
+                            Food = foodResponse,
+                            Stock = billItem.Stock,
+                            IsActive = billItem.IsActive
+                        });
+                    }
+                    else if (bill.TypeBill == TypeBill.MEDICINE)
+                    {
+                        var medicine = await _medicineRepository.GetById(billItem.MedicineId.Value, checkError);
+                        var images = await _medicineImageRepository.GetQueryable(x => x.MedicineId == medicine.Id)
+                            .ToListAsync(cancellationToken);
+                        var medicineResponse = new MedicineBillResponse
+                        {
+                            Id = medicine.Id,
+                            MedicineName = medicine.MedicineName,
+                            Stock = medicine.Stock,
+                            Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                        };
+                        billItemResponses.Add(new BillItemResponse
+                        {
+                            Id = billItem.Id,
+                            Medicine = medicineResponse,
+                            Stock = billItem.Stock,
+                            IsActive = billItem.IsActive
+                        });
+                    }
+                    else
+                    {
+                        var breed = await _breedRepository.GetById(billItem.BreedId.Value, checkError);
+                        var images = await _breedImageRepository.GetQueryable(x => x.BreedId == breed.Id)
+                            .ToListAsync(cancellationToken);
+                        var breedResponse = new BreedBillResponse
+                        {
+                            Id = breed.Id,
+                            BreedName = breed.BreedName,
+                            Stock = breed.Stock,
+                            Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                        };
+                        billItemResponses.Add(new BillItemResponse
+                        {
+                            Id = billItem.Id,
+                            Breed = breedResponse,
+                            Stock = billItem.Stock,
+                            IsActive = billItem.IsActive
+                        });
+                    }
+                }
+
+                var userRequestResponse = new UserRequestResponse
+                {
+                    Id = userRequest.Id,
+                    FullName = userRequest.FullName,
+                    Email = userRequest.Email
+                };
+                var workerResponse = new WokerResponse
+                {
+                    Id = workerInfo.Id,
+                    FullName = workerInfo.FullName,
+                    Email = workerInfo.Email
+                };
+                var barnInfoResponse = new BarnDetailResponse
+                {
+                    Id = barnInfo.Id,
+                    Address = barnInfo.Address,
+                    BarnName = barnInfo.BarnName,
+                    Image = barnInfo.Image,
+                    Worker = workerResponse
+                };
+                var lscInfoResponse = new LivestockCircleBillResponse
+                {
+                    Id = lscInfo.Id,
+                    BarnDetailResponse = barnInfoResponse,
+                    LivestockCircleName = lscInfo.LivestockCircleName
+                };
+                var response = new BillResponse
+                {
+                    Id = bill.Id,
+                    UserRequest = userRequestResponse,
+                    LivestockCircle = lscInfoResponse,
+                    Name = bill.Name,
+                    Note = bill.Note,
+                    Total = bill.Total,
+                    Status = bill.Status,
+                    Weight = bill.Weight,
+                    IsActive = bill.IsActive,
+                    BillItem = billItemResponses // Thêm danh sách BillItems
+                };
+
+                return (response, null);
+            }
+            catch (Exception ex)
+            {
+                return (null, $"Lỗi khi lấy hóa đơn: {ex.Message}");
+            }
         }
 
-        public async Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetPaginatedBillList(ListingRequest request, CancellationToken cancellationToken = default)
+    public async Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetPaginatedBillList(ListingRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
