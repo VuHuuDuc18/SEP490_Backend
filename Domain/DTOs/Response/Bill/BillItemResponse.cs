@@ -25,6 +25,8 @@ namespace Domain.Dto.Response.Bill
     {
         public Guid Id { get; set; }
         public string FoodName { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? Stock {  get; set; }
         public string Thumbnail { get; set; }
     }
 
@@ -32,12 +34,16 @@ namespace Domain.Dto.Response.Bill
     {
         public Guid Id { get; set; }
         public string MedicineName { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? Stock { get; set; }
         public string Thumbnail { get; set; }
     }
     public class BreedBillResponse
     {
         public Guid Id { get; set; }
         public string BreedName { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public int? Stock { get; set; }
         public string Thumbnail { get; set; }
     }
 }

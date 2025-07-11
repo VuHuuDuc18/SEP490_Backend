@@ -36,7 +36,7 @@ namespace Domain.IServices
         /// <summary>
         /// Lấy danh sách chuồng trại theo ID của công nhân.
         /// </summary>
-        Task<(List<BarnResponse> Barns, string ErrorMessage)> GetBarnByWorker(Guid workerId, CancellationToken cancellationToken = default);
+        Task<(PaginationSet<BarnResponse> Result, string ErrorMessage)> GetBarnByWorker(Guid workerId, ListingRequest request, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Lấy danh sách phân trang tìm kiếm lọc tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn, bao gồm danh sách ảnh và thumbnail.
