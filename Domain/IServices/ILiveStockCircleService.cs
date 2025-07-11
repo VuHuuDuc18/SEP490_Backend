@@ -72,13 +72,17 @@ namespace Domain.IServices
         /// <summary>
         /// Thay đổi trạng thái (Status) của một chu kỳ chăn nuôi.
         /// </summary>
-        Task<(bool Success, string ErrorMessage)> ChangeStatus(
-            Guid livestockCircleId,
-            string status,
-            CancellationToken cancellationToken = default);
+        //Task<(bool Success, string ErrorMessage)> ChangeStatus(
+        //    Guid livestockCircleId,
+        //    string status,
+        //    CancellationToken cancellationToken = default);
 
-        // cap nhat trang thai xuat chuong cho 1 lua nuoi
-        public Task<bool> ReleaseBarn(Guid id);
+        //Lay lua chan nuoi hien tai cua chuong
+        public Task<(LiveStockCircleActive Circle, string ErrorMessage)> GetActiveLiveStockCircleByBarnId(
+           Guid barnId,
+           CancellationToken cancellationToken = default);
+            // cap nhat trang thai xuat chuong cho 1 lua nuoi
+            public Task<bool> ReleaseBarn(Guid id);
         //lay danh sach cac chuong duoc giao quan ly
         public Task<PaginationSet<LivestockCircleResponse>> GetAssignedBarn(Guid tsid,ListingRequest req);
         // danh sach lich su chan nuoi cua 1 chuong

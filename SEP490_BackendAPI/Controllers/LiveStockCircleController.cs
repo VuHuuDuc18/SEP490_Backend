@@ -86,10 +86,20 @@ namespace SEP490_BackendAPI.Controllers
         /// <summary>
         /// Lấy danh sách tất cả chu kỳ chăn nuôi theo status/barn
         /// </summary>
-        [HttpGet("getLiveStockCircleByBarnIdAndStatus")]
-        public async Task<IActionResult> GetLiveStockCircleByBarnIdAndStatus(string status = null, Guid? barnId = null, CancellationToken cancellationToken = default)
+        //[HttpGet("getLiveStockCircleByBarnIdAndStatus")]
+        //public async Task<IActionResult> GetLiveStockCircleByBarnIdAndStatus(string status = null, Guid? barnId = null, CancellationToken cancellationToken = default)
+        //{
+        //    var (circles, errorMessage) = await _livestockCircleService.GetLiveStockCircleByBarnIdAndStatus(status, barnId, cancellationToken);
+        //    if (circles == null)
+        //        return StatusCode(StatusCodes.Status500InternalServerError, new { error = errorMessage });
+
+        //    return Ok(circles);
+        //}
+
+        [HttpGet("getCurrentLiveStockCircleByBarnId/{barnId}")]
+        public async Task<IActionResult> GetLiveStockCircleByBarnIdAndStatus([FromRoute] Guid barnId, CancellationToken cancellationToken = default)
         {
-            var (circles, errorMessage) = await _livestockCircleService.GetLiveStockCircleByBarnIdAndStatus(status, barnId, cancellationToken);
+            var (circles, errorMessage) = await _livestockCircleService.GetActiveLiveStockCircleByBarnId(barnId, cancellationToken);
             if (circles == null)
                 return StatusCode(StatusCodes.Status500InternalServerError, new { error = errorMessage });
 
@@ -161,20 +171,7 @@ namespace SEP490_BackendAPI.Controllers
 
 
         }
-        [HttpPost("changeStatus")]
-        public async Task<IActionResult> ChangeStatus([FromBody]ChangeStatusRequest req)
-        {
-            if (req.Status.Equals(StatusConstant.RELEASESTAT))
-            {
-                var result = await _livestockCircleService.ReleaseBarn(req.LivestockCircleId);
-                return Ok(result);
-            }
-            else
-            {
-                var result = await _livestockCircleService.ChangeStatus(req.LivestockCircleId, req.Status);
-                return Ok(result.Success?result.Success : result.ErrorMessage);
-            }
-        }
+
         [HttpPost("sale/getBarn")]
         public async Task<IActionResult> getReleasedBarn([FromBody]ListingRequest req)
         {

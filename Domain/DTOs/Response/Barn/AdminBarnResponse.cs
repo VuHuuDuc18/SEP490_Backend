@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Domain.Dto.Response.Bill;
+using Domain.Dto.Response.User;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -37,14 +39,13 @@ namespace Domain.Dto.Response.Barn
             public string LivestockCircleName { get; set; }
             public string Status { get; set; }
             public DateTime? StartDate { get; set; }
-            public DateTime? EndDate { get; set; }
             public int TotalUnit { get; set; }
             public int DeadUnit { get; set; }
             public float AverageWeight { get; set; }
             public int GoodUnitNumber { get; set; }
             public int BadUnitNumber { get; set; }
-            public Guid BreedId { get; set; }
-            public Guid TechicalStaffId { get; set; }
+            public BreedBillResponse Breed { get; set; }
+            public UserItemResponse TechicalStaff { get; set; }
         }
     }
 

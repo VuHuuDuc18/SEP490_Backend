@@ -37,7 +37,7 @@ namespace SEP490_BackendAPI.Controllers
         /// Cập nhật thông tin một chuồng trại.
         /// </summary>
         [HttpPut("update/{BarnId}")]
-        public async Task<IActionResult> Update(Guid BarnId, [FromBody] UpdateBarnRequest requestDto, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Update([FromRoute] Guid BarnId, [FromBody] UpdateBarnRequest requestDto, CancellationToken cancellationToken = default)
         {
             var (success, errorMessage) = await _barnService.UpdateBarn(BarnId, requestDto, cancellationToken);
             if (!success)
@@ -61,7 +61,7 @@ namespace SEP490_BackendAPI.Controllers
         /// Lấy thông tin một chuồng trại theo ID.
         /// </summary>
         [HttpGet("getBarnById/{BarnId}")]
-        public async Task<IActionResult> GetBarnById(Guid BarnId, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetBarnById([FromRoute] Guid BarnId, CancellationToken cancellationToken = default)
         {
             var (barn, errorMessage) = await _barnService.GetBarnById(BarnId, cancellationToken);
             if (barn == null)
@@ -73,9 +73,9 @@ namespace SEP490_BackendAPI.Controllers
         /// Lấy danh sách chuồng trại theo ID của công nhân.
         /// </summary>
         [HttpGet("getBarnByWorker/{workerId}")]
-        public async Task<IActionResult> GetByWorker(Guid workerId, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetByWorker([FromRoute] Guid workerId, [FromBody] ListingRequest request, CancellationToken cancellationToken = default)
         {
-            var (barns, errorMessage) = await _barnService.GetBarnByWorker(workerId, cancellationToken);
+            var (barns, errorMessage) = await _barnService.GetBarnByWorker(workerId, request, cancellationToken);
             if (barns == null)
                 return NotFound(errorMessage ?? "Không tìm thấy danh sách chuồng trại theo người gia công.");
             return Ok(barns);
@@ -124,7 +124,7 @@ namespace SEP490_BackendAPI.Controllers
         /// Lấy chi tiết chuồng trại cho admin, bao gồm thông tin LivestockCircle đang hoạt động (nếu có).
         /// </summary>
         [HttpGet("getBarnDetailAdmin/{barnId}")]
-        public async Task<IActionResult> GetAdminBarnDetail(Guid barnId, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetAdminBarnDetail([FromRoute] Guid barnId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -147,7 +147,7 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpGet("customer/getReleaseBarnDetail/{BarnId}")]
-        public async Task<IActionResult> getReleaseBarnDetail(Guid BarnId, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> getReleaseBarnDetail([FromRoute] Guid BarnId, CancellationToken cancellationToken = default)
         {
             return Ok(await _barnService.GetReleaseBarnDetail(BarnId, cancellationToken));
         }

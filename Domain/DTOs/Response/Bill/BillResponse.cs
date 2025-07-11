@@ -19,6 +19,7 @@ namespace Domain.Dto.Response.Bill
         public int Total { get; set; }
         public float? Weight { get; set; }
         public bool IsActive { get; set; }
+        public List<BillItemResponse> BillItem { get; set; }
     }
 
     public class UserRequestResponse
