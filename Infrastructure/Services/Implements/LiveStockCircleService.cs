@@ -608,7 +608,7 @@ namespace Infrastructure.Services.Implements
                 if (invalidFields.Any())
                     throw new Exception($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
 
-                var query = _livestockCircleRepository.GetQueryable(x => x.IsActive);
+                var query = _livestockCircleRepository.GetQueryable(x => x.IsActive).Where(it=>it.Status.Equals(StatusConstant.RELEASESTAT));
 
                 if (request.SearchString?.Any() == true)
                     query = query.SearchString(request.SearchString);
@@ -695,7 +695,7 @@ namespace Infrastructure.Services.Implements
                 var livestockCircleData = await _livestockCircleRepository.GetQueryable(it => it.IsActive)
                     .Include(it => it.Breed).ThenInclude(it => it.BreedCategory)
                     .Include(it => it.Barn).ThenInclude(it => it.Worker)
-                    .FirstOrDefaultAsync(it => it.Id == livestockCircleId);
+                    .FirstOrDefaultAsync(it => it.Id == livestockCircleId && it.Status.Equals(StatusConstant.RELEASESTAT));
                 ReleasedLivetockDetail result = new ReleasedLivetockDetail()
                 {
                     AverageWeight = livestockCircleData.AverageWeight,

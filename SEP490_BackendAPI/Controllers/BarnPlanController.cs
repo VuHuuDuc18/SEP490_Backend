@@ -48,7 +48,7 @@ namespace SEP490_BackendAPI.Controllers
         [HttpPost("history/{id}")]
         public async Task<IActionResult> getPlanHistory([FromRoute]Guid id,[FromBody]ListingRequest req)
         {
-            var result = _barnPlanService.ListingHistoryBarnPlan(id,req);
+            var result = await _barnPlanService.ListingHistoryBarnPlan(id,req);
             return Ok(result);  
         }
     }
