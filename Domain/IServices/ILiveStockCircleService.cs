@@ -2,6 +2,7 @@
 using Domain.Dto.Request.LivestockCircle;
 using Domain.Dto.Response;
 using Domain.Dto.Response.LivestockCircle;
+using Domain.DTOs.Response.LivestockCircle;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -81,8 +82,21 @@ namespace Domain.IServices
         public Task<(LiveStockCircleActive Circle, string ErrorMessage)> GetActiveLiveStockCircleByBarnId(
            Guid barnId,
            CancellationToken cancellationToken = default);
-            // cap nhat trang thai xuat chuong cho 1 lua nuoi
-            public Task<bool> ReleaseBarn(Guid id);
+
+        //danh sach thuc an con trong chuong
+        public  Task<(PaginationSet<FoodRemainingResponse> FoodRemainings, string ErrorMessage)> GetFoodRemaining(
+           Guid liveStockCircleId,
+           ListingRequest request,
+           CancellationToken cancellationToken = default);
+
+        //danh sach thuoc con trong chuong
+        public Task<(PaginationSet<MedicineRemainingResponse> MedicineRemainings, string ErrorMessage)> GetMedicineRemaining(
+       Guid liveStockCircleId,
+       ListingRequest request,
+       CancellationToken cancellationToken = default);
+
+        // cap nhat trang thai xuat chuong cho 1 lua nuoi
+        public Task<bool> ReleaseBarn(Guid id);
         //lay danh sach cac chuong duoc giao quan ly
         public Task<PaginationSet<LivestockCircleResponse>> GetAssignedBarn(Guid tsid,ListingRequest req);
         // danh sach lich su chan nuoi cua 1 chuong
