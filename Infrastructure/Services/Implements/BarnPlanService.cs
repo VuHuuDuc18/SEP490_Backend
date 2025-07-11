@@ -34,7 +34,7 @@ namespace Infrastructure.Services.Implements
         {
             // xu ly daily
             DateTime formatedStartDate, formatedEndDate;
-            ValidTime((bool)(req.IsDaily == null ? false : req.IsDaily), req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
+            ValidTime(true,(bool)(req.IsDaily == null ? false : req.IsDaily), req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
 
             // insert barn
             BarnPlan barnPlanDetail = new BarnPlan()
@@ -217,7 +217,7 @@ namespace Infrastructure.Services.Implements
         public async Task<bool> UpdateBarnPlan(UpdateBarnPlanRequest req)
         {
             DateTime formatedStartDate, formatedEndDate;
-            ValidTime((bool)(req.IsDaily == null ? false : req.IsDaily), req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
+            ValidTime(false,(bool)(req.IsDaily == null ? false : req.IsDaily), req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
 
             var updateItem = await _barnplanrepo.GetById(req.Id);
             if (updateItem == null)
@@ -297,7 +297,7 @@ namespace Infrastructure.Services.Implements
                 throw new Exception("Không thể tạo kế hoạch thuốc");
             }
         }
-        protected void ValidTime(bool isDaily, DateTime? StartDate, DateTime? EndDate, out DateTime FormatedStartDate, out DateTime FormatedEndDate)
+        protected void ValidTime(bool isCreate,bool isDaily, DateTime? StartDate, DateTime? EndDate, out DateTime FormatedStartDate, out DateTime FormatedEndDate)
         {
             if (isDaily)
             {
@@ -316,7 +316,7 @@ namespace Infrastructure.Services.Implements
             }
             var conflictTimeItem = _barnplanrepo.GetQueryable(x => x.IsActive)
                                     .FirstOrDefault(it => !(EndDate <= it.StartDate && StartDate >= it.EndDate));
-            if (conflictTimeItem != null)
+            if (conflictTimeItem != null && isCreate)
             {
                 throw new ArgumentException("Đã đặt kế hoạch cho ngày này");
             }
