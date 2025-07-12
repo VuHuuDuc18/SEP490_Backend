@@ -1,4 +1,5 @@
 ﻿using Domain.Dto.Response.Breed;
+using Domain.Dto.Response.LivestockCircle;
 using Entities.EntityModel;
 using System;
 using System.Collections.Generic;
@@ -17,22 +18,22 @@ namespace Domain.Dto.Response.Barn
         public string Address { get; set; }
         public string Image { get; set; }
 
-        public LiveStockCircleResponse LiveStockCircle { get; set; }
+        public LivestockCircleResponse LiveStockCircle { get; set; }
         public BreedResponse Breed { get; set; }
     }
-    public class LiveStockCircleResponse
-    {
-        public Guid Id { get; set;}
-        public string LivestockCircleName { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? ReleaseDate { get; set; }
-        public int TotalUnit { get; set; }
-        public int DeadUnit { get; set; }
-        public float AverageWeight { get; set; }
-        public int GoodUnitNumber { get; set; }
-        public int BadUnitNumber { get; set; }
-        public List<ImageLivestockCircleResponse>? Images {  get; set; }
-    }
+    //public class LiveStockCircleResponse
+    //{
+    //    public Guid Id { get; set;}
+    //    public string LivestockCircleName { get; set; }
+    //    public DateTime? StartDate { get; set; }
+    //    public DateTime? ReleaseDate { get; set; }
+    //    public int TotalUnit { get; set; }
+    //    public int DeadUnit { get; set; }
+    //    public float AverageWeight { get; set; }
+    //    public int GoodUnitNumber { get; set; }
+    //    public int BadUnitNumber { get; set; }
+    //    public List<ImageLivestockCircleResponse>? Images {  get; set; }
+    //}
     public class ImageLivestockCircleResponse
     {
         public Guid Id {  get; set; }

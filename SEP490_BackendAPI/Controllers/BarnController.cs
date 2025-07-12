@@ -1,6 +1,7 @@
 using Domain.Dto.Request;
 using Domain.Dto.Request.Barn;
 using Domain.IServices;
+using Infrastructure.Services.Implements;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using System.Threading.Tasks;
@@ -137,6 +138,24 @@ namespace SEP490_BackendAPI.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { Message = $"Lỗi khi lấy chi tiết chuồng trại: {ex.Message}" });
+            }
+        }
+        [HttpPost("technical-staff/assignedbarn")]
+        public async Task<IActionResult> GetAssignedBarn([FromBody] ListingRequest req)
+        {
+            //Guid technicalStaffId;
+            try
+            {
+                Guid.TryParse(User.FindFirst("uid")?.Value, out Guid technicalStaffId);
+                var result = await _barnService.GetAssignedBarn(technicalStaffId, req);
+                if (result == null)
+                    return StatusCode(StatusCodes.Status500InternalServerError);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("User không hợp lệ");
             }
         }
 

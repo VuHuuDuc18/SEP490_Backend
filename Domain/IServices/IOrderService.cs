@@ -3,6 +3,7 @@ using Domain.Dto.Request;
 using Domain.Dto.Response;
 using Domain.Dto.Response.User;
 using Domain.DTOs.Request.Order;
+using Domain.DTOs.Response.Order;
 
 namespace Domain.IServices
 {
@@ -14,5 +15,7 @@ namespace Domain.IServices
         Task<Response<string>> CustomerCancelOrder(Guid OrderId, CancellationToken cancellationToken = default);
         Task<Response<List<OrderResponse>>> CustomerGetAllOrders(CancellationToken cancellationToken = default);
         Task<Response<PaginationSet<OrderResponse>>> CustomerGetPagiantionList(ListingRequest request, CancellationToken cancellationToken = default);
+        public Task<StatisticsOrderResponse> GetStatisticData(StatisticsOrderRequest request);
+        
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Dto.Response.LivestockCircle;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,24 +28,24 @@ namespace Domain.Dto.Response.Barn
             public string Image { get; set; }
             public WokerResponse Worker { get; set; }
             public bool IsActive { get; set; }
-            public ActiveLivestockCircleResponse? ActiveLivestockCircle { get; set; } // Thông tin LivestockCircle đang hoạt động (nếu có)
+            public LivestockCircleResponse? ActiveLivestockCircle { get; set; } // Thông tin LivestockCircle đang hoạt động (nếu có)
         }
 
         // DTO để hiển thị thông tin LivestockCircle đang hoạt động
-        public class ActiveLivestockCircleResponse
-        {
-            public Guid Id { get; set; }
-            public string LivestockCircleName { get; set; }
-            public string Status { get; set; }
-            public DateTime? StartDate { get; set; }
-            public DateTime? EndDate { get; set; }
-            public int TotalUnit { get; set; }
-            public int DeadUnit { get; set; }
-            public float AverageWeight { get; set; }
-            public int GoodUnitNumber { get; set; }
-            public int BadUnitNumber { get; set; }
-            public Guid BreedId { get; set; }
-            public Guid TechicalStaffId { get; set; }
-        }
+        //public class ActiveLivestockCircleResponse
+        //{
+        //    public Guid Id { get; set; }
+        //    public string LivestockCircleName { get; set; }
+        //    public string Status { get; set; }
+        //    public DateTime? StartDate { get; set; }
+        //    public DateTime? EndDate { get; set; }
+        //    public int TotalUnit { get; set; }
+        //    public int DeadUnit { get; set; }
+        //    public float AverageWeight { get; set; }
+        //    public int GoodUnitNumber { get; set; }
+        //    public int BadUnitNumber { get; set; }
+        //    public Guid BreedId { get; set; }
+        //    public Guid TechicalStaffId { get; set; }
+        //}
     }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Dto.Response.Barn;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,5 +23,6 @@ namespace Domain.Dto.Response.LivestockCircle
         public Guid BarnId { get; set; }
         public Guid TechicalStaffId { get; set; }
         public bool IsActive { get; set; }
+        public List<ImageLivestockCircleResponse>? Images { get; set; }
     }
 }
