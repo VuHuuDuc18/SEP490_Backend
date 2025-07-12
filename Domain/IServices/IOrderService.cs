@@ -16,6 +16,8 @@ namespace Domain.IServices
         Task<Response<List<OrderResponse>>> CustomerGetAllOrders(CancellationToken cancellationToken = default);
         Task<Response<PaginationSet<OrderResponse>>> CustomerGetPagiantionList(ListingRequest request, CancellationToken cancellationToken = default);
         public Task<StatisticsOrderResponse> GetStatisticData(StatisticsOrderRequest request);
+        public Task<PaginationSet<OrderResponse>> GetAllOrder(ListingRequest request);
+        public Task<bool> ApproveOrder(ApproveOrderRequest request);
         
     }
 }
