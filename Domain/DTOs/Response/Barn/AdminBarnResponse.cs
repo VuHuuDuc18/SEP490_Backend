@@ -31,7 +31,7 @@ namespace Domain.Dto.Response.Barn
             public string Image { get; set; }
             public WokerResponse Worker { get; set; }
             public bool IsActive { get; set; }
-            public LivestockCircleResponse? ActiveLivestockCircle { get; set; } // Thông tin LivestockCircle đang hoạt động (nếu có)
+            public ActiveLivestockCircleResponse? ActiveLivestockCircle { get; set; } // Thông tin LivestockCircle đang hoạt động (nếu có)
         }
 
        

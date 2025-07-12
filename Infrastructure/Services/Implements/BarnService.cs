@@ -504,7 +504,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
         /// Lấy chi tiết chuồng trại cho admin, bao gồm thông tin LivestockCircle đang hoạt động (nếu có)
         /// </summary>
         public async Task<(AdminBarnDetailResponse Barn, string ErrorMessage)> GetAdminBarnDetailAsync(
-            Guid barnId, CancellationToken cancellationToken = default)
+      Guid barnId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -530,10 +530,9 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                     .GetQueryable(x => x.BarnId == barnId && x.IsActive && x.Status != StatusConstant.CANCELSTAT && x.Status != StatusConstant.DONESTAT)
                     .FirstOrDefaultAsync(cancellationToken);
 
-                LivestockCircleResponse? activeLivestockCircleResponse = null;
+                ActiveLivestockCircleResponse? activeLivestockCircleResponse = null;
                 if (activeLivestockCircle != null)
                 {
-
                     var technicalStaff = await _userRepository.GetById(activeLivestockCircle.TechicalStaffId);
                     var technicalStaffResponse = new UserItemResponse
                     {
@@ -551,7 +550,6 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                         Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
                     };
                     activeLivestockCircleResponse = new ActiveLivestockCircleResponse
-
                     {
                         Id = activeLivestockCircle.Id,
                         LivestockCircleName = activeLivestockCircle.LivestockCircleName,
@@ -562,10 +560,8 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                         AverageWeight = activeLivestockCircle.AverageWeight,
                         GoodUnitNumber = activeLivestockCircle.GoodUnitNumber,
                         BadUnitNumber = activeLivestockCircle.BadUnitNumber,
-
                         Breed = breedResponse,
                         TechicalStaff = technicalStaffResponse
-
                     };
                 }
 
