@@ -2,6 +2,7 @@
 using Domain.Dto.Request;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Barn;
+using Domain.Dto.Response.BarnPlan;
 using Domain.DTOs.Request.Order;
 using Domain.DTOs.Response.Order;
 using Domain.Helper;
@@ -445,6 +446,76 @@ namespace Infrastructure.Services.Implements
                 TotalGoodUnitStockSold = ListItem.Sum(x => x.GoodUnitStockSold ?? 0),
             };
             return result;
+        }
+
+        public async Task<PaginationSet<OrderResponse>> GetAllOrder(ListingRequest request)
+        {
+            try
+            {
+                if (request == null)
+                    throw new Exception("Yêu cầu không được null.");
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                    throw new Exception("PageIndex và PageSize phải lớn hơn 0.");
+
+                var validFields = typeof(BillItem).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any())
+                    throw new Exception($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+
+
+
+                var query = _orderRepository.GetQueryable(x => x.IsActive);
+
+                if (request.SearchString?.Any() == true)
+                    query = query.SearchString(request.SearchString);
+
+                if (request.Filter?.Any() == true)
+                    query = query.Filter(request.Filter);
+
+                var result = await query.Select(x => new OrderResponse()
+                {
+                    Id = x.Id,
+                    CustomerId = x.CustomerId,
+                    LivestockCircleId = x.LivestockCircleId,
+                    GoodUnitStock = x.GoodUnitStock,
+                    BadUnitStock = x.BadUnitStock,
+                    TotalBill = x.TotalBill,
+                    Status = x.Status,
+                    CreateDate = x.CreatedDate,
+                    PickupDate = x.PickupDate
+                }).Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                return (result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi lấy danh sách: {ex.Message}");
+            }
+            
+        }
+
+        public async Task<bool> ApproveOrder(ApproveOrderRequest request)
+        {
+            try
+            {
+                var orderItem =await _orderRepository.GetById(request.OrderId);
+                if (orderItem == null)
+                {
+                    throw new Exception("Không tìm thấy đơn ");
+                }
+                orderItem.Status = StatusConstant.APPROVED;
+                orderItem.GoodUnitPrice = request.GoodUnitPrice;
+                orderItem.BadUnitPrice = request.BadUnitPrice;
+                orderItem.TotalBill = request.GoodUnitPrice * orderItem.GoodUnitStock + request.BadUnitPrice * orderItem.BadUnitStock;
+
+                _orderRepository.Update(orderItem);
+                return await _orderRepository.CommitAsync() > 0;
+
+            }catch (Exception ex)
+            {
+                throw new Exception("lỗi hệ thống");
+            }
         }
     }
 }

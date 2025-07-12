@@ -106,5 +106,16 @@ namespace SEP490_BackendAPI.Controllers
                 return StatusCode(500, "An error occurred while exporting the statistic.");
             }
         }
+        [HttpPost("sale/get-order-list")]
+        public async Task<IActionResult> GetOrderList(ListingRequest request)
+        {
+            return Ok(await _orderService.GetAllOrder(request));
+        }
+        [HttpPut("sale/approve-order")]
+        public async Task<IActionResult> ApproveOrder(ApproveOrderRequest request)
+        {
+            return Ok(await _orderService.ApproveOrder(request));
+        }
+
     }
 }
