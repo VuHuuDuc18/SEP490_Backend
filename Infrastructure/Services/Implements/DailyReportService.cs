@@ -78,7 +78,7 @@ namespace Infrastructure.Services.Implements
                 return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
 
             var checkError = new Ref<CheckError>();
-            var livestockCircle = await _livestockCircleRepository.GetById(requestDto.LivestockCircleId, checkError);
+            var livestockCircle = await _livestockCircleRepository.GetByIdAsync(requestDto.LivestockCircleId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin vòng chăn nuôi: {checkError.Value.Message}");
             if (livestockCircle == null)
@@ -224,13 +224,13 @@ namespace Infrastructure.Services.Implements
                 return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
 
             var checkError = new Ref<CheckError>();
-            var existing = await _dailyReportRepository.GetById(dailyReportId, checkError);
+            var existing = await _dailyReportRepository.GetByIdAsync(dailyReportId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin báo cáo hàng ngày: {checkError.Value.Message}");
             if (existing == null)
                 return (false, "Không tìm thấy báo cáo hàng ngày.");
 
-            var livestockCircle = await _livestockCircleRepository.GetById(requestDto.LivestockCircleId, checkError);
+            var livestockCircle = await _livestockCircleRepository.GetByIdAsync(requestDto.LivestockCircleId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin vòng chăn nuôi: {checkError.Value.Message}");
             if (livestockCircle == null)
@@ -460,13 +460,13 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
         public async Task<(bool Success, string ErrorMessage)> DisableDailyReport(Guid dailyReportId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var dailyReport = await _dailyReportRepository.GetById(dailyReportId, checkError);
+            var dailyReport = await _dailyReportRepository.GetByIdAsync(dailyReportId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin báo cáo hàng ngày: {checkError.Value.Message}");
             if (dailyReport == null)
                 return (false, "Không tìm thấy báo cáo hàng ngày.");
 
-            var livestockCircle = await _livestockCircleRepository.GetById(dailyReport.LivestockCircleId, checkError);
+            var livestockCircle = await _livestockCircleRepository.GetByIdAsync(dailyReport.LivestockCircleId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin vòng chăn nuôi: {checkError.Value.Message}");
             if (livestockCircle == null)
@@ -535,7 +535,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
             try
             {
                 var checkError = new Ref<CheckError>();
-                var dailyReport = await _dailyReportRepository.GetById(dailyReportId, checkError);
+                var dailyReport = await _dailyReportRepository.GetByIdAsync(dailyReportId, checkError);
                 if (checkError.Value?.IsError == true)
                     return (null, $"Lỗi khi lấy thông tin báo cáo hàng ngày: {checkError.Value.Message}");
                 if (dailyReport == null)
@@ -548,7 +548,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                 var foodReportResponses = new List<FoodReportResponse>();
                 foreach (var foodReport in foodReports)
                 {
-                    var foodDetails = await _foodRepository.GetById(foodReport.FoodId);
+                    var foodDetails = await _foodRepository.GetByIdAsync(foodReport.FoodId);
                     var foodImages = foodDetails != null
                         ? await _foodImageRepository.GetQueryable(x => x.FoodId == foodReport.FoodId).ToListAsync(cancellationToken)
                         : new List<ImageFood>();
@@ -571,7 +571,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                 var medicineReportResponses = new List<MedicineReportResponse>();
                 foreach (var medicineReport in medicineReports)
                 {
-                    var medicineDetails = await _medicineRepository.GetById(medicineReport.MedicineId);
+                    var medicineDetails = await _medicineRepository.GetByIdAsync(medicineReport.MedicineId);
                     var medicineImages = medicineDetails != null
                         ? await _medicineImageRepository.GetQueryable(x => x.MedicineId == medicineReport.MedicineId).ToListAsync(cancellationToken)
                         : new List<ImageMedicine>();
@@ -639,7 +639,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                     var foodReportResponses = new List<FoodReportResponse>();
                     foreach (var foodReport in foodReports)
                     {
-                        var foodDetails = await _foodRepository.GetById(foodReport.FoodId);
+                        var foodDetails = await _foodRepository.GetByIdAsync(foodReport.FoodId);
                         var foodImages = foodDetails != null
                             ? await _foodImageRepository.GetQueryable(x => x.FoodId == foodReport.FoodId).ToListAsync(cancellationToken)
                             : new List<ImageFood>();
@@ -662,7 +662,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                     var medicineReportResponses = new List<MedicineReportResponse>();
                     foreach (var medicineReport in medicineReports)
                     {
-                        var medicineDetails = await _medicineRepository.GetById(medicineReport.MedicineId);
+                        var medicineDetails = await _medicineRepository.GetByIdAsync(medicineReport.MedicineId);
                         var medicineImages = medicineDetails != null
                             ? await _medicineImageRepository.GetQueryable(x => x.MedicineId == medicineReport.MedicineId).ToListAsync(cancellationToken)
                             : new List<ImageMedicine>();
@@ -722,7 +722,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                     return (null, "PageIndex và PageSize phải lớn hơn 0.");
 
                 var checkError = new Ref<CheckError>();
-                var dailyReport = await _dailyReportRepository.GetById(reportId, checkError);
+                var dailyReport = await _dailyReportRepository.GetByIdAsync(reportId, checkError);
                 if (checkError.Value?.IsError == true)
                     return (null, $"Lỗi khi lấy thông tin báo cáo hàng ngày: {checkError.Value.Message}");
                 if (dailyReport == null)
@@ -747,7 +747,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                 var responses = new List<FoodReportResponse>();
                 foreach (var report in paginationResult.Items)
                 {
-                    var reportFoodReports = await _foodRepository.GetById(report.FoodId);
+                    var reportFoodReports = await _foodRepository.GetByIdAsync(report.FoodId);
                     var images = await _foodImageRepository.GetQueryable(x => x.FoodId == reportFoodReports.Id).ToListAsync(cancellationToken);
                     var foodResponse = new FoodBillResponse
                     {
@@ -794,7 +794,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                     return (null, "PageIndex và PageSize phải lớn hơn 0.");
 
                 var checkError = new Ref<CheckError>();
-                var dailyReport = await _dailyReportRepository.GetById(reportId, checkError);
+                var dailyReport = await _dailyReportRepository.GetByIdAsync(reportId, checkError);
                 if (checkError.Value?.IsError == true)
                     return (null, $"Lỗi khi lấy thông tin báo cáo hàng ngày: {checkError.Value.Message}");
                 if (dailyReport == null)
@@ -820,7 +820,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                 var responses = new List<MedicineReportResponse>();
                 foreach (var report in paginationResult.Items)
                 {
-                    var reportMedicineReports = await _medicineRepository.GetById(report.MedicineId);
+                    var reportMedicineReports = await _medicineRepository.GetByIdAsync(report.MedicineId);
                     var images = await _medicineImageRepository.GetQueryable(x => x.MedicineId == reportMedicineReports.Id).ToListAsync(cancellationToken);
                     var medicineResponse = new MedicineBillResponse
                     {
@@ -996,7 +996,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
             try
             {
                 var checkError = new Ref<CheckError>();
-                var livestockCircle = await _livestockCircleRepository.GetById(livestockCircleId, checkError);
+                var livestockCircle = await _livestockCircleRepository.GetByIdAsync(livestockCircleId, checkError);
                 if (checkError.Value?.IsError == true)
                     return (false, $"Lỗi khi lấy thông tin vòng chăn nuôi: {checkError.Value.Message}");
                 if (livestockCircle == null)
@@ -1022,7 +1022,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
             try
             {
                 var checkError = new Ref<CheckError>();
-                var livestockCircle = await _livestockCircleRepository.GetById(livestockCircleId, checkError);
+                var livestockCircle = await _livestockCircleRepository.GetByIdAsync(livestockCircleId, checkError);
                 if (checkError.Value?.IsError == true)
                     return (null, $"Lỗi khi lấy thông tin vòng chăn nuôi: {checkError.Value.Message}");
                 if (livestockCircle == null)
@@ -1045,7 +1045,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                 var foodReportResponses = new List<FoodReportResponse>();
                 foreach (var foodReport in foodReports)
                 {
-                    var foodDetails = await _foodRepository.GetById(foodReport.FoodId);
+                    var foodDetails = await _foodRepository.GetByIdAsync(foodReport.FoodId);
                     var foodImages = foodDetails != null
                         ? await _foodImageRepository.GetQueryable(x => x.FoodId == foodReport.FoodId).ToListAsync(cancellationToken)
                         : new List<ImageFood>();
@@ -1068,7 +1068,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                 var medicineReportResponses = new List<MedicineReportResponse>();
                 foreach (var medicineReport in medicineReports)
                 {
-                    var medicineDetails = await _medicineRepository.GetById(medicineReport.MedicineId);
+                    var medicineDetails = await _medicineRepository.GetByIdAsync(medicineReport.MedicineId);
                     var medicineImages = medicineDetails != null
                         ? await _medicineImageRepository.GetQueryable(x => x.MedicineId == medicineReport.MedicineId).ToListAsync(cancellationToken)
                         : new List<ImageMedicine>();
@@ -1127,7 +1127,7 @@ requestDto.Thumbnail, "daily-reports", _cloudinaryCloudService, cancellationToke
                     return (null, "PageIndex và PageSize phải lớn hơn 0.");
 
                 var checkError = new Ref<CheckError>();
-                var livestockCircle = await _livestockCircleRepository.GetById(livestockCircleId, checkError);
+                var livestockCircle = await _livestockCircleRepository.GetByIdAsync(livestockCircleId, checkError);
                 if (checkError.Value?.IsError == true)
                     return (null, $"Lỗi khi lấy thông tin vòng chăn nuôi: {checkError.Value.Message}");
                 if (livestockCircle == null)

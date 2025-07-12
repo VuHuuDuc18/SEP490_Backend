@@ -44,7 +44,7 @@ namespace Infrastructure.Repository
             return await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public virtual async Task<T> GetById(object id, Ref<CheckError> checkError = null)
+        public virtual async Task<T> GetByIdAsync(object id, Ref<CheckError> checkError = null)
         {
             try
             {

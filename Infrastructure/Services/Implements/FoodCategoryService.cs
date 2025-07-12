@@ -89,7 +89,7 @@ namespace Infrastructure.Services.Implements
                 return (false, "Dữ liệu danh mục thức ăn không được null.");
 
             var checkError = new Ref<CheckError>();
-            var existing = await _foodCategoryRepository.GetById(FoodCategoryId, checkError);
+            var existing = await _foodCategoryRepository.GetByIdAsync(FoodCategoryId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin danh mục thức ăn: {checkError.Value.Message}");
 
@@ -137,7 +137,7 @@ namespace Infrastructure.Services.Implements
         public async Task<(bool Success, string ErrorMessage)> DisableFoodCategory(Guid FoodCategoryId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var foodCategory = await _foodCategoryRepository.GetById(FoodCategoryId, checkError);
+            var foodCategory = await _foodCategoryRepository.GetByIdAsync(FoodCategoryId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin danh mục thức ăn: {checkError.Value.Message}");
 
@@ -164,7 +164,7 @@ namespace Infrastructure.Services.Implements
         public async Task<(CategoryResponse Category, string ErrorMessage)> GetFoodCategoryById(Guid FoodCategoryId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var foodCategory = await _foodCategoryRepository.GetById(FoodCategoryId, checkError);
+            var foodCategory = await _foodCategoryRepository.GetByIdAsync(FoodCategoryId, checkError);
             if (checkError.Value?.IsError == true)
                 return (null, $"Lỗi khi lấy thông tin danh mục thức ăn: {checkError.Value.Message}");
 

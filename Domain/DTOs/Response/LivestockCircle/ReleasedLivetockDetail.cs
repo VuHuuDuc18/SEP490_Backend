@@ -10,7 +10,7 @@ namespace Domain.Dto.Response.LivestockCircle
     public class ReleasedLivetockDetail
     {
         public Guid LivestockCircleId { get; set; }
-
+        
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
 

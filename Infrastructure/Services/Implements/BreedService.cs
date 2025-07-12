@@ -131,7 +131,7 @@ namespace Infrastructure.Services.Implements
                 return (false, "Dữ liệu giống loài không được null.");
 
             var checkError = new Ref<CheckError>();
-            var existing = await _breedRepository.GetById(BreedId, checkError);
+            var existing = await _breedRepository.GetByIdAsync(BreedId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin giống loài: {checkError.Value.Message}");
 
@@ -225,7 +225,7 @@ namespace Infrastructure.Services.Implements
         public async Task<(bool Success, string ErrorMessage)> DisableBreed(Guid BreedId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var breed = await _breedRepository.GetById(BreedId, checkError);
+            var breed = await _breedRepository.GetByIdAsync(BreedId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin giống loài: {checkError.Value.Message}");
 
@@ -260,7 +260,7 @@ namespace Infrastructure.Services.Implements
         public async Task<(BreedResponse Breed, string ErrorMessage)> GetBreedById(Guid BreedId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var breed = await _breedRepository.GetById(BreedId, checkError);
+            var breed = await _breedRepository.GetByIdAsync(BreedId, checkError);
             if (checkError.Value?.IsError == true)
                 return (null, $"Lỗi khi lấy thông tin giống loài: {checkError.Value.Message}");
 

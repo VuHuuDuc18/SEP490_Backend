@@ -108,7 +108,7 @@ namespace Infrastructure.Services.Implements
 
         public async Task<bool> DisableBarnPlan(Guid id)
         {
-            var deleteItem = await _barnplanrepo.GetById(id);
+            var deleteItem = await _barnplanrepo.GetByIdAsync(id);
             if (deleteItem == null)
             {
                 throw new Exception("Kế khoạch không tồn tại");
@@ -179,7 +179,7 @@ namespace Infrastructure.Services.Implements
         }
         public async Task<ViewBarnPlanResponse> GetById(Guid id)
         {
-            var barnPlanDetail = await _barnplanrepo.GetById(id);
+            var barnPlanDetail = await _barnplanrepo.GetByIdAsync(id);
             if (barnPlanDetail == null)
             {
                 throw new Exception("Không tìm thấy kế hoạch cho chuồng ");
@@ -219,7 +219,7 @@ namespace Infrastructure.Services.Implements
             DateTime formatedStartDate, formatedEndDate;
             ValidTime(false,(bool)(req.IsDaily == null ? false : req.IsDaily), req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
 
-            var updateItem = await _barnplanrepo.GetById(req.Id);
+            var updateItem = await _barnplanrepo.GetByIdAsync(req.Id);
             if (updateItem == null)
             {
                 throw new Exception("Kế hoạch không tồn tại");

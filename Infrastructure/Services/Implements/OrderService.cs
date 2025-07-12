@@ -3,6 +3,7 @@ using Domain.Dto.Request;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Barn;
 using Domain.Dto.Response.BarnPlan;
+using Domain.Dto.Response.LivestockCircle;
 using Domain.DTOs.Request.Order;
 using Domain.DTOs.Response.Order;
 using Domain.Helper;
@@ -26,6 +27,7 @@ namespace Infrastructure.Services.Implements
         private UserManager<User> _userManager;
         private readonly IRepository<LivestockCircle> _livestockCircleRepository;
         private readonly IRepository<Breed> _breedRepository;
+        private readonly IRepository<ImageLivestockCircle> _imageLivestockCircleRepository;
         private readonly IRepository<BreedCategory> _breedCategoryRepository;
         private readonly Guid _currentUserId;
         public OrderService
@@ -35,7 +37,8 @@ namespace Infrastructure.Services.Implements
             IRepository<LivestockCircle> livestockCircleRepository,
             UserManager<User> userManager,
             IRepository<Breed> breedrepo,
-            IRepository<BreedCategory> bcrepo
+            IRepository<BreedCategory> bcrepo,
+            IRepository<ImageLivestockCircle> imageLivestockCircleRepository
         )
         {
             _orderRepository = orderRepository;
@@ -43,6 +46,7 @@ namespace Infrastructure.Services.Implements
             _livestockCircleRepository = livestockCircleRepository;
             _breedCategoryRepository = bcrepo;
             _userManager = userManager;
+            _imageLivestockCircleRepository = imageLivestockCircleRepository;
 
             // Lấy current user từ JWT token claims
             _currentUserId = Guid.Empty;
@@ -111,7 +115,7 @@ namespace Infrastructure.Services.Implements
                     IsActive = true,
                     PickupDate = request.PickupDate
                 };
-                var livestockCircle = await _livestockCircleRepository.GetById(request.LivestockCircleId);
+                var livestockCircle = await _livestockCircleRepository.GetByIdAsync(request.LivestockCircleId);
                 if (livestockCircle == null)
                 {
                     return new Response<string>("Chuồng nuôi không khả dụng. Vui lòng thử lại sau.")
@@ -164,12 +168,17 @@ namespace Infrastructure.Services.Implements
         {
             try
             {
-                var order = await _orderRepository.GetById(OrderId);
+                var order = await _orderRepository.GetByIdAsync(OrderId);
                 if (order == null || !order.IsActive)
                 {
                     return new Response<OrderResponse>("Đơn hàng không tồn tại hoặc đã bị xóa.");
                 }
+                var livestockCircle = await _livestockCircleRepository.GetByIdAsync(order.LivestockCircleId);
+                var images =await _imageLivestockCircleRepository.GetQueryable(x=>x.IsActive && x.LivestockCircleId == order.LivestockCircleId)
+                    .Select(x=> x.ImageLink).ToListAsync();
                 var result = AutoMapperHelper.AutoMap<Order, OrderResponse>(order);
+                result.LivestockCircle = AutoMapperHelper.AutoMap<LivestockCircle, ReleasedLivetockDetail>(livestockCircle);
+                result.LivestockCircle.ImageLinks = images;
                 return new Response<OrderResponse>()
                 {
                     Succeeded = true,
@@ -192,7 +201,7 @@ namespace Infrastructure.Services.Implements
         {
             try
             {
-                var order = await _orderRepository.GetById(request.OrderId);
+                var order = await _orderRepository.GetByIdAsync(request.OrderId);
                 if (order == null || !order.IsActive)
                 {
                     return new Response<string>("Đơn hàng không tồn tại hoặc đã bị xóa.");
@@ -270,7 +279,7 @@ namespace Infrastructure.Services.Implements
 
             try
             {
-                var order = await _orderRepository.GetById(OrderId);
+                var order = await _orderRepository.GetByIdAsync(OrderId);
                 if (order == null || !order.IsActive)
                 {
                     return new Response<string>("Đơn hàng không tồn tại hoặc đã bị xóa.");
@@ -500,7 +509,7 @@ namespace Infrastructure.Services.Implements
         {
             try
             {
-                var orderItem =await _orderRepository.GetById(request.OrderId);
+                var orderItem =await _orderRepository.GetByIdAsync(request.OrderId);
                 if (orderItem == null)
                 {
                     throw new Exception("Không tìm thấy đơn ");
