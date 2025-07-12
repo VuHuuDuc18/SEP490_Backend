@@ -18,6 +18,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.VisualBasic;
 
 namespace Infrastructure.Services.Implements
 {
@@ -36,6 +38,8 @@ namespace Infrastructure.Services.Implements
         private readonly IRepository<Barn> _barnRepository;
         private readonly IRepository<LivestockCircleFood> _livestockCircleFoodRepository;
         private readonly IRepository<LivestockCircleMedicine> _livestockCircleMedicineRepository;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly Guid _currentUserId;
 
         public BillService(
             IRepository<Bill> billRepository,
@@ -50,7 +54,8 @@ namespace Infrastructure.Services.Implements
             IRepository<LivestockCircleMedicine> livestockCircleMedicineRepository,
             IRepository<ImageFood> foodImageRepository,
             IRepository<ImageMedicine> medicineImageRepository,
-            IRepository<ImageBreed> breedImageRepository
+            IRepository<ImageBreed> breedImageRepository,
+            IHttpContextAccessor httpContextAccessor
             )
 
         {
@@ -67,6 +72,18 @@ namespace Infrastructure.Services.Implements
             _foodImageRepository = foodImageRepository;
             _medicineImageRepository = medicineImageRepository;
             _breedImageRepository = breedImageRepository;
+            _httpContextAccessor = httpContextAccessor;
+            _currentUserId = Guid.Empty;
+            // Lấy current user từ JWT token claims
+            var currentUser = _httpContextAccessor.HttpContext?.User;
+            if (currentUser != null)
+            {
+                var userIdClaim = currentUser.FindFirst("uid")?.Value;
+                if (!string.IsNullOrEmpty(userIdClaim))
+                {
+                    _currentUserId = Guid.Parse(userIdClaim);
+                }
+            }
         }
 
         private async Task<(bool Success, string ErrorMessage)> ValidateItem(Guid itemId, int quantity, bool isFood, bool isMedicine, bool isBreed, CancellationToken cancellationToken)
@@ -1505,6 +1522,100 @@ namespace Infrastructure.Services.Implements
             }
         }
 
+        public async Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetPaginatedBillListByTechicalStaff(ListingRequest request, string billType, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var checkError = new Ref<CheckError>();
+                var tech = await _userRepository.GetById(_currentUserId, checkError);
+                if (checkError.Value?.IsError == true)
+                    return (null, $"Lỗi khi lấy thông tin nhân viên kỹ thuật: {checkError.Value.Message}");
+                if (tech == null)
+                    return (null, "Nhân viên kỹ thuật không tồn tại.");
+
+
+                if (request == null) return (null, "Yêu cầu không được để trống.");
+                if (request.PageIndex < 1 || request.PageSize < 1) return (null, "PageIndex và PageSize phải lớn hơn 0.");
+
+                var validFields = typeof(Bill).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any()) return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+
+                var query = _billRepository.GetQueryable(x => x.UserRequestId == tech.Id && x.TypeBill == billType && x.IsActive );
+
+                if (request.SearchString?.Any() == true) query = query.SearchString(request.SearchString);
+                if (request.Filter?.Any() == true) query = query.Filter(request.Filter);
+
+                var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                var responses = new List<BillResponse>();
+                foreach (var bill in paginationResult.Items)
+                {
+                    var userRequest = await _userRepository.GetById(bill.UserRequestId);
+                    var lscInfo = await _livestockCircleRepository.GetById(bill.LivestockCircleId);
+                    var barnInfo = await _barnRepository.GetById(lscInfo.BarnId);
+                    var wokerInfo = await _userRepository.GetById(barnInfo.WorkerId);
+                    var userRequestResponse = new UserRequestResponse
+                    {
+                        Id = userRequest.Id,
+                        FullName = userRequest.FullName,
+                        Email = userRequest.Email
+                    };
+                    var workerReponse = new WokerResponse
+                    {
+                        Id = wokerInfo.Id,
+                        FullName = wokerInfo.FullName,
+                        Email = wokerInfo.Email
+                    };
+                    var barnInfoResponse = new BarnDetailResponse
+                    {
+                        Id = barnInfo.Id,
+                        Address = barnInfo.Address,
+                        BarnName = barnInfo.BarnName,
+                        Image = barnInfo.Image,
+                        Worker = workerReponse
+                    };
+                    var lscInfoResponse = new LivestockCircleBillResponse
+                    {
+                        Id = lscInfo.Id,
+                        BarnDetailResponse = barnInfoResponse,
+                        LivestockCircleName = lscInfo.LivestockCircleName,
+                    };
+                    responses.Add(new BillResponse
+                    {
+                        Id = bill.Id,
+                        UserRequest = userRequestResponse,
+                        LivestockCircle = lscInfoResponse,
+                        Name = bill.Name,
+                        Note = bill.Note,
+                        Total = bill.Total,
+                        Status = bill.Status,
+                        Weight = bill.Weight,
+                        IsActive = bill.IsActive
+                    });
+                }
+
+                var result = new PaginationSet<BillResponse>
+                {
+                    PageIndex = paginationResult.PageIndex,
+                    Count = responses.Count,
+                    TotalCount = paginationResult.TotalCount,
+                    TotalPages = paginationResult.TotalPages,
+                    Items = responses
+                };
+
+                return (result, null);
+            }
+            catch (Exception ex)
+            {
+                return (null, $"Lỗi khi lấy danh sách hóa đơn: {ex.Message}");
+            }
+        }
+
+
+
+
 
         // Common func
         protected async Task<bool> ValidBreedStock(Guid breedId, int stock)
@@ -1521,5 +1632,288 @@ namespace Infrastructure.Services.Implements
             return true;
         }
 
+        public async Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetPaginatedBillListHistory(ListingRequest request, string billType, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (request == null) return (null, "Yêu cầu không được để trống.");
+                if (request.PageIndex < 1 || request.PageSize < 1) return (null, "PageIndex và PageSize phải lớn hơn 0.");
+
+                var validFields = typeof(Bill).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any()) return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+                // lay bill theo loai Food, Medicine hay Breed va lay nhung bill chx dc Approval
+                var query = _billRepository.GetQueryable(x => x.IsActive && x.TypeBill.Equals(billType) && !x.Status.Equals(StatusConstant.REQUESTED));
+
+                if (request.SearchString?.Any() == true) query = query.SearchString(request.SearchString);
+                if (request.Filter?.Any() == true) query = query.Filter(request.Filter);
+
+                var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                var responses = new List<BillResponse>();
+                foreach (var bill in paginationResult.Items)
+                {
+                    var userRequest = await _userRepository.GetById(bill.UserRequestId);
+                    var lscInfo = await _livestockCircleRepository.GetById(bill.LivestockCircleId);
+                    var barnInfo = await _barnRepository.GetById(lscInfo.BarnId);
+                    var wokerInfo = await _userRepository.GetById(barnInfo.WorkerId);
+                    var userRequestResponse = new UserRequestResponse
+                    {
+                        Id = userRequest.Id,
+                        FullName = userRequest.FullName,
+                        Email = userRequest.Email
+                    };
+                    var workerReponse = new WokerResponse
+                    {
+                        Id = wokerInfo.Id,
+                        FullName = wokerInfo.FullName,
+                        Email = wokerInfo.Email
+                    };
+                    var barnInfoResponse = new BarnDetailResponse
+                    {
+                        Id = barnInfo.Id,
+                        Address = barnInfo.Address,
+                        BarnName = barnInfo.BarnName,
+                        Image = barnInfo.Image,
+                        Worker = workerReponse
+                    };
+                    var lscInfoResponse = new LivestockCircleBillResponse
+                    {
+                        Id = lscInfo.Id,
+                        BarnDetailResponse = barnInfoResponse,
+                        LivestockCircleName = lscInfo.LivestockCircleName,
+                    };
+                    responses.Add(new BillResponse
+                    {
+                        Id = bill.Id,
+                        UserRequest = userRequestResponse,
+                        LivestockCircle = lscInfoResponse,
+                        Name = bill.Name,
+                        Note = bill.Note,
+                        Total = bill.Total,
+                        Status = bill.Status,
+                        Weight = bill.Weight,
+                        IsActive = bill.IsActive
+                    });
+                }
+
+                var result = new PaginationSet<BillResponse>
+                {
+                    PageIndex = paginationResult.PageIndex,
+                    Count = responses.Count,
+                    TotalCount = paginationResult.TotalCount,
+                    TotalPages = paginationResult.TotalPages,
+                    Items = responses
+                };
+
+                return (result, null);
+            }
+            catch (Exception ex)
+            {
+                return (null, $"Lỗi khi lấy danh sách hóa đơn: {ex.Message}");
+            }
+        }
+
+        public async Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetApprovedBillsByWorker(ListingRequest request, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var checkError = new Ref<CheckError>();
+                var worker = await _userRepository.GetById(_currentUserId, checkError);
+                if (checkError.Value?.IsError == true)
+                    return (null, $"Lỗi khi lấy thông tin người gia công: {checkError.Value.Message}");
+                if (worker == null)
+                    return (null, "Người gia công không tồn tại.");
+                if (request == null) return (null, "Yêu cầu không được để trống.");
+                if (request.PageIndex < 1 || request.PageSize < 1) return (null, "PageIndex và PageSize phải lớn hơn 0.");
+
+                var validFields = typeof(Bill).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any()) return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+
+                // Lấy bills có status Approval của worker
+                var validBarnIds = await _barnRepository.GetQueryable(b => b.WorkerId == worker.Id)
+.Select(b => b.Id)
+.ToListAsync(cancellationToken);
+
+                var query = _billRepository.GetQueryable(x =>
+                    x.IsActive &&
+                    !x.Status.Equals(StatusConstant.APPROVED) &&
+                    validBarnIds.Contains(_livestockCircleRepository.GetQueryable(lc => lc.BarnId == x.LivestockCircleId)
+                        .Select(lc => lc.BarnId)
+                        .FirstOrDefault()));
+
+                if (request.SearchString?.Any() == true) query = query.SearchString(request.SearchString);
+                if (request.Filter?.Any() == true) query = query.Filter(request.Filter);
+
+                var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                var responses = new List<BillResponse>();
+                foreach (var bill in paginationResult.Items)
+                {
+                    var userRequest = await _userRepository.GetById(bill.UserRequestId);
+                    var lscInfo = await _livestockCircleRepository.GetById(bill.LivestockCircleId);
+                    var barnInfo = await _barnRepository.GetById(lscInfo.BarnId);
+                    var workerInfo = await _userRepository.GetById(barnInfo.WorkerId);
+
+                    var userRequestResponse = new UserRequestResponse
+                    {
+                        Id = userRequest.Id,
+                        FullName = userRequest.FullName,
+                        Email = userRequest.Email
+                    };
+                    var workerResponse = new WokerResponse
+                    {
+                        Id = workerInfo.Id,
+                        FullName = workerInfo.FullName,
+                        Email = workerInfo.Email
+                    };
+                    var barnInfoResponse = new BarnDetailResponse
+                    {
+                        Id = barnInfo.Id,
+                        Address = barnInfo.Address,
+                        BarnName = barnInfo.BarnName,
+                        Image = barnInfo.Image,
+                        Worker = workerResponse
+                    };
+                    var lscInfoResponse = new LivestockCircleBillResponse
+                    {
+                        Id = lscInfo.Id,
+                        BarnDetailResponse = barnInfoResponse,
+                        LivestockCircleName = lscInfo.LivestockCircleName,
+                    };
+                    responses.Add(new BillResponse
+                    {
+                        Id = bill.Id,
+                        UserRequest = userRequestResponse,
+                        LivestockCircle = lscInfoResponse,
+                        Name = bill.Name,
+                        Note = bill.Note,
+                        Total = bill.Total,
+                        Status = bill.Status,
+                        Weight = bill.Weight,
+                        IsActive = bill.IsActive
+                    });
+                }
+
+                var result = new PaginationSet<BillResponse>
+                {
+                    PageIndex = paginationResult.PageIndex,
+                    Count = responses.Count,
+                    TotalCount = paginationResult.TotalCount,
+                    TotalPages = paginationResult.TotalPages,
+                    Items = responses
+                };
+
+                return (result, null);
+            }
+            catch (Exception ex)
+            {
+                return (null, $"Lỗi khi lấy danh sách hóa đơn được phê duyệt: {ex.Message}");
+            }
+        }
+
+        public async Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetHistoryBillsByWorker(ListingRequest request, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var checkError = new Ref<CheckError>();
+                var worker = await _userRepository.GetById(_currentUserId, checkError);
+                if (checkError.Value?.IsError == true)
+                    return (null, $"Lỗi khi lấy thông tin người gia công: {checkError.Value.Message}");
+                if (worker == null)
+                    return (null, "Người gia công không tồn tại.");
+                if (request == null) return (null, "Yêu cầu không được để trống.");
+                if (request.PageIndex < 1 || request.PageSize < 1) return (null, "PageIndex và PageSize phải lớn hơn 0.");
+
+                var validFields = typeof(Bill).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any()) return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+
+                // Lấy bills không thuộc các status REQUESTED, APPROVED, REJECTED, CANCELLED
+                var excludedStatuses = new[] { StatusConstant.REQUESTED, StatusConstant.APPROVED, StatusConstant.REJECTED, StatusConstant.CANCELLED };
+                var validBarnIds = await _barnRepository.GetQueryable(b => b.WorkerId == worker.Id)
+     .Select(b => b.Id)
+     .ToListAsync(cancellationToken);
+
+                var query = _billRepository.GetQueryable(x =>
+                    x.IsActive &&
+                    !excludedStatuses.Contains(x.Status) &&
+                    validBarnIds.Contains(_livestockCircleRepository.GetQueryable(lc => lc.BarnId == x.LivestockCircleId)
+                        .Select(lc => lc.BarnId)
+                        .FirstOrDefault()));
+
+                if (request.SearchString?.Any() == true) query = query.SearchString(request.SearchString);
+                if (request.Filter?.Any() == true) query = query.Filter(request.Filter);
+
+                var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                var responses = new List<BillResponse>();
+                foreach (var bill in paginationResult.Items)
+                {
+                    var userRequest = await _userRepository.GetById(bill.UserRequestId);
+                    var lscInfo = await _livestockCircleRepository.GetById(bill.LivestockCircleId);
+                    var barnInfo = await _barnRepository.GetById(lscInfo.BarnId);
+                    var workerInfo = await _userRepository.GetById(barnInfo.WorkerId);
+
+                    var userRequestResponse = new UserRequestResponse
+                    {
+                        Id = userRequest.Id,
+                        FullName = userRequest.FullName,
+                        Email = userRequest.Email
+                    };
+                    var workerResponse = new WokerResponse
+                    {
+                        Id = workerInfo.Id,
+                        FullName = workerInfo.FullName,
+                        Email = workerInfo.Email
+                    };
+                    var barnInfoResponse = new BarnDetailResponse
+                    {
+                        Id = barnInfo.Id,
+                        Address = barnInfo.Address,
+                        BarnName = barnInfo.BarnName,
+                        Image = barnInfo.Image,
+                        Worker = workerResponse
+                    };
+                    var lscInfoResponse = new LivestockCircleBillResponse
+                    {
+                        Id = lscInfo.Id,
+                        BarnDetailResponse = barnInfoResponse,
+                        LivestockCircleName = lscInfo.LivestockCircleName,
+                    };
+                    responses.Add(new BillResponse
+                    {
+                        Id = bill.Id,
+                        UserRequest = userRequestResponse,
+                        LivestockCircle = lscInfoResponse,
+                        Name = bill.Name,
+                        Note = bill.Note,
+                        Total = bill.Total,
+                        Status = bill.Status,
+                        Weight = bill.Weight,
+                        IsActive = bill.IsActive
+                    });
+                }
+
+                var result = new PaginationSet<BillResponse>
+                {
+                    PageIndex = paginationResult.PageIndex,
+                    Count = responses.Count,
+                    TotalCount = paginationResult.TotalCount,
+                    TotalPages = paginationResult.TotalPages,
+                    Items = responses
+                };
+
+                return (result, null);
+            }
+            catch (Exception ex)
+            {
+                return (null, $"Lỗi khi lấy danh sách hóa đơn không thuộc các trạng thái chuẩn: {ex.Message}");
+            }
+        }
     }
 }

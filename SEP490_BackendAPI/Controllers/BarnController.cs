@@ -73,10 +73,10 @@ namespace SEP490_BackendAPI.Controllers
         /// <summary>
         /// Lấy danh sách chuồng trại theo ID của công nhân.
         /// </summary>
-        [HttpGet("getBarnByWorker/{workerId}")]
-        public async Task<IActionResult> GetByWorker([FromRoute] Guid workerId, [FromBody] ListingRequest request, CancellationToken cancellationToken = default)
+        [HttpPost("getBarnByWorker")]
+        public async Task<IActionResult> GetByWorker([FromBody] ListingRequest request, CancellationToken cancellationToken = default)
         {
-            var (barns, errorMessage) = await _barnService.GetBarnByWorker(workerId, request, cancellationToken);
+            var (barns, errorMessage) = await _barnService.GetBarnByWorker(request, cancellationToken);
             if (barns == null)
                 return NotFound(errorMessage ?? "Không tìm thấy danh sách chuồng trại theo người gia công.");
             return Ok(barns);

@@ -44,6 +44,8 @@ using Domain.IServices;
 using Domain.Dto.Response.User;
 using System.Net.WebSockets;
 using Domain.Dto.Response.Bill;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 
 
 
@@ -58,6 +60,8 @@ namespace Infrastructure.Services.Implements
         private readonly IRepository<ImageBreed> _imageBreedeRepository;
         private readonly IRepository<LivestockCircle> _livestockCircleRepository;
         private readonly CloudinaryCloudService _cloudinaryCloudService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly Guid _currentUserId;
 
         public BarnService(
             IRepository<Barn> barnRepository,
@@ -66,6 +70,7 @@ namespace Infrastructure.Services.Implements
             IRepository<ImageLivestockCircle> imageLiveStockCircleRepository,
             IRepository<ImageBreed> imageBreedeRepository,
             IRepository<Breed> breedRepository,
+            IHttpContextAccessor httpContextAccessor,
             CloudinaryCloudService cloudinaryCloudService)
         {
             _barnRepository = barnRepository ?? throw new ArgumentNullException(nameof(barnRepository));
@@ -75,6 +80,19 @@ namespace Infrastructure.Services.Implements
             _imageLiveStockCircleRepository = imageLiveStockCircleRepository?? throw new ArgumentNullException(nameof(imageLiveStockCircleRepository));
             _imageBreedeRepository = imageBreedeRepository ?? throw new ArgumentNullException(nameof(imageBreedeRepository));
             _breedRepository = breedRepository ?? throw new ArgumentNullException(nameof(breedRepository));
+            _httpContextAccessor = httpContextAccessor;
+
+            _currentUserId = Guid.Empty;
+            // Lấy current user từ JWT token claims
+            var currentUser = _httpContextAccessor.HttpContext?.User;
+            if (currentUser != null)
+            {
+                var userIdClaim = currentUser.FindFirst("uid")?.Value;
+                if (!string.IsNullOrEmpty(userIdClaim))
+                {
+                    _currentUserId = Guid.Parse(userIdClaim);
+                }
+            }
         }
 
         /// <summary>
@@ -278,12 +296,13 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
         /// <summary>
         /// Lấy danh sách chuồng trại theo ID của người gia công.
         /// </summary>
-        public async Task<(PaginationSet<BarnResponse> Result, string ErrorMessage)> GetBarnByWorker(Guid workerId, ListingRequest request, CancellationToken cancellationToken = default)
+        public async Task<(PaginationSet<BarnResponse> Result, string ErrorMessage)> GetBarnByWorker(ListingRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
+                
                 var checkError = new Ref<CheckError>();
-                var worker = await _userRepository.GetById(workerId, checkError);
+                var worker = await _userRepository.GetById(_currentUserId, checkError);
                 if (checkError.Value?.IsError == true)
                     return (null, $"Lỗi khi lấy thông tin người gia công: {checkError.Value.Message}");
                 if (worker == null)
@@ -300,7 +319,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                 if (invalidFields.Any())
                     return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
 
-                var query = _barnRepository.GetQueryable(x => x.WorkerId == workerId && x.IsActive);
+                var query = _barnRepository.GetQueryable(x => x.WorkerId == _currentUserId && x.IsActive);
 
                 if (request.SearchString?.Any() == true)
                     query = query.SearchString(request.SearchString);

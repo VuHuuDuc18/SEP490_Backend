@@ -265,6 +265,82 @@ namespace SEP490_BackendAPI.Controllers
                 return BadRequest(new { error = errorMessage });
             return Ok(result);
         }
+        [HttpPost("get-approval-bills-by-worker")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetApprovalBillsByWorker([FromBody] ListingRequest request)
+        {
+            var (result, errorMessage) = await _billService.GetApprovedBillsByWorker(request);
+            if (errorMessage != null)
+                return BadRequest(new { error = errorMessage });
+            return Ok(result);
+        }
+
+        [HttpPost("get-history-bills-by-worker")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetHistoryBillsByWorker([FromBody] ListingRequest request)
+        {
+            var (result, errorMessage) = await _billService.GetHistoryBillsByWorker(request);
+            if (errorMessage != null)
+                return BadRequest(new { error = errorMessage });
+            return Ok(result);
+        }
+
+        [HttpPost("get-paginated-bills-food-history")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetPaginatedBillsHistoryFood([FromBody] ListingRequest request)
+        {
+            var (result, errorMessage) = await _billService.GetPaginatedBillListHistory(request, "Food");
+            if (errorMessage != null)
+                return BadRequest(new { error = errorMessage });
+            return Ok(result);
+        }
+
+        [HttpPost("get-paginated-bills-medicine-history")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetPaginatedBillsHistoryMedicine([FromBody] ListingRequest request)
+        {
+            var (result, errorMessage) = await _billService.GetPaginatedBillListHistory(request, "Medicine");
+            if (errorMessage != null)
+                return BadRequest(new { error = errorMessage });
+            return Ok(result);
+        }
+
+        [HttpPost("get-paginated-bills-breed-history")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetPaginatedBillsHistoryBreed([FromBody] ListingRequest request)
+        {
+            var (result, errorMessage) = await _billService.GetPaginatedBillListHistory(request, "Breed");
+            if (errorMessage != null)
+                return BadRequest(new { error = errorMessage });
+            return Ok(result);
+        }
+
+        [HttpPost("getPaginatedBillsFoodByTechnicalStaff")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetPaginatedBillsFoodByTechnicalStaff([FromBody] ListingRequest request)
+        {
+            var (result, errorMessage) = await _billService.GetPaginatedBillListByTechicalStaff(request, "Food");
+            if (errorMessage != null)
+                return BadRequest(new { error = errorMessage });
+            return Ok(result);
+        }
+
+        [HttpPost("getPaginatedBillsMedicineByTechnicalStaff")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetPaginatedBillsMedicineByTechnicalStaff([FromBody] ListingRequest request)
+        {
+            var (result, errorMessage) = await _billService.GetPaginatedBillListByTechicalStaff(request, "Medicine");
+            if (errorMessage != null)
+                return BadRequest(new { error = errorMessage });
+            return Ok(result);
+        }
 
         [HttpPost("fwhs/get-request-food")]
         [ProducesResponseType(StatusCodes.Status200OK)]
