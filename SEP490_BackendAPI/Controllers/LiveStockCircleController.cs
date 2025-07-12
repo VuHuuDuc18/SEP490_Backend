@@ -111,15 +111,15 @@ namespace SEP490_BackendAPI.Controllers
         /// <summary>
         /// Lấy danh sách chu kỳ chăn nuôi theo ID của nhân viên kỹ thuật.
         /// </summary>
-        [HttpGet("getLiveStockCircleByTechnicalStaff/{technicalStaffId}")]
-        public async Task<IActionResult> GetByTechnicalStaff(Guid technicalStaffId, CancellationToken cancellationToken = default)
-        {
-            var (circles, errorMessage) = await _livestockCircleService.GetLiveStockCircleByTechnicalStaff(technicalStaffId, cancellationToken);
-            if (circles == null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new { error = errorMessage });
+        //[HttpGet("getLiveStockCircleByTechnicalStaff/{technicalStaffId}")]
+        //public async Task<IActionResult> GetByTechnicalStaff(Guid technicalStaffId, CancellationToken cancellationToken = default)
+        //{
+        //    var (circles, errorMessage) = await _livestockCircleService.GetLiveStockCircleByTechnicalStaff(technicalStaffId, cancellationToken);
+        //    if (circles == null)
+        //        return StatusCode(StatusCodes.Status500InternalServerError, new { error = errorMessage });
 
-            return Ok(circles);
-        }
+        //    return Ok(circles);
+        //}
         /// <summary>
         /// Cập nhật trung bình cân của chu kỳ chăn nuôi
         /// </summary>
@@ -131,27 +131,24 @@ namespace SEP490_BackendAPI.Controllers
                 return BadRequest(errorMessage);
             return Ok();
         }
-        [HttpPost("technical-staff/assignedbarn")]
-        public async Task<IActionResult> GetAssignedBarn([FromBody] ListingRequest req)
-        {
-            //Guid technicalStaffId;
-            try
-            {
-                Guid.TryParse(User.FindFirst("uid")?.Value, out Guid technicalStaffId);
-                var result = await _livestockCircleService.GetAssignedBarn(technicalStaffId, req);
-                if (result.Items == null)
-                    return StatusCode(StatusCodes.Status500InternalServerError);
+        //[HttpPost("technical-staff/assignedbarn")]
+        //public async Task<IActionResult> GetAssignedBarn([FromBody] ListingRequest req)
+        //{
+        //    //Guid technicalStaffId;
+        //    try
+        //    {
+        //        Guid.TryParse(User.FindFirst("uid")?.Value, out Guid technicalStaffId);
+        //        var result = await _livestockCircleService.GetAssignedBarn(technicalStaffId, req);
+        //        if (result.Items == null)
+        //            return StatusCode(StatusCodes.Status500InternalServerError);
 
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("User không hợp lệ");
-            }
-
-
-
-        }
+        //        return Ok(result);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new Exception("User không hợp lệ");
+        //    }
+        //}
         [HttpPost("admin/livestockCircleHistory/{id}")]
         public async Task<IActionResult> GetLivestockCircleHistory([FromRoute]Guid barnId,[FromBody] ListingRequest req)
         {

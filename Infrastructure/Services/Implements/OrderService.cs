@@ -2,16 +2,21 @@
 using Domain.Dto.Request;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Barn;
+using Domain.Dto.Response.BarnPlan;
 using Domain.DTOs.Request.Order;
+using Domain.DTOs.Response.Order;
 using Domain.Helper;
 using Domain.Helper.Constants;
 using Domain.IServices;
 using Entities.EntityModel;
+using Infrastructure.Extensions;
 using Infrastructure.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Infrastructure.Extensions;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Infrastructure.Services.Implements
 {
@@ -20,17 +25,23 @@ namespace Infrastructure.Services.Implements
         private readonly IRepository<Order> _orderRepository;
         private UserManager<User> _userManager;
         private readonly IRepository<LivestockCircle> _livestockCircleRepository;
+        private readonly IRepository<Breed> _breedRepository;
+        private readonly IRepository<BreedCategory> _breedCategoryRepository;
         private readonly Guid _currentUserId;
         public OrderService
         (
             IRepository<Order> orderRepository,
             IHttpContextAccessor httpContextAccessor,
             IRepository<LivestockCircle> livestockCircleRepository,
-            UserManager<User> userManager
+            UserManager<User> userManager,
+            IRepository<Breed> breedrepo,
+            IRepository<BreedCategory> bcrepo
         )
         {
             _orderRepository = orderRepository;
+            _breedRepository = breedrepo;
             _livestockCircleRepository = livestockCircleRepository;
+            _breedCategoryRepository = bcrepo;
             _userManager = userManager;
 
             // Lấy current user từ JWT token claims
@@ -399,6 +410,113 @@ namespace Infrastructure.Services.Implements
                 };
             }
 
+        }
+
+        public async Task<StatisticsOrderResponse> GetStatisticData(StatisticsOrderRequest request)
+        {
+            DateTime froms, to;
+            (froms, to) = DateTimeExcutor.TimeRangeSetting(request);
+            var LivestockCircles = _livestockCircleRepository.GetQueryable();
+            var Orders = _orderRepository.GetQueryable();
+            var Breeds = _breedRepository.GetQueryable();
+            var BreedCategories = _breedCategoryRepository.GetQueryable();
+
+            var query = from l in LivestockCircles
+                        join o in Orders on l.Id equals o.LivestockCircleId
+                        join b in Breeds on l.BreedId equals b.Id
+                        join bc in BreedCategories on b.BreedCategoryId equals bc.Id
+                        where o.CreatedDate <= to && o.CreatedDate >= froms
+                        group o by new { b.Id, b.BreedName, bc.Name } into g
+                        select new OrderItem
+                        {
+                            BreedId = g.Key.Id,
+                            BreedName = g.Key.BreedName,
+                            GoodUnitStockSold = g.Sum(x => x.GoodUnitStock),
+                            AverageGoodUnitPrice = g.Average(x => x.GoodUnitPrice ?? 0),
+                            BadUnitStockSold = g.Sum(x => x.BadUnitStock),
+                            AverageBadUnitPrice = g.Average(x => x.BadUnitPrice ?? 0),
+                            BreedCategoryName = g.Key.Name,
+                            Revenue = g.Sum(x => x.TotalBill ?? 0)
+                        };
+            var ListItem = await query.ToListAsync();
+            var result = new StatisticsOrderResponse()
+            {
+                datas = ListItem,
+                TotalRevenue = ListItem.Sum(x=>x.Revenue ?? 0),
+                TotalBadUnitStockSold = ListItem.Sum(x => x.BadUnitStockSold ?? 0),
+                TotalGoodUnitStockSold = ListItem.Sum(x => x.GoodUnitStockSold ?? 0),
+            };
+            return result;
+        }
+
+        public async Task<PaginationSet<OrderResponse>> GetAllOrder(ListingRequest request)
+        {
+            try
+            {
+                if (request == null)
+                    throw new Exception("Yêu cầu không được null.");
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                    throw new Exception("PageIndex và PageSize phải lớn hơn 0.");
+
+                var validFields = typeof(BillItem).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any())
+                    throw new Exception($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+
+
+
+                var query = _orderRepository.GetQueryable(x => x.IsActive);
+
+                if (request.SearchString?.Any() == true)
+                    query = query.SearchString(request.SearchString);
+
+                if (request.Filter?.Any() == true)
+                    query = query.Filter(request.Filter);
+
+                var result = await query.Select(x => new OrderResponse()
+                {
+                    Id = x.Id,
+                    CustomerId = x.CustomerId,
+                    LivestockCircleId = x.LivestockCircleId,
+                    GoodUnitStock = x.GoodUnitStock,
+                    BadUnitStock = x.BadUnitStock,
+                    TotalBill = x.TotalBill,
+                    Status = x.Status,
+                    CreateDate = x.CreatedDate,
+                    PickupDate = x.PickupDate
+                }).Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                return (result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi lấy danh sách: {ex.Message}");
+            }
+            
+        }
+
+        public async Task<bool> ApproveOrder(ApproveOrderRequest request)
+        {
+            try
+            {
+                var orderItem =await _orderRepository.GetById(request.OrderId);
+                if (orderItem == null)
+                {
+                    throw new Exception("Không tìm thấy đơn ");
+                }
+                orderItem.Status = StatusConstant.APPROVED;
+                orderItem.GoodUnitPrice = request.GoodUnitPrice;
+                orderItem.BadUnitPrice = request.BadUnitPrice;
+                orderItem.TotalBill = request.GoodUnitPrice * orderItem.GoodUnitStock + request.BadUnitPrice * orderItem.BadUnitStock;
+
+                _orderRepository.Update(orderItem);
+                return await _orderRepository.CommitAsync() > 0;
+
+            }catch (Exception ex)
+            {
+                throw new Exception("lỗi hệ thống");
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 using Domain.Dto.Request;
 using Domain.Dto.Request.Barn;
 using Domain.IServices;
+using Infrastructure.Services.Implements;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using System.Threading.Tasks;
@@ -72,10 +73,10 @@ namespace SEP490_BackendAPI.Controllers
         /// <summary>
         /// Lấy danh sách chuồng trại theo ID của công nhân.
         /// </summary>
-        [HttpGet("getBarnByWorker/{workerId}")]
-        public async Task<IActionResult> GetByWorker([FromRoute] Guid workerId, [FromBody] ListingRequest request, CancellationToken cancellationToken = default)
+        [HttpPost("getBarnByWorker")]
+        public async Task<IActionResult> GetByWorker([FromBody] ListingRequest request, CancellationToken cancellationToken = default)
         {
-            var (barns, errorMessage) = await _barnService.GetBarnByWorker(workerId, request, cancellationToken);
+            var (barns, errorMessage) = await _barnService.GetBarnByWorker(request, cancellationToken);
             if (barns == null)
                 return NotFound(errorMessage ?? "Không tìm thấy danh sách chuồng trại theo người gia công.");
             return Ok(barns);
@@ -137,6 +138,24 @@ namespace SEP490_BackendAPI.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { Message = $"Lỗi khi lấy chi tiết chuồng trại: {ex.Message}" });
+            }
+        }
+        [HttpPost("technical-staff/assignedbarn")]
+        public async Task<IActionResult> GetAssignedBarn([FromBody] ListingRequest req)
+        {
+            //Guid technicalStaffId;
+            try
+            {
+                Guid.TryParse(User.FindFirst("uid")?.Value, out Guid technicalStaffId);
+                var result = await _barnService.GetAssignedBarn(technicalStaffId, req);
+                if (result == null)
+                    return StatusCode(StatusCodes.Status500InternalServerError);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("User không hợp lệ");
             }
         }
 

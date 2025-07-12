@@ -1,3 +1,5 @@
+
+﻿using Domain.Dto.Response.LivestockCircle;
 ﻿using Domain.Dto.Response.Bill;
 using Domain.Dto.Response.User;
 using System;
@@ -32,7 +34,8 @@ namespace Domain.Dto.Response.Barn
             public ActiveLivestockCircleResponse? ActiveLivestockCircle { get; set; } // Thông tin LivestockCircle đang hoạt động (nếu có)
         }
 
-        // DTO để hiển thị thông tin LivestockCircle đang hoạt động
+       
+
         public class ActiveLivestockCircleResponse
         {
             public Guid Id { get; set; }
@@ -47,5 +50,6 @@ namespace Domain.Dto.Response.Barn
             public BreedBillResponse Breed { get; set; }
             public UserItemResponse TechicalStaff { get; set; }
         }
+
     }
 

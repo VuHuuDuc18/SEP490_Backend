@@ -1,10 +1,29 @@
+using Application.Wrappers;
+using CloudinaryDotNet.Actions;
+using Domain.Dto.Request;
+using Domain.Dto.Request.Barn;
+using Domain.Dto.Response;
+using Domain.Dto.Response.Barn;
+using Domain.Dto.Response.Breed;
+using Domain.Dto.Response.LivestockCircle;
+using Domain.Helper;
+using Domain.Helper.Constants;
+using Domain.IServices;
 using Entities.EntityModel;
+using Infrastructure.Core;
+using Infrastructure.Extensions;
+using Infrastructure.Repository;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
 using System.ComponentModel.DataAnnotations;
 using Infrastructure.Core;
 using Infrastructure.Repository;
@@ -25,6 +44,9 @@ using Domain.IServices;
 using Domain.Dto.Response.User;
 using System.Net.WebSockets;
 using Domain.Dto.Response.Bill;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+
 
 
 namespace Infrastructure.Services.Implements
@@ -38,6 +60,8 @@ namespace Infrastructure.Services.Implements
         private readonly IRepository<ImageBreed> _imageBreedeRepository;
         private readonly IRepository<LivestockCircle> _livestockCircleRepository;
         private readonly CloudinaryCloudService _cloudinaryCloudService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly Guid _currentUserId;
 
         public BarnService(
             IRepository<Barn> barnRepository,
@@ -46,6 +70,7 @@ namespace Infrastructure.Services.Implements
             IRepository<ImageLivestockCircle> imageLiveStockCircleRepository,
             IRepository<ImageBreed> imageBreedeRepository,
             IRepository<Breed> breedRepository,
+            IHttpContextAccessor httpContextAccessor,
             CloudinaryCloudService cloudinaryCloudService)
         {
             _barnRepository = barnRepository ?? throw new ArgumentNullException(nameof(barnRepository));
@@ -55,6 +80,19 @@ namespace Infrastructure.Services.Implements
             _imageLiveStockCircleRepository = imageLiveStockCircleRepository?? throw new ArgumentNullException(nameof(imageLiveStockCircleRepository));
             _imageBreedeRepository = imageBreedeRepository ?? throw new ArgumentNullException(nameof(imageBreedeRepository));
             _breedRepository = breedRepository ?? throw new ArgumentNullException(nameof(breedRepository));
+            _httpContextAccessor = httpContextAccessor;
+
+            _currentUserId = Guid.Empty;
+            // Lấy current user từ JWT token claims
+            var currentUser = _httpContextAccessor.HttpContext?.User;
+            if (currentUser != null)
+            {
+                var userIdClaim = currentUser.FindFirst("uid")?.Value;
+                if (!string.IsNullOrEmpty(userIdClaim))
+                {
+                    _currentUserId = Guid.Parse(userIdClaim);
+                }
+            }
         }
 
         /// <summary>
@@ -258,12 +296,13 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
         /// <summary>
         /// Lấy danh sách chuồng trại theo ID của người gia công.
         /// </summary>
-        public async Task<(PaginationSet<BarnResponse> Result, string ErrorMessage)> GetBarnByWorker(Guid workerId, ListingRequest request, CancellationToken cancellationToken = default)
+        public async Task<(PaginationSet<BarnResponse> Result, string ErrorMessage)> GetBarnByWorker(ListingRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
+                
                 var checkError = new Ref<CheckError>();
-                var worker = await _userRepository.GetById(workerId, checkError);
+                var worker = await _userRepository.GetById(_currentUserId, checkError);
                 if (checkError.Value?.IsError == true)
                     return (null, $"Lỗi khi lấy thông tin người gia công: {checkError.Value.Message}");
                 if (worker == null)
@@ -280,7 +319,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                 if (invalidFields.Any())
                     return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
 
-                var query = _barnRepository.GetQueryable(x => x.WorkerId == workerId && x.IsActive);
+                var query = _barnRepository.GetQueryable(x => x.WorkerId == _currentUserId && x.IsActive);
 
                 if (request.SearchString?.Any() == true)
                     query = query.SearchString(request.SearchString);
@@ -484,7 +523,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
         /// Lấy chi tiết chuồng trại cho admin, bao gồm thông tin LivestockCircle đang hoạt động (nếu có)
         /// </summary>
         public async Task<(AdminBarnDetailResponse Barn, string ErrorMessage)> GetAdminBarnDetailAsync(
-            Guid barnId, CancellationToken cancellationToken = default)
+      Guid barnId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -659,7 +698,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                 var breedImages = _imageBreedeRepository.GetQueryable(x => x.IsActive && x.BreedId == liveStockCircle.BreedId).Select(x=> x.ImageLink).ToList();
                 //map data to response object
                 var result = AutoMapperHelper.AutoMap<Barn,ReleaseBarnDetailResponse>(liveStockCircle.Barn);
-                result.LiveStockCircle = AutoMapperHelper.AutoMap<LivestockCircle, LiveStockCircleResponse>(liveStockCircle);
+                result.LiveStockCircle = AutoMapperHelper.AutoMap<LivestockCircle, LivestockCircleResponse>(liveStockCircle);
                 result.Breed = AutoMapperHelper.AutoMap<Breed, BreedResponse>(liveStockCircle.Breed);
                 result.Breed.Thumbnail = breedImages.FirstOrDefault();
                 result.Breed.BreedCategory = AutoMapperHelper.AutoMap<BreedCategory, BreedCategoryResponse>(liveStockCircle.Breed.BreedCategory);
@@ -681,5 +720,70 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
             
         }
 
+        public async Task<Response<PaginationSet<BarnResponse>>> GetAssignedBarn(Guid tsid, ListingRequest request)
+        {
+            try
+            {
+                if (request == null)
+                    return new Response<PaginationSet<BarnResponse>>("Yêu cầu không được null.");
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                    return new Response<PaginationSet<BarnResponse>>("PageIndex và PageSize phải lớn hơn 0.");
+
+                var validFields = typeof(ReleaseBarnResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any())
+                    return new Response<PaginationSet<BarnResponse>>($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}")
+                    {
+                        Errors = new List<string>()
+                        {
+                            $"Trường hợp lệ: {string.Join(",",validFields)}"
+                        }
+                    };
+                if (!validFields.Contains(request.Sort?.Field))
+                {
+                    return new Response<PaginationSet<BarnResponse>>($"Trường sắp xếp không hợp lệ: {request.Sort?.Field}")
+                    {
+                        Errors = new List<string>()
+                        {
+                            $"Trường hợp lệ: {string.Join(",",validFields)}"
+                        }
+                    };
+                }
+
+                var query = _livestockCircleRepository.GetQueryable(x => x.IsActive)
+                    .Include(x => x.Barn)
+                    .ThenInclude(x=>x.Worker)
+                    .Select(x => new BarnResponse()
+                    {
+                        Id = x.Barn.Id,
+                        BarnName = x.Barn.BarnName,
+                        Address = x.Barn.Address,
+                        Image = x.Barn.Image,
+                        IsActive = x.Barn.IsActive,
+                        Worker = new WokerResponse()
+                        {
+                            Id= x.Barn.Worker.Id,
+                            Email = x.Barn.Worker.Email,
+                            FullName = x.Barn.Worker.FullName,
+                        }
+                        
+                    });
+
+                if (request.SearchString?.Any() == true)
+                    query = query.SearchString(request.SearchString);
+
+                if (request.Filter?.Any() == true)
+                    query = query.Filter(request.Filter);
+
+                var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                return new Response<PaginationSet<BarnResponse>>(paginationResult, "Lấy dữ liệu thành công.");
+            }
+            catch (Exception ex)
+            {
+                return new Response<PaginationSet<BarnResponse>>($"Lỗi khi lấy danh sách phân trang: {ex.Message}");
+            }
+        }
     }
 }

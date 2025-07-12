@@ -1,14 +1,15 @@
-﻿using Entities.EntityModel;
+﻿using Application.Wrappers;
+using Domain.Dto.Request;
+using Domain.Dto.Request.Barn;
+using Domain.Dto.Response;
+using Domain.Dto.Response.Barn;
+using Domain.Dto.Response.LivestockCircle;
+using Domain.Dto.Response.Medicine;
+using Entities.EntityModel;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Domain.Dto.Request.Barn;
-using Domain.Dto.Response.Barn;
-using Domain.Dto.Request;
-using Domain.Dto.Response.Medicine;
-using Domain.Dto.Response;
-using Application.Wrappers;
 namespace Domain.IServices
 {
     public interface IBarnService
@@ -36,7 +37,7 @@ namespace Domain.IServices
         /// <summary>
         /// Lấy danh sách chuồng trại theo ID của công nhân.
         /// </summary>
-        Task<(PaginationSet<BarnResponse> Result, string ErrorMessage)> GetBarnByWorker(Guid workerId, ListingRequest request, CancellationToken cancellationToken = default);
+        Task<(PaginationSet<BarnResponse> Result, string ErrorMessage)> GetBarnByWorker(ListingRequest request, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Lấy danh sách phân trang tìm kiếm lọc tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn, bao gồm danh sách ảnh và thumbnail.
@@ -69,6 +70,6 @@ namespace Domain.IServices
         Task<Response<ReleaseBarnDetailResponse>> GetReleaseBarnDetail(
             Guid BarnId,
             CancellationToken cancellationToken = default);
-
+        public Task<Response<PaginationSet<BarnResponse>>> GetAssignedBarn(Guid tsid, ListingRequest req);
     }
 }

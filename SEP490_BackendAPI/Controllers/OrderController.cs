@@ -1,7 +1,10 @@
 ﻿using Domain.Dto.Request;
 using Domain.DTOs.Request.Order;
+using Domain.DTOs.Response.Order;
 using Domain.IServices;
+using ExcelControl.Handler;
 using Microsoft.AspNetCore.Mvc;
+using OfficeOpenXml;
 
 namespace SEP490_BackendAPI.Controllers
 {
@@ -44,5 +47,75 @@ namespace SEP490_BackendAPI.Controllers
         {
             return Ok(await _orderService.CustomerGetPagiantionList(request));
         }
+        [HttpPost("admin/get-statistic")]
+        public async Task<IActionResult> GetStatisticList([FromBody]StatisticsOrderRequest request)
+        {
+            var result = await _orderService.GetStatisticData(request);
+            return Ok(result);
+        }
+        [HttpPost("admin/export")]
+        public async Task<IActionResult> ExportStatistic([FromBody] StatisticsOrderRequest request)
+        {
+            try
+            {
+                var data = await _orderService.GetStatisticData(request);
+
+                var summaryItem = new OrderItem()
+                {
+                    Revenue = data.TotalRevenue,
+                    BadUnitStockSold = data.TotalBadUnitStockSold,
+                    GoodUnitStockSold = data.TotalGoodUnitStockSold,
+                    BreedName = "Total"
+                };
+
+                var result = data.datas;
+                result.Add(summaryItem);
+
+                // Thiết lập license context cho EPPlus (phiên bản mới)
+                ExcelPackage.License.SetNonCommercialPersonal("Company Admin");
+
+                using (var excelPackage = new ExcelPackage())
+                {
+                    // Thêm sheet và dữ liệu vào file excel
+                    ExportExcelHelper.AddSheetToExcelFile(excelPackage, result, "Sold detail", "Danh sách doanh thu từng giống");
+
+                    // Lưu file excel vào thư mục temp và lấy tên file
+                    string fileName = ExportExcelHelper.SaveExcelFile(excelPackage, "Company Admin", "Báo cáo doanh thu");
+
+                    if (string.IsNullOrWhiteSpace(fileName) || fileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+                        return BadRequest("Invalid file name.");
+
+                    var filePath = Path.Combine(Path.GetTempPath(), fileName);
+
+                    if (!System.IO.File.Exists(filePath))
+                        return NotFound("File not found.");
+
+                    var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
+
+                    // Trả về file excel cho client download
+                    return File(fileBytes,
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                fileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi nếu cần
+                // _logger.LogError(ex, "Error exporting statistic");
+
+                return StatusCode(500, "An error occurred while exporting the statistic.");
+            }
+        }
+        [HttpPost("sale/get-order-list")]
+        public async Task<IActionResult> GetOrderList(ListingRequest request)
+        {
+            return Ok(await _orderService.GetAllOrder(request));
+        }
+        [HttpPut("sale/approve-order")]
+        public async Task<IActionResult> ApproveOrder(ApproveOrderRequest request)
+        {
+            return Ok(await _orderService.ApproveOrder(request));
+        }
+
     }
 }
