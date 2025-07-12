@@ -56,42 +56,54 @@ namespace SEP490_BackendAPI.Controllers
         [HttpPost("admin/export")]
         public async Task<IActionResult> ExportStatistic([FromBody] StatisticsOrderRequest request)
         {
-            var data = await _orderService.GetStatisticData(request);
-            var SummaryItem = new OrderItem()
+            try
             {
-                Revenue = data.TotalRevenue,
-                BadUnitStockSold = data.TotalBadUnitStockSold,
-                GoodUnitStockSold = data.TotalGoodUnitStockSold
-            };
-            var result = data.datas;
-            result.Add(SummaryItem);
+                var data = await _orderService.GetStatisticData(request);
 
-            // create excel file
-            ExcelPackage package = new ExcelPackage();
-           
+                var summaryItem = new OrderItem()
+                {
+                    Revenue = data.TotalRevenue,
+                    BadUnitStockSold = data.TotalBadUnitStockSold,
+                    GoodUnitStockSold = data.TotalGoodUnitStockSold,
+                    BreedName = "Total"
+                };
 
-            using (var excelPackage = new ExcelPackage())
+                var result = data.datas;
+                result.Add(summaryItem);
+
+                // Thiết lập license context cho EPPlus (phiên bản mới)
+                ExcelPackage.License.SetNonCommercialPersonal("Company Admin");
+
+                using (var excelPackage = new ExcelPackage())
+                {
+                    // Thêm sheet và dữ liệu vào file excel
+                    ExportExcelHelper.AddSheetToExcelFile(excelPackage, result, "Sold detail", "Danh sách doanh thu từng giống");
+
+                    // Lưu file excel vào thư mục temp và lấy tên file
+                    string fileName = ExportExcelHelper.SaveExcelFile(excelPackage, "Company Admin", "Báo cáo doanh thu");
+
+                    if (string.IsNullOrWhiteSpace(fileName) || fileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+                        return BadRequest("Invalid file name.");
+
+                    var filePath = Path.Combine(Path.GetTempPath(), fileName);
+
+                    if (!System.IO.File.Exists(filePath))
+                        return NotFound("File not found.");
+
+                    var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
+
+                    // Trả về file excel cho client download
+                    return File(fileBytes,
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                fileName);
+                }
+            }
+            catch (Exception ex)
             {
-                ExcelPackage.License.SetNonCommercialPersonal("Vu Duc");
-                //B2 fill data
-                // Thêm sheet với dữ liệu
-                ExportExcelHelper.AddSheetToExcelFile(excelPackage, result, "Sold detail", "Danh sách doanh thu từng giống");
+                // Log lỗi nếu cần
+                // _logger.LogError(ex, "Error exporting statistic");
 
-                // Lưu file vào thư mục tạm và lấy tên file
-                string fileName = ExportExcelHelper.SaveExcelFile(excelPackage, "Company Admin", "Báo cáo doanh thu");
-
-                //B3 xuat data
-                if (string.IsNullOrWhiteSpace(fileName) || fileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
-                    return BadRequest("Invalid file name.");
-
-                var path = Path.Combine(Path.GetTempPath(), fileName);
-                if (!System.IO.File.Exists(path))
-                    return NotFound("File not found.");
-
-                var bytes = System.IO.File.ReadAllBytes(path);
-                return File(bytes,
-                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                            fileName);
+                return StatusCode(500, "An error occurred while exporting the statistic.");
             }
         }
     }

@@ -16,6 +16,7 @@ namespace ExcelControl.Handler
 
         public static void AddSheetToExcelFile<T>(ExcelPackage excelPackage, List<T> dataList, string sheetName, string sectionTitle)
         {
+            //ExcelPackage.License.SetNonCommercialPersonal("Company Admin");
             var workSheet = excelPackage.Workbook.Worksheets.Add(sheetName);
 
             // Tạo tiêu đề cho section
@@ -28,7 +29,7 @@ namespace ExcelControl.Handler
 
         public static string SaveExcelFile(ExcelPackage excelPackage, string currentUser, string Title)
         {
-            //ExcelPackage.License.SetNonCommercialPersonal("Vu Duc");
+           // ExcelPackage.License.SetNonCommercialPersonal("Company Admin");
             excelPackage.Workbook.Properties.Author = currentUser;
             excelPackage.Workbook.Properties.Title = Title;
 
