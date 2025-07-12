@@ -17,88 +17,56 @@ using Infrastructure.Extensions;
 using Domain.Helper.Constants;
 using Domain.Dto.Response.Barn;
 using Domain.IServices;
+using Domain.Dto.Request.Bill.Admin;
+using Domain.Dto.Response.User;
+using Domain.Dto.Response.Bill;
+using Domain.DTOs.Response.LivestockCircle;
 
 namespace Infrastructure.Services.Implements
 {
     public class LivestockCircleService : ILivestockCircleService
     {
         private readonly IRepository<LivestockCircle> _livestockCircleRepository;
-
+        private readonly IRepository<User> _userRepository;
+        private readonly IRepository<ImageBreed> _imageBreedRepository;
         private readonly IRepository<ImageLivestockCircle> _livestockCircleImageRepo;
+        private readonly IRepository<LivestockCircleFood> _livestockCircleFoodRepository;
+        private readonly IRepository<LivestockCircleMedicine> _livestockCircleMedicineRepository;
+        private readonly IRepository<Food> _foodRepository;
+        private readonly IRepository<Medicine> _medicineRepository;
         private readonly IRepository<Breed> _breedRepository;
+        private readonly IRepository<ImageFood> _foodImageRepository;
+        private readonly IRepository<ImageMedicine> _medicineImageRepository;
 
         /// <summary>
         /// Khởi tạo service với repository của LivestockCircle.
         /// </summary>
 
-        public LivestockCircleService(IRepository<LivestockCircle> livestockCircleRepository, IRepository<ImageLivestockCircle> livestockCircleImageRepo, IRepository<Breed> breedRepository)
+        public LivestockCircleService
+            (IRepository<LivestockCircle> livestockCircleRepository, 
+            IRepository<ImageLivestockCircle> livestockCircleImageRepo,
+            IRepository<User> userRepository,
+            IRepository<ImageBreed> imageBreedRepository,
+            IRepository<Breed> breedRepository,
+            IRepository<LivestockCircleFood> livestockCircleFoodRepository,
+            IRepository<LivestockCircleMedicine> livestockCircleMedicineRepository,
+            IRepository<Food> foodRepository,
+            IRepository<Medicine> medicineRepository,
+            IRepository<ImageFood> foodImageRepository,
+            IRepository<ImageMedicine> medicineImageRepository)
         {
             _livestockCircleRepository = livestockCircleRepository ?? throw new ArgumentNullException(nameof(livestockCircleRepository));
             _livestockCircleImageRepo = livestockCircleImageRepo;
             _breedRepository = breedRepository;
-
+            _imageBreedRepository = imageBreedRepository;
+            _userRepository = userRepository;
+            _livestockCircleFoodRepository = livestockCircleFoodRepository ?? throw new ArgumentNullException(nameof(livestockCircleFoodRepository));
+            _livestockCircleMedicineRepository = livestockCircleMedicineRepository ?? throw new ArgumentNullException(nameof(livestockCircleMedicineRepository));
+            _foodRepository = foodRepository ?? throw new ArgumentNullException(nameof(foodRepository));
+            _medicineRepository = medicineRepository ?? throw new ArgumentNullException(nameof(medicineRepository));
+            _foodImageRepository = foodImageRepository ?? throw new ArgumentNullException(nameof(foodImageRepository));
+            _medicineImageRepository = medicineImageRepository ?? throw new ArgumentNullException(nameof(medicineImageRepository));
         }
-
-        /// <summary>
-        /// Tạo một chu kỳ chăn nuôi request số lượng con giống và chuồng của người gia công đến nhân viên
-        /// phòng con giống.
-        /// </summary>
-        //public async Task<(bool Success, string ErrorMessage)> CreateLiveStockCircle(CreateLivestockCircleRequest request, CancellationToken cancellationToken = default)
-        //{
-        //    if (request == null)
-        //        return (false, "Dữ liệu chu kỳ chăn nuôi không được null.");
-
-        //    // Kiểm tra các trường bắt buộc
-        //    var validationResults = new List<ValidationResult>();
-        //    var validationContext = new ValidationContext(request);
-        //    if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
-        //    {
-        //        return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
-        //    }
-
-        //    //// Kiểm tra ngày hợp lệ
-        //    //if (request.StartDate > request.EndDate)
-        //    //    return (false, "Ngày bắt đầu không thể muộn hơn ngày kết thúc.");
-
-        //    // Kiểm tra xem chu kỳ với tên này đã tồn tại chưa
-        //    var checkError = new Ref<CheckError>();
-        //    var exists = await _livestockCircleRepository.CheckExist(
-        //        x => x.LivestockCircleName == request.LivestockCircleName && x.IsActive,
-        //        checkError,
-        //        cancellationToken);
-
-        //    if (checkError.Value?.IsError == true)
-        //        return (false, $"Lỗi khi kiểm tra chu kỳ tồn tại: {checkError.Value.Message}");
-
-        //    if (exists)
-        //        return (false, $"Chu kỳ chăn nuôi với tên '{request.LivestockCircleName}' đã tồn tại.");
-
-        //    var livestockCircle = new LivestockCircle
-        //    {
-        //        LivestockCircleName = request.LivestockCircleName,
-        //        Status = request.Status,
-        //        StartDate = request.StartDate,
-        //        TotalUnit = request.TotalUnit,
-        //        DeadUnit = 0,
-        //        AverageWeight = 0,
-        //        GoodUnitNumber = request.TotalUnit,
-        //        BadUnitNumber = 0,
-        //        BreedId = request.BreedId,
-        //        BarnId = request.BarnId,
-        //        TechicalStaffId = request.TechicalStaffId
-        //    };
-
-        //    try
-        //    {
-        //        _livestockCircleRepository.Insert(livestockCircle);
-        //        await _livestockCircleRepository.CommitAsync(cancellationToken);
-        //        return (true, null);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return (false, $"Lỗi khi tạo chu kỳ chăn nuôi: {ex.Message}");
-        //    }
-        //}
 
         /// <summary>
         /// Cập nhật thông tin một chu kỳ chăn nuôi.
@@ -268,6 +236,58 @@ namespace Infrastructure.Services.Implements
             }
         }
 
+        public async Task<(LiveStockCircleActive Circle, string ErrorMessage)> GetActiveLiveStockCircleByBarnId(
+            Guid barnId,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var query = _livestockCircleRepository.GetQueryable(x => x.IsActive && x.BarnId == barnId);
+                var circle = await query.FirstOrDefaultAsync(cancellationToken);
+
+                if (circle == null)
+                    return (null, "Không tìm thấy chu kỳ chăn nuôi đang hoạt động cho chuồng này.");
+                var technical = await _userRepository.GetById(circle.TechicalStaffId);
+                var technicalStaffResponse = new UserItemResponse
+                {
+                    Email = technical.Email,
+                    UserId = technical.Id,
+                    Fullname = technical.FullName,
+                    PhoneNumber = technical.PhoneNumber
+                };
+                var breed = await _breedRepository.GetById(circle.BreedId);
+                var images = await _imageBreedRepository.GetQueryable(x => x.BreedId == breed.Id).ToListAsync(cancellationToken);
+                var breedResponse = new BreedBillResponse
+                {
+                    Id = breed.Id,
+                    BreedName = breed.BreedName,
+                    Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                };
+                var response = new LiveStockCircleActive
+                {
+                    Id = circle.Id,
+                    LivestockCircleName = circle.LivestockCircleName,
+                    Status = circle.Status,
+                    StartDate = circle.StartDate,
+                    TotalUnit = circle.TotalUnit,
+                    DeadUnit = circle.DeadUnit,
+                    AverageWeight = circle.AverageWeight,
+                    GoodUnitNumber = circle.GoodUnitNumber,
+                    BadUnitNumber = circle.BadUnitNumber,
+                    Breed = breedResponse,
+                    TechicalStaffId = technicalStaffResponse,
+                };
+
+                return (response, null);
+            }
+            catch (Exception ex)
+            {
+                return (null, $"Lỗi khi lấy chu kỳ chăn nuôi đang hoạt động theo BarnId: {ex.Message}");
+            }
+        }
+
+
+
         /// <summary>
         /// Lấy danh sách chu kỳ chăn nuôi theo ID của nhân viên kỹ thuật.
         /// </summary>
@@ -409,62 +429,6 @@ namespace Infrastructure.Services.Implements
             catch (Exception ex)
             {
                 return (false, $"Lỗi khi cập nhật trọng lượng trung bình: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Thay đổi trạng thái (Status) của một chu kỳ chăn nuôi.
-        /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> ChangeStatus(
-            Guid livestockCircleId,
-            string status,
-            CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(status))
-                    return (false, "Trạng thái không được để trống.");
-
-                // Danh sách trạng thái hợp lệ 
-                var validStatuses = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    "Đang đợi duyệt",
-                    "Đã duyệt chờ vận chuyển",
-                    "Đang vận chuyển",
-                    "Đã giao chờ xác nhận",
-                    "Đang trong giai đoạn nuôi",
-                    "Đang chờ duyệt mở bán",
-                    "Đang mở bán",
-                    "Đã xong"
-                };
-
-                if (!validStatuses.Contains(status))
-                    return (false, $"Trạng thái không hợp lệ: {status}. Trạng thái hợp lệ: {string.Join(", ", validStatuses)}.");
-
-                var checkError = new Ref<CheckError>();
-                var livestockCircle = await _livestockCircleRepository.GetById(livestockCircleId, checkError);
-                if (checkError.Value?.IsError == true)
-                    return (false, $"Lỗi khi lấy thông tin chu kỳ chăn nuôi: {checkError.Value.Message}");
-
-                if (livestockCircle == null)
-                    return (false, "Không tìm thấy chu kỳ chăn nuôi.");
-
-                if (!livestockCircle.IsActive)
-                    return (false, "Chu kỳ chăn nuôi không còn hoạt động.");
-
-                // Kiểm tra nếu trạng thái mới giống trạng thái hiện tại
-                if (string.Equals(livestockCircle.Status, status, StringComparison.OrdinalIgnoreCase))
-                    return (true, "Trạng thái không thay đổi, không cần cập nhật.");
-
-                livestockCircle.Status = status;
-
-                _livestockCircleRepository.Update(livestockCircle);
-                await _livestockCircleRepository.CommitAsync(cancellationToken);
-                return (true, null);
-            }
-            catch (Exception ex)
-            {
-                return (false, $"Lỗi khi thay đổi trạng thái: {ex.Message}");
             }
         }
 
@@ -728,6 +692,148 @@ namespace Infrastructure.Services.Implements
             catch (Exception)
             {
                 throw new Exception("Mã ID không hợp lệ");
+            }
+        }
+
+        public async Task<(PaginationSet<FoodRemainingResponse> FoodRemainings, string ErrorMessage)> GetFoodRemaining(
+          Guid liveStockCircleId, ListingRequest request, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (request == null)
+                    return (null, "Yêu cầu không được để trống.");
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                    return (null, "PageIndex và PageSize phải lớn hơn 0.");
+
+                var validFields = typeof(LivestockCircleFood).GetProperties()
+                    .Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any())
+                    return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+
+                var checkError = new Ref<CheckError>();
+                var livestockCircle = await _livestockCircleRepository.GetById(liveStockCircleId, checkError);
+                if (checkError.Value?.IsError == true)
+                    return (null, $"Lỗi khi lấy thông tin chu kỳ chăn nuôi: {checkError.Value.Message}");
+                if (livestockCircle == null)
+                    return (null, "Chu kỳ chăn nuôi không tồn tại.");
+
+                var query = _livestockCircleFoodRepository.GetQueryable(x => x.LivestockCircleId == liveStockCircleId && x.Remaining > 0);
+
+                if (request.SearchString?.Any() == true)
+                    query = query.SearchString(request.SearchString);
+                if (request.Filter?.Any() == true)
+                    query = query.Filter(request.Filter);
+
+                var paginationResult = await query
+                    .Include(x => x.Food)
+                    .Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                var responses = new List<FoodRemainingResponse>();
+                foreach (var item in paginationResult.Items)
+                {
+                    var images = await _foodImageRepository.GetQueryable(x => x.FoodId == item.FoodId)
+                        .ToListAsync(cancellationToken);
+                    responses.Add(new FoodRemainingResponse
+                    {
+                        Id = item.Id,
+                        LivestockCircleId = item.LivestockCircleId,
+                        Food = new FoodBillResponse
+                        {
+                            Id = item.Food.Id,
+                            FoodName = item.Food.FoodName,
+                            Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                        },
+                        Remaining = item.Remaining
+                    });
+                }
+
+                var result = new PaginationSet<FoodRemainingResponse>
+                {
+                    PageIndex = paginationResult.PageIndex,
+                    Count = responses.Count,
+                    TotalCount = paginationResult.TotalCount,
+                    TotalPages = paginationResult.TotalPages,
+                    Items = responses
+                };
+
+                return (result, null);
+            }
+            catch (Exception ex)
+            {
+                return (null, $"Lỗi khi lấy danh sách thực phẩm còn lại: {ex.Message}");
+            }
+        }
+
+        public async Task<(PaginationSet<MedicineRemainingResponse> MedicineRemainings, string ErrorMessage)> GetMedicineRemaining(
+            Guid liveStockCircleId, ListingRequest request, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (request == null)
+                    return (null, "Yêu cầu không được để trống.");
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                    return (null, "PageIndex và PageSize phải lớn hơn 0.");
+
+                var validFields = typeof(LivestockCircleMedicine).GetProperties()
+                    .Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any())
+                    return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+
+                var checkError = new Ref<CheckError>();
+                var livestockCircle = await _livestockCircleRepository.GetById(liveStockCircleId, checkError);
+                if (checkError.Value?.IsError == true)
+                    return (null, $"Lỗi khi lấy thông tin chu kỳ chăn nuôi: {checkError.Value.Message}");
+                if (livestockCircle == null)
+                    return (null, "Chu kỳ chăn nuôi không tồn tại.");
+
+                var query = _livestockCircleMedicineRepository.GetQueryable(x => x.LivestockCircleId == liveStockCircleId && x.Remaining > 0);
+
+                if (request.SearchString?.Any() == true)
+                    query = query.SearchString(request.SearchString);
+                if (request.Filter?.Any() == true)
+                    query = query.Filter(request.Filter);
+
+                var paginationResult = await query
+                    .Include(x => x.Medicine)
+                    .Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                var responses = new List<MedicineRemainingResponse>();
+                foreach (var item in paginationResult.Items)
+                {
+                    var images = await _medicineImageRepository.GetQueryable(x => x.MedicineId == item.MedicineId)
+                        .ToListAsync(cancellationToken);
+                    responses.Add(new MedicineRemainingResponse
+                    {
+                        Id = item.Id,
+                        LivestockCircleId = item.LivestockCircleId,
+                        Medicine = new MedicineBillResponse
+                        {
+                            Id = item.Medicine.Id,
+                            MedicineName = item.Medicine.MedicineName,
+                            Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                        },
+                        Remaining = item.Remaining
+                    });
+                }
+
+                var result = new PaginationSet<MedicineRemainingResponse>
+                {
+                    PageIndex = paginationResult.PageIndex,
+                    Count = responses.Count,
+                    TotalCount = paginationResult.TotalCount,
+                    TotalPages = paginationResult.TotalPages,
+                    Items = responses
+                };
+
+                return (result, null);
+            }
+            catch (Exception ex)
+            {
+                return (null, $"Lỗi khi lấy danh sách thuốc còn lại: {ex.Message}");
             }
         }
     }

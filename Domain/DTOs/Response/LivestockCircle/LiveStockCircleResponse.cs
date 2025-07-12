@@ -1,4 +1,9 @@
+
 ﻿using Domain.Dto.Response.Barn;
+
+﻿using Domain.Dto.Response.Bill;
+using Domain.Dto.Response.User;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,5 +29,20 @@ namespace Domain.Dto.Response.LivestockCircle
         public Guid TechicalStaffId { get; set; }
         public bool IsActive { get; set; }
         public List<ImageLivestockCircleResponse>? Images { get; set; }
+    }
+
+    public class LiveStockCircleActive
+    {
+        public Guid Id { get; set; }
+        public string LivestockCircleName { get; set; }
+        public string Status { get; set; }
+        public DateTime? StartDate { get; set; }
+        public int TotalUnit { get; set; }
+        public int DeadUnit { get; set; }
+        public float AverageWeight { get; set; }
+        public int GoodUnitNumber { get; set; }
+        public int BadUnitNumber { get; set; }
+        public BreedBillResponse Breed { get; set; }
+        public UserItemResponse TechicalStaffId { get; set; }
     }
 }
