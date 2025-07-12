@@ -31,18 +31,18 @@ namespace Infrastructure.Extensions
             {
                 if (request.Year != null)
                 {
-                    request.From = new DateTime(request.Year, 1, 1);
-                    request.To = new DateTime(request.Year + 1, 1, 1);
+                    request.From = new DateTime((int)request.Year, 1, 1);
+                    request.To = new DateTime((int)(request.Year + 1), 1, 1);
                 }
                 if (request.Quater != null)
                 {
-                    request.From = new DateTime(request.Year, (((int)request.Quater - 1) * 3 + 1), 1);
-                    request.To = new DateTime(request.Year, ((int)request.Quater * 3) + 1, 1);
+                    request.From = new DateTime((int)request.Year, (((int)request.Quater - 1) * 3 + 1), 1);
+                    request.To = new DateTime((int)request.Year, ((int)request.Quater * 3) + 1, 1);
                 }
                 if (request.Month != null)
                 {
-                    request.From = new DateTime(request.Year, (int)request.Month, 1);
-                    request.To = new DateTime(request.Year, (int)request.Month + 1, 1);
+                    request.From = new DateTime((int)request.Year, (int)request.Month, 1);
+                    request.To = new DateTime((int)request.Year, (int)request.Month + 1, 1);
                 }
 
             }

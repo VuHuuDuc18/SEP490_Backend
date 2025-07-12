@@ -1,14 +1,15 @@
-﻿using Entities.EntityModel;
+﻿using Application.Wrappers;
+using Domain.Dto.Request;
+using Domain.Dto.Request.Barn;
+using Domain.Dto.Response;
+using Domain.Dto.Response.Barn;
+using Domain.Dto.Response.LivestockCircle;
+using Domain.Dto.Response.Medicine;
+using Entities.EntityModel;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Domain.Dto.Request.Barn;
-using Domain.Dto.Response.Barn;
-using Domain.Dto.Request;
-using Domain.Dto.Response.Medicine;
-using Domain.Dto.Response;
-using Application.Wrappers;
 namespace Domain.IServices
 {
     public interface IBarnService
@@ -69,6 +70,6 @@ namespace Domain.IServices
         Task<Response<ReleaseBarnDetailResponse>> GetReleaseBarnDetail(
             Guid BarnId,
             CancellationToken cancellationToken = default);
-
+        public Task<Response<PaginationSet<BarnResponse>>> GetAssignedBarn(Guid tsid, ListingRequest req);
     }
 }

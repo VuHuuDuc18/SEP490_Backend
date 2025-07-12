@@ -1,10 +1,29 @@
+using Application.Wrappers;
+using CloudinaryDotNet.Actions;
+using Domain.Dto.Request;
+using Domain.Dto.Request.Barn;
+using Domain.Dto.Response;
+using Domain.Dto.Response.Barn;
+using Domain.Dto.Response.Breed;
+using Domain.Dto.Response.LivestockCircle;
+using Domain.Helper;
+using Domain.Helper.Constants;
+using Domain.IServices;
 using Entities.EntityModel;
+using Infrastructure.Core;
+using Infrastructure.Extensions;
+using Infrastructure.Repository;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
 using System.ComponentModel.DataAnnotations;
 using Infrastructure.Core;
 using Infrastructure.Repository;
@@ -25,6 +44,7 @@ using Domain.IServices;
 using Domain.Dto.Response.User;
 using System.Net.WebSockets;
 using Domain.Dto.Response.Bill;
+
 
 
 namespace Infrastructure.Services.Implements
@@ -510,9 +530,10 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                     .GetQueryable(x => x.BarnId == barnId && x.IsActive && x.Status != StatusConstant.CANCELSTAT && x.Status != StatusConstant.DONESTAT)
                     .FirstOrDefaultAsync(cancellationToken);
 
-                ActiveLivestockCircleResponse? activeLivestockCircleResponse = null;
+                LivestockCircleResponse? activeLivestockCircleResponse = null;
                 if (activeLivestockCircle != null)
                 {
+
                     var technicalStaff = await _userRepository.GetById(activeLivestockCircle.TechicalStaffId);
                     var technicalStaffResponse = new UserItemResponse
                     {
@@ -530,6 +551,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                         Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
                     };
                     activeLivestockCircleResponse = new ActiveLivestockCircleResponse
+
                     {
                         Id = activeLivestockCircle.Id,
                         LivestockCircleName = activeLivestockCircle.LivestockCircleName,
@@ -540,8 +562,10 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                         AverageWeight = activeLivestockCircle.AverageWeight,
                         GoodUnitNumber = activeLivestockCircle.GoodUnitNumber,
                         BadUnitNumber = activeLivestockCircle.BadUnitNumber,
+
                         Breed = breedResponse,
                         TechicalStaff = technicalStaffResponse
+
                     };
                 }
 
@@ -659,7 +683,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                 var breedImages = _imageBreedeRepository.GetQueryable(x => x.IsActive && x.BreedId == liveStockCircle.BreedId).Select(x=> x.ImageLink).ToList();
                 //map data to response object
                 var result = AutoMapperHelper.AutoMap<Barn,ReleaseBarnDetailResponse>(liveStockCircle.Barn);
-                result.LiveStockCircle = AutoMapperHelper.AutoMap<LivestockCircle, LiveStockCircleResponse>(liveStockCircle);
+                result.LiveStockCircle = AutoMapperHelper.AutoMap<LivestockCircle, LivestockCircleResponse>(liveStockCircle);
                 result.Breed = AutoMapperHelper.AutoMap<Breed, BreedResponse>(liveStockCircle.Breed);
                 result.Breed.Thumbnail = breedImages.FirstOrDefault();
                 result.Breed.BreedCategory = AutoMapperHelper.AutoMap<BreedCategory, BreedCategoryResponse>(liveStockCircle.Breed.BreedCategory);
@@ -681,5 +705,70 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
             
         }
 
+        public async Task<Response<PaginationSet<BarnResponse>>> GetAssignedBarn(Guid tsid, ListingRequest request)
+        {
+            try
+            {
+                if (request == null)
+                    return new Response<PaginationSet<BarnResponse>>("Yêu cầu không được null.");
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                    return new Response<PaginationSet<BarnResponse>>("PageIndex và PageSize phải lớn hơn 0.");
+
+                var validFields = typeof(ReleaseBarnResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any())
+                    return new Response<PaginationSet<BarnResponse>>($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}")
+                    {
+                        Errors = new List<string>()
+                        {
+                            $"Trường hợp lệ: {string.Join(",",validFields)}"
+                        }
+                    };
+                if (!validFields.Contains(request.Sort?.Field))
+                {
+                    return new Response<PaginationSet<BarnResponse>>($"Trường sắp xếp không hợp lệ: {request.Sort?.Field}")
+                    {
+                        Errors = new List<string>()
+                        {
+                            $"Trường hợp lệ: {string.Join(",",validFields)}"
+                        }
+                    };
+                }
+
+                var query = _livestockCircleRepository.GetQueryable(x => x.IsActive)
+                    .Include(x => x.Barn)
+                    .ThenInclude(x=>x.Worker)
+                    .Select(x => new BarnResponse()
+                    {
+                        Id = x.Barn.Id,
+                        BarnName = x.Barn.BarnName,
+                        Address = x.Barn.Address,
+                        Image = x.Barn.Image,
+                        IsActive = x.Barn.IsActive,
+                        Worker = new WokerResponse()
+                        {
+                            Id= x.Barn.Worker.Id,
+                            Email = x.Barn.Worker.Email,
+                            FullName = x.Barn.Worker.FullName,
+                        }
+                        
+                    });
+
+                if (request.SearchString?.Any() == true)
+                    query = query.SearchString(request.SearchString);
+
+                if (request.Filter?.Any() == true)
+                    query = query.Filter(request.Filter);
+
+                var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                return new Response<PaginationSet<BarnResponse>>(paginationResult, "Lấy dữ liệu thành công.");
+            }
+            catch (Exception ex)
+            {
+                return new Response<PaginationSet<BarnResponse>>($"Lỗi khi lấy danh sách phân trang: {ex.Message}");
+            }
+        }
     }
 }
