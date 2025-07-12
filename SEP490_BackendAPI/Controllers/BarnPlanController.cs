@@ -17,13 +17,13 @@ namespace SEP490_BackendAPI.Controllers
             _barnPlanService = barnPlanService;
         }
         [HttpGet("getbyid/{id}")]
-        public async Task<IActionResult> getById([FromQuery]Guid id)
+        public async Task<IActionResult> getById([FromRoute]Guid id)
         {
             var result = await _barnPlanService.GetById(id);
             return Ok(result);
         }
         [HttpGet("getbyliveStockid/{id}")]
-        public async Task<IActionResult> getByLiveStockCircleId([FromQuery] Guid id)
+        public async Task<IActionResult> getByLiveStockCircleId([FromRoute] Guid id)
         {
             var result = await _barnPlanService.GetByLiveStockCircleId(id);
             return Ok(result);
