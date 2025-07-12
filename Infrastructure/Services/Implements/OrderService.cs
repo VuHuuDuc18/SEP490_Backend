@@ -32,6 +32,7 @@ namespace Infrastructure.Services.Implements
             _orderRepository = orderRepository;
             _livestockCircleRepository = livestockCircleRepository;
             _userManager = userManager;
+
             // Lấy current user từ JWT token claims
             _currentUserId = Guid.Empty;
             var currentUser = httpContextAccessor.HttpContext?.User;
