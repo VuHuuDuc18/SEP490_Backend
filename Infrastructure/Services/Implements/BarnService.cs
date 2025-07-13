@@ -751,7 +751,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                     };
                 }
 
-                var query = _livestockCircleRepository.GetQueryable(x => x.IsActive)
+                var query = _livestockCircleRepository.GetQueryable(x => x.IsActive && x.TechicalStaffId==tsid)
                     .Include(x => x.Barn)
                     .ThenInclude(x=>x.Worker)
                     .Select(x => new BarnResponse()

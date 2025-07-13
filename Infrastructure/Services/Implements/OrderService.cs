@@ -524,7 +524,9 @@ namespace Infrastructure.Services.Implements
                     TotalBill = x.TotalBill,
                     Status = x.Status,
                     CreateDate = x.CreatedDate,
-                    PickupDate = x.PickupDate
+                    PickupDate = x.PickupDate,
+                    BreedName = x.LivestockCircle.Breed.BreedName,
+                    BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name
                 }).Pagination(request.PageIndex, request.PageSize, request.Sort);
 
                 return (result);
@@ -594,7 +596,9 @@ namespace Infrastructure.Services.Implements
                     TotalBill = x.TotalBill,
                     Status = x.Status,
                     CreateDate = x.CreatedDate,
-                    PickupDate = x.PickupDate
+                    PickupDate = x.PickupDate,
+                    BreedName = x.LivestockCircle.Breed.BreedName,
+                    BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name
                 }).Pagination(request.PageIndex, request.PageSize, request.Sort);
 
                 return (result);

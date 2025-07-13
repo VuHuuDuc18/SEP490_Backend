@@ -148,7 +148,7 @@ namespace SEP490_BackendAPI.Controllers
             {
                 Guid.TryParse(User.FindFirst("uid")?.Value, out Guid technicalStaffId);
                 var result = await _barnService.GetAssignedBarn(technicalStaffId, req);
-                if (result == null)
+                if (result.Data == null)
                     return StatusCode(StatusCodes.Status500InternalServerError);
 
                 return Ok(result);
