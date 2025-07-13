@@ -21,6 +21,7 @@ using Domain.Dto.Request.Bill.Admin;
 using Domain.Dto.Response.User;
 using Domain.Dto.Response.Bill;
 using Domain.DTOs.Response.LivestockCircle;
+using Domain.DTOs.Request.LivestockCircle;
 
 namespace Infrastructure.Services.Implements
 {
@@ -37,6 +38,8 @@ namespace Infrastructure.Services.Implements
         private readonly IRepository<Breed> _breedRepository;
         private readonly IRepository<ImageFood> _foodImageRepository;
         private readonly IRepository<ImageMedicine> _medicineImageRepository;
+        private readonly IRepository<ImageLivestockCircle> _imageLiveStockCircleRepository;
+        private readonly CloudinaryCloudService _cloudinaryCloudService;
 
         /// <summary>
         /// Khởi tạo service với repository của LivestockCircle.
@@ -53,7 +56,10 @@ namespace Infrastructure.Services.Implements
             IRepository<Food> foodRepository,
             IRepository<Medicine> medicineRepository,
             IRepository<ImageFood> foodImageRepository,
-            IRepository<ImageMedicine> medicineImageRepository)
+            IRepository<ImageMedicine> medicineImageRepository,
+            IRepository<ImageLivestockCircle> imageLiveStockCircleRepository,
+            CloudinaryCloudService cloudinaryCloudService
+            )
         {
             _livestockCircleRepository = livestockCircleRepository ?? throw new ArgumentNullException(nameof(livestockCircleRepository));
             _livestockCircleImageRepo = livestockCircleImageRepo;
@@ -66,6 +72,8 @@ namespace Infrastructure.Services.Implements
             _medicineRepository = medicineRepository ?? throw new ArgumentNullException(nameof(medicineRepository));
             _foodImageRepository = foodImageRepository ?? throw new ArgumentNullException(nameof(foodImageRepository));
             _medicineImageRepository = medicineImageRepository ?? throw new ArgumentNullException(nameof(medicineImageRepository));
+            _cloudinaryCloudService = cloudinaryCloudService ?? throw new ArgumentNullException( nameof(cloudinaryCloudService));
+            _imageLiveStockCircleRepository = imageLiveStockCircleRepository;
         }
 
         /// <summary>
@@ -429,6 +437,70 @@ namespace Infrastructure.Services.Implements
             catch (Exception ex)
             {
                 return (false, $"Lỗi khi cập nhật trọng lượng trung bình: {ex.Message}");
+            }
+        }
+
+        public async Task<(bool Success, string ErrorMessage)> UpdateImageLiveStocCircle(
+            Guid livestockCircleId,
+            UpdateImageLiveStockCircle request,
+            CancellationToken cancellationToken = default)
+        {
+            if (request == null)
+                return (false, "Dữ liệu cập nhật hình ảnh lứa nuôi không được null.");
+
+            // Kiểm tra các trường bắt buộc
+            var validationResults = new List<ValidationResult>();
+            var validationContext = new ValidationContext(request);
+            if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
+            {
+                return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
+            }
+            try
+            {
+     //           // Upload thumbnail lên Cloudinary trong folder được chỉ định
+     //           if (!string.IsNullOrEmpty(request.Thumbnail))
+     //           {
+     //               var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
+     //request.Thumbnail, "food", _cloudinaryCloudService, cancellationToken);
+
+     //               if (!string.IsNullOrEmpty(imageLink))
+     //               {
+     //                   var imageFood = new ImageFood
+     //                   {
+     //                       FoodId = food.Id,
+     //                       ImageLink = imageLink,
+     //                       Thumnail = "true"
+     //                   };
+     //                   _imageFoodRepository.Insert(imageFood);
+     //               }
+     //           }
+
+                // Upload ảnh khác lên Cloudinary trong folder được chỉ định
+                if (request.Images != null && request.Images.Any())
+                {
+                    foreach (var imageLink in request.Images)
+                    {
+                        var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
+                           imageLink, "livestockcircle", _cloudinaryCloudService, cancellationToken);
+                        if (!string.IsNullOrEmpty(uploadedLink))
+                        {
+                            var imageLivestockCircle = new ImageLivestockCircle
+                            {
+                                 LivestockCircleId = livestockCircleId,
+                                ImageLink = uploadedLink,
+                                Thumnail = "false"
+                            };
+                            _imageLiveStockCircleRepository.Insert(imageLivestockCircle);
+                        }
+                    }
+                }
+                await _imageLiveStockCircleRepository.CommitAsync(cancellationToken);
+
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Lỗi khi tạo thức ăn: {ex.Message}");
             }
         }
 
