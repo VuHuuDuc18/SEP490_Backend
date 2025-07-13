@@ -21,84 +21,78 @@ namespace SEP490_BackendAPI.Controllers
         private readonly IMedicineService _medicineService;
         private readonly IMedicineCategoryService _medicineCategoryService;
 
-        /// <summary>
-        /// Khởi tạo controller với service để xử lý logic thuốc.
-        /// </summary>
+
         public MedicineController(IMedicineService medicineService, IMedicineCategoryService medicineCategoryService)
         {
-            _medicineService = medicineService ?? throw new ArgumentNullException(nameof(medicineService));
+            _medicineService = medicineService;
             _medicineCategoryService = medicineCategoryService;
         }
 
-        /// <summary>
-        /// Tạo một loại thuốc mới, bao gồm upload ảnh và thumbnail.
-        /// </summary>
-        [HttpPost("create")]
+
+        [HttpPost("medicine-room-staff/get-medicine-list")]
+        public async Task<IActionResult> GetPaginatedMedicines([FromBody] ListingRequest request, CancellationToken cancellationToken = default)
+        {
+            var response = await _medicineService.GetPaginatedMedicineList(request, cancellationToken);
+            if (!response.Succeeded)
+                return BadRequest(response);
+            return Ok(response);
+        }
+
+        [HttpPost("medicine-room-staff/create-medicine")]
         public async Task<IActionResult> CreateMedicine([FromBody] CreateMedicineRequest request, CancellationToken cancellationToken = default)
         {
-
-            var (success, errorMessage) = await _medicineService.CreateMedicine(request, cancellationToken);
-            if (!success)
-                return BadRequest(errorMessage);
-            return Ok();
+            var response = await _medicineService.CreateMedicine(request, cancellationToken);
+            if (!response.Succeeded)
+                return BadRequest(response);
+            return Ok(response);
         }
 
-        /// <summary>
-        /// Cập nhật thông tin một loại thuốc, bao gồm upload ảnh và thumbnail.
-        /// </summary>
-        [HttpPut("update/{MedicineId}")]
-        public async Task<IActionResult> UpdateMedicine([FromRoute] Guid MedicineId, [FromBody] UpdateMedicineRequest request, CancellationToken cancellationToken = default)
+        [HttpPut("medicine-room-staff/update-medicine")]
+        public async Task<IActionResult> UpdateMedicine([FromBody] UpdateMedicineRequest request, CancellationToken cancellationToken = default)
         {
-            var (success, errorMessage) = await _medicineService.UpdateMedicine(MedicineId, request, cancellationToken);
-            if (!success)
-                return BadRequest(errorMessage);
-            return Ok();
+            var response = await _medicineService.UpdateMedicine(request, cancellationToken);
+            if (!response.Succeeded)
+                return BadRequest(response);
+            return Ok(response);
         }
 
-        [HttpDelete("disable/{MedicineId}")]
+        [HttpPut("medicne-room-staff/disable-medicine/{MedicineId}")]
         public async Task<IActionResult> DisableMedicine([FromRoute] Guid MedicineId, CancellationToken cancellationToken = default)
         {
-            var (success, errorMessage) = await _medicineService.DisableMedicine(MedicineId, cancellationToken);
-            if (!success)
-                return BadRequest(errorMessage);
-            return Ok();
+            var response = await _medicineService.DisableMedicine(MedicineId, cancellationToken);
+            if (!response.Succeeded)
+                return BadRequest(response);
+            return Ok(response);
         }
 
-        /// <summary>
-        /// Lấy thông tin một loại thuốc theo ID.
-        /// </summary>
-        [HttpGet("getMedicineById/{MedicineId}")]
+        [HttpGet("get-medicine-by-id/{MedicineId}")]
         public async Task<IActionResult> GetMedicineById([FromRoute] Guid MedicineId, CancellationToken cancellationToken = default)
         {
-            var (medicine, errorMessage) = await _medicineService.GetMedicineById(MedicineId, cancellationToken);
-            if (medicine == null)
-                return NotFound(errorMessage ?? "Không tìm thấy thuốc.");
-            return Ok(medicine);
+            var response = await _medicineService.GetMedicineById(MedicineId, cancellationToken);
+            if (!response.Succeeded)
+                return NotFound(response);
+            return Ok(response);
+        }
+        [HttpGet("get-all-medicine")]
+        public async Task<IActionResult> GetAllMedicine(CancellationToken cancellationToken = default)
+        {
+            var response = await _medicineService.GetAllMedicine(cancellationToken);
+            if (!response.Succeeded)
+                return NotFound(response);
+            return Ok(response);
+        }
+        [HttpGet("get-medicine-by-category")]
+        public async Task<IActionResult> GetMedicineByCategory(
+            [FromQuery] string medicineName = null,
+            [FromQuery] Guid? medicineCategoryId = null,
+            CancellationToken cancellationToken = default)
+        {
+            var response = await _medicineService.GetMedicineByCategory(medicineName, medicineCategoryId, cancellationToken);
+            if (!response.Succeeded)
+                return NotFound(response);
+            return Ok(response);
         }
 
-        /// <summary>
-        /// Lấy danh sách tất cả loại thuốc đang hoạt động với bộ lọc tùy chọn.
-        /// </summary>
-        [HttpGet("getMedicineByCategory")]
-        public async Task<IActionResult> GetMedicineByCategory(string medicineName = null, Guid? medicineCategoryId = null, CancellationToken cancellationToken = default)
-        {
-            var (medicines, errorMessage) = await _medicineService.GetMedicineByCategory(medicineName, medicineCategoryId, cancellationToken);
-            if (medicines == null)
-                return NotFound(errorMessage ?? "Không tìm thấy danh sách thuốc.");
-            return Ok(medicines);
-        }
-
-        /// <summary>
-        /// Lấy danh sách phân trang tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn.
-        /// </summary>
-        [HttpPost("getPaginatedMedicineList")]
-        public async Task<IActionResult> GetPaginatedMedicines([FromBody] ListingRequest request)
-        {
-            var (result, errorMessage) = await _medicineService.GetPaginatedMedicineList(request);
-            if (errorMessage != null)
-                return BadRequest(errorMessage);
-            return Ok(result);
-        }
         //[HttpPost("export")]
         //public async Task<ActionResult> Export(ListingRequest request)
         //{

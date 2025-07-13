@@ -1,188 +1,319 @@
-﻿using Entities.EntityModel;
+﻿using Application.Wrappers;
+using Domain.Dto.Request;
+using Domain.Dto.Request.Category;
+using Domain.Dto.Response;
+using Domain.Dto.Response.Breed;
+using Domain.IServices;
+using Entities.EntityModel;
 using Infrastructure.Core;
+using Infrastructure.Extensions;
 using Infrastructure.Repository;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
-using Domain.Dto.Request;
-using Domain.Dto.Response;
-using Infrastructure.Extensions;
-using Domain.Dto.Response.Breed;
-using Domain.Dto.Response.Food;
-using Domain.Dto.Response.Category;
-using Domain.Dto.Request.Category;
-using Domain.IServices;
-
 
 namespace Infrastructure.Services.Implements
 {
     public class BreedCategoryService : IBreedCategoryService
     {
         private readonly IRepository<BreedCategory> _breedCategoryRepository;
+        private readonly Guid _currentUserId;
 
         /// <summary>
         /// Khởi tạo service với repository của BreedCategory.
         /// </summary>
-        public BreedCategoryService(IRepository<BreedCategory> breedCategoryRepository)
+        public BreedCategoryService(IRepository<BreedCategory> breedCategoryRepository, IHttpContextAccessor httpContextAccessor)
         {
             _breedCategoryRepository = breedCategoryRepository ?? throw new ArgumentNullException(nameof(breedCategoryRepository));
-        }
 
-        /// <summary>
-        /// Tạo một danh mục giống mới với kiểm tra hợp lệ.
-        /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> CreateBreedCategory(CreateCategoryRequest request, CancellationToken cancellationToken = default)
-        {
-            if (request == null)
-                return (false, "Dữ liệu danh mục giống không được null.");
-
-            // Kiểm tra các trường bắt buộc
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(request);
-            if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
+            // Lấy current user từ JWT token claims
+            _currentUserId = Guid.Empty;
+            var currentUser = httpContextAccessor.HttpContext?.User;
+            if (currentUser != null)
             {
-                return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
+                var userIdClaim = currentUser.FindFirst("uid")?.Value;
+                if (!string.IsNullOrEmpty(userIdClaim))
+                {
+                    _currentUserId = Guid.Parse(userIdClaim);
+                }
             }
-
-            // Kiểm tra xem danh mục với tên này đã tồn tại chưa
-            var checkError = new Ref<CheckError>();
-            var exists = await _breedCategoryRepository.CheckExist(
-                x => x.Name == request.Name && x.IsActive,
-                checkError,
-                cancellationToken);
-
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi kiểm tra danh mục tồn tại: {checkError.Value.Message}");
-
-            if (exists)
-                return (false, $"Danh mục giống với tên '{request.Name}' đã tồn tại.");
-
-            var breedCategory = new BreedCategory
-            {
-                Name = request.Name,
-                Description = request.Description
-            };
-
+        }
+        public async Task<Response<string>> CreateBreedCategory(CreateCategoryRequest request, CancellationToken cancellationToken = default)
+        {
             try
             {
+                //if (_currentUserId == Guid.Empty)
+                //{
+                //    return new Response<string>()
+                //    {
+                //        Succeeded = false,
+                //        Message = "Hãy đăng nhập và thử lại",
+                //        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                //    };
+                //}
+
+                if (request == null)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Dữ liệu danh mục giống không được null",
+                        Errors = new List<string> { "Dữ liệu danh mục giống không được null" }
+                    };
+                }
+
+                var validationResults = new List<ValidationResult>();
+                var validationContext = new ValidationContext(request);
+                if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Dữ liệu không hợp lệ",
+                        Errors = validationResults.Select(v => v.ErrorMessage).ToList()
+                    };
+                }
+
+                var exists = await _breedCategoryRepository.GetQueryable(x =>
+                    x.Name == request.Name && x.IsActive)
+                    .AnyAsync(cancellationToken);
+
+                if (exists)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = $"Danh mục giống với tên '{request.Name}' đã tồn tại",
+                        Errors = new List<string> { $"Danh mục giống với tên '{request.Name}' đã tồn tại" }
+                    };
+                }
+
+                var breedCategory = new BreedCategory
+                {
+                    Name = request.Name,
+                    Description = request.Description,
+                    IsActive = true,
+                    CreatedBy = _currentUserId,
+                    CreatedDate = DateTime.UtcNow
+                };
+
                 _breedCategoryRepository.Insert(breedCategory);
                 await _breedCategoryRepository.CommitAsync(cancellationToken);
-                return (true, null);
+
+                return new Response<string>()
+                {
+                    Succeeded = true,
+                    Message = "Tạo danh mục giống thành công",
+                    Data = $"Danh mục giống đã được tạo thành công. ID: {breedCategory.Id}"
+                };
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi tạo danh mục giống: {ex.Message}");
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi tạo danh mục giống",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
 
-        /// <summary>
-        /// Cập nhật thông tin một danh mục giống.
-        /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> UpdateBreedCategory(Guid BreedCategoryId, UpdateCategoryRequest request, CancellationToken cancellationToken = default)
+        public async Task<Response<string>> UpdateBreedCategory(UpdateCategoryRequest request, CancellationToken cancellationToken = default)
         {
-            if (request == null)
-                return (false, "Dữ liệu danh mục giống không được null.");
-
-            var checkError = new Ref<CheckError>();
-            var existing = await _breedCategoryRepository.GetByIdAsync(BreedCategoryId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi lấy thông tin danh mục giống: {checkError.Value.Message}");
-
-            if (existing == null)
-                return (false, "Không tìm thấy danh mục giống.");
-
-            // Kiểm tra các trường bắt buộc
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(request);
-            if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
-            {
-                return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
-            }
-
-            // Kiểm tra xung đột tên với các danh mục đang hoạt động khác
-            var exists = await _breedCategoryRepository.CheckExist(
-                x => x.Name == request.Name && x.Id != BreedCategoryId && x.IsActive,
-                checkError,
-                cancellationToken);
-
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi kiểm tra danh mục tồn tại: {checkError.Value.Message}");
-
-            if (exists)
-                return (false, $"Danh mục giống với tên '{request.Name}' đã tồn tại.");
-
             try
             {
-                existing.Name = request.Name;
-                existing.Description = request.Description;
+                //if (_currentUserId == Guid.Empty)
+                //{
+                //    return new Response<string>()
+                //    {
+                //        Succeeded = false,
+                //        Message = "Hãy đăng nhập và thử lại",
+                //        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                //    };
+                //}
 
-                _breedCategoryRepository.Update(existing);
-                await _breedCategoryRepository.CommitAsync(cancellationToken);
-                return (true, null);
-            }
-            catch (Exception ex)
-            {
-                return (false, $"Lỗi khi cập nhật danh mục giống: {ex.Message}");
-            }
-        }
+                if (request == null)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Dữ liệu danh mục giống không được null",
+                        Errors = new List<string> { "Dữ liệu danh mục giống không được null" }
+                    };
+                }
 
-        /// <summary>
-        /// Xóa mềm một danh mục giống bằng cách đặt IsActive thành false.
-        /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> DisableBreedCategory(Guid BreedCategoryId, CancellationToken cancellationToken = default)
-        {
-            var checkError = new Ref<CheckError>();
-            var breedCategory = await _breedCategoryRepository.GetByIdAsync(BreedCategoryId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi lấy thông tin danh mục giống: {checkError.Value.Message}");
+                var breedCategory = await _breedCategoryRepository.GetByIdAsync(request.Id);
+                if (breedCategory == null || !breedCategory.IsActive)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Danh mục giống không tồn tại hoặc đã bị xóa",
+                        Errors = new List<string> { "Danh mục giống không tồn tại hoặc đã bị xóa" }
+                    };
+                }
 
-            if (breedCategory == null)
-                return (false, "Không tìm thấy danh mục giống.");
+                var validationResults = new List<ValidationResult>();
+                var validationContext = new ValidationContext(request);
+                if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Dữ liệu không hợp lệ",
+                        Errors = validationResults.Select(v => v.ErrorMessage).ToList()
+                    };
+                }
 
-            try
-            {
-                breedCategory.IsActive = !breedCategory.IsActive;
+                var exists = await _breedCategoryRepository.GetQueryable(x =>
+                    x.Name == request.Name && x.Id != request.Id && x.IsActive)
+                    .AnyAsync(cancellationToken);
+
+                if (exists)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = $"Danh mục giống với tên '{request.Name}' đã tồn tại",
+                        Errors = new List<string> { $"Danh mục giống với tên '{request.Name}' đã tồn tại" }
+                    };
+                }
+
+                breedCategory.Name = request.Name;
+                breedCategory.Description = request.Description;
+                breedCategory.UpdatedBy = _currentUserId;
+                breedCategory.UpdatedDate = DateTime.UtcNow;
+
                 _breedCategoryRepository.Update(breedCategory);
                 await _breedCategoryRepository.CommitAsync(cancellationToken);
-                return (true, null);
+
+                return new Response<string>()
+                {
+                    Succeeded = true,
+                    Message = "Cập nhật danh mục giống thành công",
+                    Data = $"Danh mục giống đã được cập nhật thành công. ID: {breedCategory.Id}"
+                };
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi xóa danh mục giống: {ex.Message}");
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi cập nhật danh mục giống",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
 
-        /// <summary>
-        /// Lấy thông tin một danh mục giống theo ID.
-        /// </summary>
-        public async Task<(CategoryResponse Category, string ErrorMessage)> GetBreedCategoryById(Guid BreedCategoryId, CancellationToken cancellationToken = default)
+        public async Task<Response<string>> DisableBreedCategory(Guid breedCategoryId, CancellationToken cancellationToken = default)
         {
-            var checkError = new Ref<CheckError>();
-            var breedCategory = await _breedCategoryRepository.GetByIdAsync(BreedCategoryId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (null, $"Lỗi khi lấy thông tin danh mục giống: {checkError.Value.Message}");
-
-            if (breedCategory == null)
-                return (null, "Không tìm thấy danh mục giống.");
-
-            var response = new CategoryResponse
+            try
             {
-                Id = breedCategory.Id,
-                Name = breedCategory.Name,
-                Description = breedCategory.Description,
-                IsActive = breedCategory.IsActive
-            };
-            return (response, null);
+                //if (_currentUserId == Guid.Empty)
+                //{
+                //    return new Response<string>()
+                //    {
+                //        Succeeded = false,
+                //        Message = "Hãy đăng nhập và thử lại",
+                //        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                //    };
+                //}
+
+                var breedCategory = await _breedCategoryRepository.GetByIdAsync(breedCategoryId);
+                if (breedCategory == null)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Danh mục giống không tồn tại",
+                        Errors = new List<string> { "Danh mục giống không tồn tại" }
+                    };
+                }
+
+                breedCategory.IsActive = !breedCategory.IsActive;
+                breedCategory.UpdatedBy = _currentUserId;
+                breedCategory.UpdatedDate = DateTime.UtcNow;
+
+                _breedCategoryRepository.Update(breedCategory);
+                await _breedCategoryRepository.CommitAsync(cancellationToken);
+
+                if (breedCategory.IsActive)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = true,
+                        Message = "Khôi phục danh mục giống thành công",
+                        Data = $"Danh mục giống đã được khôi phục thành công. ID: {breedCategory.Id}"
+                    };
+                }
+                else
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = true,
+                        Message = "Xóa danh mục giống thành công",
+                        Data = $"Danh mục giống đã được xóa thành công. ID: {breedCategory.Id}"
+                    };
+
+                }
+            }
+            catch (Exception ex)
+            {
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi xóa danh mục giống",
+                    Errors = new List<string> { ex.Message }
+                };
+            }
         }
 
-        /// <summary>
-        /// Lấy danh sách tất cả danh mục giống đang hoạt động với bộ lọc tùy chọn.
-        /// </summary>
-        public async Task<(List<CategoryResponse> Categories, string ErrorMessage)> GetBreedCategoryByName(
+        public async Task<Response<BreedCategoryResponse>> GetBreedCategoryById(Guid breedCategoryId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var breedCategory = await _breedCategoryRepository.GetByIdAsync(breedCategoryId);
+                if (breedCategory == null || !breedCategory.IsActive)
+                {
+                    return new Response<BreedCategoryResponse>()
+                    {
+                        Succeeded = false,
+                        Message = "Danh mục giống không tồn tại hoặc đã bị xóa",
+                        Errors = new List<string> { "Danh mục giống không tồn tại hoặc đã bị xóa" }
+                    };
+                }
+
+                var response = new BreedCategoryResponse
+                {
+                    Id = breedCategory.Id,
+                    Name = breedCategory.Name,
+                    Description = breedCategory.Description
+                };
+
+                return new Response<BreedCategoryResponse>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy thông tin danh mục giống thành công",
+                    Data = response
+                };
+            }
+            catch (Exception ex)
+            {
+                return new Response<BreedCategoryResponse>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy thông tin danh mục giống",
+                    Errors = new List<string> { ex.Message }
+                };
+            }
+        }
+
+        public async Task<Response<List<BreedCategoryResponse>>> GetBreedCategoryByName(
             string name = null,
             CancellationToken cancellationToken = default)
         {
@@ -194,42 +325,81 @@ namespace Infrastructure.Services.Implements
                     query = query.Where(x => x.Name.Contains(name));
 
                 var categories = await query.ToListAsync(cancellationToken);
-                var responses = categories.Select(c => new CategoryResponse
+                var responses = categories.Select(c => new BreedCategoryResponse
                 {
                     Id = c.Id,
                     Name = c.Name,
-                    Description = c.Description,
-                    IsActive = c.IsActive
+                    Description = c.Description
                 }).ToList();
-                return (responses, null);
+
+                return new Response<List<BreedCategoryResponse>>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy danh sách danh mục giống thành công",
+                    Data = responses
+                };
             }
             catch (Exception ex)
             {
-                return (null, $"Lỗi khi lấy danh sách danh mục giống: {ex.Message}");
+                return new Response<List<BreedCategoryResponse>>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy danh sách danh mục giống",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
 
-        /// <summary>
-        /// Lấy danh sách phân trang các danh mục thuốc với tìm kiếm, lọc và sắp xếp.
-        /// </summary>
-        public async Task<(PaginationSet<CategoryResponse> Result, string ErrorMessage)> GetPaginatedBreedCategoryList(
+        public async Task<Response<PaginationSet<BreedCategoryResponse>>> GetPaginatedBreedCategoryList(
             ListingRequest request,
             CancellationToken cancellationToken = default)
         {
             try
             {
                 if (request == null)
-                    return (null, "Yêu cầu không được null.");
-                if (request.PageIndex < 1 || request.PageSize < 1)
-                    return (null, "PageIndex và PageSize phải lớn hơn 0.");
+                {
+                    return new Response<PaginationSet<BreedCategoryResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = "Yêu cầu không được null",
+                        Errors = new List<string> { "Yêu cầu không được null" }
+                    };
+                }
 
-                var validFields = typeof(MedicineCategory).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                {
+                    return new Response<PaginationSet<BreedCategoryResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = "PageIndex và PageSize phải lớn hơn 0",
+                        Errors = new List<string> { "PageIndex và PageSize phải lớn hơn 0" }
+                    };
+                }
+
+                var validFields = typeof(BreedCategoryResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
-                    return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+                {
+                    return new Response<PaginationSet<BreedCategoryResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(",", validFields)}" }
+                    };
+                }
 
-                var query = _breedCategoryRepository.GetQueryable(x => x.IsActive);
+                if (!validFields.Contains(request.Sort?.Field))
+                {
+                    return new Response<PaginationSet<BreedCategoryResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường sắp xếp không hợp lệ: {request.Sort?.Field}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(",", validFields)}" }
+                    };
+                }
+
+                var query = _breedCategoryRepository.GetQueryable();
 
                 if (request.SearchString?.Any() == true)
                     query = query.SearchString(request.SearchString);
@@ -239,15 +409,14 @@ namespace Infrastructure.Services.Implements
 
                 var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
 
-                var responses = paginationResult.Items.Select(c => new CategoryResponse
+                var responses = paginationResult.Items.Select(c => new BreedCategoryResponse
                 {
                     Id = c.Id,
                     Name = c.Name,
-                    Description = c.Description,
-                    IsActive = c.IsActive
+                    Description = c.Description
                 }).ToList();
 
-                var result = new PaginationSet<CategoryResponse>
+                var result = new PaginationSet<BreedCategoryResponse>
                 {
                     PageIndex = paginationResult.PageIndex,
                     Count = responses.Count,
@@ -256,23 +425,32 @@ namespace Infrastructure.Services.Implements
                     Items = responses
                 };
 
-                return (result, null);
+                return new Response<PaginationSet<BreedCategoryResponse>>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy danh sách phân trang thành công",
+                    Data = result
+                };
             }
             catch (Exception ex)
             {
-                return (null, $"Lỗi khi lấy danh sách phân trang: {ex.Message}");
+                return new Response<PaginationSet<BreedCategoryResponse>>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy danh sách phân trang",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
 
-        public async Task<List<BreedCategoryResponse>> GetAllCategory()
+        public async Task<List<BreedCategoryResponse>> GetAllCategory(CancellationToken cancellationToken = default)
         {
-            var data = await _breedCategoryRepository.GetQueryable(x => x.IsActive).ToListAsync();
-            return data.Select(it => new BreedCategoryResponse()
+            var data = await _breedCategoryRepository.GetQueryable(x => x.IsActive).ToListAsync(cancellationToken);
+            return data.Select(it => new BreedCategoryResponse
             {
-                //IsActive = it.IsActive,
+                Id = it.Id,
                 Name = it.Name,
-                Description = it.Description,
-                Id = it.Id
+                Description = it.Description
             }).ToList();
         }
     }

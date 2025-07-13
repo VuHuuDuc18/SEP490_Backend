@@ -1,4 +1,5 @@
-﻿using Domain.Dto.Request;
+﻿using Application.Wrappers;
+using Domain.Dto.Request;
 using Domain.Dto.Request.Category;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Category;
@@ -12,38 +13,18 @@ namespace Domain.IServices
 {
     public interface IMedicineCategoryService
     {
-        /// <summary>
-        /// Tạo một danh mục thuốc mới với kiểm tra hợp lệ.
-        /// </summary>
-        Task<(bool Success, string ErrorMessage)> CreateMedicineCategory(CreateCategoryRequest request, CancellationToken cancellationToken = default);
+        Task<Response<string>> CreateMedicineCategory(CreateCategoryRequest request, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Cập nhật thông tin một danh mục thuốc.
-        /// </summary>
-        Task<(bool Success, string ErrorMessage)> UpdateMedicineCategory(Guid MedicineCategoryId, UpdateCategoryRequest request, CancellationToken cancellationToken = default);
+        Task<Response<string>> UpdateMedicineCategory(UpdateCategoryRequest request, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Xóa mềm một danh mục thuốc bằng cách đặt IsActive thành false.
-        /// </summary>
-        Task<(bool Success, string ErrorMessage)> DisableMedicineCategory(Guid MedicineCategoryId, CancellationToken cancellationToken = default);
+        Task<Response<string>> DisableMedicineCategory(Guid medicineCategoryId, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Lấy thông tin một danh mục thuốc theo ID.
-        /// </summary>
-        Task<(CategoryResponse Category, string ErrorMessage)> GetMedicineCategoryById(Guid MedicineCategoryId, CancellationToken cancellationToken = default);
+        Task<Response<CategoryResponse>> GetMedicineCategoryById(Guid medicineCategoryId, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Lấy danh sách tất cả danh mục thuốc đang hoạt động với bộ lọc tùy chọn.
-        /// </summary>
-        Task<(List<CategoryResponse> Categories, string ErrorMessage)> GetMedicineCategoryByName(string name = null, CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// Lấy danh sách phân trang các danh mục thuốc với tìm kiếm, lọc và sắp xếp.
-        /// </summary>
-        Task<(PaginationSet<CategoryResponse> Result, string ErrorMessage)> GetPaginatedMedicineCategoryList(
+        Task<Response<List<CategoryResponse>>> GetMedicineCategoryByName(string name = null, CancellationToken cancellationToken = default);
+        Task<Response<PaginationSet<CategoryResponse>>> GetPaginatedMedicineCategoryList(
             ListingRequest request,
             CancellationToken cancellationToken = default);
-
-        public Task<List<MedicineCategoryResponse>> GetAllMedicineCategory();
+        Task<List<MedicineCategoryResponse>> GetAllMedicineCategory(CancellationToken cancellationToken = default);
     }
 }

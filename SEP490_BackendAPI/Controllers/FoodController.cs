@@ -1,4 +1,5 @@
-﻿using Domain.Dto.Request;
+﻿using Application.Wrappers;
+using Domain.Dto.Request;
 using Domain.Dto.Request.Food;
 using Domain.Dto.Response.Food;
 using Domain.IServices;
@@ -18,83 +19,93 @@ namespace SEP490_BackendAPI.Controllers
         private readonly IFoodService _foodService;
         private readonly IFoodCategoryService _foodCategoryService;
 
-        /// <summary>
-        /// Khởi tạo controller với service để xử lý logic thức ăn.
-        /// </summary>
         public FoodController(IFoodService foodService, IFoodCategoryService foodCategoryService)
         {
-            _foodService = foodService ?? throw new ArgumentNullException(nameof(foodService));
-            this._foodCategoryService = foodCategoryService;
+            _foodService = foodService;
+            _foodCategoryService = foodCategoryService;
         }
 
-        /// <summary>
-        /// Tạo một loại thức ăn mới, bao gồm upload ảnh và thumbnail.
-        /// </summary>
-        [HttpPost("create")]
+        [HttpPost("food-room-staff/get-food-list")]
+        public async Task<IActionResult> GetPaginatedFoods([FromBody] ListingRequest request, CancellationToken cancellationToken = default)
+        {
+            var response = await _foodService.GetPaginatedFoodList(request, cancellationToken);
+            if (!response.Succeeded)
+                return BadRequest(response);
+            return Ok(response);
+        }
+
+        [HttpPost("food-room-staff/create-food")]
         public async Task<IActionResult> CreateFood([FromBody] CreateFoodRequest request, CancellationToken cancellationToken = default)
         {
- 
-            var (success, errorMessage) = await _foodService.CreateFood(request, cancellationToken);
-            if (!success)
-                return BadRequest(errorMessage);
-            return Ok();
+            var response = await _foodService.CreateFood(request, cancellationToken);
+            if (!response.Succeeded)
+                return BadRequest(response);
+            return Ok(response);
         }
 
-        /// <summary>
-        /// Cập nhật thông tin một loại thức ăn, bao gồm upload ảnh và thumbnail.
-        /// </summary>
-        [HttpPut("update/{FoodId}")]
-        public async Task<IActionResult> UpdateFood([FromRoute] Guid FoodId, [FromBody] UpdateFoodRequest request, CancellationToken cancellationToken = default)
+        [HttpPut("food-room-staff/update-foood")]
+        public async Task<IActionResult> UpdateFood([FromBody] UpdateFoodRequest request, CancellationToken cancellationToken = default)
         {
-
-            var (success, errorMessage) = await _foodService.UpdateFood(FoodId, request, cancellationToken);
-            if (!success)
-                return BadRequest(errorMessage);
-            return Ok();
+            var response = await _foodService.UpdateFood(request, cancellationToken);
+            if (!response.Succeeded)
+                return BadRequest(response);
+            return Ok(response);
         }
 
-        [HttpDelete("disable/{FoodId}")]
+        [HttpPut("food-room-staff/disable-food/{FoodId}")]
         public async Task<IActionResult> DisableFood([FromRoute] Guid FoodId, CancellationToken cancellationToken = default)
         {
-            var (success, errorMessage) = await _foodService.DisableFood(FoodId, cancellationToken);
-            if (!success)
-                return BadRequest(errorMessage);
-            return Ok();
+            var response = await _foodService.DisableFood(FoodId, cancellationToken);
+            if (!response.Succeeded)
+                return BadRequest(response);
+            return Ok(response);
         }
 
-        /// <summary>
-        /// Lấy thông tin một loại thức ăn theo ID.
-        /// </summary>
-        [HttpGet("getFoodById/{FoodId}")]
+        [HttpGet("get-food-by-id/{FoodId}")]
         public async Task<IActionResult> GetFoodById([FromRoute] Guid FoodId, CancellationToken cancellationToken = default)
         {
-            var (food, errorMessage) = await _foodService.GetFoodById(FoodId, cancellationToken);
-            if (food == null)
-                return NotFound(errorMessage ?? "Không tìm thấy thức ăn.");
-            return Ok(food);
+            var response = await _foodService.GetFoodById(FoodId, cancellationToken);
+            if (!response.Succeeded)
+                return NotFound(response);
+            return Ok(response);
         }
 
+        //[HttpGet("get-food-by-category")]
+        //public async Task<IActionResult> GetFoodByCategory(string foodName = null, Guid? foodCategoryId = null, CancellationToken cancellationToken = default)
+        //{
+        //    var response = await _foodService.GetFoodByCategory(foodName, foodCategoryId, cancellationToken);
+        //    if (!response.Succeeded)
+        //        return NotFound(response);
+        //    return Ok(response);
+        //}
+
+
+
         /// <summary>
-        /// Lấy danh sách tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn.
+        /// Lấy tất cả loại thức ăn đang hoạt động.
         /// </summary>
-        [HttpGet("getFoodByCategory")]
-        public async Task<IActionResult> GetFoodByCategory(string foodName = null, Guid? foodCategoryId = null, CancellationToken cancellationToken = default)
+        [HttpGet("get-all-food")]
+        public async Task<IActionResult> GetAllFood(CancellationToken cancellationToken = default)
         {
-            var (foods, errorMessage) = await _foodService.GetFoodByCategory(foodName, foodCategoryId, cancellationToken);
-            if (foods == null)
-                return NotFound(errorMessage ?? "Không tìm thấy danh sách thức ăn.");
-            return Ok(foods);
-        }
-        /// <summary>
-        /// Lấy danh sách phân trang tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn.
-        /// </summary>
-        [HttpPost("getPaginatedFoodList")]
-        public async Task<IActionResult> GetPaginatedFoods([FromBody] ListingRequest request)
-        {
-            var (result, errorMessage) = await _foodService.GetPaginatedFoodList(request);
-            if (errorMessage != null)
-                return BadRequest(errorMessage);
-            return Ok(result);
+            try
+            {
+                var foods = await _foodService.GetAllFood(cancellationToken);
+                return Ok(new Response<List<FoodResponse>>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy tất cả thức ăn thành công",
+                    Data = foods
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<List<FoodResponse>>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy danh sách thức ăn",
+                    Errors = new List<string> { ex.Message }
+                });
+            }
         }
         [HttpPost("import")]
         public async Task<IActionResult> ImportPersonExcel(IFormFile file)

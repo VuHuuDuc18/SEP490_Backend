@@ -1,189 +1,316 @@
-﻿
+﻿using Application.Wrappers;
+using Domain.Dto.Request;
+using Domain.Dto.Request.Category;
+using Domain.Dto.Response;
+using Domain.Dto.Response.Category;
+using Domain.Dto.Response.Medicine;
+using Domain.IServices;
 using Entities.EntityModel;
 using Infrastructure.Core;
+using Infrastructure.Extensions;
 using Infrastructure.Repository;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
-using Domain.Dto.Request;
-using Domain.Dto.Response;
-using Infrastructure.Extensions;
-using Domain.Dto.Response.Medicine;
-using Domain.Dto.Response.Category;
-using Domain.Dto.Request.Category;
-using Domain.IServices;
 
 namespace Infrastructure.Services.Implements
 {
     public class MedicineCategoryService : IMedicineCategoryService
     {
         private readonly IRepository<MedicineCategory> _medicineCategoryRepository;
+        private readonly Guid _currentUserId;
 
-        /// <summary>
-        /// Khởi tạo service với repository của MedicineCategory.
-        /// </summary>
-        public MedicineCategoryService(IRepository<MedicineCategory> medicineCategoryRepository)
+        public MedicineCategoryService(IRepository<MedicineCategory> medicineCategoryRepository, IHttpContextAccessor httpContextAccessor)
         {
-            _medicineCategoryRepository = medicineCategoryRepository ?? throw new ArgumentNullException(nameof(medicineCategoryRepository));
+            _medicineCategoryRepository = medicineCategoryRepository;
+
+            // Lấy current user từ JWT token claims
+            _currentUserId = Guid.Empty;
+            var currentUser = httpContextAccessor.HttpContext?.User;
+            if (currentUser != null)
+            {
+                var userIdClaim = currentUser.FindFirst("uid")?.Value;
+                if (!string.IsNullOrEmpty(userIdClaim))
+                {
+                    _currentUserId = Guid.Parse(userIdClaim);
+                }
+            }
         }
 
-        /// <summary>
-        /// Tạo một danh mục thuốc mới với kiểm tra hợp lệ.
-        /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> CreateMedicineCategory(CreateCategoryRequest request, CancellationToken cancellationToken = default)
+        public async Task<Response<string>> CreateMedicineCategory(CreateCategoryRequest request, CancellationToken cancellationToken = default)
         {
-            if (request == null)
-                return (false, "Dữ liệu danh mục thuốc không được null.");
-
-            // Kiểm tra các trường bắt buộc
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(request);
-            if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
-            {
-                return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
-            }
-
-            // Kiểm tra xem danh mục với tên này đã tồn tại chưa
-            var checkError = new Ref<CheckError>();
-            var exists = await _medicineCategoryRepository.CheckExist(
-                x => x.Name == request.Name && x.IsActive,
-                checkError,
-                cancellationToken);
-
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi kiểm tra danh mục tồn tại: {checkError.Value.Message}");
-
-            if (exists)
-                return (false, $"Danh mục thuốc với tên '{request.Name}' đã tồn tại.");
-
-            var medicineCategory = new MedicineCategory
-            {
-                Name = request.Name,
-                Description = request.Description
-            };
-
             try
             {
+                //if (_currentUserId == Guid.Empty)
+                //{
+                //    return new Response<string>()
+                //    {
+                //        Succeeded = false,
+                //        Message = "Hãy đăng nhập và thử lại",
+                //        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                //    };
+                //}
+
+                if (request == null)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Dữ liệu danh mục thuốc không được null",
+                        Errors = new List<string> { "Dữ liệu danh mục thuốc không được null" }
+                    };
+                }
+
+                var validationResults = new List<ValidationResult>();
+                var validationContext = new ValidationContext(request);
+                if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Dữ liệu không hợp lệ",
+                        Errors = validationResults.Select(v => v.ErrorMessage).ToList()
+                    };
+                }
+
+                var exists = await _medicineCategoryRepository.GetQueryable(x =>
+                    x.Name == request.Name && x.IsActive).AnyAsync(cancellationToken);
+
+                if (exists)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = $"Danh mục thuốc với tên '{request.Name}' đã tồn tại",
+                        Errors = new List<string> { $"Danh mục thuốc với tên '{request.Name}' đã tồn tại" }
+                    };
+                }
+
+                var medicineCategory = new MedicineCategory
+                {
+                    Name = request.Name,
+                    Description = request.Description,
+                    IsActive = true,
+                    CreatedBy = _currentUserId,
+                    CreatedDate = DateTime.UtcNow
+                };
+
                 _medicineCategoryRepository.Insert(medicineCategory);
                 await _medicineCategoryRepository.CommitAsync(cancellationToken);
-                return (true, null);
+
+                return new Response<string>()
+                {
+                    Succeeded = true,
+                    Message = "Tạo danh mục thuốc thành công",
+                    Data = $"Danh mục thuốc đã được tạo thành công. ID: {medicineCategory.Id}"
+                };
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi tạo danh mục thuốc: {ex.Message}");
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi tạo danh mục thuốc",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
 
-        /// <summary>
-        /// Cập nhật thông tin một danh mục thuốc.
-        /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> UpdateMedicineCategory(Guid MedicineCategoryId, UpdateCategoryRequest request, CancellationToken cancellationToken = default)
+        public async Task<Response<string>> UpdateMedicineCategory(UpdateCategoryRequest request, CancellationToken cancellationToken = default)
         {
-            if (request == null)
-                return (false, "Dữ liệu danh mục thuốc không được null.");
-
-            var checkError = new Ref<CheckError>();
-            var existing = await _medicineCategoryRepository.GetByIdAsync(MedicineCategoryId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi lấy thông tin danh mục thuốc: {checkError.Value.Message}");
-
-            if (existing == null)
-                return (false, "Không tìm thấy danh mục thuốc.");
-
-            // Kiểm tra các trường bắt buộc
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(request);
-            if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
-            {
-                return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
-            }
-
-            // Kiểm tra xung đột tên với các danh mục đang hoạt động khác
-            var exists = await _medicineCategoryRepository.CheckExist(
-                x => x.Name == request.Name && x.Id != MedicineCategoryId && x.IsActive,
-                checkError,
-                cancellationToken);
-
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi kiểm tra danh mục tồn tại: {checkError.Value.Message}");
-
-            if (exists)
-                return (false, $"Danh mục thuốc với tên '{request.Name}' đã tồn tại.");
-
             try
             {
-                existing.Name = request.Name;
-                existing.Description = request.Description;
+                //if (_currentUserId == Guid.Empty)
+                //{
+                //    return new Response<string>()
+                //    {
+                //        Succeeded = false,
+                //        Message = "Hãy đăng nhập và thử lại",
+                //        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                //    };
+                //}
 
-                _medicineCategoryRepository.Update(existing);
-                await _medicineCategoryRepository.CommitAsync(cancellationToken);
-                return (true, null);
-            }
-            catch (Exception ex)
-            {
-                return (false, $"Lỗi khi cập nhật danh mục thuốc: {ex.Message}");
-            }
-        }
+                if (request == null)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Dữ liệu danh mục thuốc không được null",
+                        Errors = new List<string> { "Dữ liệu danh mục thuốc không được null" }
+                    };
+                }
 
-        /// <summary>
-        /// Xóa mềm một danh mục thuốc bằng cách đặt IsActive thành false.
-        /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> DisableMedicineCategory(Guid MedicineCategoryId, CancellationToken cancellationToken = default)
-        {
-            var checkError = new Ref<CheckError>();
-            var medicineCategory = await _medicineCategoryRepository.GetByIdAsync(MedicineCategoryId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi lấy thông tin danh mục thuốc: {checkError.Value.Message}");
+                var medicineCategory = await _medicineCategoryRepository.GetByIdAsync(request.Id);
+                if (medicineCategory == null || !medicineCategory.IsActive)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Danh mục thuốc không tồn tại hoặc đã bị xóa",
+                        Errors = new List<string> { "Danh mục thuốc không tồn tại hoặc đã bị xóa" }
+                    };
+                }
 
-            if (medicineCategory == null)
-                return (false, "Không tìm thấy danh mục thuốc.");
+                var validationResults = new List<ValidationResult>();
+                var validationContext = new ValidationContext(request);
+                if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Dữ liệu không hợp lệ",
+                        Errors = validationResults.Select(v => v.ErrorMessage).ToList()
+                    };
+                }
 
-            try
-            {
-                medicineCategory.IsActive = !medicineCategory.IsActive;
+                var exists = await _medicineCategoryRepository.GetQueryable(x =>
+                    x.Name == request.Name && x.Id != request.Id && x.IsActive).AnyAsync(cancellationToken);
+
+                if (exists)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = $"Danh mục thuốc với tên '{request.Name}' đã tồn tại",
+                        Errors = new List<string> { $"Danh mục thuốc với tên '{request.Name}' đã tồn tại" }
+                    };
+                }
+
+                medicineCategory.Name = request.Name;
+                medicineCategory.Description = request.Description;
+                medicineCategory.UpdatedBy = _currentUserId;
+                medicineCategory.UpdatedDate = DateTime.UtcNow;
+
                 _medicineCategoryRepository.Update(medicineCategory);
                 await _medicineCategoryRepository.CommitAsync(cancellationToken);
-                return (true, null);
+
+                return new Response<string>()
+                {
+                    Succeeded = true,
+                    Message = "Cập nhật danh mục thuốc thành công",
+                    Data = $"Danh mục thuốc đã được cập nhật thành công. ID: {medicineCategory.Id}"
+                };
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi xóa danh mục thuốc: {ex.Message}");
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi cập nhật danh mục thuốc",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
 
-        /// <summary>
-        /// Lấy thông tin một danh mục thuốc theo ID.
-        /// </summary>
-        public async Task<(CategoryResponse Category, string ErrorMessage)> GetMedicineCategoryById(Guid MedicineCategoryId, CancellationToken cancellationToken = default)
+        public async Task<Response<string>> DisableMedicineCategory(Guid medicineCategoryId, CancellationToken cancellationToken = default)
         {
-            var checkError = new Ref<CheckError>();
-            var medicineCategory = await _medicineCategoryRepository.GetByIdAsync(MedicineCategoryId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (null, $"Lỗi khi lấy thông tin danh mục thuốc: {checkError.Value.Message}");
-
-            if (medicineCategory == null)
-                return (null, "Không tìm thấy danh mục thuốc.");
-
-            var response = new CategoryResponse
+            try
             {
-                Id = medicineCategory.Id,
-                Name = medicineCategory.Name,
-                Description = medicineCategory.Description,
-                IsActive = medicineCategory.IsActive
-            };
-            return (response, null);
+                //if (_currentUserId == Guid.Empty)
+                //{
+                //    return new Response<string>()
+                //    {
+                //        Succeeded = false,
+                //        Message = "Hãy đăng nhập và thử lại",
+                //        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                //    };
+                //}
+
+                var medicineCategory = await _medicineCategoryRepository.GetByIdAsync(medicineCategoryId);
+                if (medicineCategory == null)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Danh mục thuốc không tồn tại ",
+                        Errors = new List<string> { "Danh mục thuốc không tồn tại" }
+                    };
+                }
+
+                medicineCategory.IsActive = !medicineCategory.IsActive;
+                medicineCategory.UpdatedBy = _currentUserId;
+                medicineCategory.UpdatedDate = DateTime.UtcNow;
+
+                _medicineCategoryRepository.Update(medicineCategory);
+                await _medicineCategoryRepository.CommitAsync(cancellationToken);
+
+                if (medicineCategory.IsActive)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = true,
+                        Message = "Khôi phục danh mục thuốc thành công",
+                        Data = $"Danh mục thuốc đã được khôi phục thành công. ID: {medicineCategory.Id}"
+                    };
+                }
+                else
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = true,
+                        Message = "Xóa danh mục thuốc thành công",
+                        Data = $"Danh mục thuốc đã được xóa thành công. ID: {medicineCategory.Id}"
+                    };
+
+                }
+            }
+            catch (Exception ex)
+            {
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi xóa danh mục thuốc",
+                    Errors = new List<string> { ex.Message }
+                };
+            }
         }
 
-        /// <summary>
-        /// Lấy danh sách tất cả danh mục thuốc đang hoạt động với bộ lọc tùy chọn.
-        /// </summary>
-        public async Task<(List<CategoryResponse> Categories, string ErrorMessage)> GetMedicineCategoryByName(
-            string name = null,
-            CancellationToken cancellationToken = default)
+        public async Task<Response<CategoryResponse>> GetMedicineCategoryById(Guid medicineCategoryId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var medicineCategory = await _medicineCategoryRepository.GetByIdAsync(medicineCategoryId);
+                if (medicineCategory == null || !medicineCategory.IsActive)
+                {
+                    return new Response<CategoryResponse>()
+                    {
+                        Succeeded = false,
+                        Message = "Danh mục thuốc không tồn tại hoặc đã bị xóa",
+                        Errors = new List<string> { "Danh mục thuốc không tồn tại hoặc đã bị xóa" }
+                    };
+                }
+
+                var response = new CategoryResponse
+                {
+                    Id = medicineCategory.Id,
+                    Name = medicineCategory.Name,
+                    Description = medicineCategory.Description,
+                    IsActive = medicineCategory.IsActive
+                };
+
+                return new Response<CategoryResponse>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy thông tin danh mục thuốc thành công",
+                    Data = response
+                };
+            }
+            catch (Exception ex)
+            {
+                return new Response<CategoryResponse>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy thông tin danh mục thuốc",
+                    Errors = new List<string> { ex.Message }
+                };
+            }
+        }
+        public async Task<Response<List<CategoryResponse>>> GetMedicineCategoryByName(string name = null, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -200,33 +327,70 @@ namespace Infrastructure.Services.Implements
                     Description = c.Description,
                     IsActive = c.IsActive
                 }).ToList();
-                return (responses, null);
+
+                return new Response<List<CategoryResponse>>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy danh sách danh mục thuốc thành công",
+                    Data = responses
+                };
             }
             catch (Exception ex)
             {
-                return (null, $"Lỗi khi lấy danh sách danh mục thuốc: {ex.Message}");
+                return new Response<List<CategoryResponse>>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy danh sách danh mục thuốc",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
-
-        /// <summary>
-        /// Lấy danh sách phân trang các danh mục thuốc với tìm kiếm, lọc và sắp xếp.
-        /// </summary>
-        public async Task<(PaginationSet<CategoryResponse> Result, string ErrorMessage)> GetPaginatedMedicineCategoryList(
-            ListingRequest request,
-            CancellationToken cancellationToken = default)
+        public async Task<Response<PaginationSet<CategoryResponse>>> GetPaginatedMedicineCategoryList(ListingRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
                 if (request == null)
-                    return (null, "Yêu cầu không được null.");
-                if (request.PageIndex < 1 || request.PageSize < 1)
-                    return (null, "PageIndex và PageSize phải lớn hơn 0.");
+                {
+                    return new Response<PaginationSet<CategoryResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = "Yêu cầu không được null",
+                        Errors = new List<string> { "Yêu cầu không được null" }
+                    };
+                }
 
-                var validFields = typeof(MedicineCategory).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                {
+                    return new Response<PaginationSet<CategoryResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = "PageIndex và PageSize phải lớn hơn 0",
+                        Errors = new List<string> { "PageIndex và PageSize phải lớn hơn 0" }
+                    };
+                }
+
+                var validFields = typeof(CategoryResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
-                    return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+                {
+                    return new Response<PaginationSet<CategoryResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(",", validFields)}" }
+                    };
+                }
+
+                if (!validFields.Contains(request.Sort?.Field))
+                {
+                    return new Response<PaginationSet<CategoryResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường sắp xếp không hợp lệ: {request.Sort?.Field}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(",", validFields)}" }
+                    };
+                }
 
                 var query = _medicineCategoryRepository.GetQueryable(x => x.IsActive);
 
@@ -255,23 +419,31 @@ namespace Infrastructure.Services.Implements
                     Items = responses
                 };
 
-                return (result, null);
+                return new Response<PaginationSet<CategoryResponse>>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy danh sách phân trang thành công",
+                    Data = result
+                };
             }
             catch (Exception ex)
             {
-                return (null, $"Lỗi khi lấy danh sách phân trang: {ex.Message}");
+                return new Response<PaginationSet<CategoryResponse>>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy danh sách phân trang",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
-
-        public async Task<List<MedicineCategoryResponse>> GetAllMedicineCategory()
+        public async Task<List<MedicineCategoryResponse>> GetAllMedicineCategory(CancellationToken cancellationToken = default)
         {
-            var data = await _medicineCategoryRepository.GetQueryable(x=>x.IsActive).ToListAsync();
-            return data.Select(it=> new MedicineCategoryResponse()
+            var data = await _medicineCategoryRepository.GetQueryable(x => x.IsActive).ToListAsync(cancellationToken);
+            return data.Select(it => new MedicineCategoryResponse
             {
-                //IsActive = it.IsActive,
+                Id = it.Id,
                 Name = it.Name,
                 Description = it.Description,
-                Id = it.Id
             }).ToList();
         }
     }

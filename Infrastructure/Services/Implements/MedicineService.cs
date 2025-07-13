@@ -1,21 +1,22 @@
-﻿using Entities.EntityModel;
+﻿using Application.Wrappers;
+using Domain.Dto.Request;
+using Domain.Dto.Request.Medicine;
+using Domain.Dto.Response;
+using Domain.Dto.Response.Medicine;
+using Domain.Helper;
+using Domain.IServices;
+using Entities.EntityModel;
 using Infrastructure.Core;
+using Infrastructure.Extensions;
 using Infrastructure.Repository;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.ComponentModel.DataAnnotations;
-using Domain.IServices;
-using Microsoft.EntityFrameworkCore;
-using Domain.Dto.Request.Medicine;
-using Domain.Dto.Response.Medicine;
-using Domain.Dto.Response;
-using Domain.Dto.Request;
-using Domain.Dto.Response.Food;
-using Infrastructure.Extensions;
 
 namespace Infrastructure.Services.Implements
 {
@@ -25,64 +26,101 @@ namespace Infrastructure.Services.Implements
         private readonly IRepository<MedicineCategory> _medicineCategoryRepository;
         private readonly IRepository<ImageMedicine> _imageMedicineRepository;
         private readonly CloudinaryCloudService _cloudinaryCloudService;
+        private readonly Guid _currentUserId;
 
-        /// <summary>
-        /// Khởi tạo service với repository của Medicine và CloudinaryCloudService.
-        /// </summary>
-        public MedicineService(IRepository<Medicine> medicineRepository, IRepository<ImageMedicine> imageMedicineRepository, CloudinaryCloudService cloudinaryCloudService, IRepository<MedicineCategory> medicineCategoryRepository)
+        public MedicineService(
+            IRepository<Medicine> medicineRepository,
+            IRepository<MedicineCategory> medicineCategoryRepository,
+            IRepository<ImageMedicine> imageMedicineRepository,
+            CloudinaryCloudService cloudinaryCloudService,
+            IHttpContextAccessor httpContextAccessor)
         {
-            _medicineRepository = medicineRepository ?? throw new ArgumentNullException(nameof(medicineRepository));
-            _imageMedicineRepository = imageMedicineRepository ?? throw new ArgumentNullException(nameof(imageMedicineRepository));
-            _cloudinaryCloudService = cloudinaryCloudService ?? throw new ArgumentNullException(nameof(cloudinaryCloudService));
-            _medicineCategoryRepository = medicineCategoryRepository;
-        }
+            _medicineRepository = medicineRepository ;
+            _medicineCategoryRepository = medicineCategoryRepository ;
+            _imageMedicineRepository = imageMedicineRepository ;
+            _cloudinaryCloudService = cloudinaryCloudService ;
 
-        /// <summary>
-        /// Tạo một loại thuốc mới với kiểm tra hợp lệ, bao gồm upload ảnh và thumbnail lên Cloudinary trong folder được chỉ định.
-        /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> CreateMedicine(CreateMedicineRequest request, CancellationToken cancellationToken = default)
-        {
-            if (request == null)
-                return (false, "Dữ liệu thuốc không được null.");
-
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(request);
-            if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
+            // Lấy current user từ JWT token claims
+            _currentUserId = Guid.Empty;
+            var currentUser = httpContextAccessor.HttpContext?.User;
+            if (currentUser != null)
             {
-                return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
+                var userIdClaim = currentUser.FindFirst("uid")?.Value;
+                if (!string.IsNullOrEmpty(userIdClaim))
+                {
+                    _currentUserId = Guid.Parse(userIdClaim);
+                }
             }
-
-            var checkError = new Ref<CheckError>();
-
-            string medicineName = request.MedicineName + "/" + request.MedicineCode;
-
-            var exists = await _medicineRepository.CheckExist(
-                x => x.MedicineName == medicineName && x.MedicineCategoryId == request.MedicineCategoryId && x.IsActive,
-                checkError,
-                cancellationToken);
-
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi kiểm tra thuốc tồn tại: {checkError.Value.Message}");
-
-            if (exists)
-                return (false, $"Thuốc với tên '{medicineName}' trong danh mục này đã tồn tại.");
-
-            var medicine = new Medicine
-            {
-                MedicineName = medicineName,
-                MedicineCategoryId = request.MedicineCategoryId,
-                Stock = request.Stock,
-            };
-
+        }
+        public async Task<Response<string>> CreateMedicine(CreateMedicineRequest request, CancellationToken cancellationToken = default)
+        {
             try
             {
+                //if (_currentUserId == Guid.Empty)
+                //{
+                //    return new Response<string>()
+                //    {
+                //        Succeeded = false,
+                //        Message = "Hãy đăng nhập và thử lại",
+                //        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                //    };
+                //}
+
+                if (request == null)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Dữ liệu thuốc không được null",
+                        Errors = new List<string> { "Dữ liệu thuốc không được null" }
+                    };
+                }
+
+                var validationResults = new List<ValidationResult>();
+                var validationContext = new ValidationContext(request);
+                if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Dữ liệu không hợp lệ",
+                        Errors = validationResults.Select(v => v.ErrorMessage).ToList()
+                    };
+                }
+
+                string medicineName = $"{request.MedicineName}/{request.MedicineCode}";
+                var exists = await _medicineRepository.GetQueryable(x =>
+                    x.MedicineName == medicineName &&
+                    x.MedicineCategoryId == request.MedicineCategoryId &&
+                    x.IsActive).AnyAsync(cancellationToken);
+
+                if (exists)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = $"Thuốc với tên '{medicineName}' trong danh mục này đã tồn tại",
+                        Errors = new List<string> { $"Thuốc với tên '{medicineName}' trong danh mục này đã tồn tại" }
+                    };
+                }
+
+                var medicine = new Medicine
+                {
+                    MedicineName = medicineName,
+                    MedicineCategoryId = request.MedicineCategoryId,
+                    Stock = request.Stock,
+                    IsActive = true,
+                    CreatedBy = _currentUserId,
+                    CreatedDate = DateTime.UtcNow
+                };
+
                 _medicineRepository.Insert(medicine);
                 await _medicineRepository.CommitAsync(cancellationToken);
 
                 if (!string.IsNullOrEmpty(request.Thumbnail))
                 {
                     var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
-      request.Thumbnail, "medicine", _cloudinaryCloudService, cancellationToken);
+                        request.Thumbnail, "medicine", _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {
@@ -90,7 +128,8 @@ namespace Infrastructure.Services.Implements
                         {
                             MedicineId = medicine.Id,
                             ImageLink = imageLink,
-                            Thumnail = "true"
+                            Thumnail = "true",
+                            IsActive = true
                         };
                         _imageMedicineRepository.Insert(imageMedicine);
                     }
@@ -101,7 +140,7 @@ namespace Infrastructure.Services.Implements
                     foreach (var imageLink in request.ImageLinks)
                     {
                         var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
-           imageLink, "medicine", _cloudinaryCloudService, cancellationToken);
+                            imageLink, "medicine", _cloudinaryCloudService, cancellationToken);
 
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
@@ -109,68 +148,111 @@ namespace Infrastructure.Services.Implements
                             {
                                 MedicineId = medicine.Id,
                                 ImageLink = uploadedLink,
-                                Thumnail = "false"
+                                Thumnail = "false",
+                                IsActive = true
                             };
                             _imageMedicineRepository.Insert(imageMedicine);
                         }
                     }
                 }
+
                 await _imageMedicineRepository.CommitAsync(cancellationToken);
 
-                return (true, null);
+                return new Response<string>()
+                {
+                    Succeeded = true,
+                    Message = "Tạo thuốc thành công",
+                    Data = $"Thuốc đã được tạo thành công. ID: {medicine.Id}"
+                };
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi tạo thuốc: {ex.Message}");
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi tạo thuốc",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
 
         /// <summary>
-        /// Cập nhật thông tin một loại thuốc, bao gồm upload ảnh và thumbnail lên Cloudinary trong folder được chỉ định.
+        /// Cập nhật thông tin một loại thuốc, bao gồm upload ảnh và thumbnail.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> UpdateMedicine(Guid MedicineId, UpdateMedicineRequest request, CancellationToken cancellationToken = default)
+        public async Task<Response<string>> UpdateMedicine(UpdateMedicineRequest request, CancellationToken cancellationToken = default)
         {
-            if (request == null)
-                return (false, "Dữ liệu thuốc không được null.");
-
-            var checkError = new Ref<CheckError>();
-            var existing = await _medicineRepository.GetByIdAsync(MedicineId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi lấy thông tin thuốc: {checkError.Value.Message}");
-
-            if (existing == null)
-                return (false, "Không tìm thấy thuốc.");
-
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(request);
-            if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
-            {
-                return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
-            }
-
-            string medicineName = request.MedicineName + "/" + request.MedicineCode;
-
-            var exists = await _medicineRepository.CheckExist(
-                x => x.MedicineName == medicineName && x.MedicineCategoryId == request.MedicineCategoryId && x.Id != MedicineId && x.IsActive,
-                checkError,
-                cancellationToken);
-
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi kiểm tra thuốc tồn tại: {checkError.Value.Message}");
-
-            if (exists)
-                return (false, $"Thuốc với tên '{medicineName}' trong danh mục này đã tồn tại.");
-
             try
             {
-                existing.MedicineName = medicineName;
-                existing.MedicineCategoryId = request.MedicineCategoryId;
-                existing.Stock = request.Stock;
+                //if (_currentUserId == Guid.Empty)
+                //{
+                //    return new Response<string>()
+                //    {
+                //        Succeeded = false,
+                //        Message = "Hãy đăng nhập và thử lại",
+                //        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                //    };
+                //}
 
-                _medicineRepository.Update(existing);
+                if (request == null)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Dữ liệu thuốc không được null",
+                        Errors = new List<string> { "Dữ liệu thuốc không được null" }
+                    };
+                }
+
+                var medicine = await _medicineRepository.GetByIdAsync(request.MedicineId);
+                if (medicine == null || !medicine.IsActive)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Thuốc không tồn tại hoặc đã bị xóa",
+                        Errors = new List<string> { "Thuốc không tồn tại hoặc đã bị xóa" }
+                    };
+                }
+
+                var validationResults = new List<ValidationResult>();
+                var validationContext = new ValidationContext(request);
+                if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Dữ liệu không hợp lệ",
+                        Errors = validationResults.Select(v => v.ErrorMessage).ToList()
+                    };
+                }
+
+                string medicineName = $"{request.MedicineName}/{request.MedicineCode}";
+                var exists = await _medicineRepository.GetQueryable(x =>
+                    x.MedicineName == medicineName &&
+                    x.MedicineCategoryId == request.MedicineCategoryId &&
+                    x.Id != request.MedicineId &&
+                    x.IsActive).AnyAsync(cancellationToken);
+
+                if (exists)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = $"Thuốc với tên '{medicineName}' trong danh mục này đã tồn tại",
+                        Errors = new List<string> { $"Thuốc với tên '{medicineName}' trong danh mục này đã tồn tại" }
+                    };
+                }
+
+                medicine.MedicineName = medicineName;
+                medicine.MedicineCategoryId = request.MedicineCategoryId;
+                medicine.Stock = request.Stock;
+                medicine.UpdatedBy = _currentUserId;
+                medicine.UpdatedDate = DateTime.UtcNow;
+
+                _medicineRepository.Update(medicine);
                 await _medicineRepository.CommitAsync(cancellationToken);
 
-                var existingImages = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == MedicineId).ToListAsync(cancellationToken);
+                var existingImages = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == request.MedicineId).ToListAsync(cancellationToken);
                 foreach (var image in existingImages)
                 {
                     _imageMedicineRepository.Remove(image);
@@ -181,15 +263,16 @@ namespace Infrastructure.Services.Implements
                 if (!string.IsNullOrEmpty(request.Thumbnail))
                 {
                     var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
-      request.Thumbnail, "medicine", _cloudinaryCloudService, cancellationToken);
+                        request.Thumbnail, "medicine", _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {
                         var imageMedicine = new ImageMedicine
                         {
-                            MedicineId = MedicineId,
+                            MedicineId = request.MedicineId,
                             ImageLink = imageLink,
-                            Thumnail = "true"
+                            Thumnail = "true",
+                            IsActive = true
                         };
                         _imageMedicineRepository.Insert(imageMedicine);
                     }
@@ -200,15 +283,16 @@ namespace Infrastructure.Services.Implements
                     foreach (var imageLink in request.ImageLinks)
                     {
                         var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
-         imageLink, "medicine", _cloudinaryCloudService, cancellationToken);
+                            imageLink, "medicine", _cloudinaryCloudService, cancellationToken);
 
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
                             var imageMedicine = new ImageMedicine
                             {
-                                MedicineId = MedicineId,
+                                MedicineId = request.MedicineId,
                                 ImageLink = uploadedLink,
-                                Thumnail = "false"
+                                Thumnail = "false",
+                                IsActive = true
                             };
                             _imageMedicineRepository.Insert(imageMedicine);
                         }
@@ -216,89 +300,141 @@ namespace Infrastructure.Services.Implements
                 }
                 await _imageMedicineRepository.CommitAsync(cancellationToken);
 
-                return (true, null);
+                return new Response<string>()
+                {
+                    Succeeded = true,
+                    Message = "Cập nhật thuốc thành công",
+                    Data = $"Thuốc đã được cập nhật thành công. ID: {medicine.Id}"
+                };
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi cập nhật thuốc: {ex.Message}");
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi cập nhật thuốc",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
 
         /// <summary>
         /// Xóa mềm một loại thuốc bằng cách đặt IsActive thành false.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> DisableMedicine(Guid MedicineId, CancellationToken cancellationToken = default)
+        public async Task<Response<string>> DisableMedicine(Guid medicineId, CancellationToken cancellationToken = default)
         {
-            var checkError = new Ref<CheckError>();
-            var medicine = await _medicineRepository.GetByIdAsync(MedicineId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi lấy thông tin thuốc: {checkError.Value.Message}");
-
-            if (medicine == null)
-                return (false, "Không tìm thấy thuốc.");
-
             try
             {
+                //if (_currentUserId == Guid.Empty)
+                //{
+                //    return new Response<string>()
+                //    {
+                //        Succeeded = false,
+                //        Message = "Hãy đăng nhập và thử lại",
+                //        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                //    };
+                //}
+
+                var medicine = await _medicineRepository.GetByIdAsync(medicineId);
+                if (medicine == null)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Thuốc không tồn tại ",
+                        Errors = new List<string> { "Thuốc không tồn tại" }
+                    };
+                }
+
                 medicine.IsActive = !medicine.IsActive;
+                medicine.UpdatedBy = _currentUserId;
+                medicine.UpdatedDate = DateTime.UtcNow;
+
                 _medicineRepository.Update(medicine);
                 await _medicineRepository.CommitAsync(cancellationToken);
 
-                //var images = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == MedicineId).ToListAsync(cancellationToken);
-                //foreach (var image in images)
-                //{
-                //  //  _imageMedicineRepository.Remove(image);
-                //    await _cloudinaryCloudService.DeleteImage(image.ImageLink, cancellationToken);
-                //}
-                //await _imageMedicineRepository.CommitAsync(cancellationToken);
+                if (medicine.IsActive)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = true,
+                        Message = "Khôi phục thuốc thành công",
+                        Data = $"Thuốc đã được khôi phục thành công. ID: {medicine.Id}"
+                    };
+                }
+                else
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = true,
+                        Message = "Xóa thuốc thành công",
+                        Data = $"Thuốc đã được xóa thành công. ID: {medicine.Id}"
+                    };
 
-                return (true, null);
+                }
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi xóa thuốc: {ex.Message}");
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi xóa thuốc",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
 
         /// <summary>
         /// Lấy thông tin một loại thuốc theo ID, bao gồm danh sách ảnh và thumbnail.
         /// </summary>
-        public async Task<(MedicineResponse Medicine, string ErrorMessage)> GetMedicineById(Guid MedicineId, CancellationToken cancellationToken = default)
+        public async Task<Response<MedicineResponse>> GetMedicineById(Guid medicineId, CancellationToken cancellationToken = default)
         {
-            var checkError = new Ref<CheckError>();
-            var medicine = await _medicineRepository.GetByIdAsync(MedicineId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (null, $"Lỗi khi lấy thông tin thuốc: {checkError.Value.Message}");
-
-            if (medicine == null)
-                return (null, "Không tìm thấy thuốc.");
-
-
-            var medicineCategoryResponse = new MedicineCategoryResponse()
+            try
             {
-                Id = medicine.MedicineCategory.Id,
-                Name = medicine.MedicineCategory.Name,
-                Description = medicine.MedicineCategory.Description
-            };
-            var images = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == MedicineId).ToListAsync(cancellationToken);
+                var medicine = await _medicineRepository.GetByIdAsync(medicineId);
+                if (medicine == null || !medicine.IsActive)
+                {
+                    return new Response<MedicineResponse>()
+                    {
+                        Succeeded = false,
+                        Message = "Thuốc không tồn tại hoặc đã bị xóa",
+                        Errors = new List<string> { "Thuốc không tồn tại hoặc đã bị xóa" }
+                    };
+                }
 
-            var response = new MedicineResponse
+                var images = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == medicineId && x.IsActive).ToListAsync(cancellationToken);
+                var category = await _medicineCategoryRepository.GetByIdAsync(medicine.MedicineCategoryId);
+
+                var response = new MedicineResponse
+                {
+                    Id = medicine.Id,
+                    MedicineName = medicine.MedicineName,
+                    MedicineCategory = AutoMapperHelper.AutoMap<MedicineCategory, MedicineCategoryResponse>(category),
+                    Stock = medicine.Stock,
+                    IsActive = medicine.IsActive,
+                    ImageLinks = images.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
+                    Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                };
+
+                return new Response<MedicineResponse>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy thông tin thuốc thành công",
+                    Data = response
+                };
+            }
+            catch (Exception ex)
             {
-                Id = medicine.Id,
-                MedicineName = medicine.MedicineName,
-                MedicineCategory = medicineCategoryResponse,
-                Stock = medicine.Stock,
-                IsActive = medicine.IsActive,
-                ImageLinks = images.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
-                Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink,
-                // Folder = images.FirstOrDefault()?.ImageLink.Split('/')[4] // Lấy folder từ URL (giả định cấu trúc URL)
-            };
-            return (response, null);
+                return new Response<MedicineResponse>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy thông tin thuốc",
+                    Errors = new List<string> { ex.Message }
+                };
+            }
         }
 
-        /// <summary>
-        /// Lấy danh sách tất cả loại thuốc đang hoạt động với bộ lọc tùy chọn, bao gồm danh sách ảnh và thumbnail.
-        /// </summary>
-        public async Task<(List<MedicineResponse> Medicines, string ErrorMessage)> GetMedicineByCategory(
+        public async Task<Response<List<MedicineResponse>>> GetMedicineByCategory(
             string medicineName = null,
             Guid? medicineCategoryId = null,
             CancellationToken cancellationToken = default)
@@ -315,52 +451,89 @@ namespace Infrastructure.Services.Implements
 
                 var medicines = await query.ToListAsync(cancellationToken);
                 var responses = new List<MedicineResponse>();
+
                 foreach (var medicine in medicines)
                 {
-                    var medicineCategoryResponse = new MedicineCategoryResponse()
-                    {
-                        Id = medicine.MedicineCategory.Id,
-                        Name = medicine.MedicineCategory.Name,
-                        Description = medicine.MedicineCategory.Description
-                    };
-                    var images = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == medicine.Id).ToListAsync(cancellationToken);
+                    var images = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == medicine.Id && x.IsActive).ToListAsync(cancellationToken);
+                    var category = await _medicineCategoryRepository.GetByIdAsync(medicine.MedicineCategoryId);
+
                     responses.Add(new MedicineResponse
                     {
                         Id = medicine.Id,
                         MedicineName = medicine.MedicineName,
-                        MedicineCategory = medicineCategoryResponse,
+                        MedicineCategory = AutoMapperHelper.AutoMap<MedicineCategory, MedicineCategoryResponse>(category),
                         Stock = medicine.Stock,
                         IsActive = medicine.IsActive,
                         ImageLinks = images.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
-                        Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink,
-                        // Folder = images.FirstOrDefault()?.ImageLink.Split('/')[4] // Lấy folder từ URL (giả định cấu trúc URL)
+                        Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
                     });
                 }
-                return (responses, null);
+
+                return new Response<List<MedicineResponse>>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy danh sách thuốc thành công",
+                    Data = responses
+                };
             }
             catch (Exception ex)
             {
-                return (null, $"Lỗi khi lấy danh sách thuốc: {ex.Message}");
+                return new Response<List<MedicineResponse>>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy danh sách thuốc",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
-
-        public async Task<(PaginationSet<MedicineResponse> Result, string ErrorMessage)> GetPaginatedMedicineList(ListingRequest request, CancellationToken cancellationToken = default)
+        public async Task<Response<PaginationSet<MedicineResponse>>> GetPaginatedMedicineList(ListingRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
                 if (request == null)
-                    return (null, "Yêu cầu không được null.");
-                if (request.PageIndex < 1 || request.PageSize < 1)
-                    return (null, "PageIndex và PageSize phải lớn hơn 0.");
+                {
+                    return new Response<PaginationSet<MedicineResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = "Yêu cầu không được null",
+                        Errors = new List<string> { "Yêu cầu không được null" }
+                    };
+                }
 
-                var validFields = typeof(Medicine).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                {
+                    return new Response<PaginationSet<MedicineResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = "PageIndex và PageSize phải lớn hơn 0",
+                        Errors = new List<string> { "PageIndex và PageSize phải lớn hơn 0" }
+                    };
+                }
+
+                var validFields = typeof(MedicineResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
-                    return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+                {
+                    return new Response<PaginationSet<MedicineResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(",", validFields)}" }
+                    };
+                }
 
-                var query = _medicineRepository.GetQueryable(x => x.IsActive);
+                if (!validFields.Contains(request.Sort?.Field))
+                {
+                    return new Response<PaginationSet<MedicineResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường sắp xếp không hợp lệ: {request.Sort?.Field}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(",", validFields)}" }
+                    };
+                }
 
+                var query = _medicineRepository.GetQueryable();
                 if (request.SearchString?.Any() == true)
                     query = query.SearchString(request.SearchString);
 
@@ -368,26 +541,21 @@ namespace Infrastructure.Services.Implements
                     query = query.Filter(request.Filter);
 
                 var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
-
                 var medicineIds = paginationResult.Items.Select(f => f.Id).ToList();
-                var images = await _imageMedicineRepository.GetQueryable(x => medicineIds.Contains(x.MedicineId)).ToListAsync(cancellationToken);
+                var images = await _imageMedicineRepository.GetQueryable(x => medicineIds.Contains(x.MedicineId) && x.IsActive).ToListAsync(cancellationToken);
                 var imageGroups = images.GroupBy(x => x.MedicineId).ToDictionary(g => g.Key, g => g.ToList());
 
                 var responses = new List<MedicineResponse>();
                 foreach (var medicine in paginationResult.Items)
                 {
-                    var medicineCategoryResponse = new MedicineCategoryResponse()
-                    {
-                        Id = medicine.MedicineCategory.Id,
-                        Name = medicine.MedicineCategory.Name,
-                        Description = medicine.MedicineCategory.Description
-                    };
+                    var category = await _medicineCategoryRepository.GetByIdAsync(medicine.MedicineCategoryId);
                     var medicineImages = imageGroups.GetValueOrDefault(medicine.Id, new List<ImageMedicine>());
+
                     responses.Add(new MedicineResponse
                     {
                         Id = medicine.Id,
                         MedicineName = medicine.MedicineName,
-                        MedicineCategory = medicineCategoryResponse,
+                        MedicineCategory = AutoMapperHelper.AutoMap<MedicineCategory, MedicineCategoryResponse>(category),
                         Stock = medicine.Stock,
                         IsActive = medicine.IsActive,
                         ImageLinks = medicineImages.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
@@ -404,11 +572,21 @@ namespace Infrastructure.Services.Implements
                     Items = responses
                 };
 
-                return (result, null);
+                return new Response<PaginationSet<MedicineResponse>>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy danh sách phân trang thành công",
+                    Data = result
+                };
             }
             catch (Exception ex)
             {
-                return (null, $"Lỗi khi lấy danh sách phân trang: {ex.Message}");
+                return new Response<PaginationSet<MedicineResponse>>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy danh sách phân trang",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
 
@@ -441,7 +619,7 @@ namespace Infrastructure.Services.Implements
                     {
                         MedicineName = it.Ten_Thuoc + "/" + it.Ma_dang_ky,
                         Stock = it.So_luong,
-                        MedicineCategoryId = MedicineCategoryDetail.Id                        
+                        MedicineCategoryId = MedicineCategoryDetail.Id
                     };
                     _medicineRepository.Insert(MedicineToInsert);
                 }
@@ -452,8 +630,51 @@ namespace Infrastructure.Services.Implements
 
                 }
             }
-           ;
+            ;
             return await _medicineRepository.CommitAsync() > 0;
+        }
+
+        public async Task<Response<List<MedicineResponse>>> GetAllMedicine(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var query = _medicineRepository.GetQueryable(x => x.IsActive);
+                var medicines = await query.ToListAsync(cancellationToken);
+                var responses = new List<MedicineResponse>();
+
+                foreach (var medicine in medicines)
+                {
+                    var images = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == medicine.Id && x.IsActive).ToListAsync(cancellationToken);
+                    var category = await _medicineCategoryRepository.GetByIdAsync(medicine.MedicineCategoryId);
+
+                    responses.Add(new MedicineResponse
+                    {
+                        Id = medicine.Id,
+                        MedicineName = medicine.MedicineName,
+                        MedicineCategory = AutoMapperHelper.AutoMap<MedicineCategory, MedicineCategoryResponse>(category),
+                        Stock = medicine.Stock,
+                        IsActive = medicine.IsActive,
+                        ImageLinks = images.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
+                        Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                    });
+                }
+
+                return new Response<List<MedicineResponse>>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy danh sách thuốc thành công",
+                    Data = responses
+                };
+            }
+            catch (Exception ex)
+            {
+                return new Response<List<MedicineResponse>>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy danh sách thuốc",
+                    Errors = new List<string> { ex.Message }
+                };
+            }
         }
     }
 }

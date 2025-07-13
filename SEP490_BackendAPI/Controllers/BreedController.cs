@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Domain.Dto.Response.Breed;
 using Domain.IServices;
+using Application.Wrappers;
 
 namespace SEP490_BackendAPI.Controllers
 {
@@ -18,82 +19,87 @@ namespace SEP490_BackendAPI.Controllers
         private readonly IBreedService _breedService;
         private readonly IBreedCategoryService _breedCategoryService;
 
-        /// <summary>
-        /// Khởi tạo controller với service để xử lý logic giống loài.
-        /// </summary>
         public BreedController(IBreedService breedService, IBreedCategoryService breedCategoryService)
         {
             _breedService = breedService ?? throw new ArgumentNullException(nameof(breedService));
-            _breedCategoryService = breedCategoryService;
+            _breedCategoryService = breedCategoryService ?? throw new ArgumentNullException(nameof(breedCategoryService));
         }
-
-        /// <summary>
-        /// Tạo một giống loài mới, bao gồm upload ảnh và thumbnail.
-        /// </summary>
-        [HttpPost("create")]
-        public async Task<IActionResult> CreateBreed([FromBody] CreateBreedRequest request,  CancellationToken cancellationToken = default)
+        [HttpPost("breed-room-staff/get-breed-list")]
+        public async Task<IActionResult> GetPaginatedBreeds([FromBody] ListingRequest request, CancellationToken cancellationToken = default)
         {
-            var (success, errorMessage) = await _breedService.CreateBreed(request,cancellationToken);
-            if (!success)
-                return BadRequest(errorMessage);
-            return Ok();
+            var response = await _breedService.GetPaginatedBreedList(request, cancellationToken);
+            if (!response.Succeeded)
+                return BadRequest(response);
+            return Ok(response);
         }
 
-        /// <summary>
-        /// Cập nhật thông tin một giống loài, bao gồm upload ảnh và thumbnail.
-        /// </summary>
-        [HttpPut("update/{BreedId}")]
-        public async Task<IActionResult> UpdateBreed([FromRoute] Guid BreedId, [FromBody] UpdateBreedRequest request, CancellationToken cancellationToken = default)
+        [HttpPost("breed-room-staff/create-breed")]
+        public async Task<IActionResult> CreateBreed([FromBody] CreateBreedRequest request, CancellationToken cancellationToken = default)
         {
-            var (success, errorMessage) = await _breedService.UpdateBreed(BreedId, request, cancellationToken);
-            if (!success)
-                return BadRequest(errorMessage);
-            return Ok();
+            var response = await _breedService.CreateBreed(request, cancellationToken);
+            if (!response.Succeeded)
+                return BadRequest(response);
+            return Ok(response);
         }
 
-        [HttpPut("disable/{BreedId}")]
-        public async Task<IActionResult> DisableBreed([FromRoute] Guid BreedId,CancellationToken cancellationToken = default)
+        [HttpPut("breed-room-staff/update-breed")]
+        public async Task<IActionResult> UpdateBreed([FromBody] UpdateBreedRequest request, CancellationToken cancellationToken = default)
         {
-            var (success, errorMessage) = await _breedService.DisableBreed(BreedId,cancellationToken);
-            if (!success)
-                return BadRequest(errorMessage);
-            return Ok();
+            var response = await _breedService.UpdateBreed(request, cancellationToken);
+            if (!response.Succeeded)
+                return BadRequest(response);
+            return Ok(response);
         }
 
-        /// <summary>
-        /// Lấy thông tin một giống loài theo ID.
-        /// </summary>
-        [HttpGet("getBreedById/{BreedId}")]
+        [HttpPut("breed-room-staff/disable-breed/{BreedId}")]
+        public async Task<IActionResult> DisableBreed([FromRoute] Guid BreedId, CancellationToken cancellationToken = default)
+        {
+            var response = await _breedService.DisableBreed(BreedId, cancellationToken);
+            if (!response.Succeeded)
+                return BadRequest(response);
+            return Ok(response);
+        }
+
+        [HttpGet("get-breed-by-id/{BreedId}")]
         public async Task<IActionResult> GetBreedById([FromRoute] Guid BreedId, CancellationToken cancellationToken = default)
         {
-            var (breed, errorMessage) = await _breedService.GetBreedById(BreedId, cancellationToken);
-            if (breed == null)
-                return NotFound(errorMessage ?? "Không tìm thấy giống loài.");
-            return Ok(breed);
+            var response = await _breedService.GetBreedById(BreedId, cancellationToken);
+            if (!response.Succeeded)
+                return NotFound(response);
+            return Ok(response);
         }
 
-        /// <summary>
-        /// Lấy danh sách tất cả giống loài đang hoạt động với bộ lọc tùy chọn.
-        /// </summary>
-        [HttpGet("getBreedByCategory")]
-        public async Task<IActionResult> GetBreedByCategory(string breedName = null, Guid? breedCategoryId = null, CancellationToken cancellationToken = default)
-        {
-            var (breeds, errorMessage) = await _breedService.GetBreedByCategory(breedName, breedCategoryId, cancellationToken);
-            if (breeds == null)
-                return NotFound(errorMessage ?? "Không tìm thấy danh sách giống loài.");
-            return Ok(breeds);
-        }
+        //[HttpGet("get-breed-by-category")]
+        //public async Task<IActionResult> GetBreedByCategory(string breedName = null, Guid? breedCategoryId = null, CancellationToken cancellationToken = default)
+        //{
+        //    var response = await _breedService.GetBreedByCategory(breedName, breedCategoryId, cancellationToken);
+        //    if (!response.Succeeded)
+        //        return NotFound(response);
+        //    return Ok(response);
+        //}
 
-        /// <summary>
-        /// Lấy danh sách phân trang tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn.
-        /// </summary>
-        [HttpPost("getPaginatedBreedList")]
-        public async Task<IActionResult> GetPaginatedBreeds([FromBody] ListingRequest request)
+        [HttpGet("get-all-breed")]
+        public async Task<IActionResult> GetAllBreed(CancellationToken cancellationToken = default)
         {
-            var (result, errorMessage) = await _breedService.GetPaginatedBreedList(request);
-            if (errorMessage != null)
-                return BadRequest(errorMessage);
-            return Ok(result);
+            try
+            {
+                var breeds = await _breedService.GetAllBreed(cancellationToken);
+                return Ok(new Response<List<BreedResponse>>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy tất cả giống loài thành công",
+                    Data = breeds
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<List<BreedResponse>>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy danh sách giống loài",
+                    Errors = new List<string> { ex.Message }
+                });
+            }
         }
         [HttpPost("import")]
         public async Task<IActionResult> ImportPersonExcel(IFormFile file)

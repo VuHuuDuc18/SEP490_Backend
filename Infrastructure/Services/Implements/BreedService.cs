@@ -15,6 +15,8 @@ using Domain.Dto.Response.Breed;
 using Domain.Dto.Response;
 using Domain.Dto.Request;
 using Infrastructure.Extensions;
+using Microsoft.AspNetCore.Http;
+using Application.Wrappers;
 
 namespace Infrastructure.Services.Implements
 {
@@ -24,60 +26,116 @@ namespace Infrastructure.Services.Implements
         private readonly IRepository<BreedCategory> _breedCategoryRepository;
         private readonly IRepository<ImageBreed> _imageBreedRepository;
         private readonly CloudinaryCloudService _cloudinaryCloudService;
+        private readonly Guid _currentUserId;
 
         /// <summary>
         /// Khởi tạo service với repository của Breed và CloudinaryCloudService.
         /// </summary>
-        public BreedService(IRepository<Breed> breedRepository, IRepository<ImageBreed> imageBreedRepository, CloudinaryCloudService cloudinaryCloudService, IRepository<BreedCategory> breedCategoryRepository)
+        public BreedService(
+            IRepository<Breed> breedRepository,
+            IRepository<ImageBreed> imageBreedRepository,
+            CloudinaryCloudService cloudinaryCloudService,
+            IRepository<BreedCategory> breedCategoryRepository,
+            IHttpContextAccessor httpContextAccessor)
         {
             _breedRepository = breedRepository ?? throw new ArgumentNullException(nameof(breedRepository));
             _imageBreedRepository = imageBreedRepository ?? throw new ArgumentNullException(nameof(imageBreedRepository));
             _cloudinaryCloudService = cloudinaryCloudService ?? throw new ArgumentNullException(nameof(cloudinaryCloudService));
-            _breedCategoryRepository = breedCategoryRepository;
+            _breedCategoryRepository = breedCategoryRepository ?? throw new ArgumentNullException(nameof(breedCategoryRepository));
+
+            // Lấy current user từ JWT token claims
+            _currentUserId = Guid.Empty;
+            var currentUser = httpContextAccessor.HttpContext?.User;
+            if (currentUser != null)
+            {
+                var userIdClaim = currentUser.FindFirst("uid")?.Value;
+                if (!string.IsNullOrEmpty(userIdClaim))
+                {
+                    _currentUserId = Guid.Parse(userIdClaim);
+                }
+            }
         }
 
         /// <summary>
         /// Tạo một giống loài mới với kiểm tra hợp lệ, bao gồm upload ảnh và thumbnail lên Cloudinary trong folder được chỉ định.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> CreateBreed(CreateBreedRequest request, CancellationToken cancellationToken = default)
+        public async Task<Response<string>> CreateBreed(CreateBreedRequest request, CancellationToken cancellationToken = default)
         {
-            if (request == null)
-                return (false, "Dữ liệu giống loài không được null.");
-
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(request);
-            if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
-            {
-                return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
-            }
-
-            var checkError = new Ref<CheckError>();
-            var exists = await _breedRepository.CheckExist(
-                x => x.BreedName == request.BreedName && x.BreedCategoryId == request.BreedCategoryId && x.IsActive,
-                checkError,
-                cancellationToken);
-
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi kiểm tra giống loài tồn tại: {checkError.Value.Message}");
-
-            if (exists)
-                return (false, $"Giống loài với tên '{request.BreedName}' trong danh mục này đã tồn tại.");
-
-            var breed = new Breed
-            {
-                BreedName = request.BreedName,
-                BreedCategoryId = request.BreedCategoryId,
-                Stock = request.Stock
-            };
-
             try
             {
+                if (_currentUserId == Guid.Empty)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Hãy đăng nhập và thử lại",
+                        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                    };
+                }
+
+                if (request == null)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Dữ liệu giống loài không được null",
+                        Errors = new List<string> { "Dữ liệu giống loài không được null" }
+                    };
+                }
+
+                var validationResults = new List<ValidationResult>();
+                var validationContext = new ValidationContext(request);
+                if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Dữ liệu không hợp lệ",
+                        Errors = validationResults.Select(v => v.ErrorMessage).ToList()
+                    };
+                }
+
+                var exists = await _breedRepository.GetQueryable(x =>
+                    x.BreedName == request.BreedName && x.BreedCategoryId == request.BreedCategoryId && x.IsActive)
+                    .AnyAsync(cancellationToken);
+
+                if (exists)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = $"Giống loài với tên '{request.BreedName}' trong danh mục này đã tồn tại",
+                        Errors = new List<string> { $"Giống loài với tên '{request.BreedName}' trong danh mục này đã tồn tại" }
+                    };
+                }
+
+                var breedCategory = await _breedCategoryRepository.GetByIdAsync(request.BreedCategoryId);
+                if (breedCategory == null || !breedCategory.IsActive)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Danh mục giống loài không tồn tại hoặc đã bị xóa",
+                        Errors = new List<string> { "Danh mục giống loài không tồn tại hoặc đã bị xóa" }
+                    };
+                }
+
+                var breed = new Breed
+                {
+                    BreedName = request.BreedName,
+                    BreedCategoryId = request.BreedCategoryId,
+                    Stock = request.Stock,
+                    IsActive = true,
+                    CreatedBy = _currentUserId,
+                    CreatedDate = DateTime.UtcNow
+                };
+
                 _breedRepository.Insert(breed);
                 await _breedRepository.CommitAsync(cancellationToken);
 
+                // Upload thumbnail lên Cloudinary
                 if (!string.IsNullOrEmpty(request.Thumbnail))
                 {
-
                     var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
                         request.Thumbnail, "breed", _cloudinaryCloudService, cancellationToken);
 
@@ -93,13 +151,13 @@ namespace Infrastructure.Services.Implements
                     }
                 }
 
+                // Upload ảnh khác lên Cloudinary
                 if (request.ImageLinks != null && request.ImageLinks.Any())
                 {
                     foreach (var imageLink in request.ImageLinks)
                     {
-
                         var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
-                                imageLink, "breed", _cloudinaryCloudService, cancellationToken);
+                            imageLink, "breed", _cloudinaryCloudService, cancellationToken);
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
                             var imageBreed = new ImageBreed
@@ -114,58 +172,110 @@ namespace Infrastructure.Services.Implements
                 }
                 await _imageBreedRepository.CommitAsync(cancellationToken);
 
-                return (true, null);
+                return new Response<string>()
+                {
+                    Succeeded = true,
+                    Message = "Tạo giống loài thành công",
+                    Data = $"Giống loài đã được tạo thành công. ID: {breed.Id}"
+                };
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi tạo giống loài: {ex.Message}");
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi tạo giống loài",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
 
         /// <summary>
         /// Cập nhật thông tin một giống loài, bao gồm upload ảnh và thumbnail lên Cloudinary trong folder được chỉ định.
         /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> UpdateBreed(Guid BreedId, UpdateBreedRequest request, CancellationToken cancellationToken = default)
+        public async Task<Response<string>> UpdateBreed(UpdateBreedRequest request, CancellationToken cancellationToken = default)
         {
-            if (request == null)
-                return (false, "Dữ liệu giống loài không được null.");
-
-            var checkError = new Ref<CheckError>();
-            var existing = await _breedRepository.GetByIdAsync(BreedId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi lấy thông tin giống loài: {checkError.Value.Message}");
-
-            if (existing == null)
-                return (false, "Không tìm thấy giống loài.");
-
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(request);
-            if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
-            {
-                return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
-            }
-
-            var exists = await _breedRepository.CheckExist(
-                x => x.BreedName == request.BreedName && x.BreedCategoryId == request.BreedCategoryId && x.Id != BreedId && x.IsActive,
-                checkError,
-                cancellationToken);
-
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi kiểm tra giống loài tồn tại: {checkError.Value.Message}");
-
-            if (exists)
-                return (false, $"Giống loài với tên '{request.BreedName}' trong danh mục này đã tồn tại.");
-
             try
             {
-                existing.BreedName = request.BreedName;
-                existing.BreedCategoryId = request.BreedCategoryId;
-                existing.Stock = request.Stock;
+                if (_currentUserId == Guid.Empty)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Hãy đăng nhập và thử lại",
+                        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                    };
+                }
 
-                _breedRepository.Update(existing);
+                if (request == null)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Dữ liệu giống loài không được null",
+                        Errors = new List<string> { "Dữ liệu giống loài không được null" }
+                    };
+                }
+
+                var breed = await _breedRepository.GetByIdAsync(request.BreedId);
+                if (breed == null || !breed.IsActive)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Giống loài không tồn tại hoặc đã bị xóa",
+                        Errors = new List<string> { "Giống loài không tồn tại hoặc đã bị xóa" }
+                    };
+                }
+
+                var validationResults = new List<ValidationResult>();
+                var validationContext = new ValidationContext(request);
+                if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Dữ liệu không hợp lệ",
+                        Errors = validationResults.Select(v => v.ErrorMessage).ToList()
+                    };
+                }
+
+                var exists = await _breedRepository.GetQueryable(x =>
+                    x.BreedName == request.BreedName && x.BreedCategoryId == request.BreedCategoryId && x.Id != request.BreedId && x.IsActive)
+                    .AnyAsync(cancellationToken);
+
+                if (exists)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = $"Giống loài với tên '{request.BreedName}' trong danh mục này đã tồn tại",
+                        Errors = new List<string> { $"Giống loài với tên '{request.BreedName}' trong danh mục này đã tồn tại" }
+                    };
+                }
+
+                var breedCategory = await _breedCategoryRepository.GetByIdAsync(request.BreedCategoryId);
+                if (breedCategory == null || !breedCategory.IsActive)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Danh mục giống loài không tồn tại hoặc đã bị xóa",
+                        Errors = new List<string> { "Danh mục giống loài không tồn tại hoặc đã bị xóa" }
+                    };
+                }
+
+                breed.BreedName = request.BreedName;
+                breed.BreedCategoryId = request.BreedCategoryId;
+                breed.Stock = request.Stock;
+                breed.UpdatedBy = _currentUserId;
+                breed.UpdatedDate = DateTime.UtcNow;
+
+                _breedRepository.Update(breed);
                 await _breedRepository.CommitAsync(cancellationToken);
 
-                var existingImages = await _imageBreedRepository.GetQueryable(x => x.BreedId == BreedId).ToListAsync(cancellationToken);
+                // Xóa ảnh và thumbnail cũ
+                var existingImages = await _imageBreedRepository.GetQueryable(x => x.BreedId == request.BreedId).ToListAsync(cancellationToken);
                 foreach (var image in existingImages)
                 {
                     _imageBreedRepository.Remove(image);
@@ -173,6 +283,7 @@ namespace Infrastructure.Services.Implements
                 }
                 await _imageBreedRepository.CommitAsync(cancellationToken);
 
+                // Upload thumbnail mới
                 if (!string.IsNullOrEmpty(request.Thumbnail))
                 {
                     var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
@@ -182,7 +293,7 @@ namespace Infrastructure.Services.Implements
                     {
                         var imageBreed = new ImageBreed
                         {
-                            BreedId = BreedId,
+                            BreedId = request.BreedId,
                             ImageLink = imageLink,
                             Thumnail = "true"
                         };
@@ -190,18 +301,18 @@ namespace Infrastructure.Services.Implements
                     }
                 }
 
+                // Upload ảnh khác
                 if (request.ImageLinks != null && request.ImageLinks.Any())
                 {
                     foreach (var imageLink in request.ImageLinks)
                     {
                         var uploadedLink = await UploadImageExtension.UploadBase64ImageAsync(
-           imageLink, "breed", _cloudinaryCloudService, cancellationToken);
-
+                            imageLink, "breed", _cloudinaryCloudService, cancellationToken);
                         if (!string.IsNullOrEmpty(uploadedLink))
                         {
                             var imageBreed = new ImageBreed
                             {
-                                BreedId = BreedId,
+                                BreedId = request.BreedId,
                                 ImageLink = uploadedLink,
                                 Thumnail = "false"
                             };
@@ -211,34 +322,58 @@ namespace Infrastructure.Services.Implements
                 }
                 await _imageBreedRepository.CommitAsync(cancellationToken);
 
-                return (true, null);
+                return new Response<string>()
+                {
+                    Succeeded = true,
+                    Message = "Cập nhật giống loài thành công",
+                    Data = $"Giống loài đã được cập nhật thành công. ID: {breed.Id}"
+                };
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi cập nhật giống loài: {ex.Message}");
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi cập nhật giống loài",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
 
-        /// <summary>
-        /// Xóa mềm một giống loài bằng cách đặt IsActive thành false.
-        /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> DisableBreed(Guid BreedId, CancellationToken cancellationToken = default)
+        public async Task<Response<string>> DisableBreed(Guid breedId, CancellationToken cancellationToken = default)
         {
-            var checkError = new Ref<CheckError>();
-            var breed = await _breedRepository.GetByIdAsync(BreedId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi lấy thông tin giống loài: {checkError.Value.Message}");
-
-            if (breed == null)
-                return (false, "Không tìm thấy giống loài.");
-
             try
             {
+                //if (_currentUserId == Guid.Empty)
+                //{
+                //    return new Response<string>()
+                //    {
+                //        Succeeded = false,
+                //        Message = "Hãy đăng nhập và thử lại",
+                //        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                //    };
+                //}
+
+                var breed = await _breedRepository.GetByIdAsync(breedId);
+                if (breed == null)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Giống loài không tồn tại hoặc đã bị xóa",
+                        Errors = new List<string> { "Giống loài không tồn tại hoặc đã bị xóa" }
+                    };
+                }
+
                 breed.IsActive = !breed.IsActive;
+                breed.UpdatedBy = _currentUserId;
+                breed.UpdatedDate = DateTime.UtcNow;
+
                 _breedRepository.Update(breed);
                 await _breedRepository.CommitAsync(cancellationToken);
 
-                //var images = await _imageBreedRepository.GetQueryable(x => x.BreedId == BreedId).ToListAsync(cancellationToken);
+                // Xóa ảnh và thumbnail liên quan khỏi Cloudinary
+                //var images = await _imageBreedRepository.GetQueryable(x => x.BreedId == breedId).ToListAsync(cancellationToken);
                 //foreach (var image in images)
                 //{
                 //    _imageBreedRepository.Remove(image);
@@ -246,54 +381,91 @@ namespace Infrastructure.Services.Implements
                 //}
                 //await _imageBreedRepository.CommitAsync(cancellationToken);
 
-                return (true, null);
+                if (breed.IsActive)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = true,
+                        Message = "Khôi phục giống thành công",
+                        Data = $"Giống đã được khôi phục thành công. ID: {breed.Id}"
+                    };
+                }
+                else
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = true,
+                        Message = "Xóa giống thành công",
+                        Data = $"Giống đã được xóa thành công. ID: {breed.Id}"
+                    };
+
+                }
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi xóa giống loài: {ex.Message}");
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi xóa giống loài",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
-
-        /// <summary>
-        /// Lấy thông tin một giống loài theo ID, bao gồm danh sách ảnh và thumbnail.
-        /// </summary>
-        public async Task<(BreedResponse Breed, string ErrorMessage)> GetBreedById(Guid BreedId, CancellationToken cancellationToken = default)
+        public async Task<Response<BreedResponse>> GetBreedById(Guid breedId, CancellationToken cancellationToken = default)
         {
-            var checkError = new Ref<CheckError>();
-            var breed = await _breedRepository.GetByIdAsync(BreedId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (null, $"Lỗi khi lấy thông tin giống loài: {checkError.Value.Message}");
-
-            if (breed == null)
-                return (null, "Không tìm thấy giống loài.");
-
-            var images = await _imageBreedRepository.GetQueryable(x => x.BreedId == BreedId).ToListAsync(cancellationToken);
-
-            var breedCategoryResponse = new BreedCategoryResponse()
+            try
             {
-                Id = breed.BreedCategory.Id,
-                Name = breed.BreedCategory.Name,
-                Description = breed.BreedCategory.Description
-            }; 
+                var breed = await _breedRepository.GetQueryable(x => x.Id == breedId && x.IsActive)
+                    .Include(x => x.BreedCategory)
+                    .FirstOrDefaultAsync(cancellationToken);
 
-            var response = new BreedResponse
+                if (breed == null)
+                {
+                    return new Response<BreedResponse>()
+                    {
+                        Succeeded = false,
+                        Message = "Giống loài không tồn tại hoặc đã bị xóa",
+                        Errors = new List<string> { "Giống loài không tồn tại hoặc đã bị xóa" }
+                    };
+                }
+
+                var images = await _imageBreedRepository.GetQueryable(x => x.BreedId == breedId).ToListAsync(cancellationToken);
+                var breedCategoryResponse = new BreedCategoryResponse
+                {
+                    Id = breed.BreedCategory.Id,
+                    Name = breed.BreedCategory.Name,
+                    Description = breed.BreedCategory.Description
+                };
+
+                var response = new BreedResponse
+                {
+                    Id = breed.Id,
+                    BreedName = breed.BreedName,
+                    BreedCategory = breedCategoryResponse,
+                    Stock = breed.Stock,
+                    IsActive = breed.IsActive,
+                    ImageLinks = images.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
+                    Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                };
+
+                return new Response<BreedResponse>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy thông tin giống loài thành công",
+                    Data = response
+                };
+            }
+            catch (Exception ex)
             {
-                Id = breed.Id,
-                BreedName = breed.BreedName,
-                BreedCategory = breedCategoryResponse,
-                Stock = breed.Stock,
-                IsActive = breed.IsActive,
-                ImageLinks = images.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
-                Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink,
-               // Folder = images.FirstOrDefault()?.ImageLink.Split('/')[4] // Lấy folder từ URL (giả định cấu trúc URL)
-            };
-            return (response, null);
+                return new Response<BreedResponse>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy thông tin giống loài",
+                    Errors = new List<string> { ex.Message }
+                };
+            }
         }
-
-        /// <summary>
-        /// Lấy danh sách tất cả giống loài đang hoạt động với bộ lọc tùy chọn, bao gồm danh sách ảnh và thumbnail.
-        /// </summary>
-        public async Task<(List<BreedResponse> Breeds, string ErrorMessage)> GetBreedByCategory(
+        public async Task<Response<List<BreedResponse>>> GetBreedByCategory(
             string breedName = null,
             Guid? breedCategoryId = null,
             CancellationToken cancellationToken = default)
@@ -309,16 +481,20 @@ namespace Infrastructure.Services.Implements
                     query = query.Where(x => x.BreedCategoryId == breedCategoryId.Value);
 
                 var breeds = await query.ToListAsync(cancellationToken);
+                var breedIds = breeds.Select(b => b.Id).ToList();
+                var images = await _imageBreedRepository.GetQueryable(x => breedIds.Contains(x.BreedId)).ToListAsync(cancellationToken);
+                var imageGroups = images.GroupBy(x => x.BreedId).ToDictionary(g => g.Key, g => g.ToList());
+
                 var responses = new List<BreedResponse>();
                 foreach (var breed in breeds)
                 {
-                    var breedCategoryResponse = new BreedCategoryResponse()
+                    var breedCategoryResponse = new BreedCategoryResponse
                     {
                         Id = breed.BreedCategory.Id,
                         Name = breed.BreedCategory.Name,
-                        Description = breed.BreedCategory.Description
+                        Description = breed.BreedCategory.Description,
                     };
-                    var images = await _imageBreedRepository.GetQueryable(x => x.BreedId == breed.Id).ToListAsync(cancellationToken);
+                    var breedImages = imageGroups.GetValueOrDefault(breed.Id, new List<ImageBreed>());
                     responses.Add(new BreedResponse
                     {
                         Id = breed.Id,
@@ -326,36 +502,78 @@ namespace Infrastructure.Services.Implements
                         BreedCategory = breedCategoryResponse,
                         Stock = breed.Stock,
                         IsActive = breed.IsActive,
-                        ImageLinks = images.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
-                        Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink,
-                       // Folder = images.FirstOrDefault()?.ImageLink.Split('/')[4] // Lấy folder từ URL (giả định cấu trúc URL)
+                        ImageLinks = breedImages.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
+                        Thumbnail = breedImages.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
                     });
                 }
-                return (responses, null);
+
+                return new Response<List<BreedResponse>>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy danh sách giống loài thành công",
+                    Data = responses
+                };
             }
             catch (Exception ex)
             {
-                return (null, $"Lỗi khi lấy danh sách giống loài: {ex.Message}");
+                return new Response<List<BreedResponse>>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy danh sách giống loài",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
-
-        public async Task<(PaginationSet<BreedResponse> Result, string ErrorMessage)> GetPaginatedBreedList(ListingRequest request, CancellationToken cancellationToken = default)
+        public async Task<Response<PaginationSet<BreedResponse>>> GetPaginatedBreedList(
+            ListingRequest request,
+            CancellationToken cancellationToken = default)
         {
             try
             {
                 if (request == null)
-                    return (null, "Yêu cầu không được null.");
-                if (request.PageIndex < 1 || request.PageSize < 1)
-                    return (null, "PageIndex và PageSize phải lớn hơn 0.");
+                {
+                    return new Response<PaginationSet<BreedResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = "Yêu cầu không được null",
+                        Errors = new List<string> { "Yêu cầu không được null" }
+                    };
+                }
 
-                var validFields = typeof(Breed).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                {
+                    return new Response<PaginationSet<BreedResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = "PageIndex và PageSize phải lớn hơn 0",
+                        Errors = new List<string> { "PageIndex và PageSize phải lớn hơn 0" }
+                    };
+                }
+
+                var validFields = typeof(BreedResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
-                    return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+                {
+                    return new Response<PaginationSet<BreedResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(",", validFields)}" }
+                    };
+                }
 
-                var query = _breedRepository.GetQueryable(x => x.IsActive);
+                if (!validFields.Contains(request.Sort?.Field))
+                {
+                    return new Response<PaginationSet<BreedResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường sắp xếp không hợp lệ: {request.Sort?.Field}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(",", validFields)}" }
+                    };
+                }
 
+                var query = _breedRepository.GetQueryable();
                 if (request.SearchString?.Any() == true)
                     query = query.SearchString(request.SearchString);
 
@@ -364,14 +582,14 @@ namespace Infrastructure.Services.Implements
 
                 var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
 
-                var breedIds = paginationResult.Items.Select(f => f.Id).ToList();
+                var breedIds = paginationResult.Items.Select(b => b.Id).ToList();
                 var images = await _imageBreedRepository.GetQueryable(x => breedIds.Contains(x.BreedId)).ToListAsync(cancellationToken);
                 var imageGroups = images.GroupBy(x => x.BreedId).ToDictionary(g => g.Key, g => g.ToList());
 
                 var responses = new List<BreedResponse>();
                 foreach (var breed in paginationResult.Items)
                 {
-                    var breedCategoryResponse = new BreedCategoryResponse()
+                    var breedCategoryResponse = new BreedCategoryResponse
                     {
                         Id = breed.BreedCategory.Id,
                         Name = breed.BreedCategory.Name,
@@ -399,14 +617,55 @@ namespace Infrastructure.Services.Implements
                     Items = responses
                 };
 
-                return (result, null);
+                return new Response<PaginationSet<BreedResponse>>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy danh sách phân trang thành công",
+                    Data = result
+                };
             }
             catch (Exception ex)
             {
-                return (null, $"Lỗi khi lấy danh sách phân trang: {ex.Message}");
+                return new Response<PaginationSet<BreedResponse>>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy danh sách phân trang",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
 
+        public async Task<List<BreedResponse>> GetAllBreed(CancellationToken cancellationToken = default)
+        {
+            var breeds = await _breedRepository.GetQueryable(x => x.IsActive)
+                .Include(x => x.BreedCategory)
+                .ToListAsync(cancellationToken);
+
+            var breedIds = breeds.Select(b => b.Id).ToList();
+            var images = await _imageBreedRepository.GetQueryable(x => breedIds.Contains(x.BreedId)).ToListAsync(cancellationToken);
+            var imageGroups = images.GroupBy(x => x.BreedId).ToDictionary(g => g.Key, g => g.ToList());
+
+            return breeds.Select(breed =>
+            {
+                var breedCategoryResponse = new BreedCategoryResponse
+                {
+                    Id = breed.BreedCategory.Id,
+                    Name = breed.BreedCategory.Name,
+                    Description = breed.BreedCategory.Description
+                };
+                var breedImages = imageGroups.GetValueOrDefault(breed.Id, new List<ImageBreed>());
+                return new BreedResponse
+                {
+                    Id = breed.Id,
+                    BreedName = breed.BreedName,
+                    BreedCategory = breedCategoryResponse,
+                    Stock = breed.Stock,
+                    IsActive = breed.IsActive,
+                    ImageLinks = breedImages.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
+                    Thumbnail = breedImages.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                };
+            }).ToList();
+        }
         public async Task<bool> ExcelDataHandle(List<CellBreedItem> data)
         {
             try
