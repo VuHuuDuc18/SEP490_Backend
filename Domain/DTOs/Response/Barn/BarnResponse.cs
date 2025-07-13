@@ -13,7 +13,7 @@ namespace Domain.Dto.Response.Barn
         public string BarnName { get; set; }
         public string Address { get; set; }
         public string Image { get; set; }
-        public WokerResponse Worker { get; set; }
+        public WokerResponse? Worker { get; set; }
         public bool IsActive { get; set; }
     }
 

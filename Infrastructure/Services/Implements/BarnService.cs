@@ -122,7 +122,7 @@ namespace Infrastructure.Services.Implements
             if (exists)
                 return (false, $"Chuồng trại với tên '{requestDto.BarnName}' và địa chỉ '{requestDto.Address}' đã tồn tại.");
 
-            var worker = await _userRepository.GetById(requestDto.WorkerId, checkError);
+            var worker = await _userRepository.GetByIdAsync(requestDto.WorkerId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin người gia công: {checkError.Value.Message}");
             if (worker == null)
@@ -167,7 +167,7 @@ namespace Infrastructure.Services.Implements
                 return (false, "Dữ liệu chuồng trại không được null.");
 
             var checkError = new Ref<CheckError>();
-            var existing = await _barnRepository.GetById(BarnId, checkError);
+            var existing = await _barnRepository.GetByIdAsync(BarnId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin chuồng trại: {checkError.Value.Message}");
 
@@ -192,7 +192,7 @@ namespace Infrastructure.Services.Implements
             if (exists)
                 return (false, $"Chuồng trại với tên '{requestDto.BarnName}' và địa chỉ '{requestDto.Address}' đã tồn tại.");
 
-            var worker = await _userRepository.GetById(requestDto.WorkerId, checkError);
+            var worker = await _userRepository.GetByIdAsync(requestDto.WorkerId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin người gia công: {checkError.Value.Message}");
             if (worker == null)
@@ -237,7 +237,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
         public async Task<(bool Success, string ErrorMessage)> DisableBarn(Guid BarnId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var barn = await _barnRepository.GetById(BarnId, checkError);
+            var barn = await _barnRepository.GetByIdAsync(BarnId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin chuồng trại: {checkError.Value.Message}");
 
@@ -267,7 +267,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
         public async Task<(BarnResponse Barn, string ErrorMessage)> GetBarnById(Guid BarnId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var barn = await _barnRepository.GetById(BarnId);
+            var barn = await _barnRepository.GetByIdAsync(BarnId);
             if (checkError.Value?.IsError == true)
                 return (null, $"Lỗi khi lấy thông tin chuồng trại: {checkError.Value.Message}");
 
@@ -302,7 +302,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
             {
                 
                 var checkError = new Ref<CheckError>();
-                var worker = await _userRepository.GetById(_currentUserId, checkError);
+                var worker = await _userRepository.GetByIdAsync(_currentUserId, checkError);
                 if (checkError.Value?.IsError == true)
                     return (null, $"Lỗi khi lấy thông tin người gia công: {checkError.Value.Message}");
                 if (worker == null)
@@ -552,15 +552,15 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                 ActiveLivestockCircleResponse? activeLivestockCircleResponse = null;
                 if (activeLivestockCircle != null)
                 {
-                    var technicalStaff = await _userRepository.GetById(activeLivestockCircle.TechicalStaffId);
+                    var technicalStaff = await _userRepository.GetByIdAsync(activeLivestockCircle.TechicalStaffId);
                     var technicalStaffResponse = new UserItemResponse
                     {
-                        UserId = technicalStaff.Id,
+                        Id = technicalStaff.Id,
                         Email = technicalStaff.Email,
                         Fullname = technicalStaff.FullName,
                         PhoneNumber = technicalStaff.PhoneNumber
                     };
-                    var breed = await _breedRepository.GetById(activeLivestockCircle.BreedId);
+                    var breed = await _breedRepository.GetByIdAsync(activeLivestockCircle.BreedId);
                     var images = await _imageBreedeRepository.GetQueryable(x => x.BreedId == breed.Id).ToListAsync(cancellationToken);
                     var breedResponse = new BreedBillResponse
                     {

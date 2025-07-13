@@ -8,7 +8,7 @@ namespace Domain.Dto.Response.User
 {
     public class UserItemResponse
     {
-        public Guid UserId { get; set; }
+        public Guid Id { get; set; }
         public string Fullname { get; set; }    
         public string Email { get; set; }
         public string PhoneNumber { get; set; }

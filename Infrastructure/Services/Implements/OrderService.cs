@@ -3,6 +3,8 @@ using Domain.Dto.Request;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Barn;
 using Domain.Dto.Response.BarnPlan;
+using Domain.Dto.Response.LivestockCircle;
+using Domain.Dto.Response.User;
 using Domain.DTOs.Request.Order;
 using Domain.DTOs.Response.Order;
 using Domain.Helper;
@@ -26,6 +28,7 @@ namespace Infrastructure.Services.Implements
         private UserManager<User> _userManager;
         private readonly IRepository<LivestockCircle> _livestockCircleRepository;
         private readonly IRepository<Breed> _breedRepository;
+        private readonly IRepository<ImageLivestockCircle> _imageLivestockCircleRepository;
         private readonly IRepository<BreedCategory> _breedCategoryRepository;
         private readonly Guid _currentUserId;
         public OrderService
@@ -35,7 +38,8 @@ namespace Infrastructure.Services.Implements
             IRepository<LivestockCircle> livestockCircleRepository,
             UserManager<User> userManager,
             IRepository<Breed> breedrepo,
-            IRepository<BreedCategory> bcrepo
+            IRepository<BreedCategory> bcrepo,
+            IRepository<ImageLivestockCircle> imageLivestockCircleRepository
         )
         {
             _orderRepository = orderRepository;
@@ -43,6 +47,8 @@ namespace Infrastructure.Services.Implements
             _livestockCircleRepository = livestockCircleRepository;
             _breedCategoryRepository = bcrepo;
             _userManager = userManager;
+            _imageLivestockCircleRepository = imageLivestockCircleRepository;
+
             // Lấy current user từ JWT token claims
             _currentUserId = Guid.Empty;
             var currentUser = httpContextAccessor.HttpContext?.User;
@@ -110,7 +116,7 @@ namespace Infrastructure.Services.Implements
                     IsActive = true,
                     PickupDate = request.PickupDate
                 };
-                var livestockCircle = await _livestockCircleRepository.GetById(request.LivestockCircleId);
+                var livestockCircle = await _livestockCircleRepository.GetByIdAsync(request.LivestockCircleId);
                 if (livestockCircle == null)
                 {
                     return new Response<string>("Chuồng nuôi không khả dụng. Vui lòng thử lại sau.")
@@ -163,12 +169,33 @@ namespace Infrastructure.Services.Implements
         {
             try
             {
-                var order = await _orderRepository.GetById(OrderId);
+                var order = await _orderRepository.GetByIdAsync(OrderId);
                 if (order == null || !order.IsActive)
                 {
                     return new Response<OrderResponse>("Đơn hàng không tồn tại hoặc đã bị xóa.");
                 }
-                var result = AutoMapperHelper.AutoMap<Order, OrderResponse>(order);
+                var livestockCircle = await _livestockCircleRepository.GetByIdAsync(order.LivestockCircleId);
+                var images =await _imageLivestockCircleRepository.GetQueryable(x=>x.IsActive && x.LivestockCircleId == order.LivestockCircleId)
+                    .Select(x=> x.ImageLink).ToListAsync();
+                var customer =await _userManager.FindByIdAsync(_currentUserId.ToString());
+                var result = new OrderResponse()
+                    {
+                        Id = order.Id,
+                        CustomerId = order.CustomerId,
+                        LivestockCircleId = order.LivestockCircleId,
+                        GoodUnitStock = order.GoodUnitStock,
+                        BadUnitStock = order.BadUnitStock,
+                        TotalBill = order.TotalBill,
+                        Status = order.Status,
+                        CreateDate = order.CreatedDate,
+                        PickupDate = order.PickupDate,
+                        BreedName = order.LivestockCircle.Breed.BreedName,
+                        BreedCategory = order.LivestockCircle.Breed.BreedCategory.Name
+                    };
+                result.LivestockCircle = AutoMapperHelper.AutoMap<LivestockCircle, ReleasedLivetockDetail>(livestockCircle);
+                result.LivestockCircle.ImageLinks = images;
+                result.Customer = AutoMapperHelper.AutoMap<User, UserItemResponse>(customer);
+                result.Barn = AutoMapperHelper.AutoMap<Barn, BarnResponse>(livestockCircle.Barn);
                 return new Response<OrderResponse>()
                 {
                     Succeeded = true,
@@ -191,7 +218,7 @@ namespace Infrastructure.Services.Implements
         {
             try
             {
-                var order = await _orderRepository.GetById(request.OrderId);
+                var order = await _orderRepository.GetByIdAsync(request.OrderId);
                 if (order == null || !order.IsActive)
                 {
                     return new Response<string>("Đơn hàng không tồn tại hoặc đã bị xóa.");
@@ -269,7 +296,7 @@ namespace Infrastructure.Services.Implements
 
             try
             {
-                var order = await _orderRepository.GetById(OrderId);
+                var order = await _orderRepository.GetByIdAsync(OrderId);
                 if (order == null || !order.IsActive)
                 {
                     return new Response<string>("Đơn hàng không tồn tại hoặc đã bị xóa.");
@@ -329,7 +356,20 @@ namespace Infrastructure.Services.Implements
                     };
                 }
                 var orders = await _orderRepository.GetQueryable(x => x.CustomerId == _currentUserId && x.IsActive).ToListAsync();
-                var result = orders.Select(x => AutoMapperHelper.AutoMap<Order, OrderResponse>(x)).OrderByDescending(x => x.CreateDate).ToList();
+                var result = orders.Select(x => new OrderResponse()
+                {
+                    Id = x.Id,
+                    CustomerId = x.CustomerId,
+                    LivestockCircleId = x.LivestockCircleId,
+                    GoodUnitStock = x.GoodUnitStock,
+                    BadUnitStock = x.BadUnitStock,
+                    TotalBill = x.TotalBill,
+                    Status = x.Status,
+                    CreateDate = x.CreatedDate,
+                    PickupDate = x.PickupDate,
+                    BreedName = x.LivestockCircle.Breed.BreedName,
+                    BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name
+                }).OrderByDescending(x => x.CreateDate).ToList();
                 return new Response<List<OrderResponse>>(result, "Lấy danh sách đơn hàng thành công");
 
             }
@@ -386,9 +426,10 @@ namespace Infrastructure.Services.Implements
                         TotalBill = x.TotalBill,
                         Status = x.Status,
                         CreateDate = x.CreatedDate,
-                        PickupDate = x.PickupDate
+                        PickupDate = x.PickupDate,
+                        BreedName = x.LivestockCircle.Breed.BreedName,
+                        BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name
                     });
-
                 if (request.SearchString?.Any() == true)
                     orders = orders.SearchString(request.SearchString);
 
@@ -440,7 +481,7 @@ namespace Infrastructure.Services.Implements
             var ListItem = await query.ToListAsync();
             var result = new StatisticsOrderResponse()
             {
-                datas = ListItem,
+                Datas = ListItem,
                 TotalRevenue = ListItem.Sum(x=>x.Revenue ?? 0),
                 TotalBadUnitStockSold = ListItem.Sum(x => x.BadUnitStockSold ?? 0),
                 TotalGoodUnitStockSold = ListItem.Sum(x => x.GoodUnitStockSold ?? 0),
@@ -499,7 +540,7 @@ namespace Infrastructure.Services.Implements
         {
             try
             {
-                var orderItem =await _orderRepository.GetById(request.OrderId);
+                var orderItem =await _orderRepository.GetByIdAsync(request.OrderId);
                 if (orderItem == null)
                 {
                     throw new Exception("Không tìm thấy đơn ");

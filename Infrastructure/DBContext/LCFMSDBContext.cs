@@ -39,28 +39,13 @@ namespace Infrastructure.DBContext
         public virtual DbSet<ImageBreed> ImageBreeds { get; set; }
         public virtual DbSet<ImageLivestockCircle> ImageLivestockCircles { get; set; }
         public virtual DbSet<ImageDailyReport> ImageDailyReports { get; set; }
-  
+        public virtual DbSet<Notification> Notifications { get; set; }
 
 
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // var RoleAdminId = Guid.NewGuid();
-
-            //modelBuilder.Entity<Role>().HasData(
-            //                new Role() { Id = RoleAdminId, Name = CoreRoleName.RoleNames[0], CreatedBy = Guid.Empty, CreatedDate = DateTime.Now, IsActive = true, UpdatedBy = null, UpdatedDate = null },
-            //                new Role() { Id = Guid.NewGuid(), Name = CoreRoleName.RoleNames[1], CreatedBy = Guid.Empty, CreatedDate = DateTime.Now, IsActive = true, UpdatedBy = null, UpdatedDate = null },
-            //                new Role() { Id = Guid.NewGuid(), Name = CoreRoleName.RoleNames[2], CreatedBy = Guid.Empty, CreatedDate = DateTime.Now, IsActive = true, UpdatedBy = null, UpdatedDate = null },
-            //                new Role() { Id = Guid.NewGuid(), Name = CoreRoleName.RoleNames[3], CreatedBy = Guid.Empty, CreatedDate = DateTime.Now, IsActive = true, UpdatedBy = null, UpdatedDate = null },
-            //                new Role() { Id = Guid.NewGuid(), Name = CoreRoleName.RoleNames[4], CreatedBy = Guid.Empty, CreatedDate = DateTime.Now, IsActive = true, UpdatedBy = null, UpdatedDate = null },
-            //                new Role() { Id = Guid.NewGuid(), Name = CoreRoleName.RoleNames[5], CreatedBy = Guid.Empty, CreatedDate = DateTime.Now, IsActive = true, UpdatedBy = null, UpdatedDate = null },
-            //                new Role() { Id = Guid.NewGuid(), Name = CoreRoleName.RoleNames[6], CreatedBy = Guid.Empty, CreatedDate = DateTime.Now, IsActive = true, UpdatedBy = null, UpdatedDate = null },
-            //                new Role() { Id = Guid.NewGuid(), Name = CoreRoleName.RoleNames[7], CreatedBy = Guid.Empty, CreatedDate = DateTime.Now, IsActive = true, UpdatedBy = null, UpdatedDate = null }
-            //                );
-            //modelBuilder.Entity<User>().HasData(
-            //    new User() { Id = Guid.NewGuid(), Email = "admin@a", Password = "123", RoleId = RoleAdminId, UserName = "Company Admin", CreatedBy = Guid.Empty, CreatedDate = DateTime.Now, IsActive = true, UpdatedBy = null, UpdatedDate = null }
-            //    );
 
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseLazyLoadingProxies();

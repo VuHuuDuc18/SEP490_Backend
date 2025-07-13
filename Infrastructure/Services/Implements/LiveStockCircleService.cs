@@ -77,7 +77,7 @@ namespace Infrastructure.Services.Implements
                 return (false, "Dữ liệu chu kỳ chăn nuôi không được null.");
 
             var checkError = new Ref<CheckError>();
-            var existing = await _livestockCircleRepository.GetById(livestockCircleId, checkError);
+            var existing = await _livestockCircleRepository.GetByIdAsync(livestockCircleId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin chu kỳ chăn nuôi: {checkError.Value.Message}");
 
@@ -139,7 +139,7 @@ namespace Infrastructure.Services.Implements
         public async Task<(bool Success, string ErrorMessage)> DisableLiveStockCircle(Guid livestockCircleId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var livestockCircle = await _livestockCircleRepository.GetById(livestockCircleId, checkError);
+            var livestockCircle = await _livestockCircleRepository.GetByIdAsync(livestockCircleId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin chu kỳ chăn nuôi: {checkError.Value.Message}");
 
@@ -165,7 +165,7 @@ namespace Infrastructure.Services.Implements
         public async Task<(LivestockCircleResponse Circle, string ErrorMessage)> GetLiveStockCircleById(Guid livestockCircleId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var livestockCircle = await _livestockCircleRepository.GetById(livestockCircleId, checkError);
+            var livestockCircle = await _livestockCircleRepository.GetByIdAsync(livestockCircleId, checkError);
             if (checkError.Value?.IsError == true)
                 return (null, $"Lỗi khi lấy thông tin chu kỳ chăn nuôi: {checkError.Value.Message}");
 
@@ -247,15 +247,15 @@ namespace Infrastructure.Services.Implements
 
                 if (circle == null)
                     return (null, "Không tìm thấy chu kỳ chăn nuôi đang hoạt động cho chuồng này.");
-                var technical = await _userRepository.GetById(circle.TechicalStaffId);
+                var technical = await _userRepository.GetByIdAsync(circle.TechicalStaffId);
                 var technicalStaffResponse = new UserItemResponse
                 {
                     Email = technical.Email,
-                    UserId = technical.Id,
+                    Id = technical.Id,
                     Fullname = technical.FullName,
                     PhoneNumber = technical.PhoneNumber
                 };
-                var breed = await _breedRepository.GetById(circle.BreedId);
+                var breed = await _breedRepository.GetByIdAsync(circle.BreedId);
                 var images = await _imageBreedRepository.GetQueryable(x => x.BreedId == breed.Id).ToListAsync(cancellationToken);
                 var breedResponse = new BreedBillResponse
                 {
@@ -410,7 +410,7 @@ namespace Infrastructure.Services.Implements
                     return (false, "Trọng lượng trung bình không thể âm.");
 
                 var checkError = new Ref<CheckError>();
-                var livestockCircle = await _livestockCircleRepository.GetById(livestockCircleId, checkError);
+                var livestockCircle = await _livestockCircleRepository.GetByIdAsync(livestockCircleId, checkError);
                 if (checkError.Value?.IsError == true)
                     return (false, $"Lỗi khi lấy thông tin chu kỳ chăn nuôi: {checkError.Value.Message}");
 
@@ -434,7 +434,7 @@ namespace Infrastructure.Services.Implements
 
         public async Task<bool> ReleaseBarn(Guid id)
         {
-            var releaseItem = await _livestockCircleRepository.GetById(id);
+            var releaseItem = await _livestockCircleRepository.GetByIdAsync(id);
 
             if (releaseItem == null) throw new Exception("Không tìm thấy chu kỳ chăn nuôi.");
             // BR-6
@@ -607,7 +607,7 @@ namespace Infrastructure.Services.Implements
             try
             {
                 // valid breed
-                var breedValidStock = await _breedRepository.GetById(request.BreedId);
+                var breedValidStock = await _breedRepository.GetByIdAsync(request.BreedId);
                 if (breedValidStock != null)
                 {
                     if (breedValidStock.Stock <= request.TotalUnit)
@@ -714,7 +714,7 @@ namespace Infrastructure.Services.Implements
                     return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
 
                 var checkError = new Ref<CheckError>();
-                var livestockCircle = await _livestockCircleRepository.GetById(liveStockCircleId, checkError);
+                var livestockCircle = await _livestockCircleRepository.GetByIdAsync(liveStockCircleId, checkError);
                 if (checkError.Value?.IsError == true)
                     return (null, $"Lỗi khi lấy thông tin chu kỳ chăn nuôi: {checkError.Value.Message}");
                 if (livestockCircle == null)
@@ -785,7 +785,7 @@ namespace Infrastructure.Services.Implements
                     return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
 
                 var checkError = new Ref<CheckError>();
-                var livestockCircle = await _livestockCircleRepository.GetById(liveStockCircleId, checkError);
+                var livestockCircle = await _livestockCircleRepository.GetByIdAsync(liveStockCircleId, checkError);
                 if (checkError.Value?.IsError == true)
                     return (null, $"Lỗi khi lấy thông tin chu kỳ chăn nuôi: {checkError.Value.Message}");
                 if (livestockCircle == null)

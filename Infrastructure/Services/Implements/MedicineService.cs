@@ -134,7 +134,7 @@ namespace Infrastructure.Services.Implements
                 return (false, "Dữ liệu thuốc không được null.");
 
             var checkError = new Ref<CheckError>();
-            var existing = await _medicineRepository.GetById(MedicineId, checkError);
+            var existing = await _medicineRepository.GetByIdAsync(MedicineId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin thuốc: {checkError.Value.Message}");
 
@@ -230,7 +230,7 @@ namespace Infrastructure.Services.Implements
         public async Task<(bool Success, string ErrorMessage)> DisableMedicine(Guid MedicineId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var medicine = await _medicineRepository.GetById(MedicineId, checkError);
+            var medicine = await _medicineRepository.GetByIdAsync(MedicineId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin thuốc: {checkError.Value.Message}");
 
@@ -265,7 +265,7 @@ namespace Infrastructure.Services.Implements
         public async Task<(MedicineResponse Medicine, string ErrorMessage)> GetMedicineById(Guid MedicineId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var medicine = await _medicineRepository.GetById(MedicineId, checkError);
+            var medicine = await _medicineRepository.GetByIdAsync(MedicineId, checkError);
             if (checkError.Value?.IsError == true)
                 return (null, $"Lỗi khi lấy thông tin thuốc: {checkError.Value.Message}");
 

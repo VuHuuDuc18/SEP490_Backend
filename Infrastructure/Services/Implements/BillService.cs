@@ -91,21 +91,21 @@ namespace Infrastructure.Services.Implements
             var checkError = new Ref<CheckError>();
             if (isFood)
             {
-                var food = await _foodRepository.GetById(itemId, checkError);
+                var food = await _foodRepository.GetByIdAsync(itemId, checkError);
                 return food != null && food.IsActive && food.Stock >= quantity
                     ? (true, null)
                     : (false, $"Thức ăn với ID {itemId} không tồn tại, không hoạt động hoặc không đủ tồn kho.");
             }
             else if (isMedicine)
             {
-                var medicine = await _medicineRepository.GetById(itemId, checkError);
+                var medicine = await _medicineRepository.GetByIdAsync(itemId, checkError);
                 return medicine != null && medicine.IsActive && medicine.Stock >= quantity
                     ? (true, null)
                     : (false, $"Thuốc với ID {itemId} không tồn tại, không hoạt động hoặc không đủ tồn kho.");
             }
             else if (isBreed)
             {
-                var breed = await _breedRepository.GetById(itemId, checkError);
+                var breed = await _breedRepository.GetByIdAsync(itemId, checkError);
                 return breed != null && breed.IsActive && breed.Stock >= quantity
                     ? (true, null)
                     : (false, $"Giống với ID {itemId} không tồn tại, không hoạt động hoặc không đủ tồn kho.");
@@ -118,17 +118,17 @@ namespace Infrastructure.Services.Implements
             var checkError = new Ref<CheckError>();
             if (billItem.FoodId.HasValue)
             {
-                var food = await _foodRepository.GetById(billItem.FoodId.Value, checkError);
+                var food = await _foodRepository.GetByIdAsync(billItem.FoodId.Value, checkError);
                 if (food != null) { food.Stock -= quantity; _foodRepository.Update(food); }
             }
             else if (billItem.MedicineId.HasValue)
             {
-                var medicine = await _medicineRepository.GetById(billItem.MedicineId.Value, checkError);
+                var medicine = await _medicineRepository.GetByIdAsync(billItem.MedicineId.Value, checkError);
                 if (medicine != null) { medicine.Stock -= quantity; _medicineRepository.Update(medicine); }
             }
             else if (billItem.BreedId.HasValue)
             {
-                var breed = await _breedRepository.GetById(billItem.BreedId.Value, checkError);
+                var breed = await _breedRepository.GetByIdAsync(billItem.BreedId.Value, checkError);
                 if (breed != null) { breed.Stock -= quantity; _breedRepository.Update(breed); }
             }
             await Task.CompletedTask;
@@ -136,7 +136,7 @@ namespace Infrastructure.Services.Implements
 
         private async Task UpdateLivestockCircle(Guid livestockCircleId, int quantity, int? deadUnit, float? averageWeight, CancellationToken cancellationToken)
         {
-            var livestockCircle = await _livestockCircleRepository.GetById(livestockCircleId, new Ref<CheckError>());
+            var livestockCircle = await _livestockCircleRepository.GetByIdAsync(livestockCircleId, new Ref<CheckError>());
             if (livestockCircle != null)
             {
                 livestockCircle.TotalUnit = (quantity - (deadUnit ?? 0));
@@ -150,11 +150,11 @@ namespace Infrastructure.Services.Implements
         public async Task<(bool Success, string ErrorMessage)> DisableBillItem(Guid billItemId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var billItem = await _billItemRepository.GetById(billItemId, checkError);
+            var billItem = await _billItemRepository.GetByIdAsync(billItemId, checkError);
             if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy mục hóa đơn: {checkError.Value.Message}");
             if (billItem == null || !billItem.IsActive) return (false, "Mục hóa đơn không tồn tại hoặc không hoạt động.");
 
-            var bill = await _billRepository.GetById(billItem.BillId, checkError);
+            var bill = await _billRepository.GetByIdAsync(billItem.BillId, checkError);
             if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
             if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
@@ -176,7 +176,7 @@ namespace Infrastructure.Services.Implements
         public async Task<(bool Success, string ErrorMessage)> DisableBill(Guid billId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetById(billId, checkError);
+            var bill = await _billRepository.GetByIdAsync(billId, checkError);
             if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
             if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
@@ -206,7 +206,7 @@ namespace Infrastructure.Services.Implements
                 if (invalidFields.Any()) return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
 
                 var checkError = new Ref<CheckError>();
-                var bill = await _billRepository.GetById(billId, checkError);
+                var bill = await _billRepository.GetByIdAsync(billId, checkError);
                 if (checkError.Value?.IsError == true) return (null, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
                 if (bill == null) return (null, "Hóa đơn không tồn tại.");
 
@@ -223,7 +223,7 @@ namespace Infrastructure.Services.Implements
                 {
                     if (bill.TypeBill == TypeBill.FOOD)
                     {
-                        var food = await _foodRepository.GetById(billItem.FoodId.Value, checkError);
+                        var food = await _foodRepository.GetByIdAsync(billItem.FoodId.Value, checkError);
                         var images = await _foodImageRepository.GetQueryable(x => x.FoodId == food.Id).ToListAsync(cancellationToken);
                         var foodResponse = new FoodBillResponse
                         {
@@ -241,7 +241,7 @@ namespace Infrastructure.Services.Implements
                         }).ToList();
                     } else if(bill.TypeBill == TypeBill.MEDICINE)
                     {
-                        var medicine = await _medicineRepository.GetById(billItem.MedicineId.Value, checkError);
+                        var medicine = await _medicineRepository.GetByIdAsync(billItem.MedicineId.Value, checkError);
                         var images = await _medicineImageRepository.GetQueryable(x => x.MedicineId == medicine.Id).ToListAsync(cancellationToken);
                         var medicineResponse = new MedicineBillResponse
                         {
@@ -259,7 +259,7 @@ namespace Infrastructure.Services.Implements
                         }).ToList();
                     } else
                     {
-                        var breed = await _breedRepository.GetById(billItem.BreedId.Value, checkError);
+                        var breed = await _breedRepository.GetByIdAsync(billItem.BreedId.Value, checkError);
                         var images = await _breedImageRepository.GetQueryable(x => x.BreedId == breed.Id).ToListAsync(cancellationToken);
                         var breedResponse = new BreedBillResponse
                         {
@@ -302,16 +302,16 @@ namespace Infrastructure.Services.Implements
             try
             {
                 var checkError = new Ref<CheckError>();
-                var bill = await _billRepository.GetById(billId, checkError);
+                var bill = await _billRepository.GetByIdAsync(billId, checkError);
                 if (checkError.Value?.IsError == true)
                     return (null, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
                 if (bill == null)
                     return (null, "Hóa đơn không tồn tại.");
 
-                var userRequest = await _userRepository.GetById(bill.UserRequestId, checkError);
-                var lscInfo = await _livestockCircleRepository.GetById(bill.LivestockCircleId, checkError);
-                var barnInfo = await _barnRepository.GetById(lscInfo.BarnId, checkError);
-                var workerInfo = await _userRepository.GetById(barnInfo.WorkerId, checkError);
+                var userRequest = await _userRepository.GetByIdAsync(bill.UserRequestId, checkError);
+                var lscInfo = await _livestockCircleRepository.GetByIdAsync(bill.LivestockCircleId, checkError);
+                var barnInfo = await _barnRepository.GetByIdAsync(lscInfo.BarnId, checkError);
+                var workerInfo = await _userRepository.GetByIdAsync(barnInfo.WorkerId, checkError);
 
                 // Lấy danh sách BillItems
                 var billItems = await _billItemRepository.GetQueryable(x => x.BillId == billId && x.IsActive)
@@ -322,7 +322,7 @@ namespace Infrastructure.Services.Implements
                 {
                     if (bill.TypeBill == TypeBill.FOOD)
                     {
-                        var food = await _foodRepository.GetById(billItem.FoodId.Value, checkError);
+                        var food = await _foodRepository.GetByIdAsync(billItem.FoodId.Value, checkError);
                         var images = await _foodImageRepository.GetQueryable(x => x.FoodId == food.Id)
                             .ToListAsync(cancellationToken);
                         var foodResponse = new FoodBillResponse
@@ -342,7 +342,7 @@ namespace Infrastructure.Services.Implements
                     }
                     else if (bill.TypeBill == TypeBill.MEDICINE)
                     {
-                        var medicine = await _medicineRepository.GetById(billItem.MedicineId.Value, checkError);
+                        var medicine = await _medicineRepository.GetByIdAsync(billItem.MedicineId.Value, checkError);
                         var images = await _medicineImageRepository.GetQueryable(x => x.MedicineId == medicine.Id)
                             .ToListAsync(cancellationToken);
                         var medicineResponse = new MedicineBillResponse
@@ -362,7 +362,7 @@ namespace Infrastructure.Services.Implements
                     }
                     else
                     {
-                        var breed = await _breedRepository.GetById(billItem.BreedId.Value, checkError);
+                        var breed = await _breedRepository.GetByIdAsync(billItem.BreedId.Value, checkError);
                         var images = await _breedImageRepository.GetQueryable(x => x.BreedId == breed.Id)
                             .ToListAsync(cancellationToken);
                         var breedResponse = new BreedBillResponse
@@ -452,10 +452,10 @@ namespace Infrastructure.Services.Implements
                 var responses = new List<BillResponse>();
                 foreach (var bill in paginationResult.Items)
                 {
-                    var userRequest = await _userRepository.GetById(bill.UserRequestId);
-                    var lscInfo = await _livestockCircleRepository.GetById(bill.LivestockCircleId);
-                    var barnInfo = await _barnRepository.GetById(lscInfo.BarnId);
-                    var wokerInfo = await _userRepository.GetById(barnInfo.WorkerId);
+                    var userRequest = await _userRepository.GetByIdAsync(bill.UserRequestId);
+                    var lscInfo = await _livestockCircleRepository.GetByIdAsync(bill.LivestockCircleId);
+                    var barnInfo = await _barnRepository.GetByIdAsync(lscInfo.BarnId);
+                    var wokerInfo = await _userRepository.GetByIdAsync(barnInfo.WorkerId);
                     var userRequestResponse = new UserRequestResponse
                     {
                         Id = userRequest.Id,
@@ -535,10 +535,10 @@ namespace Infrastructure.Services.Implements
                 var responses = new List<BillResponse>();
                 foreach (var bill in paginationResult.Items)
                 {
-                    var userRequest = await _userRepository.GetById(bill.UserRequestId);
-                    var lscInfo = await _livestockCircleRepository.GetById(bill.LivestockCircleId);
-                    var barnInfo = await _barnRepository.GetById(lscInfo.BarnId);
-                    var wokerInfo = await _userRepository.GetById(barnInfo.WorkerId);
+                    var userRequest = await _userRepository.GetByIdAsync(bill.UserRequestId);
+                    var lscInfo = await _livestockCircleRepository.GetByIdAsync(bill.LivestockCircleId);
+                    var barnInfo = await _barnRepository.GetByIdAsync(lscInfo.BarnId);
+                    var wokerInfo = await _userRepository.GetByIdAsync(barnInfo.WorkerId);
                     var userRequestResponse = new UserRequestResponse
                     {
                         Id = userRequest.Id,
@@ -607,7 +607,7 @@ namespace Infrastructure.Services.Implements
                     return (false, $"Trạng thái không hợp lệ: {newStatus}. Phải là một trong: {string.Join(", ", validStatuses)}.");
 
                 var checkError = new Ref<CheckError>();
-                var bill = await _billRepository.GetById(billId, checkError);
+                var bill = await _billRepository.GetByIdAsync(billId, checkError);
                 if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
                 if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
@@ -681,7 +681,7 @@ namespace Infrastructure.Services.Implements
             if (!request.FoodItems.Any()) return (false, "Phải cung cấp ít nhất một mặt hàng thức ăn.");
 
             var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetById(billId, checkError);
+            var bill = await _billRepository.GetByIdAsync(billId, checkError);
             if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
             if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
@@ -731,7 +731,7 @@ namespace Infrastructure.Services.Implements
             if (!request.MedicineItems.Any()) return (false, "Phải cung cấp ít nhất một mặt hàng thuốc.");
 
             var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetById(billId, checkError);
+            var bill = await _billRepository.GetByIdAsync(billId, checkError);
             if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
             if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
@@ -781,7 +781,7 @@ namespace Infrastructure.Services.Implements
             if (!request.BreedItems.Any()) return (false, "Phải cung cấp ít nhất một mặt hàng giống.");
 
             var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetById(billId, checkError);
+            var bill = await _billRepository.GetByIdAsync(billId, checkError);
             if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
             if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
@@ -831,11 +831,11 @@ namespace Infrastructure.Services.Implements
             if (request.FoodItems.Count != 1) return (false, "Phải cung cấp chính xác một mặt hàng thức ăn.");
 
             var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetById(billId, checkError);
+            var bill = await _billRepository.GetByIdAsync(billId, checkError);
             if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
             if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
-            var billItem = await _billItemRepository.GetById(itemId, checkError);
+            var billItem = await _billItemRepository.GetByIdAsync(itemId, checkError);
             if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy mục hóa đơn: {checkError.Value.Message}");
             if (billItem == null || !billItem.IsActive) return (false, "Mục hóa đơn không tồn tại hoặc không hoạt động.");
             if (billItem.BillId != billId) return (false, "Mục hóa đơn không thuộc hóa đơn được chỉ định.");
@@ -873,11 +873,11 @@ namespace Infrastructure.Services.Implements
             if (request.MedicineItems.Count != 1) return (false, "Phải cung cấp chính xác một mặt hàng thuốc.");
 
             var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetById(billId, checkError);
+            var bill = await _billRepository.GetByIdAsync(billId, checkError);
             if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
             if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
-            var billItem = await _billItemRepository.GetById(itemId, checkError);
+            var billItem = await _billItemRepository.GetByIdAsync(itemId, checkError);
             if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy mục hóa đơn: {checkError.Value.Message}");
             if (billItem == null || !billItem.IsActive) return (false, "Mục hóa đơn không tồn tại hoặc không hoạt động.");
             if (billItem.BillId != billId) return (false, "Mục hóa đơn không thuộc hóa đơn được chỉ định.");
@@ -915,11 +915,11 @@ namespace Infrastructure.Services.Implements
             if (request.BreedItems.Count != 1) return (false, "Phải cung cấp chính xác một mặt hàng giống.");
 
             var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetById(billId, checkError);
+            var bill = await _billRepository.GetByIdAsync(billId, checkError);
             if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
             if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
-            var billItem = await _billItemRepository.GetById(itemId, checkError);
+            var billItem = await _billItemRepository.GetByIdAsync(itemId, checkError);
             if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy mục hóa đơn: {checkError.Value.Message}");
             if (billItem == null || !billItem.IsActive) return (false, "Mục hóa đơn không tồn tại hoặc không hoạt động.");
             if (billItem.BillId != billId) return (false, "Mục hóa đơn không thuộc hóa đơn được chỉ định.");
@@ -954,11 +954,11 @@ namespace Infrastructure.Services.Implements
         public async Task<(bool Success, string ErrorMessage)> DeleteFoodItemFromBill(Guid billId, Guid itemId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetById(billId, checkError);
+            var bill = await _billRepository.GetByIdAsync(billId, checkError);
             if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
             if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
-            var billItem = await _billItemRepository.GetById(itemId, checkError);
+            var billItem = await _billItemRepository.GetByIdAsync(itemId, checkError);
             if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy mục hóa đơn: {checkError.Value.Message}");
             if (billItem == null || !billItem.IsActive) return (false, "Mục hóa đơn không tồn tại hoặc không hoạt động.");
             if (billItem.BillId != billId) return (false, "Mục hóa đơn không thuộc hóa đơn được chỉ định.");
@@ -982,11 +982,11 @@ namespace Infrastructure.Services.Implements
         public async Task<(bool Success, string ErrorMessage)> DeleteMedicineItemFromBill(Guid billId, Guid itemId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetById(billId, checkError);
+            var bill = await _billRepository.GetByIdAsync(billId, checkError);
             if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
             if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
-            var billItem = await _billItemRepository.GetById(itemId, checkError);
+            var billItem = await _billItemRepository.GetByIdAsync(itemId, checkError);
             if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy mục hóa đơn: {checkError.Value.Message}");
             if (billItem == null || !billItem.IsActive) return (false, "Mục hóa đơn không tồn tại hoặc không hoạt động.");
             if (billItem.BillId != billId) return (false, "Mục hóa đơn không thuộc hóa đơn được chỉ định.");
@@ -1010,11 +1010,11 @@ namespace Infrastructure.Services.Implements
         public async Task<(bool Success, string ErrorMessage)> DeleteBreedItemFromBill(Guid billId, Guid itemId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetById(billId, checkError);
+            var bill = await _billRepository.GetByIdAsync(billId, checkError);
             if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
             if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
-            var billItem = await _billItemRepository.GetById(itemId, checkError);
+            var billItem = await _billItemRepository.GetByIdAsync(itemId, checkError);
             if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy mục hóa đơn: {checkError.Value.Message}");
             if (billItem == null || !billItem.IsActive) return (false, "Mục hóa đơn không tồn tại hoặc không hoạt động.");
             if (billItem.BillId != billId) return (false, "Mục hóa đơn không thuộc hóa đơn được chỉ định.");
@@ -1053,7 +1053,7 @@ namespace Infrastructure.Services.Implements
 
                 if (isValid)
                 {
-                    var food = await _foodRepository.GetById(foodItem.ItemId);
+                    var food = await _foodRepository.GetByIdAsync(foodItem.ItemId);
                     weight += food.WeighPerUnit * foodItem.Quantity;
                 }
                 else
@@ -1208,7 +1208,7 @@ namespace Infrastructure.Services.Implements
         {
             try
             {
-                var BillToUpdate = await _billRepository.GetById(request.BillId);
+                var BillToUpdate = await _billRepository.GetByIdAsync(request.BillId);
                 if (BillToUpdate == null || !BillToUpdate.Status.Equals(StatusConstant.REQUESTED))
                 {
                     return false;
@@ -1226,7 +1226,7 @@ namespace Infrastructure.Services.Implements
                 await _billItemRepository.CommitAsync();
 
                 // cap nhat livestockCircle
-                var UpdatedLivestockCircle = await _livestockCircleRepository.GetById(BillToUpdate.LivestockCircleId);
+                var UpdatedLivestockCircle = await _livestockCircleRepository.GetByIdAsync(BillToUpdate.LivestockCircleId);
                 UpdatedLivestockCircle.BreedId = request.BreedId;
 
                 _livestockCircleRepository.Update(UpdatedLivestockCircle);
@@ -1246,7 +1246,7 @@ namespace Infrastructure.Services.Implements
             if (!request.FoodItems.Any()) return (false, "Phải cung cấp danh sách mặt hàng thức ăn.");
 
             var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetById(billId, checkError);
+            var bill = await _billRepository.GetByIdAsync(billId, checkError);
             if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
             if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
@@ -1277,7 +1277,7 @@ namespace Infrastructure.Services.Implements
                         var (isValid, errorMessage) = await ValidateItem(newItem.ItemId, newItem.Quantity, true, false, false, cancellationToken);
                         if (isValid)
                         {
-                             food = await _foodRepository.GetById(newItem.ItemId);
+                             food = await _foodRepository.GetByIdAsync(newItem.ItemId);
                         }
                         else
                         {
@@ -1313,7 +1313,7 @@ namespace Infrastructure.Services.Implements
                             var (isValid, errorMessage) = await ValidateItem(currentItem.FoodId.Value, newQuantity, true, false, false, cancellationToken);
                             if (isValid)
                             {
-                                food = await _foodRepository.GetById(currentItem.FoodId.Value);
+                                food = await _foodRepository.GetByIdAsync(currentItem.FoodId.Value);
                             }
                             else
                             {
@@ -1332,7 +1332,7 @@ namespace Infrastructure.Services.Implements
                     else if (newItemsDict.All(x => x.Key != currentItem.FoodId.Value))
                     {
 
-                        var food = await _foodRepository.GetById(currentItem.FoodId.Value);
+                        var food = await _foodRepository.GetByIdAsync(currentItem.FoodId.Value);
                         bill.Total -= currentItem.Stock;
                         bill.Weight -= food.WeighPerUnit * currentItem.Stock;
 
@@ -1357,7 +1357,7 @@ namespace Infrastructure.Services.Implements
             if (!request.MedicineItems.Any()) return (false, "Phải cung cấp danh sách mặt hàng thuốc.");
 
             var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetById(billId, checkError);
+            var bill = await _billRepository.GetByIdAsync(billId, checkError);
             if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
             if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
@@ -1446,7 +1446,7 @@ namespace Infrastructure.Services.Implements
             }
 
             var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetById(billId, checkError);
+            var bill = await _billRepository.GetByIdAsync(billId, checkError);
             if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
             if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
@@ -1527,7 +1527,7 @@ namespace Infrastructure.Services.Implements
             try
             {
                 var checkError = new Ref<CheckError>();
-                var tech = await _userRepository.GetById(_currentUserId, checkError);
+                var tech = await _userRepository.GetByIdAsync(_currentUserId, checkError);
                 if (checkError.Value?.IsError == true)
                     return (null, $"Lỗi khi lấy thông tin nhân viên kỹ thuật: {checkError.Value.Message}");
                 if (tech == null)
@@ -1552,10 +1552,10 @@ namespace Infrastructure.Services.Implements
                 var responses = new List<BillResponse>();
                 foreach (var bill in paginationResult.Items)
                 {
-                    var userRequest = await _userRepository.GetById(bill.UserRequestId);
-                    var lscInfo = await _livestockCircleRepository.GetById(bill.LivestockCircleId);
-                    var barnInfo = await _barnRepository.GetById(lscInfo.BarnId);
-                    var wokerInfo = await _userRepository.GetById(barnInfo.WorkerId);
+                    var userRequest = await _userRepository.GetByIdAsync(bill.UserRequestId);
+                    var lscInfo = await _livestockCircleRepository.GetByIdAsync(bill.LivestockCircleId);
+                    var barnInfo = await _barnRepository.GetByIdAsync(lscInfo.BarnId);
+                    var wokerInfo = await _userRepository.GetByIdAsync(barnInfo.WorkerId);
                     var userRequestResponse = new UserRequestResponse
                     {
                         Id = userRequest.Id,
@@ -1620,7 +1620,7 @@ namespace Infrastructure.Services.Implements
         // Common func
         protected async Task<bool> ValidBreedStock(Guid breedId, int stock)
         {
-            var BreedToValid = await _breedRepository.GetById(breedId);
+            var BreedToValid = await _breedRepository.GetByIdAsync(breedId);
             if (BreedToValid == null)
             {
                 return false;
@@ -1654,10 +1654,10 @@ namespace Infrastructure.Services.Implements
                 var responses = new List<BillResponse>();
                 foreach (var bill in paginationResult.Items)
                 {
-                    var userRequest = await _userRepository.GetById(bill.UserRequestId);
-                    var lscInfo = await _livestockCircleRepository.GetById(bill.LivestockCircleId);
-                    var barnInfo = await _barnRepository.GetById(lscInfo.BarnId);
-                    var wokerInfo = await _userRepository.GetById(barnInfo.WorkerId);
+                    var userRequest = await _userRepository.GetByIdAsync(bill.UserRequestId);
+                    var lscInfo = await _livestockCircleRepository.GetByIdAsync(bill.LivestockCircleId);
+                    var barnInfo = await _barnRepository.GetByIdAsync(lscInfo.BarnId);
+                    var wokerInfo = await _userRepository.GetByIdAsync(barnInfo.WorkerId);
                     var userRequestResponse = new UserRequestResponse
                     {
                         Id = userRequest.Id,
@@ -1720,7 +1720,7 @@ namespace Infrastructure.Services.Implements
             try
             {
                 var checkError = new Ref<CheckError>();
-                var worker = await _userRepository.GetById(_currentUserId, checkError);
+                var worker = await _userRepository.GetByIdAsync(_currentUserId, checkError);
                 if (checkError.Value?.IsError == true)
                     return (null, $"Lỗi khi lấy thông tin người gia công: {checkError.Value.Message}");
                 if (worker == null)
@@ -1753,10 +1753,10 @@ namespace Infrastructure.Services.Implements
                 var responses = new List<BillResponse>();
                 foreach (var bill in paginationResult.Items)
                 {
-                    var userRequest = await _userRepository.GetById(bill.UserRequestId);
-                    var lscInfo = await _livestockCircleRepository.GetById(bill.LivestockCircleId);
-                    var barnInfo = await _barnRepository.GetById(lscInfo.BarnId);
-                    var workerInfo = await _userRepository.GetById(barnInfo.WorkerId);
+                    var userRequest = await _userRepository.GetByIdAsync(bill.UserRequestId);
+                    var lscInfo = await _livestockCircleRepository.GetByIdAsync(bill.LivestockCircleId);
+                    var barnInfo = await _barnRepository.GetByIdAsync(lscInfo.BarnId);
+                    var workerInfo = await _userRepository.GetByIdAsync(barnInfo.WorkerId);
 
                     var userRequestResponse = new UserRequestResponse
                     {
@@ -1820,7 +1820,7 @@ namespace Infrastructure.Services.Implements
             try
             {
                 var checkError = new Ref<CheckError>();
-                var worker = await _userRepository.GetById(_currentUserId, checkError);
+                var worker = await _userRepository.GetByIdAsync(_currentUserId, checkError);
                 if (checkError.Value?.IsError == true)
                     return (null, $"Lỗi khi lấy thông tin người gia công: {checkError.Value.Message}");
                 if (worker == null)
@@ -1854,10 +1854,10 @@ namespace Infrastructure.Services.Implements
                 var responses = new List<BillResponse>();
                 foreach (var bill in paginationResult.Items)
                 {
-                    var userRequest = await _userRepository.GetById(bill.UserRequestId);
-                    var lscInfo = await _livestockCircleRepository.GetById(bill.LivestockCircleId);
-                    var barnInfo = await _barnRepository.GetById(lscInfo.BarnId);
-                    var workerInfo = await _userRepository.GetById(barnInfo.WorkerId);
+                    var userRequest = await _userRepository.GetByIdAsync(bill.UserRequestId);
+                    var lscInfo = await _livestockCircleRepository.GetByIdAsync(bill.LivestockCircleId);
+                    var barnInfo = await _barnRepository.GetByIdAsync(lscInfo.BarnId);
+                    var workerInfo = await _userRepository.GetByIdAsync(barnInfo.WorkerId);
 
                     var userRequestResponse = new UserRequestResponse
                     {

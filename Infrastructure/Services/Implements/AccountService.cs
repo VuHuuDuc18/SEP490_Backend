@@ -209,8 +209,6 @@ namespace Infrastructure.Services.Implements
             await _userManager.UpdateAsync(user);
             return new Response<string>(user.Id.ToString(), message: $"Tài khoản đã được cập nhật.");
         }
-        #region Old Code
-
         public async Task<Response<PaginationSet<AccountResponse>>> GetListAccount(ListingRequest req)
         {
             try
@@ -328,12 +326,11 @@ namespace Infrastructure.Services.Implements
                 };
             }
         }
-        #endregion
         private async Task<string> SendVerificationEmail(User user, string origin)
         {
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-            var route = "api/account/confirm-email/";
+            var route = "api/user/confirm-email/";
             var _enpointUri = new Uri(string.Concat($"{origin}/", route));
             var verificationUri = QueryHelpers.AddQueryString(_enpointUri.ToString(), "userId", user.Id.ToString());
             verificationUri = QueryHelpers.AddQueryString(verificationUri, "code", code);

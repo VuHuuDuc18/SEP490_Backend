@@ -39,8 +39,10 @@ namespace Infrastructure
             services.AddScoped<IBillService, BillService>();
             services.AddScoped<CloudinaryCloudService>();
             services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<INotificationService, NotificationServices>();
 
             //Add repo
+            services.AddScoped<IRepository<Notification>, Repository<Notification>>();
             services.AddScoped<IRepository<BarnPlan>, Repository<BarnPlan>>();
             services.AddScoped<IRepository<BarnPlanFood>, Repository<BarnPlanFood>>();
             services.AddScoped<IRepository<BarnPlanMedicine>, Repository<BarnPlanMedicine>>();

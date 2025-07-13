@@ -68,7 +68,7 @@ namespace SEP490_BackendAPI.Controllers
                     BreedName = "Total"
                 };
 
-                var result = data.datas;
+                var result = data.Datas;
                 result.Add(summaryItem);
 
                 // Thiết lập license context cho EPPlus (phiên bản mới)

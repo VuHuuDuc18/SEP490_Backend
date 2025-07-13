@@ -88,7 +88,7 @@ namespace Infrastructure.Services.Implements
                 return (false, "Dữ liệu danh mục giống không được null.");
 
             var checkError = new Ref<CheckError>();
-            var existing = await _breedCategoryRepository.GetById(BreedCategoryId, checkError);
+            var existing = await _breedCategoryRepository.GetByIdAsync(BreedCategoryId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin danh mục giống: {checkError.Value.Message}");
 
@@ -136,7 +136,7 @@ namespace Infrastructure.Services.Implements
         public async Task<(bool Success, string ErrorMessage)> DisableBreedCategory(Guid BreedCategoryId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var breedCategory = await _breedCategoryRepository.GetById(BreedCategoryId, checkError);
+            var breedCategory = await _breedCategoryRepository.GetByIdAsync(BreedCategoryId, checkError);
             if (checkError.Value?.IsError == true)
                 return (false, $"Lỗi khi lấy thông tin danh mục giống: {checkError.Value.Message}");
 
@@ -162,7 +162,7 @@ namespace Infrastructure.Services.Implements
         public async Task<(CategoryResponse Category, string ErrorMessage)> GetBreedCategoryById(Guid BreedCategoryId, CancellationToken cancellationToken = default)
         {
             var checkError = new Ref<CheckError>();
-            var breedCategory = await _breedCategoryRepository.GetById(BreedCategoryId, checkError);
+            var breedCategory = await _breedCategoryRepository.GetByIdAsync(BreedCategoryId, checkError);
             if (checkError.Value?.IsError == true)
                 return (null, $"Lỗi khi lấy thông tin danh mục giống: {checkError.Value.Message}");
 
