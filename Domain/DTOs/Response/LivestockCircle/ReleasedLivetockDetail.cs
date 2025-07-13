@@ -26,6 +26,7 @@ namespace Domain.Dto.Response.LivestockCircle
     }
     public class ReleasedLivetockItem
     {
+        public Guid Id { get; set; }
         public Guid LivestockCircleId { get; set; }
         public int TotalUnit { get; set; }
         public string BreedName { get; set; }
