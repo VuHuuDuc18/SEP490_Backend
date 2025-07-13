@@ -2,6 +2,7 @@
 using Domain.Dto.Request.LivestockCircle;
 using Domain.Dto.Response;
 using Domain.Dto.Response.LivestockCircle;
+using Domain.DTOs.Request.LivestockCircle;
 using Domain.DTOs.Response.LivestockCircle;
 using System;
 using System.Collections.Generic;
@@ -104,6 +105,11 @@ namespace Domain.IServices
 
         public Task<PaginationSet<ReleasedLivetockItem>> GetReleasedLivestockCircleList(ListingRequest req);
         public Task<ReleasedLivetockDetail> GetReleasedLivestockCircleById(Guid livestockCircleId);
+
+        public Task<(bool Success, string ErrorMessage)> UpdateImageLiveStocCircle(
+            Guid livestockCircleId,
+            UpdateImageLiveStockCircle request,
+            CancellationToken cancellationToken = default);
 
     }
 }
