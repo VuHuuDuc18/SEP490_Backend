@@ -558,5 +558,51 @@ namespace Infrastructure.Services.Implements
                 throw new Exception("lỗi hệ thống");
             }
         }
+
+        public async Task<PaginationSet<OrderResponse>> WorkerGetallOrder(ListingRequest request)
+        {
+            try
+            {
+                if (request == null)
+                    throw new Exception("Yêu cầu không được null.");
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                    throw new Exception("PageIndex và PageSize phải lớn hơn 0.");
+
+                var validFields = typeof(BillItem).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any())
+                    throw new Exception($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+
+
+
+                var query = _orderRepository.GetQueryable(x => x.IsActive).Where(x=>x.LivestockCircle.Barn.WorkerId == _currentUserId);
+
+                if (request.SearchString?.Any() == true)
+                    query = query.SearchString(request.SearchString);
+
+                if (request.Filter?.Any() == true)
+                    query = query.Filter(request.Filter);
+
+                var result = await query.Select(x => new OrderResponse()
+                {
+                    Id = x.Id,
+                    CustomerId = x.CustomerId,
+                    LivestockCircleId = x.LivestockCircleId,
+                    GoodUnitStock = x.GoodUnitStock,
+                    BadUnitStock = x.BadUnitStock,
+                    TotalBill = x.TotalBill,
+                    Status = x.Status,
+                    CreateDate = x.CreatedDate,
+                    PickupDate = x.PickupDate
+                }).Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                return (result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi lấy danh sách: {ex.Message}");
+            }
+        }
     }
 }

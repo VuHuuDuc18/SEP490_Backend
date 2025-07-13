@@ -111,6 +111,11 @@ namespace SEP490_BackendAPI.Controllers
         {
             return Ok(await _orderService.GetAllOrder(request));
         }
+        [HttpPost("worker/worker-get-order-list")]
+        public async Task<IActionResult> WorderGetOrderList(ListingRequest request)
+        {
+            return Ok(await _orderService.WorkerGetallOrder(request));
+        }
         [HttpPut("sale/approve-order")]
         public async Task<IActionResult> ApproveOrder(ApproveOrderRequest request)
         {
