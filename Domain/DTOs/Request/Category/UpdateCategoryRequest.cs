@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 
 namespace Domain.Dto.Request.Category
 {
-    public class UpdateCategoryRequest
-    {
+    public class UpdateCategoryRequest 
+    { 
+        [Required(ErrorMessage = "Id danh mục là bắt buộc.")]
+        public Guid Id {  get; set; }
         [Required(ErrorMessage = "Tên danh mục là bắt buộc.")]
         public string Name { get; set; }
 
