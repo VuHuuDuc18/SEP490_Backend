@@ -42,7 +42,7 @@ namespace SEP490_BackendAPI.Controllers
         {
             return Ok(await _orderService.CustomerGetAllOrders());
         }
-        [HttpGet("customer/get-pagination-list")]
+        [HttpPost("customer/get-pagination-list")]
         public async Task<IActionResult> GetPaginationList(ListingRequest request)
         {
             return Ok(await _orderService.CustomerGetPagiantionList(request));
