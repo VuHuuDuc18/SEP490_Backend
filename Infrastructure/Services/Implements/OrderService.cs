@@ -13,6 +13,7 @@ using Domain.IServices;
 using Entities.EntityModel;
 using Infrastructure.Extensions;
 using Infrastructure.Repository;
+using MailKit.Search;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +26,10 @@ namespace Infrastructure.Services.Implements
     public class OrderService : IOrderService
     {
         private readonly IRepository<Order> _orderRepository;
+        private readonly IRepository<User> _userRepository;
         private UserManager<User> _userManager;
+        private RoleManager<Role> _roleManager;
+        private IRepository<Role> _roleRepository;
         private readonly IRepository<LivestockCircle> _livestockCircleRepository;
         private readonly IRepository<Breed> _breedRepository;
         private readonly IRepository<ImageLivestockCircle> _imageLivestockCircleRepository;
@@ -37,17 +41,23 @@ namespace Infrastructure.Services.Implements
             IHttpContextAccessor httpContextAccessor,
             IRepository<LivestockCircle> livestockCircleRepository,
             UserManager<User> userManager,
+            RoleManager<Role> roleManager,
+            IRepository<User> userRepository,
             IRepository<Breed> breedrepo,
             IRepository<BreedCategory> bcrepo,
-            IRepository<ImageLivestockCircle> imageLivestockCircleRepository
+            IRepository<ImageLivestockCircle> imageLivestockCircleRepository,
+            IRepository<Role> roleRepository
         )
         {
+            _userRepository = userRepository;
             _orderRepository = orderRepository;
             _breedRepository = breedrepo;
             _livestockCircleRepository = livestockCircleRepository;
             _breedCategoryRepository = bcrepo;
             _userManager = userManager;
+            _roleManager = roleManager;
             _imageLivestockCircleRepository = imageLivestockCircleRepository;
+            _roleRepository = roleRepository;
 
             // Lấy current user từ JWT token claims
             _currentUserId = Guid.Empty;
@@ -103,6 +113,39 @@ namespace Infrastructure.Services.Implements
                         Message = "Đã tồn tại đơn hàng với chuồng nuôi hiện tại. Vui lòng kiểm tra lại các đơn hàng của bạn.",
                     };
                 }
+                // Lấy danh sách các Sale Staff và tổng số đơn hàng mỗi Sale đang xử lý
+                var Orders = _orderRepository.GetQueryable();
+                var Staffs = _userManager.GetUsersInRoleAsync(RoleConstant.SalesStaff).Result.AsQueryable();
+                var query = from o in Orders
+                            join s in Staffs on o.SaleStaffId equals s.Id
+                            group o by new { o.SaleStaffId } into g
+                            orderby g.Count()
+                            select new
+                            {
+                                SaleStaffId = g.Key.SaleStaffId,
+                                TotalOrders = g.Count()
+                            };
+                var saleStaffs = Orders
+                    .GroupJoin(
+                        Staffs,
+                        o => o.SaleStaffId,
+                        u => u.Id,
+                        (order, users) => new { order, users }
+                    )
+                    .SelectMany(
+                        x => x.users.DefaultIfEmpty(),
+                        (x, user) => new { x.order, SaleStaff = user }
+                    )
+                    .GroupBy(x => new { x.SaleStaff.Id, x.SaleStaff.FullName })
+                    .Select(g => new
+                    {
+                        SaleStaffId = g.Key.Id,
+                        SaleStaffName = g.Key.FullName,
+                        TotalOrders = g.Count()
+                    })
+                    .OrderBy(x => x.TotalOrders)
+                    .ToList();
+                var saleStaffId = saleStaffs.FirstOrDefault().SaleStaffId;
                 //Tạo đơn hàng mới
                 var order = new Order()
                 {
@@ -114,8 +157,11 @@ namespace Infrastructure.Services.Implements
                     CreatedDate = DateTime.UtcNow,
                     CreatedBy = _currentUserId,
                     IsActive = true,
-                    PickupDate = request.PickupDate
+                    PickupDate = request.PickupDate,
+                    SaleStaffId = saleStaffId
                 };
+
+                
                 var livestockCircle = await _livestockCircleRepository.GetByIdAsync(request.LivestockCircleId);
                 if (livestockCircle == null)
                 {
