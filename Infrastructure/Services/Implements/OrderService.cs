@@ -4,6 +4,7 @@ using Domain.Dto.Response;
 using Domain.Dto.Response.Barn;
 using Domain.Dto.Response.BarnPlan;
 using Domain.Dto.Response.LivestockCircle;
+using Domain.Dto.Response.User;
 using Domain.DTOs.Request.Order;
 using Domain.DTOs.Response.Order;
 using Domain.Helper;
@@ -176,9 +177,25 @@ namespace Infrastructure.Services.Implements
                 var livestockCircle = await _livestockCircleRepository.GetByIdAsync(order.LivestockCircleId);
                 var images =await _imageLivestockCircleRepository.GetQueryable(x=>x.IsActive && x.LivestockCircleId == order.LivestockCircleId)
                     .Select(x=> x.ImageLink).ToListAsync();
-                var result = AutoMapperHelper.AutoMap<Order, OrderResponse>(order);
+                var customer =await _userManager.FindByIdAsync(_currentUserId.ToString());
+                var result = new OrderResponse()
+                    {
+                        Id = order.Id,
+                        CustomerId = order.CustomerId,
+                        LivestockCircleId = order.LivestockCircleId,
+                        GoodUnitStock = order.GoodUnitStock,
+                        BadUnitStock = order.BadUnitStock,
+                        TotalBill = order.TotalBill,
+                        Status = order.Status,
+                        CreateDate = order.CreatedDate,
+                        PickupDate = order.PickupDate,
+                        BreedName = order.LivestockCircle.Breed.BreedName,
+                        BreedCategory = order.LivestockCircle.Breed.BreedCategory.Name
+                    };
                 result.LivestockCircle = AutoMapperHelper.AutoMap<LivestockCircle, ReleasedLivetockDetail>(livestockCircle);
                 result.LivestockCircle.ImageLinks = images;
+                result.Customer = AutoMapperHelper.AutoMap<User, UserItemResponse>(customer);
+                result.Barn = AutoMapperHelper.AutoMap<Barn, BarnResponse>(livestockCircle.Barn);
                 return new Response<OrderResponse>()
                 {
                     Succeeded = true,
@@ -339,7 +356,20 @@ namespace Infrastructure.Services.Implements
                     };
                 }
                 var orders = await _orderRepository.GetQueryable(x => x.CustomerId == _currentUserId && x.IsActive).ToListAsync();
-                var result = orders.Select(x => AutoMapperHelper.AutoMap<Order, OrderResponse>(x)).OrderByDescending(x => x.CreateDate).ToList();
+                var result = orders.Select(x => new OrderResponse()
+                {
+                    Id = x.Id,
+                    CustomerId = x.CustomerId,
+                    LivestockCircleId = x.LivestockCircleId,
+                    GoodUnitStock = x.GoodUnitStock,
+                    BadUnitStock = x.BadUnitStock,
+                    TotalBill = x.TotalBill,
+                    Status = x.Status,
+                    CreateDate = x.CreatedDate,
+                    PickupDate = x.PickupDate,
+                    BreedName = x.LivestockCircle.Breed.BreedName,
+                    BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name
+                }).OrderByDescending(x => x.CreateDate).ToList();
                 return new Response<List<OrderResponse>>(result, "Lấy danh sách đơn hàng thành công");
 
             }
@@ -396,9 +426,10 @@ namespace Infrastructure.Services.Implements
                         TotalBill = x.TotalBill,
                         Status = x.Status,
                         CreateDate = x.CreatedDate,
-                        PickupDate = x.PickupDate
+                        PickupDate = x.PickupDate,
+                        BreedName = x.LivestockCircle.Breed.BreedName,
+                        BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name
                     });
-
                 if (request.SearchString?.Any() == true)
                     orders = orders.SearchString(request.SearchString);
 
@@ -450,7 +481,7 @@ namespace Infrastructure.Services.Implements
             var ListItem = await query.ToListAsync();
             var result = new StatisticsOrderResponse()
             {
-                datas = ListItem,
+                Datas = ListItem,
                 TotalRevenue = ListItem.Sum(x=>x.Revenue ?? 0),
                 TotalBadUnitStockSold = ListItem.Sum(x => x.BadUnitStockSold ?? 0),
                 TotalGoodUnitStockSold = ListItem.Sum(x => x.GoodUnitStockSold ?? 0),

@@ -555,7 +555,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                     var technicalStaff = await _userRepository.GetByIdAsync(activeLivestockCircle.TechicalStaffId);
                     var technicalStaffResponse = new UserItemResponse
                     {
-                        UserId = technicalStaff.Id,
+                        Id = technicalStaff.Id,
                         Email = technicalStaff.Email,
                         Fullname = technicalStaff.FullName,
                         PhoneNumber = technicalStaff.PhoneNumber

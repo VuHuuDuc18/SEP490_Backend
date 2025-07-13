@@ -17,7 +17,6 @@ namespace Entities.EntityModel
         public bool IsNew { get; set; } = true;
         public DateTime? ReadDate { get; set; }
         public string? Link { get; set; }
-        public object? Data { get; set; }
         public string? Icon { get; set; }
         public int Priority { get; set; }
 

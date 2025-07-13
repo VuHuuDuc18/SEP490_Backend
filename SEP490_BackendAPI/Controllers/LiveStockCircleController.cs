@@ -215,5 +215,10 @@ namespace SEP490_BackendAPI.Controllers
 
             return Ok(medicineRemainings);
         }
+        [HttpPut("technical-taff/release-barn/{id}")]
+        public async Task<IActionResult> ReleaseBarn([FromRoute]Guid id)
+        {
+            return Ok(await _livestockCircleService.ReleaseBarn(id));
+        }
     } 
 }

@@ -14,7 +14,7 @@ namespace Domain.DTOs.Response.Order
         public int TotalGoodUnitStockSold { get; set; }
         public int TotalBadUnitStockSold { get; set; }
         [JsonProperty("datas")]
-        public List<OrderItem>? datas;
+        public List<OrderItem>? Datas;
 
     }
 

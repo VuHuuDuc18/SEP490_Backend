@@ -251,7 +251,7 @@ namespace Infrastructure.Services.Implements
                 var technicalStaffResponse = new UserItemResponse
                 {
                     Email = technical.Email,
-                    UserId = technical.Id,
+                    Id = technical.Id,
                     Fullname = technical.FullName,
                     PhoneNumber = technical.PhoneNumber
                 };
@@ -583,6 +583,7 @@ namespace Infrastructure.Services.Implements
                 var result = await query.Include(it => it.Breed).ThenInclude(it => it.BreedCategory).Include(it => it.Barn)
                     .Select(it => new ReleasedLivetockItem
                     {
+                        Id = it.BarnId,
                         LivestockCircleId = it.Id,
                         BarnName = it.Barn.BarnName,
                         BreedCategoryName = it.Breed.BreedCategory.Name,
