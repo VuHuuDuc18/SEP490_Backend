@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure.Identity", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{5872AEB3-BAA3-FE31-B0EB-0FB6DBEDCF83}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelControl", "ExcelControl\ExcelControl.csproj", "{E858ADB1-C909-42B3-B5F5-5C9694295B28}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExcelControl", "ExcelControl\ExcelControl.csproj", "{E858ADB1-C909-42B3-B5F5-5C9694295B28}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.UnitTests", "Infrastructure.UnitTests\Infrastructure.UnitTests.csproj", "{72D9CB43-844E-458C-A728-CC29A7992C3E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{E858ADB1-C909-42B3-B5F5-5C9694295B28}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E858ADB1-C909-42B3-B5F5-5C9694295B28}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E858ADB1-C909-42B3-B5F5-5C9694295B28}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72D9CB43-844E-458C-A728-CC29A7992C3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72D9CB43-844E-458C-A728-CC29A7992C3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72D9CB43-844E-458C-A728-CC29A7992C3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72D9CB43-844E-458C-A728-CC29A7992C3E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
