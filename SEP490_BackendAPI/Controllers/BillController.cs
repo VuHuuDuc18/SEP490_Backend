@@ -30,8 +30,6 @@ namespace SEP490_BackendAPI.Controllers
             _livestockCircleService = livestockCircleService;
         }
         [HttpPost("technical-staff/get-bill-food-list")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetPaginatedBillsFoodByTechnicalStaff([FromBody] ListingRequest request)
         {
             var response = await _billService.GetPaginatedBillListByTechicalStaff(request, TypeBill.FOOD);
@@ -41,8 +39,6 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpPost("technical-staff/get-bill-medicine-list")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetPaginatedBillsMedicineByTechnicalStaff([FromBody] ListingRequest request)
         {
             var response = await _billService.GetPaginatedBillListByTechicalStaff(request, TypeBill.MEDICINE);
@@ -52,8 +48,6 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpPut("technical-staff/update-bill-food")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> UpdateBillFood([FromBody] UpdateBillFoodDto request)
         {
             var response = await _billService.UpdateBillFood(request);
@@ -63,8 +57,6 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpPut("technical-staff/update-bill-medicine")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> UpdateBillMedicine([FromBody] UpdateBillMedicineDto request)
         {
             var response = await _billService.UpdateBillMedicine(request);
@@ -74,8 +66,6 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpPost("technical-staff/request-food")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> RequestFood([FromBody] CreateFoodRequestDto request)
         {
             var response = await _billService.RequestFood(request);
@@ -85,8 +75,6 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpPost("technical-staff/request-medicine")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> RequestMedicine([FromBody] CreateMedicineRequestDto request)
         {
             var response = await _billService.RequestMedicine(request);
@@ -102,8 +90,6 @@ namespace SEP490_BackendAPI.Controllers
 
       
         [HttpPatch("disable/bill-item/{billItemId}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> DisableBillItem([FromRoute] Guid billItemId)
         {
             var response = await _billService.DisableBillItem(billItemId);
@@ -113,8 +99,6 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpPatch("disable/bill/{billId}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> DisableBill([FromRoute] Guid billId)
         {
             var response = await _billService.DisableBill(billId);
@@ -124,8 +108,6 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpPost("get-bill-items/{billId}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetBillItemsByBillId([FromRoute] Guid billId, [FromBody] ListingRequest request)
         {
             var response = await _billService.GetBillItemsByBillId(billId, request);
@@ -135,9 +117,6 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpGet("get-bill-by-id/{billId}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetBillById([FromRoute] Guid billId)
         {
             var response = await _billService.GetBillById(billId);
@@ -158,8 +137,6 @@ namespace SEP490_BackendAPI.Controllers
 
 
         [HttpPost("food-room-staff/get-list-request-food")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetRequestFood([FromBody] ListingRequest request)
         {
             var response = await _billService.GetBillRequestByType(request, TypeBill.FOOD);
@@ -169,8 +146,6 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpPost("food-room-staff/get-bill-list-food-history")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetPaginatedBillsHistoryFood([FromBody] ListingRequest request)
         {
             var response = await _billService.GetPaginatedBillListHistory(request, TypeBill.FOOD);
@@ -181,8 +156,6 @@ namespace SEP490_BackendAPI.Controllers
 
 
         [HttpPost("medicine-room-staff/get-list-request-medicine")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetRequestMedicine([FromBody] ListingRequest request)
         {
             var response = await _billService.GetBillRequestByType(request, TypeBill.MEDICINE);
@@ -193,8 +166,6 @@ namespace SEP490_BackendAPI.Controllers
 
 
         [HttpPost("medicine-room-staff/get-bill-list-medicine-history")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetPaginatedBillsHistoryMedicine([FromBody] ListingRequest request)
         {
             var response = await _billService.GetPaginatedBillListHistory(request, TypeBill.MEDICINE);
@@ -204,8 +175,6 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpPost("breed-room-staff/get-list-request-breed")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetRequestBreed([FromBody] ListingRequest request)
         {
             var response = await _billService.GetBillRequestByType(request, TypeBill.BREED);
@@ -215,8 +184,6 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpPost("breed-room-staff/get-bill-list-breed-history")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetPaginatedBillsHistoryBreed([FromBody] ListingRequest request)
         {
             var response = await _billService.GetPaginatedBillListHistory(request, TypeBill.BREED);
@@ -238,8 +205,6 @@ namespace SEP490_BackendAPI.Controllers
             return Ok(await _billService.RejectBill(billId));
         }
         [HttpPost("worker/get-bill-list-approve-by-worker")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetApprovalBillsByWorker([FromBody] ListingRequest request)
         {
             var response = await _billService.GetApprovedBillsByWorker(request);
@@ -249,8 +214,6 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpPost("worker/get-history-bill-list-by-worker")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetHistoryBillsByWorker([FromBody] ListingRequest request)
         {
             var response = await _billService.GetHistoryBillsByWorker(request);
@@ -265,8 +228,6 @@ namespace SEP490_BackendAPI.Controllers
             return Ok(await _billService.ConfirmBill(billId));
         }
         [HttpPost("admin/request-breed")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Authorize(Roles = "Company Admin")]
         public async Task<IActionResult> RequestBreed([FromBody] AdminCreateBreedBillRequest request)
 
@@ -317,8 +278,6 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         //[HttpPut("update/breed/{billId}")]
-        //[ProducesResponseType(StatusCodes.Status200OK)]
-        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
         //public async Task<IActionResult> UpdateBillBreed([FromRoute] Guid billId, [FromBody] UpdateBillBreedDto request)
         //{
         //    var (success, errorMessage) = await _billService.UpdateBillBreed(billId, request);
