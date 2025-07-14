@@ -140,6 +140,7 @@ namespace Infrastructure.Services.Implements
             var livestockCircle = await _livestockCircleRepository.GetByIdAsync(livestockCircleId, new Ref<CheckError>());
             if (livestockCircle != null)
             {
+                livestockCircle.Status = StatusConstant.GROWINGSTAT;
                 livestockCircle.TotalUnit = (quantity - (deadUnit ?? 0));
                 livestockCircle.StartDate = DateTime.UtcNow;
                 livestockCircle.AverageWeight = averageWeight ?? livestockCircle.AverageWeight;
