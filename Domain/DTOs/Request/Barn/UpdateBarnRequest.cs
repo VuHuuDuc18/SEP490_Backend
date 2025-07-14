@@ -9,6 +9,8 @@ namespace Domain.Dto.Request.Barn
 {
     public class UpdateBarnRequest
     {
+        [Required(ErrorMessage = "ID chuồng trại là bắt buộc.")]
+        public Guid BarnId{ get; set; }
         [Required(ErrorMessage = "Tên chuồng trại là bắt buộc.")]
         public string BarnName { get; set; }
 
