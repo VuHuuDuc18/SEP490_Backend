@@ -9,8 +9,7 @@ namespace Domain.Dto.Request.DailyReport
 {
     public class UpdateFoodReportRequest
     {
-        [Required(ErrorMessage = "ID báo cáo thức ăn là bắt buộc.")]
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
 
         [Required(ErrorMessage = "ID thức ăn là bắt buộc.")]
         public Guid FoodId { get; set; }
