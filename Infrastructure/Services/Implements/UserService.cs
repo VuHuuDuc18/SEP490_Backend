@@ -90,6 +90,10 @@ namespace Infrastructure.Services.Implements
             {
                 return new Response<AuthenticationResponse>($"Không tìm thấy tài khoản với email {request.Email}.");
             }
+            if(!user.IsActive)
+            {
+                return new Response<AuthenticationResponse>($"Tài khoản với email {request.Email} đã bị khóa.");
+            }
             var result = await _signInManager.PasswordSignInAsync(user.UserName, request.Password, false, lockoutOnFailure: false);
             if (!result.Succeeded)
             {
@@ -261,7 +265,7 @@ namespace Infrastructure.Services.Implements
             var result = await _userManager.ConfirmEmailAsync(user, code);
             if (result.Succeeded)
             {
-                return new Response<string>(user.Id.ToString(), message: $"Tài khoản đã được xác thực.");
+                return new Response<string>(user.Id.ToString(), message: $"Tài khoản đã được xác thực thành công.");
             }
             else
             {
@@ -280,6 +284,7 @@ namespace Infrastructure.Services.Implements
 
             // always return ok response to prevent email enumeration
             if (account == null) return;
+            if (!account.IsActive) return;
 
             var code = await _userManager.GeneratePasswordResetTokenAsync(account);
             var route = "api/account/reset-password/";
@@ -291,6 +296,7 @@ namespace Infrastructure.Services.Implements
         {
             var account = await _userManager.FindByEmailAsync(model.Email);
             if (account == null) return new Response<string>($"Không tìm thấy tài khoản với email {model.Email}.");
+            if (!account.IsActive) return new Response<string>($"Tài khoản với email {model.Email} đã bị khóa.");
             var result = await _userManager.ResetPasswordAsync(account, model.Token, model.Password);
             if (result.Succeeded)
             {
