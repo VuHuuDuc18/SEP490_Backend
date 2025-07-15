@@ -139,7 +139,7 @@ namespace Infrastructure.UnitTests.UserService
             // Assert
             Assert.False(result.Succeeded);
             Assert.Null(result.Data);
-            Assert.Contains("Tài khoản với email Inactive@example.com đã bị khóa.", result.Message);
+            Assert.Contains("Tài khoản với email Inactive@gmail.com đã bị khóa.", result.Message);
         }
 
         [Fact]
