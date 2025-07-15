@@ -560,6 +560,7 @@ namespace Infrastructure.Services.Implements
                     Name = bill.Name,
                     Note = bill.Note,
                     Total = bill.Total,
+                    TypeBill = bill.TypeBill,
                     Status = bill.Status,
                     Weight = bill.Weight,
                     IsActive = bill.IsActive,
@@ -720,7 +721,7 @@ namespace Infrastructure.Services.Implements
                 }
 
                 // Lấy hóa đơn theo loại (Food, Medicine, Breed) và những hóa đơn chưa được Approval
-                var validBillTypes = new[] { TypeBill.FOOD, TypeBill.MEDICINE, TypeBill.BREED};
+                var validBillTypes = new[] { TypeBill.FOOD, TypeBill.MEDICINE, TypeBill.BREED };
                 if (string.IsNullOrEmpty(billType) || !validBillTypes.Contains(billType))
                 {
                     return new Response<PaginationSet<BillResponse>>()
@@ -790,6 +791,7 @@ namespace Infrastructure.Services.Implements
                         LivestockCircle = lscInfoResponse,
                         Name = bill.Name,
                         Note = bill.Note,
+                        TypeBill = bill.TypeBill,
                         Total = bill.Total,
                         Status = bill.Status,
                         Weight = bill.Weight,
@@ -1002,22 +1004,38 @@ namespace Infrastructure.Services.Implements
                         var lcFood = await _livestockCircleFoodRepository.GetQueryable(x => x.LivestockCircleId == bill.LivestockCircleId && x.FoodId == item.FoodId).FirstOrDefaultAsync(cancellationToken);
                         if (lcFood == null)
                         {
-                            lcFood = new LivestockCircleFood { LivestockCircleId = bill.LivestockCircleId, FoodId = item.FoodId.Value, Remaining = 0 };
+                            lcFood = new LivestockCircleFood
+                            {
+                                LivestockCircleId = bill.LivestockCircleId,
+                                FoodId = item.FoodId.Value,
+                                Remaining = item.Stock
+                            };
                             _livestockCircleFoodRepository.Insert(lcFood);
                         }
-                        lcFood.Remaining += item.Stock;
-                        _livestockCircleFoodRepository.Update(lcFood);
+                        else
+                        {
+                            lcFood.Remaining += item.Stock;
+                            _livestockCircleFoodRepository.Update(lcFood);
+                        }
                     }
                     else if (item.MedicineId.HasValue)
                     {
                         var lcMedicine = await _livestockCircleMedicineRepository.GetQueryable(x => x.LivestockCircleId == bill.LivestockCircleId && x.MedicineId == item.MedicineId).FirstOrDefaultAsync(cancellationToken);
                         if (lcMedicine == null)
                         {
-                            lcMedicine = new LivestockCircleMedicine { LivestockCircleId = bill.LivestockCircleId, MedicineId = item.MedicineId.Value, Remaining = 0 };
+                            lcMedicine = new LivestockCircleMedicine
+                            {
+                                LivestockCircleId = bill.LivestockCircleId,
+                                MedicineId = item.MedicineId.Value,
+                                Remaining = item.Stock
+                            };
                             _livestockCircleMedicineRepository.Insert(lcMedicine);
                         }
-                        lcMedicine.Remaining += item.Stock;
-                        _livestockCircleMedicineRepository.Update(lcMedicine);
+                        else
+                        {
+                            lcMedicine.Remaining += item.Stock;
+                            _livestockCircleMedicineRepository.Update(lcMedicine);
+                        }
                     }
                     else if (item.BreedId.HasValue)
                     {
@@ -1197,365 +1215,365 @@ namespace Infrastructure.Services.Implements
         //    }
         //}
 
-        public async Task<(bool Success, string ErrorMessage)> AddFoodItemToBill(Guid billId, AddFoodItemToBillDto request, CancellationToken cancellationToken = default)
-        {
-            if (request == null) return (false, "Dữ liệu yêu cầu là bắt buộc.");
-            if (!request.FoodItems.Any()) return (false, "Phải cung cấp ít nhất một mặt hàng thức ăn.");
+        //public async Task<(bool Success, string ErrorMessage)> AddFoodItemToBill(Guid billId, AddFoodItemToBillDto request, CancellationToken cancellationToken = default)
+        //{
+        //    if (request == null) return (false, "Dữ liệu yêu cầu là bắt buộc.");
+        //    if (!request.FoodItems.Any()) return (false, "Phải cung cấp ít nhất một mặt hàng thức ăn.");
 
-            var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetByIdAsync(billId, checkError);
-            if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
-            if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
+        //    var checkError = new Ref<CheckError>();
+        //    var bill = await _billRepository.GetByIdAsync(billId, checkError);
+        //    if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
+        //    if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
-            var existingItems = await _billItemRepository.GetQueryable(x => x.BillId == billId && x.IsActive).ToListAsync(cancellationToken);
-            if (existingItems.Any() && !existingItems.All(x => x.FoodId.HasValue))
-                return (false, "Hóa đơn chỉ được chứa mặt hàng thức ăn.");
+        //    var existingItems = await _billItemRepository.GetQueryable(x => x.BillId == billId && x.IsActive).ToListAsync(cancellationToken);
+        //    if (existingItems.Any() && !existingItems.All(x => x.FoodId.HasValue))
+        //        return (false, "Hóa đơn chỉ được chứa mặt hàng thức ăn.");
 
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(request);
-            if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
-                return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
+        //    var validationResults = new List<ValidationResult>();
+        //    var validationContext = new ValidationContext(request);
+        //    if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
+        //        return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
 
-            foreach (var item in request.FoodItems)
-            {
-                var (isValid, errorMessage) = await ValidateItem(item.ItemId, item.Quantity, true, false, false, cancellationToken);
-                if (!isValid) return (false, errorMessage);
-            }
+        //    foreach (var item in request.FoodItems)
+        //    {
+        //        var (isValid, errorMessage) = await ValidateItem(item.ItemId, item.Quantity, true, false, false, cancellationToken);
+        //        if (!isValid) return (false, errorMessage);
+        //    }
 
-            try
-            {
-                foreach (var item in request.FoodItems)
-                {
-                    var billItem = new BillItem
-                    {
-                        BillId = bill.Id,
-                        FoodId = item.ItemId,
-                        MedicineId = null,
-                        BreedId = null,
-                        Stock = item.Quantity
-                    };
-                    _billItemRepository.Insert(billItem);
-                    bill.Total += item.Quantity;
-                }
-                _billRepository.Update(bill);
-                await _billRepository.CommitAsync(cancellationToken);
-                return (true, null);
-            }
-            catch (Exception ex)
-            {
-                return (false, $"Lỗi khi thêm mặt hàng thức ăn vào hóa đơn: {ex.Message}");
-            }
-        }
+        //    try
+        //    {
+        //        foreach (var item in request.FoodItems)
+        //        {
+        //            var billItem = new BillItem
+        //            {
+        //                BillId = bill.Id,
+        //                FoodId = item.ItemId,
+        //                MedicineId = null,
+        //                BreedId = null,
+        //                Stock = item.Quantity
+        //            };
+        //            _billItemRepository.Insert(billItem);
+        //            bill.Total += item.Quantity;
+        //        }
+        //        _billRepository.Update(bill);
+        //        await _billRepository.CommitAsync(cancellationToken);
+        //        return (true, null);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return (false, $"Lỗi khi thêm mặt hàng thức ăn vào hóa đơn: {ex.Message}");
+        //    }
+        //}
 
-        public async Task<(bool Success, string ErrorMessage)> AddMedicineItemToBill(Guid billId, AddMedicineItemToBillDto request, CancellationToken cancellationToken = default)
-        {
-            if (request == null) return (false, "Dữ liệu yêu cầu là bắt buộc.");
-            if (!request.MedicineItems.Any()) return (false, "Phải cung cấp ít nhất một mặt hàng thuốc.");
+        //public async Task<(bool Success, string ErrorMessage)> AddMedicineItemToBill(Guid billId, AddMedicineItemToBillDto request, CancellationToken cancellationToken = default)
+        //{
+        //    if (request == null) return (false, "Dữ liệu yêu cầu là bắt buộc.");
+        //    if (!request.MedicineItems.Any()) return (false, "Phải cung cấp ít nhất một mặt hàng thuốc.");
 
-            var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetByIdAsync(billId, checkError);
-            if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
-            if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
+        //    var checkError = new Ref<CheckError>();
+        //    var bill = await _billRepository.GetByIdAsync(billId, checkError);
+        //    if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
+        //    if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
-            var existingItems = await _billItemRepository.GetQueryable(x => x.BillId == billId && x.IsActive).ToListAsync(cancellationToken);
-            if (existingItems.Any() && !existingItems.All(x => x.MedicineId.HasValue))
-                return (false, "Hóa đơn chỉ được chứa mặt hàng thuốc.");
+        //    var existingItems = await _billItemRepository.GetQueryable(x => x.BillId == billId && x.IsActive).ToListAsync(cancellationToken);
+        //    if (existingItems.Any() && !existingItems.All(x => x.MedicineId.HasValue))
+        //        return (false, "Hóa đơn chỉ được chứa mặt hàng thuốc.");
 
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(request);
-            if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
-                return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
+        //    var validationResults = new List<ValidationResult>();
+        //    var validationContext = new ValidationContext(request);
+        //    if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
+        //        return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
 
-            foreach (var item in request.MedicineItems)
-            {
-                var (isValid, errorMessage) = await ValidateItem(item.ItemId, item.Quantity, false, true, false, cancellationToken);
-                if (!isValid) return (false, errorMessage);
-            }
+        //    foreach (var item in request.MedicineItems)
+        //    {
+        //        var (isValid, errorMessage) = await ValidateItem(item.ItemId, item.Quantity, false, true, false, cancellationToken);
+        //        if (!isValid) return (false, errorMessage);
+        //    }
 
-            try
-            {
-                foreach (var item in request.MedicineItems)
-                {
-                    var billItem = new BillItem
-                    {
-                        BillId = bill.Id,
-                        FoodId = null,
-                        MedicineId = item.ItemId,
-                        BreedId = null,
-                        Stock = item.Quantity
-                    };
-                    _billItemRepository.Insert(billItem);
-                    bill.Total += item.Quantity;
-                }
-                _billRepository.Update(bill);
-                await _billRepository.CommitAsync(cancellationToken);
-                return (true, null);
-            }
-            catch (Exception ex)
-            {
-                return (false, $"Lỗi khi thêm mặt hàng thuốc vào hóa đơn: {ex.Message}");
-            }
-        }
+        //    try
+        //    {
+        //        foreach (var item in request.MedicineItems)
+        //        {
+        //            var billItem = new BillItem
+        //            {
+        //                BillId = bill.Id,
+        //                FoodId = null,
+        //                MedicineId = item.ItemId,
+        //                BreedId = null,
+        //                Stock = item.Quantity
+        //            };
+        //            _billItemRepository.Insert(billItem);
+        //            bill.Total += item.Quantity;
+        //        }
+        //        _billRepository.Update(bill);
+        //        await _billRepository.CommitAsync(cancellationToken);
+        //        return (true, null);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return (false, $"Lỗi khi thêm mặt hàng thuốc vào hóa đơn: {ex.Message}");
+        //    }
+        //}
 
-        public async Task<(bool Success, string ErrorMessage)> AddBreedItemToBill(Guid billId, AddBreedItemToBillDto request, CancellationToken cancellationToken = default)
-        {
-            if (request == null) return (false, "Dữ liệu yêu cầu là bắt buộc.");
-            if (!request.BreedItems.Any()) return (false, "Phải cung cấp ít nhất một mặt hàng giống.");
+        //public async Task<(bool Success, string ErrorMessage)> AddBreedItemToBill(Guid billId, AddBreedItemToBillDto request, CancellationToken cancellationToken = default)
+        //{
+        //    if (request == null) return (false, "Dữ liệu yêu cầu là bắt buộc.");
+        //    if (!request.BreedItems.Any()) return (false, "Phải cung cấp ít nhất một mặt hàng giống.");
 
-            var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetByIdAsync(billId, checkError);
-            if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
-            if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
+        //    var checkError = new Ref<CheckError>();
+        //    var bill = await _billRepository.GetByIdAsync(billId, checkError);
+        //    if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
+        //    if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
-            var existingItems = await _billItemRepository.GetQueryable(x => x.BillId == billId && x.IsActive).ToListAsync(cancellationToken);
-            if (existingItems.Any() && !existingItems.All(x => x.BreedId.HasValue))
-                return (false, "Hóa đơn chỉ được chứa mặt hàng giống.");
+        //    var existingItems = await _billItemRepository.GetQueryable(x => x.BillId == billId && x.IsActive).ToListAsync(cancellationToken);
+        //    if (existingItems.Any() && !existingItems.All(x => x.BreedId.HasValue))
+        //        return (false, "Hóa đơn chỉ được chứa mặt hàng giống.");
 
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(request);
-            if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
-                return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
+        //    var validationResults = new List<ValidationResult>();
+        //    var validationContext = new ValidationContext(request);
+        //    if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
+        //        return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
 
-            foreach (var item in request.BreedItems)
-            {
-                var (isValid, errorMessage) = await ValidateItem(item.ItemId, item.Quantity, false, false, true, cancellationToken);
-                if (!isValid) return (false, errorMessage);
-            }
+        //    foreach (var item in request.BreedItems)
+        //    {
+        //        var (isValid, errorMessage) = await ValidateItem(item.ItemId, item.Quantity, false, false, true, cancellationToken);
+        //        if (!isValid) return (false, errorMessage);
+        //    }
 
-            try
-            {
-                foreach (var item in request.BreedItems)
-                {
-                    var billItem = new BillItem
-                    {
-                        BillId = bill.Id,
-                        FoodId = null,
-                        MedicineId = null,
-                        BreedId = item.ItemId,
-                        Stock = item.Quantity
-                    };
-                    _billItemRepository.Insert(billItem);
-                    bill.Total += item.Quantity;
-                }
-                _billRepository.Update(bill);
-                await _billRepository.CommitAsync(cancellationToken);
-                return (true, null);
-            }
-            catch (Exception ex)
-            {
-                return (false, $"Lỗi khi thêm mặt hàng giống vào hóa đơn: {ex.Message}");
-            }
-        }
+        //    try
+        //    {
+        //        foreach (var item in request.BreedItems)
+        //        {
+        //            var billItem = new BillItem
+        //            {
+        //                BillId = bill.Id,
+        //                FoodId = null,
+        //                MedicineId = null,
+        //                BreedId = item.ItemId,
+        //                Stock = item.Quantity
+        //            };
+        //            _billItemRepository.Insert(billItem);
+        //            bill.Total += item.Quantity;
+        //        }
+        //        _billRepository.Update(bill);
+        //        await _billRepository.CommitAsync(cancellationToken);
+        //        return (true, null);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return (false, $"Lỗi khi thêm mặt hàng giống vào hóa đơn: {ex.Message}");
+        //    }
+        //}
 
-        public async Task<(bool Success, string ErrorMessage)> UpdateFoodItemInBill(Guid billId, Guid itemId, UpdateFoodItemInBillDto request, CancellationToken cancellationToken = default)
-        {
-            if (request == null) return (false, "Dữ liệu yêu cầu là bắt buộc.");
-            if (request.FoodItems.Count != 1) return (false, "Phải cung cấp chính xác một mặt hàng thức ăn.");
+        //public async Task<(bool Success, string ErrorMessage)> UpdateFoodItemInBill(Guid billId, Guid itemId, UpdateFoodItemInBillDto request, CancellationToken cancellationToken = default)
+        //{
+        //    if (request == null) return (false, "Dữ liệu yêu cầu là bắt buộc.");
+        //    if (request.FoodItems.Count != 1) return (false, "Phải cung cấp chính xác một mặt hàng thức ăn.");
 
-            var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetByIdAsync(billId, checkError);
-            if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
-            if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
+        //    var checkError = new Ref<CheckError>();
+        //    var bill = await _billRepository.GetByIdAsync(billId, checkError);
+        //    if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
+        //    if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
-            var billItem = await _billItemRepository.GetByIdAsync(itemId, checkError);
-            if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy mục hóa đơn: {checkError.Value.Message}");
-            if (billItem == null || !billItem.IsActive) return (false, "Mục hóa đơn không tồn tại hoặc không hoạt động.");
-            if (billItem.BillId != billId) return (false, "Mục hóa đơn không thuộc hóa đơn được chỉ định.");
-            if (!billItem.FoodId.HasValue) return (false, "Mục hóa đơn không phải là mặt hàng thức ăn.");
+        //    var billItem = await _billItemRepository.GetByIdAsync(itemId, checkError);
+        //    if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy mục hóa đơn: {checkError.Value.Message}");
+        //    if (billItem == null || !billItem.IsActive) return (false, "Mục hóa đơn không tồn tại hoặc không hoạt động.");
+        //    if (billItem.BillId != billId) return (false, "Mục hóa đơn không thuộc hóa đơn được chỉ định.");
+        //    if (!billItem.FoodId.HasValue) return (false, "Mục hóa đơn không phải là mặt hàng thức ăn.");
 
-            var item = request.FoodItems.First();
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(request);
-            if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
-                return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
+        //    var item = request.FoodItems.First();
+        //    var validationResults = new List<ValidationResult>();
+        //    var validationContext = new ValidationContext(request);
+        //    if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
+        //        return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
 
-            var (isValid, errorMessage) = await ValidateItem(item.ItemId, item.Quantity, true, false, false, cancellationToken);
-            if (!isValid) return (false, errorMessage);
+        //    var (isValid, errorMessage) = await ValidateItem(item.ItemId, item.Quantity, true, false, false, cancellationToken);
+        //    if (!isValid) return (false, errorMessage);
 
-            try
-            {
-                bill.Total -= billItem.Stock;
-                billItem.FoodId = item.ItemId;
-                billItem.Stock = item.Quantity;
-                bill.Total += item.Quantity;
-                _billItemRepository.Update(billItem);
-                _billRepository.Update(bill);
-                await _billRepository.CommitAsync(cancellationToken);
-                return (true, null);
-            }
-            catch (Exception ex)
-            {
-                return (false, $"Lỗi khi cập nhật mặt hàng thức ăn trong hóa đơn: {ex.Message}");
-            }
-        }
+        //    try
+        //    {
+        //        bill.Total -= billItem.Stock;
+        //        billItem.FoodId = item.ItemId;
+        //        billItem.Stock = item.Quantity;
+        //        bill.Total += item.Quantity;
+        //        _billItemRepository.Update(billItem);
+        //        _billRepository.Update(bill);
+        //        await _billRepository.CommitAsync(cancellationToken);
+        //        return (true, null);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return (false, $"Lỗi khi cập nhật mặt hàng thức ăn trong hóa đơn: {ex.Message}");
+        //    }
+        //}
 
-        public async Task<(bool Success, string ErrorMessage)> UpdateMedicineItemInBill(Guid billId, Guid itemId, UpdateMedicineItemInBillDto request, CancellationToken cancellationToken = default)
-        {
-            if (request == null) return (false, "Dữ liệu yêu cầu là bắt buộc.");
-            if (request.MedicineItems.Count != 1) return (false, "Phải cung cấp chính xác một mặt hàng thuốc.");
+        //public async Task<(bool Success, string ErrorMessage)> UpdateMedicineItemInBill(Guid billId, Guid itemId, UpdateMedicineItemInBillDto request, CancellationToken cancellationToken = default)
+        //{
+        //    if (request == null) return (false, "Dữ liệu yêu cầu là bắt buộc.");
+        //    if (request.MedicineItems.Count != 1) return (false, "Phải cung cấp chính xác một mặt hàng thuốc.");
 
-            var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetByIdAsync(billId, checkError);
-            if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
-            if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
+        //    var checkError = new Ref<CheckError>();
+        //    var bill = await _billRepository.GetByIdAsync(billId, checkError);
+        //    if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
+        //    if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
-            var billItem = await _billItemRepository.GetByIdAsync(itemId, checkError);
-            if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy mục hóa đơn: {checkError.Value.Message}");
-            if (billItem == null || !billItem.IsActive) return (false, "Mục hóa đơn không tồn tại hoặc không hoạt động.");
-            if (billItem.BillId != billId) return (false, "Mục hóa đơn không thuộc hóa đơn được chỉ định.");
-            if (!billItem.MedicineId.HasValue) return (false, "Mục hóa đơn không phải là mặt hàng thuốc.");
+        //    var billItem = await _billItemRepository.GetByIdAsync(itemId, checkError);
+        //    if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy mục hóa đơn: {checkError.Value.Message}");
+        //    if (billItem == null || !billItem.IsActive) return (false, "Mục hóa đơn không tồn tại hoặc không hoạt động.");
+        //    if (billItem.BillId != billId) return (false, "Mục hóa đơn không thuộc hóa đơn được chỉ định.");
+        //    if (!billItem.MedicineId.HasValue) return (false, "Mục hóa đơn không phải là mặt hàng thuốc.");
 
-            var item = request.MedicineItems.First();
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(request);
-            if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
-                return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
+        //    var item = request.MedicineItems.First();
+        //    var validationResults = new List<ValidationResult>();
+        //    var validationContext = new ValidationContext(request);
+        //    if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
+        //        return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
 
-            var (isValid, errorMessage) = await ValidateItem(item.ItemId, item.Quantity, false, true, false, cancellationToken);
-            if (!isValid) return (false, errorMessage);
+        //    var (isValid, errorMessage) = await ValidateItem(item.ItemId, item.Quantity, false, true, false, cancellationToken);
+        //    if (!isValid) return (false, errorMessage);
 
-            try
-            {
-                bill.Total -= billItem.Stock;
-                billItem.MedicineId = item.ItemId;
-                billItem.Stock = item.Quantity;
-                bill.Total += item.Quantity;
-                _billItemRepository.Update(billItem);
-                _billRepository.Update(bill);
-                await _billRepository.CommitAsync(cancellationToken);
-                return (true, null);
-            }
-            catch (Exception ex)
-            {
-                return (false, $"Lỗi khi cập nhật mặt hàng thuốc trong hóa đơn: {ex.Message}");
-            }
-        }
+        //    try
+        //    {
+        //        bill.Total -= billItem.Stock;
+        //        billItem.MedicineId = item.ItemId;
+        //        billItem.Stock = item.Quantity;
+        //        bill.Total += item.Quantity;
+        //        _billItemRepository.Update(billItem);
+        //        _billRepository.Update(bill);
+        //        await _billRepository.CommitAsync(cancellationToken);
+        //        return (true, null);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return (false, $"Lỗi khi cập nhật mặt hàng thuốc trong hóa đơn: {ex.Message}");
+        //    }
+        //}
 
-        public async Task<(bool Success, string ErrorMessage)> UpdateBreedItemInBill(Guid billId, Guid itemId, UpdateBreedItemInBillDto request, CancellationToken cancellationToken = default)
-        {
-            if (request == null) return (false, "Dữ liệu yêu cầu là bắt buộc.");
-            if (request.BreedItems.Count != 1) return (false, "Phải cung cấp chính xác một mặt hàng giống.");
+        //public async Task<(bool Success, string ErrorMessage)> UpdateBreedItemInBill(Guid billId, Guid itemId, UpdateBreedItemInBillDto request, CancellationToken cancellationToken = default)
+        //{
+        //    if (request == null) return (false, "Dữ liệu yêu cầu là bắt buộc.");
+        //    if (request.BreedItems.Count != 1) return (false, "Phải cung cấp chính xác một mặt hàng giống.");
 
-            var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetByIdAsync(billId, checkError);
-            if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
-            if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
+        //    var checkError = new Ref<CheckError>();
+        //    var bill = await _billRepository.GetByIdAsync(billId, checkError);
+        //    if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
+        //    if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
-            var billItem = await _billItemRepository.GetByIdAsync(itemId, checkError);
-            if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy mục hóa đơn: {checkError.Value.Message}");
-            if (billItem == null || !billItem.IsActive) return (false, "Mục hóa đơn không tồn tại hoặc không hoạt động.");
-            if (billItem.BillId != billId) return (false, "Mục hóa đơn không thuộc hóa đơn được chỉ định.");
-            if (!billItem.BreedId.HasValue) return (false, "Mục hóa đơn không phải là mặt hàng giống.");
+        //    var billItem = await _billItemRepository.GetByIdAsync(itemId, checkError);
+        //    if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy mục hóa đơn: {checkError.Value.Message}");
+        //    if (billItem == null || !billItem.IsActive) return (false, "Mục hóa đơn không tồn tại hoặc không hoạt động.");
+        //    if (billItem.BillId != billId) return (false, "Mục hóa đơn không thuộc hóa đơn được chỉ định.");
+        //    if (!billItem.BreedId.HasValue) return (false, "Mục hóa đơn không phải là mặt hàng giống.");
 
-            var item = request.BreedItems.First();
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(request);
-            if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
-                return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
+        //    var item = request.BreedItems.First();
+        //    var validationResults = new List<ValidationResult>();
+        //    var validationContext = new ValidationContext(request);
+        //    if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
+        //        return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
 
-            var (isValid, errorMessage) = await ValidateItem(item.ItemId, item.Quantity, false, false, true, cancellationToken);
-            if (!isValid) return (false, errorMessage);
+        //    var (isValid, errorMessage) = await ValidateItem(item.ItemId, item.Quantity, false, false, true, cancellationToken);
+        //    if (!isValid) return (false, errorMessage);
 
-            try
-            {
-                bill.Total -= billItem.Stock;
-                billItem.BreedId = item.ItemId;
-                billItem.Stock = item.Quantity;
-                bill.Total += item.Quantity;
-                _billItemRepository.Update(billItem);
-                _billRepository.Update(bill);
-                await _billRepository.CommitAsync(cancellationToken);
-                return (true, null);
-            }
-            catch (Exception ex)
-            {
-                return (false, $"Lỗi khi cập nhật mặt hàng giống trong hóa đơn: {ex.Message}");
-            }
-        }
+        //    try
+        //    {
+        //        bill.Total -= billItem.Stock;
+        //        billItem.BreedId = item.ItemId;
+        //        billItem.Stock = item.Quantity;
+        //        bill.Total += item.Quantity;
+        //        _billItemRepository.Update(billItem);
+        //        _billRepository.Update(bill);
+        //        await _billRepository.CommitAsync(cancellationToken);
+        //        return (true, null);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return (false, $"Lỗi khi cập nhật mặt hàng giống trong hóa đơn: {ex.Message}");
+        //    }
+        //}
 
-        public async Task<(bool Success, string ErrorMessage)> DeleteFoodItemFromBill(Guid billId, Guid itemId, CancellationToken cancellationToken = default)
-        {
-            var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetByIdAsync(billId, checkError);
-            if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
-            if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
+        //public async Task<(bool Success, string ErrorMessage)> DeleteFoodItemFromBill(Guid billId, Guid itemId, CancellationToken cancellationToken = default)
+        //{
+        //    var checkError = new Ref<CheckError>();
+        //    var bill = await _billRepository.GetByIdAsync(billId, checkError);
+        //    if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
+        //    if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
-            var billItem = await _billItemRepository.GetByIdAsync(itemId, checkError);
-            if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy mục hóa đơn: {checkError.Value.Message}");
-            if (billItem == null || !billItem.IsActive) return (false, "Mục hóa đơn không tồn tại hoặc không hoạt động.");
-            if (billItem.BillId != billId) return (false, "Mục hóa đơn không thuộc hóa đơn được chỉ định.");
-            if (!billItem.FoodId.HasValue) return (false, "Mục hóa đơn không phải là mặt hàng thức ăn.");
+        //    var billItem = await _billItemRepository.GetByIdAsync(itemId, checkError);
+        //    if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy mục hóa đơn: {checkError.Value.Message}");
+        //    if (billItem == null || !billItem.IsActive) return (false, "Mục hóa đơn không tồn tại hoặc không hoạt động.");
+        //    if (billItem.BillId != billId) return (false, "Mục hóa đơn không thuộc hóa đơn được chỉ định.");
+        //    if (!billItem.FoodId.HasValue) return (false, "Mục hóa đơn không phải là mặt hàng thức ăn.");
 
-            try
-            {
-                bill.Total -= billItem.Stock;
-                billItem.IsActive = false;
-                _billItemRepository.Update(billItem);
-                _billRepository.Update(bill);
-                await _billRepository.CommitAsync(cancellationToken);
-                return (true, null);
-            }
-            catch (Exception ex)
-            {
-                return (false, $"Lỗi khi xóa mặt hàng thức ăn khỏi hóa đơn: {ex.Message}");
-            }
-        }
+        //    try
+        //    {
+        //        bill.Total -= billItem.Stock;
+        //        billItem.IsActive = false;
+        //        _billItemRepository.Update(billItem);
+        //        _billRepository.Update(bill);
+        //        await _billRepository.CommitAsync(cancellationToken);
+        //        return (true, null);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return (false, $"Lỗi khi xóa mặt hàng thức ăn khỏi hóa đơn: {ex.Message}");
+        //    }
+        //}
 
-        public async Task<(bool Success, string ErrorMessage)> DeleteMedicineItemFromBill(Guid billId, Guid itemId, CancellationToken cancellationToken = default)
-        {
-            var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetByIdAsync(billId, checkError);
-            if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
-            if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
+        //public async Task<(bool Success, string ErrorMessage)> DeleteMedicineItemFromBill(Guid billId, Guid itemId, CancellationToken cancellationToken = default)
+        //{
+        //    var checkError = new Ref<CheckError>();
+        //    var bill = await _billRepository.GetByIdAsync(billId, checkError);
+        //    if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
+        //    if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
-            var billItem = await _billItemRepository.GetByIdAsync(itemId, checkError);
-            if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy mục hóa đơn: {checkError.Value.Message}");
-            if (billItem == null || !billItem.IsActive) return (false, "Mục hóa đơn không tồn tại hoặc không hoạt động.");
-            if (billItem.BillId != billId) return (false, "Mục hóa đơn không thuộc hóa đơn được chỉ định.");
-            if (!billItem.MedicineId.HasValue) return (false, "Mục hóa đơn không phải là mặt hàng thuốc.");
+        //    var billItem = await _billItemRepository.GetByIdAsync(itemId, checkError);
+        //    if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy mục hóa đơn: {checkError.Value.Message}");
+        //    if (billItem == null || !billItem.IsActive) return (false, "Mục hóa đơn không tồn tại hoặc không hoạt động.");
+        //    if (billItem.BillId != billId) return (false, "Mục hóa đơn không thuộc hóa đơn được chỉ định.");
+        //    if (!billItem.MedicineId.HasValue) return (false, "Mục hóa đơn không phải là mặt hàng thuốc.");
 
-            try
-            {
-                bill.Total -= billItem.Stock;
-                billItem.IsActive = false;
-                _billItemRepository.Update(billItem);
-                _billRepository.Update(bill);
-                await _billRepository.CommitAsync(cancellationToken);
-                return (true, null);
-            }
-            catch (Exception ex)
-            {
-                return (false, $"Lỗi khi xóa mặt hàng thuốc khỏi hóa đơn: {ex.Message}");
-            }
-        }
+        //    try
+        //    {
+        //        bill.Total -= billItem.Stock;
+        //        billItem.IsActive = false;
+        //        _billItemRepository.Update(billItem);
+        //        _billRepository.Update(bill);
+        //        await _billRepository.CommitAsync(cancellationToken);
+        //        return (true, null);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return (false, $"Lỗi khi xóa mặt hàng thuốc khỏi hóa đơn: {ex.Message}");
+        //    }
+        //}
 
-        public async Task<(bool Success, string ErrorMessage)> DeleteBreedItemFromBill(Guid billId, Guid itemId, CancellationToken cancellationToken = default)
-        {
-            var checkError = new Ref<CheckError>();
-            var bill = await _billRepository.GetByIdAsync(billId, checkError);
-            if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
-            if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
+        //public async Task<(bool Success, string ErrorMessage)> DeleteBreedItemFromBill(Guid billId, Guid itemId, CancellationToken cancellationToken = default)
+        //{
+        //    var checkError = new Ref<CheckError>();
+        //    var bill = await _billRepository.GetByIdAsync(billId, checkError);
+        //    if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy hóa đơn: {checkError.Value.Message}");
+        //    if (bill == null || !bill.IsActive) return (false, "Hóa đơn không tồn tại hoặc không hoạt động.");
 
-            var billItem = await _billItemRepository.GetByIdAsync(itemId, checkError);
-            if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy mục hóa đơn: {checkError.Value.Message}");
-            if (billItem == null || !billItem.IsActive) return (false, "Mục hóa đơn không tồn tại hoặc không hoạt động.");
-            if (billItem.BillId != billId) return (false, "Mục hóa đơn không thuộc hóa đơn được chỉ định.");
-            if (!billItem.BreedId.HasValue) return (false, "Mục hóa đơn không phải là mặt hàng giống.");
+        //    var billItem = await _billItemRepository.GetByIdAsync(itemId, checkError);
+        //    if (checkError.Value?.IsError == true) return (false, $"Lỗi khi lấy mục hóa đơn: {checkError.Value.Message}");
+        //    if (billItem == null || !billItem.IsActive) return (false, "Mục hóa đơn không tồn tại hoặc không hoạt động.");
+        //    if (billItem.BillId != billId) return (false, "Mục hóa đơn không thuộc hóa đơn được chỉ định.");
+        //    if (!billItem.BreedId.HasValue) return (false, "Mục hóa đơn không phải là mặt hàng giống.");
 
-            try
-            {
-                bill.Total -= billItem.Stock;
-                billItem.IsActive = false;
-                _billItemRepository.Update(billItem);
-                _billRepository.Update(bill);
-                await _billRepository.CommitAsync(cancellationToken);
-                return (true, null);
-            }
-            catch (Exception ex)
-            {
-                return (false, $"Lỗi khi xóa mặt hàng giống khỏi hóa đơn: {ex.Message}");
-            }
-        }
+        //    try
+        //    {
+        //        bill.Total -= billItem.Stock;
+        //        billItem.IsActive = false;
+        //        _billItemRepository.Update(billItem);
+        //        _billRepository.Update(bill);
+        //        await _billRepository.CommitAsync(cancellationToken);
+        //        return (true, null);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return (false, $"Lỗi khi xóa mặt hàng giống khỏi hóa đơn: {ex.Message}");
+        //    }
+        //}
 
         public async Task<Response<bool>> RequestFood(
            CreateFoodRequestDto request,
@@ -1870,7 +1888,7 @@ namespace Infrastructure.Services.Implements
 
             var bill = new Bill
             {
-                UserRequestId =request.UserRequestId, 
+                UserRequestId = request.UserRequestId,
                 LivestockCircleId = request.LivestockCircleId,
                 Name = $"Yêu cầu giống - {DateTime.UtcNow}",
                 Note = request.Note,
@@ -1913,7 +1931,7 @@ namespace Infrastructure.Services.Implements
                 {
                     return false;
                 }
-                if ( !(await ValidBreedStock(request.BreedId, request.Stock)))
+                if (!(await ValidBreedStock(request.BreedId, request.Stock)))
                 {
                     throw new Exception("Giống không khả dụng hoặc giống không đủ số lượng");
                 }
@@ -2279,11 +2297,12 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-            public async Task<(bool Success, string ErrorMessage)> UpdateBillBreed(Guid billId, UpdateBillBreedDto request, CancellationToken cancellationToken = default)
+        public async Task<(bool Success, string ErrorMessage)> UpdateBillBreed(
+            Guid billId, UpdateBillBreedDto request, CancellationToken cancellationToken = default)
         {
             if (request == null) return (false, "Dữ liệu yêu cầu là bắt buộc.");
             if (!request.BreedItems.Any()) return (false, "Phải cung cấp danh sách mặt hàng giống.");
-            foreach(var it in request.BreedItems)
+            foreach (var it in request.BreedItems)
             {
                 if (!(await ValidBreedStock(it.ItemId, it.Quantity)))
                 {
@@ -2367,7 +2386,6 @@ namespace Infrastructure.Services.Implements
                 return (false, $"Lỗi khi cập nhật hóa đơn với mặt hàng giống: {ex.Message}");
             }
         }
-
         public async Task<Response<PaginationSet<BillResponse>>> GetPaginatedBillListByTechicalStaff(
              ListingRequest request,
              string billType,
@@ -2478,6 +2496,7 @@ namespace Infrastructure.Services.Implements
                         Name = bill.Name,
                         Note = bill.Note,
                         Total = bill.Total,
+                        TypeBill = bill.TypeBill,
                         Status = bill.Status,
                         Weight = bill.Weight,
                         IsActive = bill.IsActive
@@ -2510,8 +2529,6 @@ namespace Infrastructure.Services.Implements
                 };
             }
         }
-
-
 
         // Common func
         protected async Task<bool> ValidBreedStock(Guid breedId, int stock)
@@ -2579,7 +2596,7 @@ namespace Infrastructure.Services.Implements
                 }
 
                 // Lấy hóa đơn theo loại và không thuộc trạng thái REQUESTED và CANCELLED
-                var query = _billRepository.GetQueryable(x => x.IsActive && x.TypeBill.Equals(billType) 
+                var query = _billRepository.GetQueryable(x => x.IsActive && x.TypeBill.Equals(billType)
                 && !x.Status.Equals(StatusConstant.REQUESTED) && !x.Status.Equals(StatusConstant.CANCELLED));
 
                 if (request.SearchString?.Any() == true) query = query.SearchString(request.SearchString);
@@ -2629,6 +2646,7 @@ namespace Infrastructure.Services.Implements
                         Name = bill.Name,
                         Note = bill.Note,
                         Total = bill.Total,
+                        TypeBill = bill.TypeBill,
                         Status = bill.Status,
                         Weight = bill.Weight,
                         IsActive = bill.IsActive
@@ -2663,8 +2681,8 @@ namespace Infrastructure.Services.Implements
         }
 
         public async Task<Response<PaginationSet<BillResponse>>> GetApprovedBillsByWorker(
-            ListingRequest request,
-            CancellationToken cancellationToken = default)
+     ListingRequest request,
+     CancellationToken cancellationToken = default)
         {
             try
             {
@@ -2727,11 +2745,12 @@ namespace Infrastructure.Services.Implements
                     .Select(b => b.Id)
                     .ToListAsync(cancellationToken);
 
-                // Lấy hóa đơn đã được phê duyệt thuộc các Barn của worker
-                var query = _billRepository.GetQueryable(x =>
-                    x.IsActive &&
-                    x.Status.Equals(StatusConstant.APPROVED) &&
-                    validBarnIds.Contains(x.LivestockCircleId));
+                // Lấy hóa đơn đã được phê duyệt thuộc các LivestockCircle của các Barn của worker
+                var query = from bill in _billRepository.GetQueryable(b => b.IsActive && b.Status.Equals(StatusConstant.APPROVED))
+                            join livestockCircle in _livestockCircleRepository.GetQueryable()
+                                on bill.LivestockCircleId equals livestockCircle.Id
+                            where validBarnIds.Contains(livestockCircle.BarnId)
+                            select bill;
 
                 if (request.SearchString?.Any() == true) query = query.SearchString(request.SearchString);
                 if (request.Filter?.Any() == true) query = query.Filter(request.Filter);
@@ -2743,35 +2762,39 @@ namespace Infrastructure.Services.Implements
                 {
                     var userRequest = await _userRepository.GetByIdAsync(bill.UserRequestId);
                     var lscInfo = await _livestockCircleRepository.GetByIdAsync(bill.LivestockCircleId);
-                    var barnInfo = await _barnRepository.GetByIdAsync(lscInfo.BarnId);
-                    var workerInfo = await _userRepository.GetByIdAsync(barnInfo.WorkerId);
+                    var barnInfo = await _barnRepository.GetByIdAsync(lscInfo?.BarnId ?? Guid.Empty);
+                    var workerInfo = await _userRepository.GetByIdAsync(barnInfo?.WorkerId ?? Guid.Empty);
 
-                    var userRequestResponse = new UserRequestResponse
+                    var userRequestResponse = userRequest != null ? new UserRequestResponse
                     {
                         Id = userRequest.Id,
                         FullName = userRequest.FullName,
                         Email = userRequest.Email
-                    };
-                    var workerResponse = new WokerResponse
+                    } : null;
+
+                    var workerResponse = workerInfo != null ? new WokerResponse
                     {
                         Id = workerInfo.Id,
                         FullName = workerInfo.FullName,
                         Email = workerInfo.Email
-                    };
-                    var barnInfoResponse = new BarnDetailResponse
+                    } : null;
+
+                    var barnInfoResponse = barnInfo != null ? new BarnDetailResponse
                     {
                         Id = barnInfo.Id,
                         Address = barnInfo.Address,
                         BarnName = barnInfo.BarnName,
                         Image = barnInfo.Image,
                         Worker = workerResponse
-                    };
-                    var lscInfoResponse = new LivestockCircleBillResponse
+                    } : null;
+
+                    var lscInfoResponse = lscInfo != null ? new LivestockCircleBillResponse
                     {
                         Id = lscInfo.Id,
                         BarnDetailResponse = barnInfoResponse,
-                        LivestockCircleName = lscInfo.LivestockCircleName,
-                    };
+                        LivestockCircleName = lscInfo.LivestockCircleName
+                    } : null;
+
                     responses.Add(new BillResponse
                     {
                         Id = bill.Id,
@@ -2780,6 +2803,7 @@ namespace Infrastructure.Services.Implements
                         Name = bill.Name,
                         Note = bill.Note,
                         Total = bill.Total,
+                        TypeBill = bill.TypeBill,
                         Status = bill.Status,
                         Weight = bill.Weight,
                         IsActive = bill.IsActive
@@ -2814,8 +2838,8 @@ namespace Infrastructure.Services.Implements
         }
 
         public async Task<Response<PaginationSet<BillResponse>>> GetHistoryBillsByWorker(
-             ListingRequest request,
-             CancellationToken cancellationToken = default)
+    ListingRequest request,
+    CancellationToken cancellationToken = default)
         {
             try
             {
@@ -2880,10 +2904,11 @@ namespace Infrastructure.Services.Implements
 
                 // Lấy hóa đơn không thuộc các trạng thái REQUESTED, APPROVED, REJECTED, CANCELLED
                 var excludedStatuses = new[] { StatusConstant.REQUESTED, StatusConstant.APPROVED, StatusConstant.REJECTED, StatusConstant.CANCELLED };
-                var query = _billRepository.GetQueryable(x =>
-                    x.IsActive &&
-                    !excludedStatuses.Contains(x.Status) &&
-                    validBarnIds.Contains(x.LivestockCircleId));
+                var query = from bill in _billRepository.GetQueryable(b => b.IsActive && !excludedStatuses.Contains(b.Status))
+                            join livestockCircle in _livestockCircleRepository.GetQueryable()
+                                on bill.LivestockCircleId equals livestockCircle.Id
+                            where validBarnIds.Contains(livestockCircle.BarnId)
+                            select bill;
 
                 if (request.SearchString?.Any() == true) query = query.SearchString(request.SearchString);
                 if (request.Filter?.Any() == true) query = query.Filter(request.Filter);
@@ -2895,35 +2920,39 @@ namespace Infrastructure.Services.Implements
                 {
                     var userRequest = await _userRepository.GetByIdAsync(bill.UserRequestId);
                     var lscInfo = await _livestockCircleRepository.GetByIdAsync(bill.LivestockCircleId);
-                    var barnInfo = await _barnRepository.GetByIdAsync(lscInfo.BarnId);
-                    var workerInfo = await _userRepository.GetByIdAsync(barnInfo.WorkerId);
+                    var barnInfo = await _barnRepository.GetByIdAsync(lscInfo?.BarnId ?? Guid.Empty);
+                    var workerInfo = await _userRepository.GetByIdAsync(barnInfo?.WorkerId ?? Guid.Empty);
 
-                    var userRequestResponse = new UserRequestResponse
+                    var userRequestResponse = userRequest != null ? new UserRequestResponse
                     {
                         Id = userRequest.Id,
                         FullName = userRequest.FullName,
                         Email = userRequest.Email
-                    };
-                    var workerResponse = new WokerResponse
+                    } : null;
+
+                    var workerResponse = workerInfo != null ? new WokerResponse
                     {
                         Id = workerInfo.Id,
                         FullName = workerInfo.FullName,
                         Email = workerInfo.Email
-                    };
-                    var barnInfoResponse = new BarnDetailResponse
+                    } : null;
+
+                    var barnInfoResponse = barnInfo != null ? new BarnDetailResponse
                     {
                         Id = barnInfo.Id,
                         Address = barnInfo.Address,
                         BarnName = barnInfo.BarnName,
                         Image = barnInfo.Image,
                         Worker = workerResponse
-                    };
-                    var lscInfoResponse = new LivestockCircleBillResponse
+                    } : null;
+
+                    var lscInfoResponse = lscInfo != null ? new LivestockCircleBillResponse
                     {
                         Id = lscInfo.Id,
                         BarnDetailResponse = barnInfoResponse,
-                        LivestockCircleName = lscInfo.LivestockCircleName,
-                    };
+                        LivestockCircleName = lscInfo.LivestockCircleName
+                    } : null;
+
                     responses.Add(new BillResponse
                     {
                         Id = bill.Id,
@@ -2932,6 +2961,7 @@ namespace Infrastructure.Services.Implements
                         Name = bill.Name,
                         Note = bill.Note,
                         Total = bill.Total,
+                        TypeBill = bill.TypeBill,
                         Status = bill.Status,
                         Weight = bill.Weight,
                         IsActive = bill.IsActive
@@ -2959,7 +2989,7 @@ namespace Infrastructure.Services.Implements
                 return new Response<PaginationSet<BillResponse>>()
                 {
                     Succeeded = false,
-                    Message = "Lỗi khi lấy danh sách hóa đơn không thuộc các trạng thái chuẩn",
+                    Message = "Lỗi khi lấy danh sách hóa đơn lịch sử",
                     Errors = new List<string> { ex.Message }
                 };
             }

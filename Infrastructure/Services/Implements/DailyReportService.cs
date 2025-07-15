@@ -769,7 +769,7 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-            public async Task<Response<string>> DisableDailyReport(Guid dailyReportId, CancellationToken cancellationToken = default)
+        public async Task<Response<string>> DisableDailyReport(Guid dailyReportId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -804,7 +804,7 @@ namespace Infrastructure.Services.Implements
                         Errors = new List<string> { "Vòng chăn nuôi không tồn tại hoặc đã bị xóa" }
                     };
                 }
-                var oldGoodUnit =  dailyReport.GoodUnit + dailyReport.BadUnit + dailyReport.DeadUnit;
+                var oldGoodUnit = dailyReport.GoodUnit + dailyReport.BadUnit + dailyReport.DeadUnit;
                 livestockCircle.BadUnitNumber -= dailyReport.BadUnit;
                 livestockCircle.GoodUnitNumber = oldGoodUnit;
                 livestockCircle.DeadUnit -= dailyReport.DeadUnit;
@@ -1010,10 +1010,10 @@ namespace Infrastructure.Services.Implements
                 };
             }
         }
-    
 
-    public async Task<(List<DailyReportResponse> DailyReports, string ErrorMessage)> GetDailyReportByLiveStockCircle(
-    Guid? livestockCircleId = null, CancellationToken cancellationToken = default)
+
+        public async Task<(List<DailyReportResponse> DailyReports, string ErrorMessage)> GetDailyReportByLiveStockCircle(
+        Guid? livestockCircleId = null, CancellationToken cancellationToken = default)
         {
             try
             {
