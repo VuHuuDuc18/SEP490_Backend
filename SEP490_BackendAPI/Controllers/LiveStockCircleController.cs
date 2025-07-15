@@ -142,7 +142,7 @@ namespace SEP490_BackendAPI.Controllers
         //        throw new Exception("User không hợp lệ");
         //    }
         //}
-        [HttpPost("admin/livestockCircleHistory/{id}")]
+        [HttpPost("livestockCircle-history/{barnId}")]
         public async Task<IActionResult> GetLivestockCircleHistory([FromRoute]Guid barnId,[FromBody] ListingRequest req)
         {
             //Guid technicalStaffId;
