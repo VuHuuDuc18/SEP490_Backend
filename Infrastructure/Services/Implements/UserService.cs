@@ -35,6 +35,7 @@ using Domain.Dto.Request.User;
 using Domain.Dto.Response.User;
 using Domain.Dto.Response.BarnPlan;
 using Domain.IServices;
+using System.ComponentModel.DataAnnotations;
 
 namespace Infrastructure.Services.Implements
 {
@@ -260,7 +261,10 @@ namespace Infrastructure.Services.Implements
 
         public async Task<Response<string>> ConfirmEmailAsync(string userId, string code)
         {
+            if (string.IsNullOrEmpty(userId)) return new Response<string>("The UserId field is a require.");
+            if (string.IsNullOrEmpty(code)) return new Response<string>("The Code field is a require.");
             var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return new Response<string>("Không tìm thấy tài khoản.");
             code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
             var result = await _userManager.ConfirmEmailAsync(user, code);
             if (result.Succeeded)
@@ -315,6 +319,20 @@ namespace Infrastructure.Services.Implements
 
         public async Task<Response<string>> ChangePassword(ChangePasswordRequest req)
         {
+            if (req == null) return new Response<string>("Yêu cầu không được để trống.");
+
+            
+            var validationContext = new ValidationContext(req);
+            var validationResults = new List<ValidationResult>();
+            if (!Validator.TryValidateObject(req, validationContext, validationResults, validateAllProperties: true))
+            {
+                return new Response<string>
+                {
+                    Succeeded = false,
+                    Message = "Dữ liệu không hợp lệ.",
+                    Errors = validationResults.Select(r => r.ErrorMessage).ToList()
+                };
+            }
             User user = await _userManager.FindByIdAsync(req.UserId.ToString());
             if (user == null)
             {
