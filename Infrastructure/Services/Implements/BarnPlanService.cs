@@ -154,7 +154,7 @@ namespace Infrastructure.Services.Implements
                 StartDate = barnPlanDetail.StartDate,
                 Note = barnPlanDetail.Note,
                 foodPlans = await _bpfoodrepo.GetQueryable(x => x.IsActive)
-                                        .Where(x => x.BarnPlanId == id)
+                                        .Where(x => x.BarnPlanId == barnPlanDetail.Id)
                                         .Include(x => x.Food)
                                         .Select(it => new Domain.Dto.Response.BarnPlan.FoodPlan()
                                         {
@@ -164,7 +164,7 @@ namespace Infrastructure.Services.Implements
                                             Stock = it.Stock
                                         }).ToListAsync(),
                 medicinePlans = await _bpmedicinerepo.GetQueryable(x => x.IsActive)
-                                        .Where(x => x.BarnPlanId == id)
+                                        .Where(x => x.BarnPlanId == barnPlanDetail.Id)
                                         .Include(x => x.Medicine)
                                         .Select(it => new Domain.Dto.Response.BarnPlan.MedicinePlan()
                                         {
@@ -186,7 +186,7 @@ namespace Infrastructure.Services.Implements
             }
             ViewBarnPlanResponse result = new ViewBarnPlanResponse()
             {
-                Id = id,
+                Id = barnPlanDetail.Id,
                 EndDate = barnPlanDetail.EndDate,
                 StartDate = barnPlanDetail.StartDate,
                 Note = barnPlanDetail.Note,
@@ -216,10 +216,20 @@ namespace Infrastructure.Services.Implements
 
         public async Task<bool> UpdateBarnPlan(UpdateBarnPlanRequest req)
         {
-            DateTime formatedStartDate, formatedEndDate;
-            ValidTime(false, (bool)(req.IsDaily == null ? false : req.IsDaily), req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
-
             var updateItem = await _barnplanrepo.GetByIdAsync(req.Id);
+
+            DateTime formatedStartDate, formatedEndDate;
+            if (req.IsDaily == true)
+            {
+                ValidTime(false, false, updateItem.StartDate, updateItem.EndDate, out formatedStartDate, out formatedEndDate);
+            }
+            else
+            {
+                ValidTime(false, (bool)(req.IsDaily == null ? false : req.IsDaily), req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
+            }
+
+
+
             if (updateItem == null)
             {
                 throw new Exception("Kế hoạch không tồn tại");
@@ -230,6 +240,7 @@ namespace Infrastructure.Services.Implements
 
             await InsertFoodPlan(req.foodPlans, req.Id);
             await InsertMedicinePlan(req.medicinePlans, req.Id);
+            _barnplanrepo.Update(updateItem);
             return await _barnplanrepo.CommitAsync() > 0;
         }
 
@@ -240,9 +251,9 @@ namespace Infrastructure.Services.Implements
         {
 
             // xoa bo plan cu
-            var previous_Food_Plan = _bpfoodrepo.GetQueryable().Where(it => it.BarnPlanId == bpid);
+            var previous_Food_Plan = await _bpfoodrepo.GetQueryable().Where(it => it.BarnPlanId == bpid).ToListAsync();
 
-            foreach (var item in previous_Food_Plan.ToList())
+            foreach (var item in previous_Food_Plan)
             {
                 _bpfoodrepo.Remove(item);
             }
@@ -271,8 +282,8 @@ namespace Infrastructure.Services.Implements
         {
 
             // xoa bo plan cu
-            var previous_Medicine_Plan = _bpmedicinerepo.GetQueryable().Where(it => it.BarnPlanId == bpid);
-            foreach (var item in previous_Medicine_Plan.ToList())
+            var previous_Medicine_Plan = await _bpmedicinerepo.GetQueryable().Where(it => it.BarnPlanId == bpid).ToListAsync();
+            foreach (var item in previous_Medicine_Plan)
             {
                 _bpmedicinerepo.Remove(item);
             }
