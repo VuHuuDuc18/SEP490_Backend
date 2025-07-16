@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Entities.EntityModel;
+using Infrastructure.Core;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Entities.EntityModel;
-using Infrastructure.Core;
 namespace Infrastructure.DBContext
 {
     public class LCFMSDBContext : DbContext
@@ -16,6 +17,7 @@ namespace Infrastructure.DBContext
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<Role> Roles { get; set; }
         public virtual DbSet<Barn> Barns { get; set; }
+        public virtual DbSet<UserRole> UserRoles { get; set; }
         public virtual DbSet<BarnPlan> BarnPlans { get; set; }
         public virtual DbSet<BarnPlanFood> BarnPlanFoods { get; set; }
         public virtual DbSet<BarnPlanMedicine> BarnPlanMedicines { get; set; }
@@ -46,7 +48,10 @@ namespace Infrastructure.DBContext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
+            modelBuilder.Entity<UserRole>(entity =>
+            {
+                entity.HasNoKey();
+            });
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseLazyLoadingProxies();
 

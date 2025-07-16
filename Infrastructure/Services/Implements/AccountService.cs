@@ -26,6 +26,9 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.Dto.Response.User;
+using Domain.DTOs.Response.Role;
+using Domain.Helper;
 namespace Infrastructure.Services.Implements
 {
     public class AccountService : IAccountService
@@ -72,10 +75,49 @@ namespace Infrastructure.Services.Implements
         }
 
 
-        public async Task<Response<List<User>>> GetAllAccountsAsync()
+        public async Task<Response<List<(AccountResponse, RoleResponse)>>> GetAllAccountsAsync()
         {
-            var users = await _userManager.Users.ToListAsync();
-            return new Response<List<User>>(users, message: $"Lấy danh sách tài khoản thành công.");
+            try
+            {
+                var users = await _userManager.Users.ToListAsync();
+                var userNRole = new List<(AccountResponse user, RoleResponse role)>();
+
+                foreach (var user in users)
+                {
+                    var roleNames = await _userManager.GetRolesAsync(user);
+                    var roleName = roleNames.FirstOrDefault();
+                    var roles = await _roleManager.Roles.ToListAsync();
+                    var role = roles.FirstOrDefault(r => r.Name == roleName);
+                    
+                    var userResponse = new AccountResponse
+                    {
+                        Id = user.Id,
+                        Email = user.Email,
+                        FullName = user.FullName,
+                        PhoneNumber = user.PhoneNumber,
+                        IsActive = user.IsActive,
+                        RoleName = roleName,
+                        CreatedDate = user.CreatedDate,
+                        CreatedBy = user.CreatedBy,
+                        UpdatedDate = user.UpdatedDate,
+                        UpdatedBy = user.UpdatedBy
+                    };
+                    
+                    var roleResponse = new RoleResponse
+                    {   
+                        Id = role?.Id,
+                        Name = role?.Name
+                    };
+                    
+                    userNRole.Add((userResponse, roleResponse));
+                }
+
+                return new Response<List<(AccountResponse, RoleResponse)>>(userNRole, message: $"Lấy danh sách tài khoản thành công.");
+            }
+            catch (Exception ex)
+            {
+                return new Response<List<(AccountResponse, RoleResponse)>>($"Lỗi: {ex.Message}");
+            }
         }
         public async Task<Response<User>> GetAccountByEmailAsync(string email)
         {
@@ -231,9 +273,9 @@ namespace Infrastructure.Services.Implements
                         FullName = user.FullName,
                         IsActive = user.IsActive,
                         RoleName = role,
-                        CreatedAt = user.CreatedDate,
+                        CreatedDate = user.CreatedDate,
                         CreatedBy = user.CreatedBy,
-                        UpdatedAt = user.UpdatedDate,
+                        UpdatedDate = user.UpdatedDate,
                         UpdatedBy = user.UpdatedBy
                         
                     });

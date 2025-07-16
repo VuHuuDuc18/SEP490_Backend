@@ -11,6 +11,7 @@ using Domain.Helper;
 using Domain.Helper.Constants;
 using Domain.IServices;
 using Entities.EntityModel;
+using Infrastructure.DBContext;
 using Infrastructure.Extensions;
 using Infrastructure.Repository;
 using MailKit.Search;
@@ -18,6 +19,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.IdentityModel.Tokens;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -35,6 +37,7 @@ namespace Infrastructure.Services.Implements
         private readonly IRepository<ImageLivestockCircle> _imageLivestockCircleRepository;
         private readonly IRepository<BreedCategory> _breedCategoryRepository;
         private readonly Guid _currentUserId;
+        private readonly LCFMSDBContext _dbContext;
         public OrderService
         (
             IRepository<Order> orderRepository,
@@ -46,9 +49,11 @@ namespace Infrastructure.Services.Implements
             IRepository<Breed> breedrepo,
             IRepository<BreedCategory> bcrepo,
             IRepository<ImageLivestockCircle> imageLivestockCircleRepository,
-            IRepository<Role> roleRepository
+            IRepository<Role> roleRepository,
+            DbContext dbContext
         )
         {
+            _dbContext = (LCFMSDBContext)dbContext;
             _userRepository = userRepository;
             _orderRepository = orderRepository;
             _breedRepository = breedrepo;
@@ -105,7 +110,7 @@ namespace Infrastructure.Services.Implements
             {
                 //Kiểm tra đơn hàng đã tồn tại chưa
                 var existingOrder = _orderRepository.GetQueryable(x => x.CustomerId == _currentUserId && x.LivestockCircleId == request.LivestockCircleId);
-                if (existingOrder != null)
+                if (!existingOrder.IsNullOrEmpty())
                 {
                     return new Response<string>()
                     {
@@ -115,9 +120,10 @@ namespace Infrastructure.Services.Implements
                 }
                 // Lấy danh sách các Sale Staff và tổng số đơn hàng mỗi Sale đang xử lý
                 var Orders = _orderRepository.GetQueryable();
-                var Staffs = _userManager.GetUsersInRoleAsync(RoleConstant.SalesStaff).Result.AsQueryable();
+                //var Staffs = _userManager.GetUsersInRoleAsync(RoleConstant.SalesStaff).Result.AsQueryable();
+                var Staffs = _dbContext.Set<UserRole>().Where(x=>x.User.IsActive && x.Role.Name == RoleConstant.SalesStaff);
                 var query = from o in Orders
-                            join s in Staffs on o.SaleStaffId equals s.Id
+                            join s in Staffs on o.SaleStaffId equals s.UserId
                             group o by new { o.SaleStaffId } into g
                             orderby g.Count()
                             select new
@@ -129,22 +135,29 @@ namespace Infrastructure.Services.Implements
                     .GroupJoin(
                         Staffs,
                         o => o.SaleStaffId,
-                        u => u.Id,
+                        u => u.UserId,
                         (order, users) => new { order, users }
                     )
                     .SelectMany(
                         x => x.users.DefaultIfEmpty(),
                         (x, user) => new { x.order, SaleStaff = user }
                     )
-                    .GroupBy(x => new { x.SaleStaff.Id, x.SaleStaff.FullName })
+                    .GroupBy(x => new { x.SaleStaff.UserId})
                     .Select(g => new
                     {
-                        SaleStaffId = g.Key.Id,
-                        SaleStaffName = g.Key.FullName,
+                        SaleStaffId = g.Key.UserId,
                         TotalOrders = g.Count()
                     })
                     .OrderBy(x => x.TotalOrders)
                     .ToList();
+                if (saleStaffs.IsNullOrEmpty())
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Không có nhân viên sale nào xử lý đơn hàng.",
+                    };
+                }
                 var saleStaffId = saleStaffs.FirstOrDefault().SaleStaffId;
                 //Tạo đơn hàng mới
                 var order = new Order()

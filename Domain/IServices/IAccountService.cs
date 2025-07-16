@@ -3,13 +3,14 @@ using Domain.Dto.Request;
 using Domain.Dto.Request.Account;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Account;
+using Domain.DTOs.Response.Role;
 using Entities.EntityModel;
 
 namespace Domain.IServices
 {
     public interface IAccountService
     {
-        Task<Response<List<User>>> GetAllAccountsAsync();
+        Task<Response<List<(AccountResponse, RoleResponse)>>> GetAllAccountsAsync();
         Task<Response<User>> GetAccountByEmailAsync(string email);
         Task<Response<string>> CreateAccountAsync(CreateAccountRequest request, string origin);
         Task<Response<string>> ResetPassword(ResetPasswordRequest model);
