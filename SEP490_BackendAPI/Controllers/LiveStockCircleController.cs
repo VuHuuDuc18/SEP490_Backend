@@ -36,19 +36,19 @@ namespace SEP490_BackendAPI.Controllers
         //    return StatusCode(StatusCodes.Status201Created);
         //}
 
-        [HttpPut("update/{livestockCircleId}")]
-        public async Task<IActionResult> Update(Guid livestockCircleId, [FromBody] UpdateLivestockCircleRequest request, CancellationToken cancellationToken = default)
-        {
-            var (success, errorMessage) = await _livestockCircleService.UpdateLiveStockCircle(livestockCircleId, request, cancellationToken);
-            if (!success)
-            {
-                if (errorMessage.Contains("Không tìm thấy"))
-                    return NotFound(new { error = errorMessage });
-                return BadRequest(new { error = errorMessage });
-            }
+        //[HttpPut("update/{livestockCircleId}")]
+        //public async Task<IActionResult> Update(Guid livestockCircleId, [FromBody] UpdateLivestockCircleRequest request, CancellationToken cancellationToken = default)
+        //{
+        //    var (success, errorMessage) = await _livestockCircleService.UpdateLiveStockCircle(livestockCircleId, request, cancellationToken);
+        //    if (!success)
+        //    {
+        //        if (errorMessage.Contains("Không tìm thấy"))
+        //            return NotFound(new { error = errorMessage });
+        //        return BadRequest(new { error = errorMessage });
+        //    }
 
-            return Ok();
-        }
+        //    return Ok();
+        //}
         [HttpDelete("disable/{livestockCircleId}")]
         public async Task<IActionResult> DisableLiveStockCircle(Guid livestockCircleId, CancellationToken cancellationToken = default)
         {
@@ -90,7 +90,7 @@ namespace SEP490_BackendAPI.Controllers
         //}
 
         [HttpGet("getCurrentLiveStockCircleByBarnId/{barnId}")]
-        public async Task<IActionResult> GetLiveStockCircleByBarnIdAndStatus([FromRoute] Guid barnId, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetLiveStockCircleByBarnId([FromRoute] Guid barnId, CancellationToken cancellationToken = default)
         {
             var (circles, errorMessage) = await _livestockCircleService.GetActiveLiveStockCircleByBarnId(barnId, cancellationToken);
             if (circles == null)
@@ -165,13 +165,13 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpPost("sale/getBarn")]
-        public async Task<IActionResult> getReleasedBarn([FromBody]ListingRequest req)
+        public async Task<IActionResult> GetReleasedBarn([FromBody]ListingRequest req)
         {
             var result = await _livestockCircleService.GetReleasedLivestockCircleList(req);
             return Ok(result);
         }
         [HttpGet("sale/getBarnById/{id}")]
-        public async Task<IActionResult> getReleasedBarnById([FromRoute]Guid id)
+        public async Task<IActionResult> GetReleasedBarnById([FromRoute]Guid id)
         {
             var result = await _livestockCircleService.GetReleasedLivestockCircleById(id);
             return Ok(result);
