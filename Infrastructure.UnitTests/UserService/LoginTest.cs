@@ -31,6 +31,7 @@ namespace Infrastructure.UnitTests.UserService
         private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
         private readonly Mock<IdentityContext> _contextMock;
         private readonly Mock<IOptions<JWTSettings>> _jwtSettingsMock;
+        private readonly Mock<RoleManager<Role>> _roleManagerMock;
         private readonly Infrastructure.Services.Implements.UserService _userService;
 
         public LoginTest()
@@ -43,6 +44,9 @@ namespace Infrastructure.UnitTests.UserService
             _signInManagerMock = new Mock<SignInManager<User>>(
                 _userManagerMock.Object, Mock.Of<IHttpContextAccessor>(), Mock.Of<IUserClaimsPrincipalFactory<User>>(),
                 null, null, null, null);
+
+            _roleManagerMock = new Mock<RoleManager<Role>>(
+       Mock.Of<IRoleStore<Role>>(), null, null, null, null);
 
             // Khởi tạo Mock cho các dịch vụ khác
             _emailServiceMock = new Mock<IEmailService>();
@@ -68,7 +72,7 @@ namespace Infrastructure.UnitTests.UserService
             // Khởi tạo UserService với các Mock
             _userService = new Infrastructure.Services.Implements.UserService(
                 _userManagerMock.Object,
-                null, // RoleManager không được mock ở đây, có thể thêm nếu cần
+                _roleManagerMock.Object, // RoleManager không được mock ở đây, có thể thêm nếu cần
                 _jwtSettingsMock.Object,
                 _signInManagerMock.Object,
                 _emailServiceMock.Object,
@@ -90,17 +94,15 @@ namespace Infrastructure.UnitTests.UserService
             // Mock RefreshTokens như một DbSet
             var refreshTokenDbSetMock = new Mock<DbSet<RefreshToken>>();
             refreshTokenDbSetMock
-                .Setup(x => x.Add(It.IsAny<RefreshToken>()))
-                .Verifiable(); // Đảm bảo được gọi
-
-            _contextMock.Setup(x => x.RefreshTokens).Returns(refreshTokenDbSetMock.Object);
-            _contextMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+       .Setup(x => x.AddAsync(It.IsAny<RefreshToken>(), It.IsAny<CancellationToken>()))
+       .ReturnsAsync((RefreshToken token, CancellationToken ct) => null);
 
             // Act
             var result = await _userService.LoginAsync(request, "127.0.0.1");
 
-            // Assert
-            Assert.True(result.Succeeded);
+            Console.WriteLine("Service message: " + result.Message);
+
+            Assert.True(result.Succeeded, $"Service message: {result.Message}");
             Assert.NotNull(result.Data);
             Assert.Equal("Đăng nhập thành công.", result.Message);
             Assert.Equal(user.Id, result.Data.Id);

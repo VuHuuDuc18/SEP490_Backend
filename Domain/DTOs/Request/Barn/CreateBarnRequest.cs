@@ -17,7 +17,7 @@ namespace Domain.Dto.Request.Barn
 
         [Required(ErrorMessage = "Địa chỉ là bắt buộc.")]
         public string Address { get; set; }
-
+        [Required(ErrorMessage = "Hình ảnh chuồng là bắt buộc.")]
         public string Image { get; set; }
 
         [Required(ErrorMessage = "ID người gia công là bắt buộc.")]
