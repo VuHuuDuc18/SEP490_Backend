@@ -103,7 +103,7 @@ namespace SEP490_BackendAPI.Controllers
             }
             catch (Exception ex)
             {
-                throw new Exception("User không hợp lệ");
+                return Unauthorized();
             }
         }
 
