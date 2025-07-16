@@ -51,7 +51,7 @@ namespace SEP490_BackendAPI.Controllers
         public async Task<IActionResult> GetStatisticList([FromBody]StatisticsOrderRequest request)
         {
             var result = await _orderService.GetStatisticData(request);
-            return Ok(result);
+            return Ok(result.Datas);
         }
         [HttpPost("admin/export")]
         public async Task<IActionResult> ExportStatistic([FromBody] StatisticsOrderRequest request)
