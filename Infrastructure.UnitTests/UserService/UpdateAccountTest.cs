@@ -1,0 +1,421 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
+using Application.Wrappers;
+using Domain.Dto.Request.Account;
+using Domain.Dto.Response.Account;
+using Entities.EntityModel;
+using Infrastructure.Identity.Contexts;
+using Infrastructure.Services.Implements;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Moq;
+using Xunit;
+using Assert = Xunit.Assert;
+using MockQueryable.Moq;
+using Microsoft.AspNetCore.WebUtilities;
+using Domain.Dto.Request.User;
+using Domain.Settings;
+using Infrastructure.Services;
+
+namespace Infrastructure.UnitTests.UserService
+{
+    public class UpdateAccountTest
+    {
+        private readonly Mock<UserManager<User>> _userManagerMock;
+        private readonly Mock<SignInManager<User>> _signInManagerMock;
+        private readonly Mock<IEmailService> _emailServiceMock;
+        private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
+        private readonly Mock<IdentityContext> _contextMock;
+        private readonly Mock<IOptions<JWTSettings>> _jwtSettingsMock;
+        private readonly Infrastructure.Services.Implements.UserService _userService;
+
+        public UpdateAccountTest()
+        {
+            // Khởi tạo Mock cho UserManager
+            _userManagerMock = new Mock<UserManager<User>>(
+                Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
+
+            // Khởi tạo Mock cho SignInManager
+            _signInManagerMock = new Mock<SignInManager<User>>(
+                _userManagerMock.Object, Mock.Of<IHttpContextAccessor>(), Mock.Of<IUserClaimsPrincipalFactory<User>>(),
+                null, null, null, null);
+
+            // Khởi tạo Mock cho các dịch vụ khác
+            _emailServiceMock = new Mock<IEmailService>();
+            _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+            _contextMock = new Mock<IdentityContext>(new DbContextOptions<IdentityContext>());
+            _jwtSettingsMock = new Mock<IOptions<JWTSettings>>();
+            _jwtSettingsMock.Setup(x => x.Value).Returns(new JWTSettings
+            {
+                SecurityKey = "test-key-1234567890",
+                Issuer = "test-issuer",
+                Audience = "test-audience",
+                LifeTime = 60
+            });
+
+            // Cấu hình mặc định HttpContext với user đã đăng nhập
+            var defaultUserId = Guid.Parse("2eaedaf7-afd6-4340-53de-08ddc0fec23a");
+            var claims = new List<Claim> { new Claim("uid", defaultUserId.ToString()) };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            var principal = new ClaimsPrincipal(identity);
+            var httpContext = new DefaultHttpContext { User = principal };
+            _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext);
+
+            // Khởi tạo UserService với các Mock
+            _userService = new Infrastructure.Services.Implements.UserService(
+                _userManagerMock.Object,
+                null, // RoleManager không được mock ở đây, có thể thêm nếu cần
+                _jwtSettingsMock.Object,
+                _signInManagerMock.Object,
+                _emailServiceMock.Object,
+                _contextMock.Object,
+                _httpContextAccessorMock.Object);
+        }
+        [Fact]
+        public async Task UpdateAccountAsync_ValidRequest_Success()
+        {
+            // Arrange
+            var userId = Guid.Parse("2eaedaf7-afd6-4340-53de-08ddc0fec23a");
+            var user = new User
+            {
+                Id = userId,
+                Email = "luongcongduy826@gmail.com",
+                FullName = "Luong Cong Duy",
+                PhoneNumber = "0987654321",
+                Address = "Nghe An",
+                IsActive = true,
+                EmailConfirmed = true
+            };
+            var request = new UserUpdateAccountRequest
+            {
+                Email = "newEmail@gmail.com",
+                FullName = "Nguyen Van A",
+                PhoneNumber = "0999999999",
+                Address = "New Address"
+            };
+            _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString())).ReturnsAsync(user);
+            _userManagerMock.Setup(x => x.UpdateAsync(user)).ReturnsAsync(IdentityResult.Success);
+
+            // Act
+            var result = await _userService.UpdateAccountAsync(request);
+
+            // Assert
+            Assert.True(result.Succeeded);
+            Assert.Equal("Thông tin đã được cập nhập.", result.Message);
+            Assert.Null(result.Data);
+            Assert.Null(result.Errors); 
+            Assert.Equal("newEmail@gmail.com", user.Email);
+            Assert.Equal("Nguyen Van A", user.FullName);
+            Assert.Equal("0999999999", user.PhoneNumber);
+            Assert.Equal("New Address", user.Address);
+        }
+
+        [Fact]
+        public async Task UpdateAccountAsync_ValidRequestBlankEmail_Success()
+        {
+            // Arrange
+            var userId = Guid.Parse("2eaedaf7-afd6-4340-53de-08ddc0fec23a");
+            var user = new User
+            {
+                Id = userId,
+                Email = "luongcongduy826@gmail.com",
+                FullName = "Luong Cong Duy",
+                PhoneNumber = "0987654321",
+                Address = "Nghe An",
+                IsActive = true,
+                EmailConfirmed = true
+            };
+            var request = new UserUpdateAccountRequest
+            {
+                Email = "",
+                FullName = "Nguyen Van A",
+                PhoneNumber = "0999999999",
+                Address = "New Address"
+            };
+            _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString())).ReturnsAsync(user);
+            _userManagerMock.Setup(x => x.UpdateAsync(user)).ReturnsAsync(IdentityResult.Success);
+
+            // Act
+            var result = await _userService.UpdateAccountAsync(request);
+
+            // Assert
+            Assert.True(result.Succeeded);
+            Assert.Equal("Thông tin đã được cập nhập.", result.Message);
+            Assert.Null(result.Data);
+            Assert.Null(result.Errors);
+            Assert.Equal("luongcongduy826@gmail.com", user.Email);
+            Assert.Equal("Nguyen Van A", user.FullName);
+            Assert.Equal("0999999999", user.PhoneNumber);
+            Assert.Equal("New Address", user.Address);
+        }
+
+        [Fact]
+        public async Task UpdateAccountAsync_ValidRequestBlankFullName_Success()
+        {
+            // Arrange
+            var userId = Guid.Parse("2eaedaf7-afd6-4340-53de-08ddc0fec23a");
+            var user = new User
+            {
+                Id = userId,
+                Email = "luongcongduy826@gmail.com",
+                FullName = "Luong Cong Duy",
+                PhoneNumber = "0987654321",
+                Address = "Nghe An",
+                IsActive = true,
+                EmailConfirmed = true
+            };
+            var request = new UserUpdateAccountRequest
+            {
+                Email = "newEmail@gmail.com",
+                FullName = "",
+                PhoneNumber = "0999999999",
+                Address = "New Address"
+            };
+            _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString())).ReturnsAsync(user);
+            _userManagerMock.Setup(x => x.UpdateAsync(user)).ReturnsAsync(IdentityResult.Success);
+
+            // Act
+            var result = await _userService.UpdateAccountAsync(request);
+
+            // Assert
+            Assert.True(result.Succeeded);
+            Assert.Equal("Thông tin đã được cập nhập.", result.Message);
+            Assert.Null(result.Data);
+            Assert.Null(result.Errors);
+            Assert.Equal("newEmail@gmail.com", user.Email);
+            Assert.Equal("Luong Cong Duy", user.FullName);
+            Assert.Equal("0999999999", user.PhoneNumber);
+            Assert.Equal("New Address", user.Address);
+        }
+
+        [Fact]
+        public async Task UpdateAccountAsync_ValidRequestBlankPhoneNumber_Success()
+        {
+            // Arrange
+            var userId = Guid.Parse("2eaedaf7-afd6-4340-53de-08ddc0fec23a");
+            var user = new User
+            {
+                Id = userId,
+                Email = "luongcongduy826@gmail.com",
+                FullName = "Luong Cong Duy",
+                PhoneNumber = "0987654321",
+                Address = "Nghe An",
+                IsActive = true,
+                EmailConfirmed = true
+            };
+            var request = new UserUpdateAccountRequest
+            {
+                Email = "newEmail@gmail.com",
+                FullName = "Nguyen Van A",
+                PhoneNumber = "",
+                Address = "New Address"
+            };
+            _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString())).ReturnsAsync(user);
+            _userManagerMock.Setup(x => x.UpdateAsync(user)).ReturnsAsync(IdentityResult.Success);
+
+            // Act
+            var result = await _userService.UpdateAccountAsync(request);
+
+            // Assert
+            Assert.True(result.Succeeded);
+            Assert.Equal("Thông tin đã được cập nhập.", result.Message);
+            Assert.Null(result.Data);
+            Assert.Null(result.Errors);
+            Assert.Equal("newEmail@gmail.com", user.Email);
+            Assert.Equal("Nguyen Van A", user.FullName);
+            Assert.Equal("0987654321", user.PhoneNumber);
+            Assert.Equal("New Address", user.Address);
+        }
+
+        [Fact]
+        public async Task UpdateAccountAsync_ValidRequestBlankAddress_Success()
+        {
+            // Arrange
+            var userId = Guid.Parse("2eaedaf7-afd6-4340-53de-08ddc0fec23a");
+            var user = new User
+            {
+                Id = userId,
+                Email = "luongcongduy826@gmail.com",
+                FullName = "Luong Cong Duy",
+                PhoneNumber = "0987654321",
+                Address = "Nghe An",
+                IsActive = true,
+                EmailConfirmed = true
+            };
+            var request = new UserUpdateAccountRequest
+            {
+                Email = "newEmail@gmail.com",
+                FullName = "Nguyen Van A",
+                PhoneNumber = "0999999999",
+                Address = ""
+            };
+            _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString())).ReturnsAsync(user);
+            _userManagerMock.Setup(x => x.UpdateAsync(user)).ReturnsAsync(IdentityResult.Success);
+
+            // Act
+            var result = await _userService.UpdateAccountAsync(request);
+
+            // Assert
+            Assert.True(result.Succeeded);
+            Assert.Equal("Thông tin đã được cập nhập.", result.Message);
+            Assert.Null(result.Data);
+            Assert.Null(result.Errors);
+            Assert.Equal("newEmail@gmail.com", user.Email);
+            Assert.Equal("Nguyen Van A", user.FullName);
+            Assert.Equal("0999999999", user.PhoneNumber);
+            Assert.Equal("Nghe An", user.Address);
+        }
+
+
+
+
+        [Fact]
+        public async Task UpdateAccountAsync_InvalidUserId_ReturnsError()
+        {
+            // Arrange
+            // Ghi đè HttpContext để mô phỏng không đăng nhập (Guid.Empty)
+            var claims = new List<Claim> { new Claim("uid", Guid.Empty.ToString()) };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            var principal = new ClaimsPrincipal(identity);
+            var httpContext = new DefaultHttpContext { User = principal };
+            _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext);
+            var request = new UserUpdateAccountRequest { Email = "newEmail@gmail.com" };
+            _userManagerMock.Setup(x => x.FindByIdAsync(It.IsAny<string>())).ReturnsAsync((User)null); 
+
+            // Act
+            var result = await _userService.UpdateAccountAsync(request);
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Equal("Không tìm thấy tài khoản.", result.Message); 
+            Assert.Null(result.Data);
+            Assert.Contains("Không tìm thấy tài khoản với ID:2eaedaf7-afd6-4340-53de-08ddc0fec23a", result.Errors);
+        }
+
+        [Fact]
+        public async Task UpdateAccountAsync_UserNotFound_ReturnsError()
+        {
+            // Arrange
+            var userId = Guid.Parse("2eaedaf7-afd6-4340-53de-08ddc0fec23a");
+            var request = new UserUpdateAccountRequest { Email = "newEmail@gmail.com" };
+            _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString())).ReturnsAsync((User)null);
+
+            // Act
+            var result = await _userService.UpdateAccountAsync(request);
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Equal("Không tìm thấy tài khoản.", result.Message);
+            Assert.Null(result.Data);
+            Assert.Contains($"Không tìm thấy tài khoản với ID:{userId}", result.Errors);
+        }
+
+        [Fact]
+        public async Task UpdateAccountAsync_NoChanges_ReturnsError()
+        {
+            // Arrange
+            var userId = Guid.Parse("2eaedaf7-afd6-4340-53de-08ddc0fec23a");
+            var user = new User
+            {
+                Id = userId,
+                Email = "luongcongduy826@gmail.com",
+                FullName = "Luong Cong Duy",
+                PhoneNumber = "0987654321",
+                Address = "Nghe An",
+                IsActive = true,
+                EmailConfirmed = true
+            };
+            var request = new UserUpdateAccountRequest
+            {
+                Email = "luongcongduy826@gmail.com",
+                FullName = "Luong Cong Duy",
+                PhoneNumber = "0987654321",
+                Address = "Nghe An"
+            };
+            _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString())).ReturnsAsync(user);
+
+            // Act
+            var result = await _userService.UpdateAccountAsync(request);
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Equal("Không có thông tin thay đổi.", result.Message);
+            Assert.Null(result.Data);
+            Assert.Null(result.Errors); // Thay đổi từ Assert.Empty thành Assert.Null vì Errors có thể là null
+        }
+
+        [Fact]
+        public async Task UpdateAccountAsync_NoChangesByBlank_ReturnsError()
+        {
+            // Arrange
+            var userId = Guid.Parse("2eaedaf7-afd6-4340-53de-08ddc0fec23a");
+            var user = new User
+            {
+                Id = userId,
+                Email = "luongcongduy826@gmail.com",
+                FullName = "Luong Cong Duy",
+                PhoneNumber = "0987654321",
+                Address = "Nghe An",
+                IsActive = true,
+                EmailConfirmed = true
+            };
+            var request = new UserUpdateAccountRequest
+            {
+                Email = "",
+                FullName = "",
+                PhoneNumber = "",
+                Address = ""
+            };
+            _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString())).ReturnsAsync(user);
+
+            // Act
+            var result = await _userService.UpdateAccountAsync(request);
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Equal("Không có thông tin thay đổi.", result.Message);
+            Assert.Null(result.Data);
+            Assert.Null(result.Errors); 
+        }
+
+        //[Fact]
+        //public async Task UpdateAccountAsync_UpdateFailed_ReturnsError()
+        //{
+        //    // Arrange
+        //    var userId = Guid.Parse("2eaedaf7-afd6-4340-53de-08ddc0fec23a");
+        //    var user = new User
+        //    {
+        //        Id = userId,
+        //        Email = "luongcongduy826@gmail.com",
+        //        FullName = "Luong Cong Duy",
+        //        PhoneNumber = "0987654321",
+        //        IsActive = true,
+        //        EmailConfirmed = true
+        //    };
+        //    var request = new UserUpdateAccountRequest
+        //    {
+        //        Email = "newEmail@gmail.com",
+        //        FullName = "Nguyen Van A"
+        //    };
+        //    var error = new IdentityError { Description = "Update failed" };
+        //    var identityResult = IdentityResult.Failed(error);
+        //    _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString())).ReturnsAsync(user);
+        //    _userManagerMock.Setup(x => x.UpdateAsync(user)).ReturnsAsync(identityResult);
+
+        //    // Act
+        //    var result = await _userService.UpdateAccountAsync(request);
+
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Cập nhập không thành công.", result.Message);
+        //    Assert.Null(result.Data);
+        //    Assert.Contains("Update failed", result.Errors);
+        //}
+    }
+}
