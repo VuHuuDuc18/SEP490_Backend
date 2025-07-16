@@ -298,6 +298,17 @@ namespace Infrastructure.Services.Implements
 
         public async Task<Response<string>> ResetPassword(ResetPasswordRequest model)
         {
+            var validationContext = new ValidationContext(model);
+            var validationResults = new List<ValidationResult>();
+            if (!Validator.TryValidateObject(model, validationContext, validationResults, validateAllProperties: true))
+            {
+                return new Response<string>
+                {
+                    Succeeded = false,
+                    Message = "Dữ liệu không hợp lệ.",
+                    Errors = validationResults.Select(r => r.ErrorMessage).ToList()
+                };
+            }
             var account = await _userManager.FindByEmailAsync(model.Email);
             if (account == null) return new Response<string>($"Không tìm thấy tài khoản với email {model.Email}.");
             if (!account.IsActive) return new Response<string>($"Tài khoản với email {model.Email} đã bị khóa.");
@@ -319,9 +330,7 @@ namespace Infrastructure.Services.Implements
 
         public async Task<Response<string>> ChangePassword(ChangePasswordRequest req)
         {
-            if (req == null) return new Response<string>("Yêu cầu không được để trống.");
-
-            
+            if (req == null) return new Response<string>("Yêu cầu không được để trống.");           
             var validationContext = new ValidationContext(req);
             var validationResults = new List<ValidationResult>();
             if (!Validator.TryValidateObject(req, validationContext, validationResults, validateAllProperties: true))
@@ -444,6 +453,11 @@ namespace Infrastructure.Services.Implements
             if (!string.IsNullOrEmpty(request.FullName) && user.FullName != request.FullName)
             {
                 user.FullName = request.FullName;
+                isChanged = true;
+            }
+            if (!string.IsNullOrEmpty(request.Address) && user.Address != request.Address)
+            {
+                user.Address = request.Address;
                 isChanged = true;
             }
             if (!isChanged)
