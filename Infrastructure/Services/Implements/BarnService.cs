@@ -115,7 +115,7 @@ namespace Infrastructure.Services.Implements
                 }
 
                 var exists = await _barnRepository.GetQueryable(x =>
-                    x.BarnName == requestDto.BarnName && x.Address == requestDto.Address && x.IsActive)
+                    x.BarnName == requestDto.BarnName && x.WorkerId == requestDto.WorkerId && x.IsActive)
                     .AnyAsync(cancellationToken);
 
                 if (exists)
@@ -123,8 +123,8 @@ namespace Infrastructure.Services.Implements
                     return new Response<string>()
                     {
                         Succeeded = false,
-                        Message = $"Chuồng trại với tên '{requestDto.BarnName}' và địa chỉ '{requestDto.Address}' đã tồn tại",
-                        Errors = new List<string> { $"Chuồng trại với tên '{requestDto.BarnName}' và địa chỉ '{requestDto.Address}' đã tồn tại" }
+                        Message = $"Chuồng trại với tên '{requestDto.BarnName}' của '{requestDto.WorkerId}' đã tồn tại",
+                        Errors = new List<string> { $"Chuồng trại với tên '{requestDto.BarnName}' và của '{requestDto.WorkerId}' đã tồn tại" }
                     };
                 }
 
@@ -229,7 +229,7 @@ namespace Infrastructure.Services.Implements
                 }
 
                 var exists = await _barnRepository.GetQueryable(x =>
-                    x.BarnName == requestDto.BarnName && x.Address == requestDto.Address && x.Id != requestDto.BarnId && x.IsActive)
+                    x.BarnName == requestDto.BarnName && x.WorkerId == requestDto.WorkerId && x.Id != requestDto.BarnId && x.IsActive)
                     .AnyAsync(cancellationToken);
 
                 if (exists)
@@ -237,8 +237,8 @@ namespace Infrastructure.Services.Implements
                     return new Response<string>()
                     {
                         Succeeded = false,
-                        Message = $"Chuồng trại với tên '{requestDto.BarnName}' và địa chỉ '{requestDto.Address}' đã tồn tại",
-                        Errors = new List<string> { $"Chuồng trại với tên '{requestDto.BarnName}' và địa chỉ '{requestDto.Address}' đã tồn tại" }
+                        Message = $"Chuồng trại với tên '{requestDto.BarnName}' và của '{requestDto.WorkerId}' đã tồn tại",
+                        Errors = new List<string> { $"Chuồng trại với tên '{requestDto.BarnName}' và của '{requestDto.WorkerId}' đã tồn tại" }
                     };
                 }
 
@@ -310,13 +310,13 @@ namespace Infrastructure.Services.Implements
                 //}
 
                 var barn = await _barnRepository.GetByIdAsync(barnId);
-                if (barn == null || !barn.IsActive)
+                if (barn == null)
                 {
                     return new Response<string>()
                     {
                         Succeeded = false,
-                        Message = "Chuồng trại không tồn tại hoặc đã bị xóa",
-                        Errors = new List<string> { "Chuồng trại không tồn tại hoặc đã bị xóa" }
+                        Message = "Chuồng trại không tồn tại",
+                        Errors = new List<string> { "Chuồng trại không tồn tại" }
                     };
                 }
 
