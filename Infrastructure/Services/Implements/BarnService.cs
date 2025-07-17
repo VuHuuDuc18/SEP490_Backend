@@ -23,29 +23,12 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
-using System.ComponentModel.DataAnnotations;
-using Infrastructure.Core;
-using Infrastructure.Repository;
-using Microsoft.EntityFrameworkCore;
-using Domain.Dto.Request.Barn;
-using CloudinaryDotNet.Actions;
-using Domain.Dto.Response.Barn;
-using Domain.Dto.Request;
-using Domain.Dto.Response;
-using Infrastructure.Extensions;
-using Application.Wrappers;
-using Domain.Helper.Constants;
-using Domain.Helper;
-using Microsoft.IdentityModel.Tokens;
-using Domain.Dto.Response.Breed;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Domain.IServices;
 using Domain.Dto.Response.User;
 using System.Net.WebSockets;
 using Domain.Dto.Response.Bill;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Domain.DTOs.Request.Order;
 
 
 
@@ -73,13 +56,13 @@ namespace Infrastructure.Services.Implements
             IHttpContextAccessor httpContextAccessor,
             CloudinaryCloudService cloudinaryCloudService)
         {
-            _barnRepository = barnRepository ?? throw new ArgumentNullException(nameof(barnRepository));
-            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-            _livestockCircleRepository = livestockCircleRepository ?? throw new ArgumentNullException(nameof(livestockCircleRepository));
-            _cloudinaryCloudService = cloudinaryCloudService ?? throw new ArgumentNullException(nameof(cloudinaryCloudService));
-            _imageLiveStockCircleRepository = imageLiveStockCircleRepository?? throw new ArgumentNullException(nameof(imageLiveStockCircleRepository));
-            _imageBreedeRepository = imageBreedeRepository ?? throw new ArgumentNullException(nameof(imageBreedeRepository));
-            _breedRepository = breedRepository ?? throw new ArgumentNullException(nameof(breedRepository));
+            _barnRepository = barnRepository ;
+            _userRepository = userRepository ;
+            _livestockCircleRepository = livestockCircleRepository ;
+            _cloudinaryCloudService = cloudinaryCloudService ;
+            _imageLiveStockCircleRepository = imageLiveStockCircleRepository;
+            _imageBreedeRepository = imageBreedeRepository;
+            _breedRepository = breedRepository;
             _httpContextAccessor = httpContextAccessor;
 
             _currentUserId = Guid.Empty;
@@ -95,52 +78,81 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-        /// <summary>
-        /// Tạo một chuồng trại mới với kiểm tra hợp lệ, bao gồm upload ảnh lên Cloudinary trong folder được chỉ định.
-        /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> CreateBarn(CreateBarnRequest requestDto, CancellationToken cancellationToken = default)
+        public async Task<Response<string>> CreateBarn(CreateBarnRequest requestDto, CancellationToken cancellationToken = default)
         {
-            if (requestDto == null)
-                return (false, "Dữ liệu chuồng trại không được null.");
-
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(requestDto);
-            if (!Validator.TryValidateObject(requestDto, validationContext, validationResults, true))
-            {
-                return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
-            }
-
-            var checkError = new Ref<CheckError>();
-            var exists = await _barnRepository.CheckExist(
-                x => x.BarnName == requestDto.BarnName && x.Address == requestDto.Address && x.IsActive,
-                checkError,
-                cancellationToken);
-
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi kiểm tra chuồng trại tồn tại: {checkError.Value.Message}");
-
-            if (exists)
-                return (false, $"Chuồng trại với tên '{requestDto.BarnName}' và địa chỉ '{requestDto.Address}' đã tồn tại.");
-
-            var worker = await _userRepository.GetByIdAsync(requestDto.WorkerId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi lấy thông tin người gia công: {checkError.Value.Message}");
-            if (worker == null)
-                return (false, "Người gia công không tồn tại.");
-
-            var barn = new Barn
-            {
-                BarnName = requestDto.BarnName,
-                Address = requestDto.Address,
-                WorkerId = requestDto.WorkerId
-            };
-
             try
             {
+                //if (_currentUserId == Guid.Empty)
+                //{
+                //    return new Response<string>()
+                //    {
+                //        Succeeded = false,
+                //        Message = "Hãy đăng nhập và thử lại",
+                //        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                //    };
+                //}
+
+                if (requestDto == null)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Dữ liệu chuồng trại không được null",
+                        Errors = new List<string> { "Dữ liệu chuồng trại không được null" }
+                    };
+                }
+
+                var validationResults = new List<ValidationResult>();
+                var validationContext = new ValidationContext(requestDto);
+                if (!Validator.TryValidateObject(requestDto, validationContext, validationResults, true))
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Dữ liệu không hợp lệ",
+                        Errors = validationResults.Select(v => v.ErrorMessage).ToList()
+                    };
+                }
+
+                var exists = await _barnRepository.GetQueryable(x =>
+                    x.BarnName == requestDto.BarnName && x.WorkerId == requestDto.WorkerId && x.IsActive)
+                    .AnyAsync(cancellationToken);
+
+                if (exists)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = $"Chuồng trại với tên '{requestDto.BarnName}' của '{requestDto.WorkerId}' đã tồn tại",
+                        Errors = new List<string> { $"Chuồng trại với tên '{requestDto.BarnName}' và của '{requestDto.WorkerId}' đã tồn tại" }
+                    };
+                }
+
+                var worker = await _userRepository.GetByIdAsync(requestDto.WorkerId);
+                if (worker == null || !worker.IsActive)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Người gia công không tồn tại hoặc đã bị xóa",
+                        Errors = new List<string> { "Người gia công không tồn tại hoặc đã bị xóa" }
+                    };
+                }
+
+                var barn = new Barn
+                {
+                    BarnName = requestDto.BarnName,
+                    Address = requestDto.Address,
+                    WorkerId = requestDto.WorkerId,
+                    IsActive = true,
+                    CreatedBy = _currentUserId,
+                    CreatedDate = DateTime.UtcNow
+                };
+
                 if (!string.IsNullOrEmpty(requestDto.Image))
                 {
                     var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
-     requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
+                        requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {
@@ -150,70 +162,112 @@ namespace Infrastructure.Services.Implements
 
                 _barnRepository.Insert(barn);
                 await _barnRepository.CommitAsync(cancellationToken);
-                return (true, null);
+
+                return new Response<string>()
+                {
+                    Succeeded = true,
+                    Message = "Tạo chuồng trại thành công",
+                    Data = $"Chuồng trại đã được tạo thành công. ID: {barn.Id}"
+                };
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi tạo chuồng trại: {ex.Message}");
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi tạo chuồng trại",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
 
-        /// <summary>
-        /// Cập nhật thông tin một chuồng trại, bao gồm upload ảnh lên Cloudinary trong folder được chỉ định.
-        /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> UpdateBarn(Guid BarnId, UpdateBarnRequest requestDto, CancellationToken cancellationToken = default)
+        public async Task<Response<string>> UpdateBarn(UpdateBarnRequest requestDto, CancellationToken cancellationToken = default)
         {
-            if (requestDto == null)
-                return (false, "Dữ liệu chuồng trại không được null.");
-
-            var checkError = new Ref<CheckError>();
-            var existing = await _barnRepository.GetByIdAsync(BarnId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi lấy thông tin chuồng trại: {checkError.Value.Message}");
-
-            if (existing == null)
-                return (false, "Không tìm thấy chuồng trại.");
-
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(requestDto);
-            if (!Validator.TryValidateObject(requestDto, validationContext, validationResults, true))
-            {
-                return (false, string.Join("; ", validationResults.Select(v => v.ErrorMessage)));
-            }
-
-            var exists = await _barnRepository.CheckExist(
-                x => x.BarnName == requestDto.BarnName && x.Address == requestDto.Address && x.Id != BarnId && x.IsActive,
-                checkError,
-                cancellationToken);
-
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi kiểm tra chuồng trại tồn tại: {checkError.Value.Message}");
-
-            if (exists)
-                return (false, $"Chuồng trại với tên '{requestDto.BarnName}' và địa chỉ '{requestDto.Address}' đã tồn tại.");
-
-            var worker = await _userRepository.GetByIdAsync(requestDto.WorkerId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi lấy thông tin người gia công: {checkError.Value.Message}");
-            if (worker == null)
-                return (false, "Người gia công không tồn tại.");
-
             try
             {
+                //if (_currentUserId == Guid.Empty)
+                //{
+                //    return new Response<string>()
+                //    {
+                //        Succeeded = false,
+                //        Message = "Hãy đăng nhập và thử lại",
+                //        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                //    };
+                //}
+
+                if (requestDto == null)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Dữ liệu chuồng trại không được null",
+                        Errors = new List<string> { "Dữ liệu chuồng trại không được null" }
+                    };
+                }
+
+                var existing = await _barnRepository.GetByIdAsync(requestDto.BarnId);
+                if (existing == null || !existing.IsActive)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Chuồng trại không tồn tại hoặc đã bị xóa",
+                        Errors = new List<string> { "Chuồng trại không tồn tại hoặc đã bị xóa" }
+                    };
+                }
+
+                var validationResults = new List<ValidationResult>();
+                var validationContext = new ValidationContext(requestDto);
+                if (!Validator.TryValidateObject(requestDto, validationContext, validationResults, true))
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Dữ liệu không hợp lệ",
+                        Errors = validationResults.Select(v => v.ErrorMessage).ToList()
+                    };
+                }
+
+                var exists = await _barnRepository.GetQueryable(x =>
+                    x.BarnName == requestDto.BarnName && x.WorkerId == requestDto.WorkerId && x.Id != requestDto.BarnId && x.IsActive)
+                    .AnyAsync(cancellationToken);
+
+                if (exists)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = $"Chuồng trại với tên '{requestDto.BarnName}' và của '{requestDto.WorkerId}' đã tồn tại",
+                        Errors = new List<string> { $"Chuồng trại với tên '{requestDto.BarnName}' và của '{requestDto.WorkerId}' đã tồn tại" }
+                    };
+                }
+
+                var worker = await _userRepository.GetByIdAsync(requestDto.WorkerId);
+                if (worker == null || !worker.IsActive)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Người gia công không tồn tại hoặc đã bị xóa",
+                        Errors = new List<string> { "Người gia công không tồn tại hoặc đã bị xóa" }
+                    };
+                }
+
                 existing.BarnName = requestDto.BarnName;
                 existing.Address = requestDto.Address;
                 existing.WorkerId = requestDto.WorkerId;
+                existing.UpdatedBy = _currentUserId;
+                existing.UpdatedDate = DateTime.UtcNow;
 
                 if (!string.IsNullOrEmpty(requestDto.Image))
                 {
                     if (!string.IsNullOrEmpty(existing.Image))
                     {
-
                         await _cloudinaryCloudService.DeleteImage(existing.Image, cancellationToken);
                     }
 
                     var imageLink = await UploadImageExtension.UploadBase64ImageAsync(
-requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
+                        requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
 
                     if (!string.IsNullOrEmpty(imageLink))
                     {
@@ -223,101 +277,221 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
 
                 _barnRepository.Update(existing);
                 await _barnRepository.CommitAsync(cancellationToken);
-                return (true, null);
+
+                return new Response<string>()
+                {
+                    Succeeded = true,
+                    Message = "Cập nhật chuồng trại thành công",
+                    Data = $"Chuồng trại đã được cập nhật thành công. ID: {existing.Id}"
+                };
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi cập nhật chuồng trại: {ex.Message}");
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi cập nhật chuồng trại",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
-
-        /// <summary>
-        /// Xóa mềm một chuồng trại bằng cách đặt IsActive thành false.
-        /// </summary>
-        public async Task<(bool Success, string ErrorMessage)> DisableBarn(Guid BarnId, CancellationToken cancellationToken = default)
+        public async Task<Response<string>> DisableBarn(Guid barnId, CancellationToken cancellationToken = default)
         {
-            var checkError = new Ref<CheckError>();
-            var barn = await _barnRepository.GetByIdAsync(BarnId, checkError);
-            if (checkError.Value?.IsError == true)
-                return (false, $"Lỗi khi lấy thông tin chuồng trại: {checkError.Value.Message}");
-
-            if (barn == null)
-                return (false, "Không tìm thấy chuồng trại.");
-
             try
             {
+                //if (_currentUserId == Guid.Empty)
+                //{
+                //    return new Response<string>()
+                //    {
+                //        Succeeded = false,
+                //        Message = "Hãy đăng nhập và thử lại",
+                //        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                //    };
+                //}
+
+                var barn = await _barnRepository.GetByIdAsync(barnId);
+                if (barn == null)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Chuồng trại không tồn tại",
+                        Errors = new List<string> { "Chuồng trại không tồn tại" }
+                    };
+                }
+
                 barn.IsActive = !barn.IsActive;
+                barn.UpdatedBy = _currentUserId;
+                barn.UpdatedDate = DateTime.UtcNow;
+
                 //if (!string.IsNullOrEmpty(barn.Image))
                 //{
                 //    await _cloudinaryCloudService.DeleteImage(barn.Image, cancellationToken);
+                //    barn.Image = null;
                 //}
+
                 _barnRepository.Update(barn);
                 await _barnRepository.CommitAsync(cancellationToken);
-                return (true, null);
+
+                if (barn.IsActive)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = true,
+                        Message = "Khôi phục chuồng trại thành công",
+                        Data = $"Chuồng trại đã được khôi phục thành công. ID: {barn.Id}"
+                    };
+                }
+                else
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = true,
+                        Message = "Xóa chuồng trại thành công",
+                        Data = $"Chuồng trại đã được xóa thành công. ID: {barn.Id}"
+                    };
+
+                }
             }
             catch (Exception ex)
             {
-                return (false, $"Lỗi khi xóa chuồng trại: {ex.Message}");
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi xóa chuồng trại",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
 
-        /// <summary>
-        /// Lấy thông tin một chuồng trại theo ID.
-        /// </summary>
-        public async Task<(BarnResponse Barn, string ErrorMessage)> GetBarnById(Guid BarnId, CancellationToken cancellationToken = default)
-        {
-            var checkError = new Ref<CheckError>();
-            var barn = await _barnRepository.GetByIdAsync(BarnId);
-            if (checkError.Value?.IsError == true)
-                return (null, $"Lỗi khi lấy thông tin chuồng trại: {checkError.Value.Message}");
-
-            if (barn == null)
-                return (null, "Không tìm thấy chuồng trại.");
-
-            var wokerResponse = new WokerResponse()
-            {
-                Id = barn.Worker.Id,
-                FullName = barn.Worker.FullName,
-                Email = barn.Worker.Email
-            };
-
-            var response = new BarnResponse
-            {
-                Id = barn.Id,
-                BarnName = barn.BarnName,
-                Address = barn.Address,
-                Image = barn.Image,
-                Worker = wokerResponse,
-                IsActive = barn.IsActive
-            };
-            return (response, null);
-        }
-
-        /// <summary>
-        /// Lấy danh sách chuồng trại theo ID của người gia công.
-        /// </summary>
-        public async Task<(PaginationSet<BarnResponse> Result, string ErrorMessage)> GetBarnByWorker(ListingRequest request, CancellationToken cancellationToken = default)
+        public async Task<Response<BarnResponse>> GetBarnById(Guid barnId, CancellationToken cancellationToken = default)
         {
             try
             {
-                
-                var checkError = new Ref<CheckError>();
-                var worker = await _userRepository.GetByIdAsync(_currentUserId, checkError);
-                if (checkError.Value?.IsError == true)
-                    return (null, $"Lỗi khi lấy thông tin người gia công: {checkError.Value.Message}");
-                if (worker == null)
-                    return (null, "Người gia công không tồn tại.");
+
+                var barn = await _barnRepository.GetByIdAsync(barnId);
+                if (barn == null || !barn.IsActive)
+                {
+                    return new Response<BarnResponse>()
+                    {
+                        Succeeded = false,
+                        Message = "Chuồng trại không tồn tại hoặc đã bị xóa",
+                        Errors = new List<string> { "Chuồng trại không tồn tại hoặc đã bị xóa" }
+                    };
+                }
+
+                if (barn.Worker == null || !barn.Worker.IsActive)
+                {
+                    return new Response<BarnResponse>()
+                    {
+                        Succeeded = false,
+                        Message = "Người gia công không tồn tại hoặc đã bị xóa",
+                        Errors = new List<string> { "Người gia công không tồn tại hoặc đã bị xóa" }
+                    };
+                }
+
+                var workerResponse = new WokerResponse
+                {
+                    Id = barn.Worker.Id,
+                    FullName = barn.Worker.FullName,
+                    Email = barn.Worker.Email
+                };
+
+                var response = new BarnResponse
+                {
+                    Id = barn.Id,
+                    BarnName = barn.BarnName,
+                    Address = barn.Address,
+                    Image = barn.Image,
+                    Worker = workerResponse,
+                    IsActive = barn.IsActive
+                };
+
+                return new Response<BarnResponse>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy thông tin chuồng trại thành công",
+                    Data = response
+                };
+            }
+            catch (Exception ex)
+            {
+                return new Response<BarnResponse>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy thông tin chuồng trại",
+                    Errors = new List<string> { ex.Message }
+                };
+            }
+        }
+
+        public async Task<Response<PaginationSet<BarnResponse>>> GetBarnByWorker(ListingRequest request, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (_currentUserId == Guid.Empty)
+                {
+                    return new Response<PaginationSet<BarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = "Hãy đăng nhập và thử lại",
+                        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                    };
+                }
+
+                var worker = await _userRepository.GetByIdAsync(_currentUserId);
+                if (worker == null || !worker.IsActive)
+                {
+                    return new Response<PaginationSet<BarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = "Người gia công không tồn tại hoặc đã bị xóa",
+                        Errors = new List<string> { "Người gia công không tồn tại hoặc đã bị xóa" }
+                    };
+                }
 
                 if (request == null)
-                    return (null, "Yêu cầu không được null.");
-                if (request.PageIndex < 1 || request.PageSize < 1)
-                    return (null, "PageIndex và PageSize phải lớn hơn 0.");
+                {
+                    return new Response<PaginationSet<BarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = "Yêu cầu không được null",
+                        Errors = new List<string> { "Yêu cầu không được null" }
+                    };
+                }
 
-                var validFields = typeof(Barn).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                {
+                    return new Response<PaginationSet<BarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = "PageIndex và PageSize phải lớn hơn 0",
+                        Errors = new List<string> { "PageIndex và PageSize phải lớn hơn 0" }
+                    };
+                }
+
+                var validFields = typeof(BarnResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
-                    return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+                {
+                    return new Response<PaginationSet<BarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
+
+                if (!validFields.Contains(request.Sort?.Field))
+                {
+                    return new Response<PaginationSet<BarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường sắp xếp không hợp lệ: {request.Sort?.Field}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
 
                 var query = _barnRepository.GetQueryable(x => x.WorkerId == _currentUserId && x.IsActive);
 
@@ -329,26 +503,22 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
 
                 var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
 
-                var responses = new List<BarnResponse>();
-                foreach (var barn in paginationResult.Items)
-                {
-                    var wokerResponse = new WokerResponse()
-                    {
-                        Id = barn.Worker.Id,
-                        FullName = barn.Worker.FullName,
-                        Email = barn.Worker.Email
-                    };
-
-                    responses.Add(new BarnResponse
+                var responses = paginationResult.Items
+                    .Where(barn => barn.Worker != null && barn.Worker.IsActive)
+                    .Select(barn => new BarnResponse
                     {
                         Id = barn.Id,
                         BarnName = barn.BarnName,
                         Address = barn.Address,
                         Image = barn.Image,
-                        Worker = wokerResponse,
+                        Worker = new WokerResponse
+                        {
+                            Id = barn.Worker.Id,
+                            FullName = barn.Worker.FullName,
+                            Email = barn.Worker.Email
+                        },
                         IsActive = barn.IsActive
-                    });
-                }
+                    }).ToList();
 
                 var result = new PaginationSet<BarnResponse>
                 {
@@ -359,32 +529,79 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                     Items = responses
                 };
 
-                return (result, null);
+                return new Response<PaginationSet<BarnResponse>>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy danh sách phân trang chuồng trại thành công",
+                    Data = result
+                };
             }
             catch (Exception ex)
             {
-                return (null, $"Lỗi khi lấy danh sách phân trang: {ex.Message}");
+                return new Response<PaginationSet<BarnResponse>>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy danh sách phân trang chuồng trại",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
-        /// <summary>
-        /// Lấy danh sách chuồng trại phân trang cho người gia công.
-        /// </summary>
-        public async Task<(PaginationSet<BarnResponse> Result, string ErrorMessage)> GetPaginatedBarnList(
-            ListingRequest request,
-            CancellationToken cancellationToken = default)
+        public async Task<Response<PaginationSet<BarnResponse>>> GetPaginatedBarnList(ListingRequest request,CancellationToken cancellationToken = default)
         {
             try
             {
-                if (request == null)
-                    return (null, "Yêu cầu không được null.");
-                if (request.PageIndex < 1 || request.PageSize < 1)
-                    return (null, "PageIndex và PageSize phải lớn hơn 0.");
+                //if (_currentUserId == Guid.Empty)
+                //{
+                //    return new Response<PaginationSet<BarnResponse>>()
+                //    {
+                //        Succeeded = false,
+                //        Message = "Hãy đăng nhập và thử lại",
+                //        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                //    };
+                //}
 
-                var validFields = typeof(Barn).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                if (request == null)
+                {
+                    return new Response<PaginationSet<BarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = "Yêu cầu không được null",
+                        Errors = new List<string> { "Yêu cầu không được null" }
+                    };
+                }
+
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                {
+                    return new Response<PaginationSet<BarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = "PageIndex và PageSize phải lớn hơn 0",
+                        Errors = new List<string> { "PageIndex và PageSize phải lớn hơn 0" }
+                    };
+                }
+
+                var validFields = typeof(BarnResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
-                    return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+                {
+                    return new Response<PaginationSet<BarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
+
+                if (!string.IsNullOrEmpty(request.Sort?.Field) && !validFields.Contains(request.Sort.Field))
+                {
+                    return new Response<PaginationSet<BarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường sắp xếp không hợp lệ: {request.Sort.Field}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
 
                 var query = _barnRepository.GetQueryable(x => x.IsActive);
 
@@ -396,26 +613,22 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
 
                 var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
 
-                var responses = new List<BarnResponse>();
-                foreach (var barn in paginationResult.Items)
-                {
-                    var wokerResponse = new WokerResponse()
-                    {
-                        Id = barn.Worker.Id,
-                        FullName = barn.Worker.FullName,
-                        Email = barn.Worker.Email
-                    };
-
-                    responses.Add(new BarnResponse
+                var responses = paginationResult.Items
+                    .Where(barn => barn.Worker != null && barn.Worker.IsActive)
+                    .Select(barn => new BarnResponse
                     {
                         Id = barn.Id,
                         BarnName = barn.BarnName,
                         Address = barn.Address,
                         Image = barn.Image,
-                        Worker = wokerResponse,
+                        Worker = new WokerResponse
+                        {
+                            Id = barn.Worker.Id,
+                            FullName = barn.Worker.FullName,
+                            Email = barn.Worker.Email
+                        },
                         IsActive = barn.IsActive
-                    });
-                }
+                    }).ToList();
 
                 var result = new PaginationSet<BarnResponse>
                 {
@@ -426,82 +639,114 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                     Items = responses
                 };
 
-                return (result, null);
+                return new Response<PaginationSet<BarnResponse>>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy danh sách phân trang chuồng trại thành công",
+                    Data = result
+                };
             }
             catch (Exception ex)
             {
-                return (null, $"Lỗi khi lấy danh sách phân trang: {ex.Message}");
+                return new Response<PaginationSet<BarnResponse>>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy danh sách phân trang chuồng trại",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
 
-        /// <summary>
-        /// Lấy danh sách chuồng trại phân trang cho admin, bao gồm trạng thái có LivestockCircle đang hoạt động hay không
-        /// </summary>
-        public async Task<(PaginationSet<AdminBarnResponse> Result, string ErrorMessage)> GetPaginatedAdminBarnListAsync(
-            ListingRequest request, CancellationToken cancellationToken = default)
+        public async Task<Response<PaginationSet<AdminBarnResponse>>> GetPaginatedAdminBarnListAsync(ListingRequest request,CancellationToken cancellationToken = default)
         {
             try
             {
-                // Kiểm tra request không được null
+                if (_currentUserId == Guid.Empty)
+                {
+                    return new Response<PaginationSet<AdminBarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = "Hãy đăng nhập và thử lại",
+                        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                    };
+                }
+
                 if (request == null)
-                    return (null, "Yêu cầu không được null.");
+                {
+                    return new Response<PaginationSet<AdminBarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = "Yêu cầu không được null",
+                        Errors = new List<string> { "Yêu cầu không được null" }
+                    };
+                }
 
-                // Kiểm tra PageIndex và PageSize phải lớn hơn 0
                 if (request.PageIndex < 1 || request.PageSize < 1)
-                    return (null, "PageIndex và PageSize phải lớn hơn 0.");
+                {
+                    return new Response<PaginationSet<AdminBarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = "PageIndex và PageSize phải lớn hơn 0",
+                        Errors = new List<string> { "PageIndex và PageSize phải lớn hơn 0" }
+                    };
+                }
 
-                // Kiểm tra các trường lọc có hợp lệ không
-                var validFields = typeof(Barn).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var validFields = typeof(AdminBarnResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
-                    return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+                {
+                    return new Response<PaginationSet<AdminBarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
 
-                // Lấy danh sách chuồng trại đang hoạt động
-                var query = _barnRepository.GetQueryable(x => x.IsActive);
+                if (!string.IsNullOrEmpty(request.Sort?.Field) && !validFields.Contains(request.Sort.Field))
+                {
+                    return new Response<PaginationSet<AdminBarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường sắp xếp không hợp lệ: {request.Sort.Field}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
 
-                // Áp dụng tìm kiếm nếu có chuỗi tìm kiếm
+                var query = _barnRepository.GetQueryable();
+
                 if (request.SearchString?.Any() == true)
                     query = query.SearchString(request.SearchString);
 
-                // Áp dụng bộ lọc nếu có
                 if (request.Filter?.Any() == true)
                     query = query.Filter(request.Filter);
 
-                // Phân trang kết quả
                 var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
 
-                // Lấy danh sách LivestockCircle đang hoạt động
                 var activeLivestockCircles = await _livestockCircleRepository
                     .GetQueryable(x => x.IsActive && x.Status != StatusConstant.CANCELSTAT && x.Status != StatusConstant.DONESTAT)
+                    .Select(x => x.BarnId)
                     .ToListAsync(cancellationToken);
 
-                var responses = new List<AdminBarnResponse>();
-                foreach (var barn in paginationResult.Items)
-                {
-                    var workerResponse = new WokerResponse
-                    {
-                        Id = barn.Worker.Id,
-                        FullName = barn.Worker.FullName,
-                        Email = barn.Worker.Email
-                    };
-
-                    // Kiểm tra xem chuồng trại có LivestockCircle đang hoạt động hay không
-                    bool hasActiveLivestockCircle = activeLivestockCircles.Any(lc => lc.BarnId == barn.Id);
-
-                    responses.Add(new AdminBarnResponse
+                var responses = paginationResult.Items
+                    .Where(barn => barn.Worker != null && barn.Worker.IsActive)
+                    .Select(barn => new AdminBarnResponse
                     {
                         Id = barn.Id,
                         BarnName = barn.BarnName,
                         Address = barn.Address,
                         Image = barn.Image,
-                        Worker = workerResponse,
+                        Worker = new WokerResponse
+                        {
+                            Id = barn.Worker.Id,
+                            FullName = barn.Worker.FullName,
+                            Email = barn.Worker.Email
+                        },
                         IsActive = barn.IsActive,
-                        HasActiveLivestockCircle = hasActiveLivestockCircle
-                    });
-                }
+                        HasActiveLivestockCircle = activeLivestockCircles.Contains(barn.Id)
+                    }).ToList();
 
-                // Tạo đối tượng phân trang trả về
                 var result = new PaginationSet<AdminBarnResponse>
                 {
                     PageIndex = paginationResult.PageIndex,
@@ -511,31 +756,60 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                     Items = responses
                 };
 
-                return (result, null);
+                return new Response<PaginationSet<AdminBarnResponse>>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy danh sách phân trang chuồng trại cho admin thành công",
+                    Data = result
+                };
             }
             catch (Exception ex)
             {
-                return (null, $"Lỗi khi lấy danh sách chuồng trại cho admin: {ex.Message}");
+                return new Response<PaginationSet<AdminBarnResponse>>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy danh sách chuồng trại cho admin",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
-
-        /// <summary>
-        /// Lấy chi tiết chuồng trại cho admin, bao gồm thông tin LivestockCircle đang hoạt động (nếu có)
-        /// </summary>
-        public async Task<(AdminBarnDetailResponse Barn, string ErrorMessage)> GetAdminBarnDetailAsync(
-      Guid barnId, CancellationToken cancellationToken = default)
+        public async Task<Response<AdminBarnDetailResponse>> GetAdminBarnDetailAsync(Guid barnId,CancellationToken cancellationToken = default)
         {
             try
             {
-                var checkError = new Ref<CheckError>();
-                var barn = await _barnRepository.GetQueryable(x => x.Id == barnId)
+                if (_currentUserId == Guid.Empty)
+                {
+                    return new Response<AdminBarnDetailResponse>()
+                    {
+                        Succeeded = false,
+                        Message = "Hãy đăng nhập và thử lại",
+                        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                    };
+                }
+
+                var barn = await _barnRepository.GetQueryable(x => x.Id == barnId && x.IsActive)
                     .Include(x => x.Worker)
                     .FirstOrDefaultAsync(cancellationToken);
 
-                if (checkError.Value?.IsError == true)
-                    return (null, $"Lỗi khi lấy thông tin chuồng trại: {checkError.Value.Message}");
                 if (barn == null)
-                    return (null, "Không tìm thấy chuồng trại.");
+                {
+                    return new Response<AdminBarnDetailResponse>()
+                    {
+                        Succeeded = false,
+                        Message = "Chuồng trại không tồn tại hoặc đã bị xóa",
+                        Errors = new List<string> { "Chuồng trại không tồn tại hoặc đã bị xóa" }
+                    };
+                }
+
+                if (barn.Worker == null || !barn.Worker.IsActive)
+                {
+                    return new Response<AdminBarnDetailResponse>()
+                    {
+                        Succeeded = false,
+                        Message = "Người gia công không tồn tại hoặc đã bị xóa",
+                        Errors = new List<string> { "Người gia công không tồn tại hoặc đã bị xóa" }
+                    };
+                }
 
                 var workerResponse = new WokerResponse
                 {
@@ -544,15 +818,45 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                     Email = barn.Worker.Email
                 };
 
-                // Lấy LivestockCircle đang hoạt động (nếu có)
+                ActiveLivestockCircleResponse? activeLivestockCircleResponse = null;
                 var activeLivestockCircle = await _livestockCircleRepository
                     .GetQueryable(x => x.BarnId == barnId && x.IsActive && x.Status != StatusConstant.CANCELSTAT && x.Status != StatusConstant.DONESTAT)
                     .FirstOrDefaultAsync(cancellationToken);
 
-                ActiveLivestockCircleResponse? activeLivestockCircleResponse = null;
                 if (activeLivestockCircle != null)
                 {
                     var technicalStaff = await _userRepository.GetByIdAsync(activeLivestockCircle.TechicalStaffId);
+                    if (technicalStaff == null || !technicalStaff.IsActive)
+                    {
+                        return new Response<AdminBarnDetailResponse>()
+                        {
+                            Succeeded = false,
+                            Message = "Nhân viên kỹ thuật không tồn tại hoặc đã bị xóa",
+                            Errors = new List<string> { "Nhân viên kỹ thuật không tồn tại hoặc đã bị xóa" }
+                        };
+                    }
+
+                    var breed = await _breedRepository.GetByIdAsync(activeLivestockCircle.BreedId);
+                    if (breed == null || !breed.IsActive)
+                    {
+                        return new Response<AdminBarnDetailResponse>()
+                        {
+                            Succeeded = false,
+                            Message = "Giống không tồn tại hoặc đã bị xóa",
+                            Errors = new List<string> { "Giống không tồn tại hoặc đã bị xóa" }
+                        };
+                    }
+
+                    var images = await _imageBreedeRepository.GetQueryable(x => x.BreedId == breed.Id && x.IsActive)
+                        .ToListAsync(cancellationToken);
+
+                    var breedResponse = new BreedBillResponse
+                    {
+                        Id = activeLivestockCircle.BreedId,
+                        BreedName = breed.BreedName,
+                        Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
+                    };
+
                     var technicalStaffResponse = new UserItemResponse
                     {
                         Id = technicalStaff.Id,
@@ -560,14 +864,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                         Fullname = technicalStaff.FullName,
                         PhoneNumber = technicalStaff.PhoneNumber
                     };
-                    var breed = await _breedRepository.GetByIdAsync(activeLivestockCircle.BreedId);
-                    var images = await _imageBreedeRepository.GetQueryable(x => x.BreedId == breed.Id).ToListAsync(cancellationToken);
-                    var breedResponse = new BreedBillResponse
-                    {
-                        Id = activeLivestockCircle.BreedId,
-                        BreedName = breed.BreedName,
-                        Thumbnail = images.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
-                    };
+
                     activeLivestockCircleResponse = new ActiveLivestockCircleResponse
                     {
                         Id = activeLivestockCircle.Id,
@@ -595,20 +892,25 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                     ActiveLivestockCircle = activeLivestockCircleResponse
                 };
 
-                return (response, null);
+                return new Response<AdminBarnDetailResponse>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy chi tiết chuồng trại thành công",
+                    Data = response
+                };
             }
             catch (Exception ex)
             {
-                return (null, $"Lỗi khi lấy chi tiết chuồng trại: {ex.Message}");
+                return new Response<AdminBarnDetailResponse>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy chi tiết chuồng trại",
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
 
-        /// <summary>
-        /// Lấy danh sách phân trang chuồng trại đang có sẵn cho khách hàng, bao gồm thông tin LivestockCircle đang hoạt động
-        /// </summary>
-        public async Task<Response<PaginationSet<ReleaseBarnResponse>>> GetPaginatedReleaseBarnListAsync(
-            ListingRequest request,
-            CancellationToken cancellationToken = default)
+        public async Task<Response<PaginationSet<ReleaseBarnResponse>>> GetPaginatedReleaseBarnListAsync(ListingRequest request,CancellationToken cancellationToken = default)
         {
             try
             {
@@ -678,9 +980,7 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
             }
         }
 
-        public async Task<Response<ReleaseBarnDetailResponse>> GetReleaseBarnDetail(
-            Guid BarnId,
-            CancellationToken cancellationToken = default)
+        public async Task<Response<ReleaseBarnDetailResponse>> GetReleaseBarnDetail(Guid BarnId,CancellationToken cancellationToken = default)
         {
             try
             {
@@ -691,9 +991,9 @@ requestDto.Image, "barn", _cloudinaryCloudService, cancellationToken);
                     return new Response<ReleaseBarnDetailResponse>("Không tìm thấy thông tin chuồng nuôi.");
                 }
                 //get livestock circle images
-                var circleImages = _imageLiveStockCircleRepository.GetQueryable(x=>x.IsActive && x.LivestockCircleId == liveStockCircle.Id)
+                var circleImages =await  _imageLiveStockCircleRepository.GetQueryable(x=>x.IsActive && x.LivestockCircleId == liveStockCircle.Id)
                     .Select(x=> AutoMapperHelper.AutoMap<ImageLivestockCircle, ImageLivestockCircleResponse>(x))
-                    .ToList();
+                    .ToListAsync();
                 //get breed images
                 var breedImages = _imageBreedeRepository.GetQueryable(x => x.IsActive && x.BreedId == liveStockCircle.BreedId).Select(x=> x.ImageLink).ToList();
                 //map data to response object

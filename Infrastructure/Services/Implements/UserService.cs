@@ -35,6 +35,7 @@ using Domain.Dto.Request.User;
 using Domain.Dto.Response.User;
 using Domain.Dto.Response.BarnPlan;
 using Domain.IServices;
+using System.ComponentModel.DataAnnotations;
 
 namespace Infrastructure.Services.Implements
 {
@@ -89,6 +90,10 @@ namespace Infrastructure.Services.Implements
             if (user == null)
             {
                 return new Response<AuthenticationResponse>($"Không tìm thấy tài khoản với email {request.Email}.");
+            }
+            if(!user.IsActive)
+            {
+                return new Response<AuthenticationResponse>($"Tài khoản với email {request.Email} đã bị khóa.");
             }
             var result = await _signInManager.PasswordSignInAsync(user.UserName, request.Password, false, lockoutOnFailure: false);
             if (!result.Succeeded)
@@ -256,12 +261,15 @@ namespace Infrastructure.Services.Implements
 
         public async Task<Response<string>> ConfirmEmailAsync(string userId, string code)
         {
+            if (string.IsNullOrEmpty(userId)) return new Response<string>("The UserId field is a require.");
+            if (string.IsNullOrEmpty(code)) return new Response<string>("The Code field is a require.");
             var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return new Response<string>("Không tìm thấy tài khoản.");
             code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
             var result = await _userManager.ConfirmEmailAsync(user, code);
             if (result.Succeeded)
             {
-                return new Response<string>(user.Id.ToString(), message: $"Tài khoản đã được xác thực.");
+                return new Response<string>(user.Id.ToString(), message: $"Tài khoản đã được xác thực thành công.");
             }
             else
             {
@@ -280,6 +288,7 @@ namespace Infrastructure.Services.Implements
 
             // always return ok response to prevent email enumeration
             if (account == null) return;
+            if (!account.IsActive) return;
 
             var code = await _userManager.GeneratePasswordResetTokenAsync(account);
             var route = "api/account/reset-password/";
@@ -289,8 +298,20 @@ namespace Infrastructure.Services.Implements
 
         public async Task<Response<string>> ResetPassword(ResetPasswordRequest model)
         {
+            var validationContext = new ValidationContext(model);
+            var validationResults = new List<ValidationResult>();
+            if (!Validator.TryValidateObject(model, validationContext, validationResults, validateAllProperties: true))
+            {
+                return new Response<string>
+                {
+                    Succeeded = false,
+                    Message = "Dữ liệu không hợp lệ.",
+                    Errors = validationResults.Select(r => r.ErrorMessage).ToList()
+                };
+            }
             var account = await _userManager.FindByEmailAsync(model.Email);
             if (account == null) return new Response<string>($"Không tìm thấy tài khoản với email {model.Email}.");
+            if (!account.IsActive) return new Response<string>($"Tài khoản với email {model.Email} đã bị khóa.");
             var result = await _userManager.ResetPasswordAsync(account, model.Token, model.Password);
             if (result.Succeeded)
             {
@@ -309,6 +330,18 @@ namespace Infrastructure.Services.Implements
 
         public async Task<Response<string>> ChangePassword(ChangePasswordRequest req)
         {
+            if (req == null) return new Response<string>("Yêu cầu không được để trống.");           
+            var validationContext = new ValidationContext(req);
+            var validationResults = new List<ValidationResult>();
+            if (!Validator.TryValidateObject(req, validationContext, validationResults, validateAllProperties: true))
+            {
+                return new Response<string>
+                {
+                    Succeeded = false,
+                    Message = "Dữ liệu không hợp lệ.",
+                    Errors = validationResults.Select(r => r.ErrorMessage).ToList()
+                };
+            }
             User user = await _userManager.FindByIdAsync(req.UserId.ToString());
             if (user == null)
             {
@@ -420,6 +453,11 @@ namespace Infrastructure.Services.Implements
             if (!string.IsNullOrEmpty(request.FullName) && user.FullName != request.FullName)
             {
                 user.FullName = request.FullName;
+                isChanged = true;
+            }
+            if (!string.IsNullOrEmpty(request.Address) && user.Address != request.Address)
+            {
+                user.Address = request.Address;
                 isChanged = true;
             }
             if (!isChanged)

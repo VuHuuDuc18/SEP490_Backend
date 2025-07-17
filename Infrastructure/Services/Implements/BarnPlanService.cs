@@ -34,7 +34,7 @@ namespace Infrastructure.Services.Implements
         {
             // xu ly daily
             DateTime formatedStartDate, formatedEndDate;
-            ValidTime(true,(bool)(req.IsDaily == null ? false : req.IsDaily), req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
+            ValidTime(true, (bool)(req.IsDaily == null ? false : req.IsDaily), req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
 
             // insert barn
             BarnPlan barnPlanDetail = new BarnPlan()
@@ -80,7 +80,7 @@ namespace Infrastructure.Services.Implements
 
 
 
-                var query = _barnplanrepo.GetQueryable(x => x.IsActive).Where(it=>it.LivestockCircleId == livestockCircleId);
+                var query = _barnplanrepo.GetQueryable(x => x.IsActive).Where(it => it.LivestockCircleId == livestockCircleId);
 
                 if (request.SearchString?.Any() == true)
                     query = query.SearchString(request.SearchString);
@@ -96,7 +96,7 @@ namespace Infrastructure.Services.Implements
                     medicinePlans = null,
                     Note = i.Note,
                     StartDate = i.StartDate
-                }).Pagination(request.PageIndex, request.PageSize, request.Sort);               
+                }).Pagination(request.PageIndex, request.PageSize, request.Sort);
 
                 return (result);
             }
@@ -140,9 +140,46 @@ namespace Infrastructure.Services.Implements
         }
         public async Task<ViewBarnPlanResponse> GetByLiveStockCircleId(Guid id)
         {
-            var barnPlanDetail = await _barnplanrepo.GetQueryable(x=>x.IsActive)
-                .Where(it => it.EndDate <= DateTime.Now && it.StartDate >= DateTime.Now && it.LivestockCircleId == id)
-                .FirstOrDefaultAsync();
+            var barnPlanDetail = await _barnplanrepo.GetQueryable(x => x.IsActive)
+                .FirstOrDefaultAsync(it => it.EndDate >= DateTime.Now && it.StartDate <= DateTime.Now && it.LivestockCircleId == id);
+
+            if (barnPlanDetail == null)
+            {
+                throw new Exception("Không tìm thấy kế hoạch cho chuồng ");
+            }
+            ViewBarnPlanResponse result = new ViewBarnPlanResponse()
+            {
+                Id = barnPlanDetail.Id,
+                EndDate = barnPlanDetail.EndDate,
+                StartDate = barnPlanDetail.StartDate,
+                Note = barnPlanDetail.Note,
+                foodPlans = await _bpfoodrepo.GetQueryable(x => x.IsActive)
+                                        .Where(x => x.BarnPlanId == barnPlanDetail.Id)
+                                        .Include(x => x.Food)
+                                        .Select(it => new Domain.Dto.Response.BarnPlan.FoodPlan()
+                                        {
+                                            FoodId = it.FoodId,
+                                            FoodName = it.Food.FoodName,
+                                            Note = it.Note,
+                                            Stock = it.Stock
+                                        }).ToListAsync(),
+                medicinePlans = await _bpmedicinerepo.GetQueryable(x => x.IsActive)
+                                        .Where(x => x.BarnPlanId == barnPlanDetail.Id)
+                                        .Include(x => x.Medicine)
+                                        .Select(it => new Domain.Dto.Response.BarnPlan.MedicinePlan()
+                                        {
+                                            MedicineId = it.MedicineId,
+                                            MedicineName = it.Medicine.MedicineName,
+                                            Note = it.Note,
+                                            Stock = it.Stock
+                                        }).ToListAsync(),
+            };
+            return result;
+
+        }
+        public async Task<ViewBarnPlanResponse> GetById(Guid id)
+        {
+            var barnPlanDetail = await _barnplanrepo.GetByIdAsync(id);
             if (barnPlanDetail == null)
             {
                 throw new Exception("Không tìm thấy kế hoạch cho chuồng ");
@@ -175,51 +212,24 @@ namespace Infrastructure.Services.Implements
                                         }).ToListAsync(),
             };
             return result;
-
-        }
-        public async Task<ViewBarnPlanResponse> GetById(Guid id)
-        {
-            var barnPlanDetail = await _barnplanrepo.GetByIdAsync(id);
-            if (barnPlanDetail == null)
-            {
-                throw new Exception("Không tìm thấy kế hoạch cho chuồng ");
-            }
-            ViewBarnPlanResponse result = new ViewBarnPlanResponse()
-            {
-                Id = id,
-                EndDate = barnPlanDetail.EndDate,
-                StartDate = barnPlanDetail.StartDate,
-                Note = barnPlanDetail.Note,
-                foodPlans = await _bpfoodrepo.GetQueryable(x => x.IsActive)
-                                        .Where(x => x.BarnPlanId == id)
-                                        .Include(x => x.Food)
-                                        .Select(it => new Domain.Dto.Response.BarnPlan.FoodPlan()
-                                        {
-                                            FoodId = it.FoodId,
-                                            FoodName = it.Food.FoodName,
-                                            Note = it.Note,
-                                            Stock = it.Stock
-                                        }).ToListAsync(),
-                medicinePlans = await _bpmedicinerepo.GetQueryable(x => x.IsActive)
-                                        .Where(x => x.BarnPlanId == id)
-                                        .Include(x=>x.Medicine)
-                                        .Select(it => new Domain.Dto.Response.BarnPlan.MedicinePlan()
-                                        {
-                                            MedicineId = it.MedicineId,
-                                            MedicineName = it.Medicine.MedicineName,
-                                            Note = it.Note,
-                                            Stock = it.Stock
-                                        }).ToListAsync(),
-            };
-            return result;
         }
 
         public async Task<bool> UpdateBarnPlan(UpdateBarnPlanRequest req)
         {
-            DateTime formatedStartDate, formatedEndDate;
-            ValidTime(false,(bool)(req.IsDaily == null ? false : req.IsDaily), req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
-
             var updateItem = await _barnplanrepo.GetByIdAsync(req.Id);
+
+            DateTime formatedStartDate, formatedEndDate;
+            if (req.IsDaily == true)
+            {
+                ValidTime(false, false, updateItem.StartDate, updateItem.EndDate, out formatedStartDate, out formatedEndDate);
+            }
+            else
+            {
+                ValidTime(false, (bool)(req.IsDaily == null ? false : req.IsDaily), req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
+            }
+
+
+
             if (updateItem == null)
             {
                 throw new Exception("Kế hoạch không tồn tại");
@@ -230,6 +240,7 @@ namespace Infrastructure.Services.Implements
 
             await InsertFoodPlan(req.foodPlans, req.Id);
             await InsertMedicinePlan(req.medicinePlans, req.Id);
+            _barnplanrepo.Update(updateItem);
             return await _barnplanrepo.CommitAsync() > 0;
         }
 
@@ -240,9 +251,9 @@ namespace Infrastructure.Services.Implements
         {
 
             // xoa bo plan cu
-            var previous_Food_Plan = _bpfoodrepo.GetQueryable().Where(it => it.BarnPlanId == bpid);
+            var previous_Food_Plan = await _bpfoodrepo.GetQueryable().Where(it => it.BarnPlanId == bpid).ToListAsync();
 
-            foreach (var item in previous_Food_Plan.ToList())
+            foreach (var item in previous_Food_Plan)
             {
                 _bpfoodrepo.Remove(item);
             }
@@ -271,8 +282,8 @@ namespace Infrastructure.Services.Implements
         {
 
             // xoa bo plan cu
-            var previous_Medicine_Plan = _bpmedicinerepo.GetQueryable().Where(it => it.BarnPlanId == bpid);
-            foreach (var item in previous_Medicine_Plan.ToList())
+            var previous_Medicine_Plan = await _bpmedicinerepo.GetQueryable().Where(it => it.BarnPlanId == bpid).ToListAsync();
+            foreach (var item in previous_Medicine_Plan)
             {
                 _bpmedicinerepo.Remove(item);
             }
@@ -297,33 +308,43 @@ namespace Infrastructure.Services.Implements
                 throw new Exception("Không thể tạo kế hoạch thuốc");
             }
         }
-        protected void ValidTime(bool isCreate,bool isDaily, DateTime? StartDate, DateTime? EndDate, out DateTime FormatedStartDate, out DateTime FormatedEndDate)
+        protected void ValidTime(bool isCreate, bool isDaily, DateTime? StartDate, DateTime? EndDate, out DateTime FormatedStartDate, out DateTime FormatedEndDate)
         {
+            if (!isDaily && StartDate == null && EndDate == null)
+            {
+                throw new Exception("Phải có dữ liệu ngày");
+            }
             if (isDaily)
             {
                 FormatedStartDate = DateTime.Today.AddDays(1);
                 FormatedEndDate = DateTime.Today.AddDays(1).AddHours(23).AddMinutes(59);
+
             }
             else
             {
                 FormatedStartDate = ((DateTime)StartDate).Date;
                 FormatedEndDate = ((DateTime)EndDate).Date.AddDays(1).AddSeconds(-1);
             }
-
+            StartDate = FormatedStartDate;
+            EndDate = FormatedEndDate;
             if (StartDate >= EndDate)
             {
                 throw new Exception("Thời gian kết thúc phải sau thời gian bắt đầu");
             }
             var conflictTimeItem = _barnplanrepo.GetQueryable(x => x.IsActive)
-                                    .FirstOrDefault(it => !(EndDate <= it.StartDate && StartDate >= it.EndDate));
+                                    .FirstOrDefault(it => (EndDate <= it.EndDate) && (StartDate >= it.StartDate));
             if (conflictTimeItem != null && isCreate)
             {
-                throw new ArgumentException("Đã đặt kế hoạch cho ngày này");
+                throw new ArgumentException("Đã đặt kế hoạch cho ngày này id: " + conflictTimeItem.Id);
             }
+
         }
 
-       
-        #endregion 
-       
+
     }
+
+
+    #endregion
+
 }
+

@@ -1,5 +1,6 @@
 using Domain.Dto.Request;
 using Domain.Dto.Request.Barn;
+using Domain.Dto.Request.Category;
 using Domain.IServices;
 using Infrastructure.Services.Implements;
 using Microsoft.AspNetCore.Mvc;
@@ -13,133 +14,80 @@ namespace SEP490_BackendAPI.Controllers
     public class BarnController : ControllerBase
     {
         private readonly IBarnService _barnService;
-
-        /// <summary>
-        /// Khởi tạo controller với service để xử lý logic chuồng trại.
-        /// </summary>
         public BarnController(IBarnService barnService)
         {
-            _barnService = barnService ?? throw new ArgumentNullException(nameof(barnService));
+            _barnService = barnService;
         }
-
-        /// <summary>
-        /// Tạo một chuồng trại mới.
-        /// </summary>
-        [HttpPost("create")]
-        public async Task<IActionResult> CreateBarn([FromBody] CreateBarnRequest requestDto, CancellationToken cancellationToken = default)
+        [HttpPost("admin/get-barn-list")]
+        public async Task<IActionResult> GetPaginatedAdminBarnList([FromBody] ListingRequest request, CancellationToken cancellationToken = default)
         {
-            var (success, errorMessage) = await _barnService.CreateBarn(requestDto, cancellationToken);
-            if (!success)
-                return BadRequest(errorMessage);
-            return Ok();
+            var response = await _barnService.GetPaginatedAdminBarnListAsync(request, cancellationToken);
+            if (!response.Succeeded)
+                return BadRequest(response);
+            return Ok(response);
         }
 
-        /// <summary>
-        /// Cập nhật thông tin một chuồng trại.
-        /// </summary>
-        [HttpPut("update/{BarnId}")]
-        public async Task<IActionResult> Update([FromRoute] Guid BarnId, [FromBody] UpdateBarnRequest requestDto, CancellationToken cancellationToken = default)
+        [HttpGet("admin/get-barn-detail/{barnId}")]
+        public async Task<IActionResult> GetAdminBarnDetail([FromRoute] Guid barnId, CancellationToken cancellationToken = default)
         {
-            var (success, errorMessage) = await _barnService.UpdateBarn(BarnId, requestDto, cancellationToken);
-            if (!success)
-                return BadRequest(errorMessage);
-            return Ok();
+            var response = await _barnService.GetAdminBarnDetailAsync(barnId, cancellationToken);
+            if (!response.Succeeded)
+                return BadRequest(response);
+            return Ok(response);
         }
-
-        /// <summary>
-        /// Xóa mềm một chuồng trại bằng cách đặt IsActive thành false.
-        /// </summary>
-        [HttpDelete("disable/{BarnId}")]
-        public async Task<IActionResult> DisableBarn(Guid BarnId, CancellationToken cancellationToken = default)
+        [HttpPost("admin/create-barn")]
+        public async Task<IActionResult> CreateBarn([FromBody] CreateBarnRequest request, CancellationToken cancellationToken = default)
         {
-            var (success, errorMessage) = await _barnService.DisableBarn(BarnId, cancellationToken);
-            if (!success)
-                return BadRequest(errorMessage);
-            return Ok();
+            var response = await _barnService.CreateBarn(request, cancellationToken);
+            if (!response.Succeeded)
+                return BadRequest(response);
+            return Ok(response);
         }
 
-        /// <summary>
-        /// Lấy thông tin một chuồng trại theo ID.
-        /// </summary>
+        [HttpPut("admin/update-barn")]
+        public async Task<IActionResult> UpdateBarn([FromBody] UpdateBarnRequest request, CancellationToken cancellationToken = default)
+        {
+            var response = await _barnService.UpdateBarn(request, cancellationToken);
+            if (!response.Succeeded)
+                return BadRequest(response);
+            return Ok(response);
+        }
+        [HttpDelete("admin/disable-barn/{BarnId}")]
+        public async Task<IActionResult> DisableBarn([FromRoute] Guid BarnId, CancellationToken cancellationToken = default)
+        {
+            var response = await _barnService.DisableBarn(BarnId, cancellationToken);
+            if (!response.Succeeded)
+                return BadRequest(response);
+            return Ok(response);
+        }
+
         [HttpGet("getBarnById/{BarnId}")]
         public async Task<IActionResult> GetBarnById([FromRoute] Guid BarnId, CancellationToken cancellationToken = default)
         {
-            var (barn, errorMessage) = await _barnService.GetBarnById(BarnId, cancellationToken);
-            if (barn == null)
-                return NotFound(errorMessage ?? "Không tìm thấy chuồng trại.");
-            return Ok(barn);
+            var response = await _barnService.GetBarnById(BarnId, cancellationToken);
+            if (!response.Succeeded)
+                return BadRequest(response);
+            return Ok(response);
         }
 
-        /// <summary>
-        /// Lấy danh sách chuồng trại theo ID của công nhân.
-        /// </summary>
-        [HttpPost("getBarnByWorker")]
+        [HttpPost("woker/get-barn-by-worker")]
         public async Task<IActionResult> GetByWorker([FromBody] ListingRequest request, CancellationToken cancellationToken = default)
         {
-            var (barns, errorMessage) = await _barnService.GetBarnByWorker(request, cancellationToken);
-            if (barns == null)
-                return NotFound(errorMessage ?? "Không tìm thấy danh sách chuồng trại theo người gia công.");
-            return Ok(barns);
+            var response = await _barnService.GetBarnByWorker(request, cancellationToken);
+            if (!response.Succeeded)
+                return BadRequest(response);
+            return Ok(response);
         }
 
-        /// <summary>
-        /// Lấy danh sách phân trang tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn.
-        /// </summary>
-        [HttpPost("getPaginatedBarnList")]
+        [HttpPost("get-barn-list")]
         public async Task<IActionResult> GetPaginatedBarns([FromBody] ListingRequest request)
         {
-            var (result, errorMessage) = await _barnService.GetPaginatedBarnList(request);
-            if (errorMessage != null)
-                return BadRequest(errorMessage);
-            return Ok(result);
+            var response = await _barnService.GetPaginatedBarnList(request);
+            if (!response.Succeeded)
+                return BadRequest(response);
+            return Ok(response);
         }
 
-        /// <summary>
-        /// Lấy danh sách chuồng trại phân trang cho admin, bao gồm trạng thái có LivestockCircle đang hoạt động.
-        /// </summary>
-        [HttpPost("getPaginatedBarnListAdmin")]
-        public async Task<IActionResult> GetPaginatedAdminBarnList([FromBody] ListingRequest request, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                var (result, errorMessage) = await _barnService.GetPaginatedAdminBarnListAsync(request, cancellationToken);
-                if (result == null)
-                    return BadRequest(new { Message = errorMessage });
-
-                return Ok(new
-                {
-                    Data = result.Items,
-                    PageIndex = result.PageIndex,
-                    Count = result.Count,
-                    TotalCount = result.TotalCount,
-                    TotalPages = result.TotalPages
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Message = $"Lỗi khi lấy danh sách chuồng trại: {ex.Message}" });
-            }
-        }
-
-        /// <summary>
-        /// Lấy chi tiết chuồng trại cho admin, bao gồm thông tin LivestockCircle đang hoạt động (nếu có).
-        /// </summary>
-        [HttpGet("getBarnDetailAdmin/{barnId}")]
-        public async Task<IActionResult> GetAdminBarnDetail([FromRoute] Guid barnId, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                var (barn, errorMessage) = await _barnService.GetAdminBarnDetailAsync(barnId, cancellationToken);
-                if (barn == null)
-                    return NotFound(new { Message = errorMessage });
-
-                return Ok(barn);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Message = $"Lỗi khi lấy chi tiết chuồng trại: {ex.Message}" });
-            }
-        }
         [HttpPost("technical-staff/assignedbarn")]
         public async Task<IActionResult> GetAssignedBarn([FromBody] ListingRequest req)
         {
@@ -155,7 +103,7 @@ namespace SEP490_BackendAPI.Controllers
             }
             catch (Exception ex)
             {
-                throw new Exception("User không hợp lệ");
+                return Unauthorized();
             }
         }
 

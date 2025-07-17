@@ -9,8 +9,7 @@ namespace Domain.Dto.Request.DailyReport
 {
     public class UpdateMedicineReportRequest
     {
-        [Required(ErrorMessage = "ID báo cáo thuốc là bắt buộc.")]
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
 
         [Required(ErrorMessage = "ID thuốc là bắt buộc.")]
         public Guid MedicineId { get; set; }

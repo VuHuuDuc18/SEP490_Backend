@@ -17,7 +17,7 @@ namespace Domain.Dto.Request.Account
         public string Password { get; set; }
 
         [Required]
-        [Compare("Password")]
+        [Compare("Password", ErrorMessage = "The ConfirmPassword field must match the Password field.")]
         public string ConfirmPassword { get; set; }
     }
 }

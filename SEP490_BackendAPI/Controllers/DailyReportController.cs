@@ -1,7 +1,11 @@
-﻿using Domain.Dto.Request;
+﻿using Application.Wrappers;
+using Domain.Dto.Request;
 using Domain.Dto.Request.DailyReport;
+using Domain.Dto.Response.Food;
+using Domain.Dto.Response.Medicine;
 using Domain.IServices;
 using Entities.EntityModel;
+using Infrastructure.Services.Implements;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,82 +23,128 @@ namespace Controllers
             _dailyReportService = dailyReportService ?? throw new ArgumentNullException(nameof(dailyReportService));
         }
 
-        [HttpPost("create")]
+        [HttpPost("worker/create-daily-report")]
         public async Task<IActionResult> CreateDailyReport([FromBody] CreateDailyReportWithDetailsRequest requestDto, CancellationToken cancellationToken = default)
         {
-            var (success, errorMessage) = await _dailyReportService.CreateDailyReport(requestDto, cancellationToken);
-            return success ? Ok() : BadRequest(errorMessage);
+            var result = await _dailyReportService.CreateDailyReport(requestDto, cancellationToken);
+            return result.Succeeded ? Ok(result.Data) : BadRequest(result);
         }
 
-        [HttpPut("update/{dailyReportId}")]
-        public async Task<IActionResult> Update([FromRoute] Guid dailyReportId, [FromBody] UpdateDailyReportWithDetailsRequest requestDto, CancellationToken cancellationToken = default)
+        [HttpPut("worker/update-daily-report")]
+        public async Task<IActionResult> Update([FromBody] UpdateDailyReportWithDetailsRequest requestDto, CancellationToken cancellationToken = default)
         {
-            var (success, errorMessage) = await _dailyReportService.UpdateDailyReport(dailyReportId, requestDto, cancellationToken);
-            return success ? Ok() : BadRequest(errorMessage);
+            var result = await _dailyReportService.UpdateDailyReport(requestDto, cancellationToken);
+            return result.Succeeded ? Ok(result.Data) : BadRequest(result);
         }
 
-        [HttpDelete("disable/{dailyReportId}")]
+        [HttpDelete("worker/disable-daily-report/{dailyReportId}")]
         public async Task<IActionResult> Delete([FromRoute] Guid dailyReportId, CancellationToken cancellationToken = default)
         {
-            var (success, errorMessage) = await _dailyReportService.DisableDailyReport(dailyReportId, cancellationToken);
-            return success ? Ok() : BadRequest(errorMessage);
+            var result = await _dailyReportService.DisableDailyReport(dailyReportId, cancellationToken);
+            return result.Succeeded ? Ok(result.Data) : BadRequest(result);
         }
 
-        [HttpGet("getDailyReportById/{dailyReportId}")]
+        [HttpGet("worker/get-all-remaining-food-by-livestockcircle")]
+        public async Task<IActionResult> GetAllFood(Guid livestockCircleId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var foods = await _dailyReportService.GetAllFoodRemainingOfLivestockCircle(livestockCircleId,cancellationToken);
+                return Ok(new Response<List<FoodResponse>>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy tất cả thức ăn thành công",
+                    Data = foods
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<List<FoodResponse>>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy danh sách thức ăn",
+                    Errors = new List<string> { ex.Message }
+                });
+            }
+        }
+
+        [HttpGet("worker/get-all-remaining-medicine-by-livestockcircle")]
+        public async Task<IActionResult> GetAllMedicine(Guid livestockCircleId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var medicines = await _dailyReportService.GetAllMedicineRemainingOfLivestockCircle(livestockCircleId, cancellationToken);
+                return Ok(new Response<List<MedicineResponse>>()
+                {
+                    Succeeded = true,
+                    Message = "Lấy tất cả thức ăn thành công",
+                    Data = medicines
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<List<MedicineResponse>>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi khi lấy danh sách thức ăn",
+                    Errors = new List<string> { ex.Message }
+                });
+            }
+        }
+
+        [HttpGet("get-daily-report-by-id/{dailyReportId}")]
         public async Task<IActionResult> GetDailyReportById([FromRoute] Guid dailyReportId, CancellationToken cancellationToken = default)
         {
-            var (dailyReport, errorMessage) = await _dailyReportService.GetDailyReportById(dailyReportId, cancellationToken);
-            return dailyReport != null ? Ok(dailyReport) : NotFound(errorMessage ?? "Không tìm thấy báo cáo hàng ngày.");
+            var result = await _dailyReportService.GetDailyReportById(dailyReportId, cancellationToken);
+            return result.Succeeded ? Ok(result.Data) : NotFound(result);
         }
 
         //[HttpGet("getDailyReportByLiveStockCircle/{livestockCircleId}")]
-        //public async Task<IActionResult> GetDailyReportByLiveStockCircle([FromRoute] Guid? livestockCircleId = null, CancellationToken cancellationToken = default)
+        //public async Task<IActionResult> GetDailyReportByLiveStockCircle([FromRoute] Guid livestockCircleId, CancellationToken cancellationToken = default)
         //{
-        //    var (dailyReports, errorMessage) = await _dailyReportService.GetDailyReportByLiveStockCircle(livestockCircleId, cancellationToken);
-        //    return dailyReports != null ? Ok(dailyReports) : NotFound(errorMessage ?? "Không tìm thấy danh sách báo cáo hàng ngày.");
+        //    var result = await _dailyReportService.Get(livestockCircleId, cancellationToken);
+        //    return result.Succeeded ? Ok(result.Data) : NotFound(result);
         //}
 
         [HttpPost("food-details/{dailyReportId}")]
         public async Task<IActionResult> GetFoodReportDetails([FromRoute] Guid dailyReportId, [FromBody] ListingRequest request)
         {
-            var (foodReports, errorMessage) = await _dailyReportService.GetFoodReportDetails(dailyReportId, request);
-            return foodReports != null ? Ok(foodReports) : NotFound(errorMessage ?? "Không tìm thấy chi tiết báo cáo thức ăn.");
+            var result = await _dailyReportService.GetFoodReportDetails(dailyReportId, request);
+            return result.Succeeded ? Ok(result.Data) : NotFound(result);
         }
 
         [HttpPost("medicine-details/{dailyReportId}")]
         public async Task<IActionResult> GetMedicineReportDetails([FromRoute] Guid dailyReportId, [FromBody] ListingRequest request)
         {
-            var (medicineReports, errorMessage) = await _dailyReportService.GetMedicineReportDetails(dailyReportId, request);
-            return medicineReports != null ? Ok(medicineReports) : NotFound(errorMessage ?? "Không tìm thấy chi tiết báo cáo thuốc.");
+            var result = await _dailyReportService.GetMedicineReportDetails(dailyReportId, request);
+            return result.Succeeded ? Ok(result.Data) : NotFound(result);
         }
 
-        /// <summary>
-        /// Lấy danh sách phân trang tất cả loại thức ăn đang hoạt động với bộ lọc tùy chọn.
-        /// </summary>
         //[HttpPost("getPaginatedDailyReportList")]
         //public async Task<IActionResult> GetPaginatedDailyReport([FromBody] ListingRequest request)
         //{
-        //    var (result, errorMessage) = await _dailyReportService.GetPaginatedDailyReportList(request);
-        //    if (errorMessage != null)
-        //        return BadRequest(errorMessage);
-        //    return Ok(result);
+        //    var result = await _dailyReportService.GetPaginatedDailyReportList(request);
+        //    return result.Succeeded ? Ok(result.Data) : BadRequest(result);
         //}
 
-        [HttpPost("getPaginatedDailyReportListByLiveStockCircle/{livestockCircleId}")]
-        public async Task<IActionResult> GetPaginatedMedicines([FromRoute] Guid livestockCircleId, [FromBody] ListingRequest request)
+        [HttpPost("get-list-report-by-livestockCircle/{livestockCircleId}")]
+        public async Task<IActionResult> GetPaginatedDailyReportListByLiveStockCircle([FromRoute] Guid livestockCircleId, [FromBody] ListingRequest request)
         {
-            var (result, errorMessage) = await _dailyReportService.GetPaginatedDailyReportListByLiveStockCircle(livestockCircleId, request);
-            if (errorMessage != null)
-                return BadRequest(errorMessage);
-            return Ok(result);
+            var result = await _dailyReportService.GetPaginatedDailyReportList(request, livestockCircleId);
+            return result.Succeeded ? Ok(result.Data) : BadRequest(result);
         }
 
-        [HttpGet("today-daily-report/{livestockCircleId}")]
-        public async Task<IActionResult> GetTodayDailyReport([FromRoute] Guid livestockCircleId)
+        [HttpGet("get-today-daily-report/{livestockCircleId}")]
+        public async Task<IActionResult> GetTodayDailyReport([FromRoute] Guid livestockCircleId, CancellationToken cancellationToken = default)
         {
-            var (dailyReports, errorMessage) = await _dailyReportService.GetTodayDailyReport(livestockCircleId);
-            return dailyReports != null ? Ok(dailyReports) : NotFound(errorMessage ?? "Không tìm thấy báo cáo hôm nay.");
+            var result = await _dailyReportService.GetTodayDailyReport(livestockCircleId, cancellationToken);
+            return result.Succeeded ? Ok(result.Data) : NotFound(result);
         }
-
+        [HttpGet("has-today-daily-report/{livestockCircleId}")]
+        public async Task<IActionResult> HasTodayDailyReport([FromRoute] Guid livestockCircleId, CancellationToken cancellationToken = default)
+        {
+            var result = await _dailyReportService.HasDailyReportToday(livestockCircleId, cancellationToken);
+            return result.Succeeded ? Ok(result.Data) : NotFound(result);
+        }
     }
 }

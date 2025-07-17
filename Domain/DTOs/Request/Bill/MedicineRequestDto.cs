@@ -6,8 +6,6 @@ namespace Domain.Dto.Request.Bill
 {
     public class CreateMedicineRequestDto
     {
-        [Required(ErrorMessage = "UserRequestId là bắt buộc.")]
-        public Guid UserRequestId { get; set; }
         [Required(ErrorMessage = "LivestockCircleId là bắt buộc.")]
         public Guid LivestockCircleId { get; set; }
         public string Note { get; set; }

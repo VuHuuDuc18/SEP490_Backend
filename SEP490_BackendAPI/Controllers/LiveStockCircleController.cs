@@ -36,26 +36,19 @@ namespace SEP490_BackendAPI.Controllers
         //    return StatusCode(StatusCodes.Status201Created);
         //}
 
-        /// <summary>
-        /// Cập nhật thông tin một chu kỳ chăn nuôi.
-        /// </summary>
-        [HttpPut("update/{livestockCircleId}")]
-        public async Task<IActionResult> Update(Guid livestockCircleId, [FromBody] UpdateLivestockCircleRequest request, CancellationToken cancellationToken = default)
-        {
-            var (success, errorMessage) = await _livestockCircleService.UpdateLiveStockCircle(livestockCircleId, request, cancellationToken);
-            if (!success)
-            {
-                if (errorMessage.Contains("Không tìm thấy"))
-                    return NotFound(new { error = errorMessage });
-                return BadRequest(new { error = errorMessage });
-            }
+        //[HttpPut("update/{livestockCircleId}")]
+        //public async Task<IActionResult> Update(Guid livestockCircleId, [FromBody] UpdateLivestockCircleRequest request, CancellationToken cancellationToken = default)
+        //{
+        //    var (success, errorMessage) = await _livestockCircleService.UpdateLiveStockCircle(livestockCircleId, request, cancellationToken);
+        //    if (!success)
+        //    {
+        //        if (errorMessage.Contains("Không tìm thấy"))
+        //            return NotFound(new { error = errorMessage });
+        //        return BadRequest(new { error = errorMessage });
+        //    }
 
-            return Ok();
-        }
-
-        /// <summary>
-        /// Xóa mềm một chu kỳ chăn nuôi.
-        /// </summary>
+        //    return Ok();
+        //}
         [HttpDelete("disable/{livestockCircleId}")]
         public async Task<IActionResult> DisableLiveStockCircle(Guid livestockCircleId, CancellationToken cancellationToken = default)
         {
@@ -97,7 +90,7 @@ namespace SEP490_BackendAPI.Controllers
         //}
 
         [HttpGet("getCurrentLiveStockCircleByBarnId/{barnId}")]
-        public async Task<IActionResult> GetLiveStockCircleByBarnIdAndStatus([FromRoute] Guid barnId, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetLiveStockCircleByBarnId([FromRoute] Guid barnId, CancellationToken cancellationToken = default)
         {
             var (circles, errorMessage) = await _livestockCircleService.GetActiveLiveStockCircleByBarnId(barnId, cancellationToken);
             if (circles == null)
@@ -123,7 +116,7 @@ namespace SEP490_BackendAPI.Controllers
         /// <summary>
         /// Cập nhật trung bình cân của chu kỳ chăn nuôi
         /// </summary>
-        [HttpPatch("updateLivestockCircleAverageWeight/{livestockCircleId}")]
+        [HttpPatch("update-livestockCircle-average-weight/{livestockCircleId}")]
         public async Task<IActionResult> UpdateLivestockCircleAverageWeight(Guid livestockCircleId, [FromBody] float averageWeight)
         {
             var (success, errorMessage) = await _livestockCircleService.UpdateAverageWeight(livestockCircleId, averageWeight);
@@ -149,7 +142,7 @@ namespace SEP490_BackendAPI.Controllers
         //        throw new Exception("User không hợp lệ");
         //    }
         //}
-        [HttpPost("admin/livestockCircleHistory/{id}")]
+        [HttpPost("livestockCircle-history/{barnId}")]
         public async Task<IActionResult> GetLivestockCircleHistory([FromRoute]Guid barnId,[FromBody] ListingRequest req)
         {
             //Guid technicalStaffId;
@@ -172,48 +165,34 @@ namespace SEP490_BackendAPI.Controllers
         }
 
         [HttpPost("sale/getBarn")]
-        public async Task<IActionResult> getReleasedBarn([FromBody]ListingRequest req)
+        public async Task<IActionResult> GetReleasedBarn([FromBody]ListingRequest req)
         {
             var result = await _livestockCircleService.GetReleasedLivestockCircleList(req);
             return Ok(result);
         }
         [HttpGet("sale/getBarnById/{id}")]
-        public async Task<IActionResult> getReleasedBarnById([FromRoute]Guid id)
+        public async Task<IActionResult> GetReleasedBarnById([FromRoute]Guid id)
         {
             var result = await _livestockCircleService.GetReleasedLivestockCircleById(id);
             return Ok(result);
         }
 
-        [HttpPost("getFoodRemaining/{liveStockCircleId}")]
+        [HttpPost("get-food-remaining/{liveStockCircleId}")]
         public async Task<IActionResult> GetFoodRemaining(
             [FromRoute]Guid liveStockCircleId,
             [FromBody] ListingRequest request,
             CancellationToken cancellationToken = default)
         {
-            var (foodRemainings, errorMessage) = await _livestockCircleService.GetFoodRemaining(liveStockCircleId, request, cancellationToken);
-
-            if (errorMessage != null)
-            {
-                return BadRequest(new { Error = errorMessage });
-            }
-
-            return Ok(foodRemainings);
+             return Ok(await _livestockCircleService.GetFoodRemaining(liveStockCircleId,request));
         }
 
-        [HttpPost("getMedcineRemaining/{liveStockCircleId}")]
+        [HttpPost("get-medicine-remaining/{liveStockCircleId}")]
         public async Task<IActionResult> GetMedicineRemaining(
             [FromRoute] Guid liveStockCircleId,
             [FromBody] ListingRequest request,
             CancellationToken cancellationToken = default)
         {
-            var (medicineRemainings, errorMessage) = await _livestockCircleService.GetMedicineRemaining(liveStockCircleId, request, cancellationToken);
-
-            if (errorMessage != null)
-            {
-                return BadRequest(new { Error = errorMessage });
-            }
-
-            return Ok(medicineRemainings);
+            return Ok(await _livestockCircleService.GetMedicineRemaining(liveStockCircleId, request));
         }
         [HttpPut("technical-taff/release-barn/{id}")]
         public async Task<IActionResult> ReleaseBarn([FromRoute]Guid id)
