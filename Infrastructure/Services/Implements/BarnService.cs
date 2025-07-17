@@ -1039,7 +1039,7 @@ namespace Infrastructure.Services.Implements
                 if (request.PageIndex < 1 || request.PageSize < 1)
                     return new Response<PaginationSet<BarnResponse>>("PageIndex và PageSize phải lớn hơn 0.");
 
-                var validFields = typeof(ReleaseBarnResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var validFields = typeof(BarnResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
@@ -1050,9 +1050,9 @@ namespace Infrastructure.Services.Implements
                             $"Trường hợp lệ: {string.Join(",",validFields)}"
                         }
                     };
-                if (!validFields.Contains(request.Sort?.Field))
+                if (!string.IsNullOrEmpty(request.Sort?.Field) && !validFields.Contains(request.Sort.Field))
                 {
-                    return new Response<PaginationSet<BarnResponse>>($"Trường sắp xếp không hợp lệ: {request.Sort?.Field}")
+                    return new Response<PaginationSet<BarnResponse>>($"Trường sắp xếp không hợp lệ: {request.Sort.Field}")
                     {
                         Errors = new List<string>()
                         {
