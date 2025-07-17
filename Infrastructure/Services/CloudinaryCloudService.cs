@@ -31,7 +31,7 @@ namespace Infrastructure.Services
         /// <summary>
         /// Trích xuất ID từ URI của Cloudinary.
         /// </summary>
-        private string GetIDFromURI(string uri)
+        public virtual string GetIDFromURI(string uri)
         {
             string id = "";
             // Tìm ID dựa trên bất kỳ folder nào, nên không cố định tên folder
@@ -48,7 +48,7 @@ namespace Infrastructure.Services
         /// <summary>
         /// Upload ảnh lên Cloudinary từ base64 và trả về liên kết.
         /// </summary>
-        public async Task<string> UploadImage(string base64Image, string folder, CancellationToken cancellationToken = default)
+        public virtual async Task<string> UploadImage(string base64Image, string folder, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -79,7 +79,7 @@ namespace Infrastructure.Services
         /// <summary>
         /// Xóa ảnh khỏi Cloudinary dựa trên URI.
         /// </summary>
-        public async Task<string> DeleteImage(string uri, CancellationToken cancellationToken = default)
+        public virtual async Task<string> DeleteImage(string uri, CancellationToken cancellationToken = default)
         {
             try
             {

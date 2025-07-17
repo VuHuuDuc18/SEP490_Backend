@@ -553,11 +553,21 @@ namespace Infrastructure.Services.Implements
                 orderItem.TotalBill = request.GoodUnitPrice * orderItem.GoodUnitStock + request.BadUnitPrice * orderItem.BadUnitStock;
 
                 _orderRepository.Update(orderItem);
-                return await _orderRepository.CommitAsync() > 0;
+
+                var livestockCircleDetail = await _livestockCircleRepository.GetByIdAsync(orderItem.LivestockCircleId);
+                livestockCircleDetail.GoodUnitNumber -= orderItem.GoodUnitStock;
+                livestockCircleDetail.BadUnitNumber -= orderItem.BadUnitStock;
+                if (livestockCircleDetail.GoodUnitNumber == 0 && livestockCircleDetail.BadUnitNumber == 0)
+                {
+                    livestockCircleDetail.Status = StatusConstant.DONESTAT;
+                }
+                _livestockCircleRepository.Update(livestockCircleDetail);
+                
+                return (await _orderRepository.CommitAsync() > 0) &&  (await _livestockCircleRepository.CommitAsync() > 0);
 
             }catch (Exception ex)
             {
-                throw new Exception("lỗi hệ thống");
+                return false;
             }
         }
 
