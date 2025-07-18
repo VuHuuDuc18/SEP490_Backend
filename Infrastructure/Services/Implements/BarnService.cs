@@ -712,7 +712,7 @@ namespace Infrastructure.Services.Implements
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
                 var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
-                   .Select(f => f.Field).ToList() ?? new List<string>();
+                    .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
                 {
                     return new Response<PaginationSet<AdminBarnResponse>>()
@@ -956,7 +956,7 @@ namespace Infrastructure.Services.Implements
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
                 var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
-                   .Select(f => f.Field).ToList() ?? new List<string>();
+                    .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
                 {
                     return new Response<PaginationSet<ReleaseBarnResponse>>()
@@ -968,7 +968,7 @@ namespace Infrastructure.Services.Implements
                 }
 
                 if (invalidFieldsSearch.Any())
-                {
+                        {
                     return new Response<PaginationSet<ReleaseBarnResponse>>()
                     {
                         Succeeded = false,
@@ -1082,7 +1082,7 @@ namespace Infrastructure.Services.Implements
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                    .Select(f => f.Field).ToList() ?? new List<string>();
                 var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
-                   .Select(f => f.Field).ToList() ?? new List<string>();
+                    .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
                 {
                     return new Response<PaginationSet<BarnResponse>>()
@@ -1094,7 +1094,7 @@ namespace Infrastructure.Services.Implements
                 }
 
                 if (invalidFieldsSearch.Any())
-                {
+                        {
                     return new Response<PaginationSet<BarnResponse>>()
                     {
                         Succeeded = false,
