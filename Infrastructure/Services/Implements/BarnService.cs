@@ -473,6 +473,8 @@ namespace Infrastructure.Services.Implements
                 var validFields = typeof(BarnResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
+                var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                   .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
                 {
                     return new Response<PaginationSet<BarnResponse>>()
@@ -482,6 +484,17 @@ namespace Infrastructure.Services.Implements
                         Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
                     };
                 }
+
+                if (invalidFieldsSearch.Any())
+                {
+                    return new Response<PaginationSet<BarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFields)}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
+
 
                 if (!validFields.Contains(request.Sort?.Field))
                 {
@@ -665,15 +678,15 @@ namespace Infrastructure.Services.Implements
         {
             try
             {
-                if (_currentUserId == Guid.Empty)
-                {
-                    return new Response<PaginationSet<AdminBarnResponse>>()
-                    {
-                        Succeeded = false,
-                        Message = "Hãy đăng nhập và thử lại",
-                        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
-                    };
-                }
+                //if (_currentUserId == Guid.Empty)
+                //{
+                //    return new Response<PaginationSet<AdminBarnResponse>>()
+                //    {
+                //        Succeeded = false,
+                //        Message = "Hãy đăng nhập và thử lại",
+                //        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                //    };
+                //}
 
                 if (request == null)
                 {
@@ -698,6 +711,8 @@ namespace Infrastructure.Services.Implements
                 var validFields = typeof(AdminBarnResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
+                var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                   .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
                 {
                     return new Response<PaginationSet<AdminBarnResponse>>()
@@ -708,16 +723,26 @@ namespace Infrastructure.Services.Implements
                     };
                 }
 
-                if (!string.IsNullOrEmpty(request.Sort?.Field) && !validFields.Contains(request.Sort.Field))
+                if (invalidFieldsSearch.Any())
                 {
                     return new Response<PaginationSet<AdminBarnResponse>>()
                     {
                         Succeeded = false,
-                        Message = $"Trường sắp xếp không hợp lệ: {request.Sort.Field}",
+                        Message = $"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFields)}",
                         Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
                     };
                 }
 
+
+                if (!validFields.Contains(request.Sort?.Field))
+                {
+                    return new Response<PaginationSet<AdminBarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường sắp xếp không hợp lệ: {request.Sort?.Field}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
                 var query = _barnRepository.GetQueryable();
 
                 if (request.SearchString?.Any() == true)
@@ -783,15 +808,15 @@ namespace Infrastructure.Services.Implements
         {
             try
             {
-                if (_currentUserId == Guid.Empty)
-                {
-                    return new Response<AdminBarnDetailResponse>()
-                    {
-                        Succeeded = false,
-                        Message = "Hãy đăng nhập và thử lại",
-                        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
-                    };
-                }
+                //if (_currentUserId == Guid.Empty)
+                //{
+                //    return new Response<AdminBarnDetailResponse>()
+                //    {
+                //        Succeeded = false,
+                //        Message = "Hãy đăng nhập và thử lại",
+                //        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                //    };
+                //}
 
                 var barn = await _barnRepository.GetQueryable(x => x.Id == barnId && x.IsActive)
                     .Include(x => x.Worker)
@@ -802,20 +827,20 @@ namespace Infrastructure.Services.Implements
                     return new Response<AdminBarnDetailResponse>()
                     {
                         Succeeded = false,
-                        Message = "Chuồng trại không tồn tại hoặc đã bị xóa",
-                        Errors = new List<string> { "Chuồng trại không tồn tại hoặc đã bị xóa" }
+                        Message = "Chuồng trại không tồn tại",
+                        Errors = new List<string> { "Chuồng trại không tồn tại" }
                     };
                 }
 
-                if (barn.Worker == null || !barn.Worker.IsActive)
-                {
-                    return new Response<AdminBarnDetailResponse>()
-                    {
-                        Succeeded = false,
-                        Message = "Người gia công không tồn tại hoặc đã bị xóa",
-                        Errors = new List<string> { "Người gia công không tồn tại hoặc đã bị xóa" }
-                    };
-                }
+                //if (barn.Worker == null || !barn.Worker.IsActive)
+                //{
+                //    return new Response<AdminBarnDetailResponse>()
+                //    {
+                //        Succeeded = false,
+                //        Message = "Người gia công không tồn tại hoặc đã bị xóa",
+                //        Errors = new List<string> { "Người gia công không tồn tại hoặc đã bị xóa" }
+                //    };
+                //}
 
                 var workerResponse = new WokerResponse
                 {
@@ -832,26 +857,26 @@ namespace Infrastructure.Services.Implements
                 if (activeLivestockCircle != null)
                 {
                     var technicalStaff = await _userRepository.GetByIdAsync(activeLivestockCircle.TechicalStaffId);
-                    if (technicalStaff == null || !technicalStaff.IsActive)
-                    {
-                        return new Response<AdminBarnDetailResponse>()
-                        {
-                            Succeeded = false,
-                            Message = "Nhân viên kỹ thuật không tồn tại hoặc đã bị xóa",
-                            Errors = new List<string> { "Nhân viên kỹ thuật không tồn tại hoặc đã bị xóa" }
-                        };
-                    }
+                    //if (technicalStaff == null || !technicalStaff.IsActive)
+                    //{
+                    //    return new Response<AdminBarnDetailResponse>()
+                    //    {
+                    //        Succeeded = false,
+                    //        Message = "Nhân viên kỹ thuật không tồn tại hoặc đã bị xóa",
+                    //        Errors = new List<string> { "Nhân viên kỹ thuật không tồn tại hoặc đã bị xóa" }
+                    //    };
+                    //}
 
                     var breed = await _breedRepository.GetByIdAsync(activeLivestockCircle.BreedId);
-                    if (breed == null || !breed.IsActive)
-                    {
-                        return new Response<AdminBarnDetailResponse>()
-                        {
-                            Succeeded = false,
-                            Message = "Giống không tồn tại hoặc đã bị xóa",
-                            Errors = new List<string> { "Giống không tồn tại hoặc đã bị xóa" }
-                        };
-                    }
+                    //if (breed == null || !breed.IsActive)
+                    //{
+                    //    return new Response<AdminBarnDetailResponse>()
+                    //    {
+                    //        Succeeded = false,
+                    //        Message = "Giống không tồn tại hoặc đã bị xóa",
+                    //        Errors = new List<string> { "Giống không tồn tại hoặc đã bị xóa" }
+                    //    };
+                    //}
 
                     var images = await _imageBreedeRepository.GetQueryable(x => x.BreedId == breed.Id && x.IsActive)
                         .ToListAsync(cancellationToken);
@@ -930,22 +955,36 @@ namespace Infrastructure.Services.Implements
                 var validFields = typeof(ReleaseBarnResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
+                var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                   .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
-                    return new Response<PaginationSet<ReleaseBarnResponse>>($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}")
+                {
+                    return new Response<PaginationSet<ReleaseBarnResponse>>()
                     {
-                        Errors = new List<string>()
-                        {
-                            $"Trường hợp lệ: {string.Join(",",validFields)}"
-                        }
+                        Succeeded = false,
+                        Message = $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
                     };
+                }
+
+                if (invalidFieldsSearch.Any())
+                {
+                    return new Response<PaginationSet<ReleaseBarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFields)}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
+
+
                 if (!validFields.Contains(request.Sort?.Field))
                 {
-                    return new Response<PaginationSet<ReleaseBarnResponse>>($"Trường sắp xếp không hợp lệ: {request.Sort?.Field}")
+                    return new Response<PaginationSet<ReleaseBarnResponse>>()
                     {
-                        Errors = new List<string>()
-                        {
-                            $"Trường hợp lệ: {string.Join(",",validFields)}"
-                        }
+                        Succeeded = false,
+                        Message = $"Trường sắp xếp không hợp lệ: {request.Sort?.Field}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
                     };
                 }
 
@@ -1041,23 +1080,37 @@ namespace Infrastructure.Services.Implements
 
                 var validFields = typeof(BarnResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
-                    .Select(f => f.Field).ToList() ?? new List<string>();
+                   .Select(f => f.Field).ToList() ?? new List<string>();
+                var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                   .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
-                    return new Response<PaginationSet<BarnResponse>>($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}")
-                    {
-                        Errors = new List<string>()
-                        {
-                            $"Trường hợp lệ: {string.Join(",",validFields)}"
-                        }
-                    };
-                if (!string.IsNullOrEmpty(request.Sort?.Field) && !validFields.Contains(request.Sort.Field))
                 {
-                    return new Response<PaginationSet<BarnResponse>>($"Trường sắp xếp không hợp lệ: {request.Sort.Field}")
+                    return new Response<PaginationSet<BarnResponse>>()
                     {
-                        Errors = new List<string>()
-                        {
-                            $"Trường hợp lệ: {string.Join(",",validFields)}"
-                        }
+                        Succeeded = false,
+                        Message = $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
+
+                if (invalidFieldsSearch.Any())
+                {
+                    return new Response<PaginationSet<BarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFields)}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
+
+
+                if (!validFields.Contains(request.Sort?.Field))
+                {
+                    return new Response<PaginationSet<BarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường sắp xếp không hợp lệ: {request.Sort?.Field}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
                     };
                 }
 

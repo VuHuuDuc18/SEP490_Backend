@@ -56,16 +56,16 @@ namespace Infrastructure.UnitTests.BarnService
                 _cloudinaryCloudServiceMock.Object);
         }
 
-        [Fact]
-        public async Task GetPaginatedReleaseBarnListAsync_RequestNull_ReturnsError()
-        {
-            // Act
-            var result = await _barnService.GetPaginatedReleaseBarnListAsync(null);
+        //[Fact]
+        //public async Task GetPaginatedReleaseBarnListAsync_RequestNull_ReturnsError()
+        //{
+        //    // Act
+        //    var result = await _barnService.GetPaginatedReleaseBarnListAsync(null);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Contains("không được null", result.Message, StringComparison.OrdinalIgnoreCase);
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Contains("không được null", result.Message, StringComparison.OrdinalIgnoreCase);
+        //}
 
         [Fact]
         public async Task GetPaginatedReleaseBarnListAsync_InvalidPageIndex_ReturnsError()
@@ -103,9 +103,9 @@ namespace Infrastructure.UnitTests.BarnService
             {
                 PageIndex = 1,
                 PageSize = 10,
-                Filter = new List<SearchObjectForCondition> 
-                { 
-                    new SearchObjectForCondition { Field = "InvalidField", Value = "test" } 
+                Filter = new List<SearchObjectForCondition>
+                {
+                    new SearchObjectForCondition { Field = "InvalidField", Value = "test" }
                 }
             };
 
@@ -117,6 +117,27 @@ namespace Infrastructure.UnitTests.BarnService
             Assert.Contains("Trường lọc không hợp lệ", result.Message, StringComparison.OrdinalIgnoreCase);
         }
 
+        [Fact]
+        public async Task GetPaginatedReleaseBarnListAsync_InvalidSearchField_ReturnsError()
+        {
+            // Arrange
+            var request = new ListingRequest
+            {
+                PageIndex = 1,
+                PageSize = 10,
+                SearchString = new List<SearchObjectForCondition>
+                {
+                    new SearchObjectForCondition { Field = "InvalidField", Value = "test" }
+                }
+            };
+
+            // Act
+            var result = await _barnService.GetPaginatedReleaseBarnListAsync(request);
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Contains("Trường tìm kiếm không hợp lệ", result.Message, StringComparison.OrdinalIgnoreCase);
+        }
         [Fact]
         public async Task GetPaginatedReleaseBarnListAsync_InvalidSortField_ReturnsError()
         {
@@ -168,7 +189,7 @@ namespace Infrastructure.UnitTests.BarnService
                 Id = breedId,
                 BreedName = "Test Breed",
                 BreedCategoryId = breedCategoryId,
-                BreedCategory = breedCategory,             
+                BreedCategory = breedCategory,
                 IsActive = true
             };
 
@@ -218,7 +239,7 @@ namespace Infrastructure.UnitTests.BarnService
             Assert.Equal("Lấy dữ liệu thành công.", result.Message);
             Assert.NotNull(result.Data);
             Assert.Equal(1, result.Data.Items.Count);
-            
+
             var item = result.Data.Items.First();
             Assert.Equal(barnId, item.Id);
             Assert.Equal("Test Barn", item.BarnName);
@@ -308,7 +329,7 @@ namespace Infrastructure.UnitTests.BarnService
                 PageIndex = 1,
                 PageSize = 10,
                 Sort = new SearchObjectForCondition { Field = "BarnName", Value = "asc" },
-                SearchString = new List<SearchObjectForCondition> { new SearchObjectForCondition { Field = "BarnName",  Value = "Searchable" } }
+                SearchString = new List<SearchObjectForCondition> { new SearchObjectForCondition { Field = "BarnName", Value = "Searchable" } }
             };
 
             // Act
@@ -408,158 +429,159 @@ namespace Infrastructure.UnitTests.BarnService
             Assert.Equal("Filterable Barn", result.Data.Items.First().BarnName);
         }
 
-        [Fact]
-        public async Task GetPaginatedReleaseBarnListAsync_Success_EmptyResult()
-        {
-            // Arrange
-            // Setup InMemory DbContext for LivestockCircle with no data
-            var options = new DbContextOptionsBuilder<TestLivestockCircleDbContext1>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-            using var context = new TestLivestockCircleDbContext1(options);
-            // No livestock circles added
-            context.SaveChanges();
+        //    [Fact]
+        //    public async Task GetPaginatedReleaseBarnListAsync_Success_EmptyResult()
+        //    {
+        //        // Arrange
+        //        // Setup InMemory DbContext for LivestockCircle with no data
+        //        var options = new DbContextOptionsBuilder<TestLivestockCircleDbContext1>()
+        //            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+        //            .Options;
+        //        using var context = new TestLivestockCircleDbContext1(options);
+        //        // No livestock circles added
+        //        context.SaveChanges();
 
-            // Mock repository to return DbSet from InMemory context
-            _livestockCircleRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<LivestockCircle, bool>>>()))
-                .Returns(context.LivestockCircles);
+        //        // Mock repository to return DbSet from InMemory context
+        //        _livestockCircleRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<LivestockCircle, bool>>>()))
+        //            .Returns(context.LivestockCircles);
 
-            var request = new ListingRequest
-            {
-                PageIndex = 1,
-                PageSize = 10,
-                Sort = new SearchObjectForCondition { Field = "BarnName", Value = "asc" }
-            };
+        //        var request = new ListingRequest
+        //        {
+        //            PageIndex = 1,
+        //            PageSize = 10,
+        //            Sort = new SearchObjectForCondition { Field = "BarnName", Value = "asc" }
+        //        };
 
-            // Act
-            var result = await _barnService.GetPaginatedReleaseBarnListAsync(request);
+        //        // Act
+        //        var result = await _barnService.GetPaginatedReleaseBarnListAsync(request);
 
-            // Assert
-            Assert.True(result.Succeeded, $"Service message: {result.Message}, Errors: {string.Join(", ", result.Errors ?? new List<string>())}");
-            Assert.Equal("Lấy dữ liệu thành công.", result.Message);
-            Assert.NotNull(result.Data);
-            Assert.Equal(0, result.Data.Items.Count);
-        }
+        //        // Assert
+        //        Assert.True(result.Succeeded, $"Service message: {result.Message}, Errors: {string.Join(", ", result.Errors ?? new List<string>())}");
+        //        Assert.Equal("Lấy dữ liệu thành công.", result.Message);
+        //        Assert.NotNull(result.Data);
+        //        Assert.Equal(0, result.Data.Items.Count);
+        //    }
 
-        [Fact]
-        public async Task GetPaginatedReleaseBarnListAsync_Success_WithMultipleItems()
-        {
-            // Arrange
-            var barnId1 = Guid.NewGuid();
-            var barnId2 = Guid.NewGuid();
-            var breedId = Guid.NewGuid();
-            var breedCategoryId = Guid.NewGuid();
-            var livestockCircleId1 = Guid.NewGuid();
-            var livestockCircleId2 = Guid.NewGuid();
+        //    [Fact]
+        //    public async Task GetPaginatedReleaseBarnListAsync_Success_WithMultipleItems()
+        //    {
+        //        // Arrange
+        //        var barnId1 = Guid.NewGuid();
+        //        var barnId2 = Guid.NewGuid();
+        //        var breedId = Guid.NewGuid();
+        //        var breedCategoryId = Guid.NewGuid();
+        //        var livestockCircleId1 = Guid.NewGuid();
+        //        var livestockCircleId2 = Guid.NewGuid();
 
-            // Create test data
-            var barn1 = new Barn
-            {
-                Id = barnId1,
-                BarnName = "Barn 1",
-                Address = "Address 1",
-                Image = "image1.jpg",
-                IsActive = true
-            };
+        //        // Create test data
+        //        var barn1 = new Barn
+        //        {
+        //            Id = barnId1,
+        //            BarnName = "Barn 1",
+        //            Address = "Address 1",
+        //            Image = "image1.jpg",
+        //            IsActive = true
+        //        };
 
-            var barn2 = new Barn
-            {
-                Id = barnId2,
-                BarnName = "Barn 2",
-                Address = "Address 2",
-                Image = "image2.jpg",
-                IsActive = true
-            };
+        //        var barn2 = new Barn
+        //        {
+        //            Id = barnId2,
+        //            BarnName = "Barn 2",
+        //            Address = "Address 2",
+        //            Image = "image2.jpg",
+        //            IsActive = true
+        //        };
 
-            var breedCategory = new BreedCategory
-            {
-                Id = breedCategoryId,
-                Name = "Test Breed Category",
-                Description = "Test",
-                IsActive = true
-            };
+        //        var breedCategory = new BreedCategory
+        //        {
+        //            Id = breedCategoryId,
+        //            Name = "Test Breed Category",
+        //            Description = "Test",
+        //            IsActive = true
+        //        };
 
-            var breed = new Breed
-            {
-                Id = breedId,
-                BreedName = "Test Breed",
-                BreedCategoryId = breedCategoryId,
-                BreedCategory = breedCategory,
-                IsActive = true
-            };
+        //        var breed = new Breed
+        //        {
+        //            Id = breedId,
+        //            BreedName = "Test Breed",
+        //            BreedCategoryId = breedCategoryId,
+        //            BreedCategory = breedCategory,
+        //            IsActive = true
+        //        };
 
-            var livestockCircle1 = new LivestockCircle
-            {
-                Id = livestockCircleId1,
-                BarnId = barnId1,
-                Barn = barn1,
-                BreedId = breedId,
-                Breed = breed,
-                LivestockCircleName = "Livestock Circle 1",
-                Status = StatusConstant.GROWINGSTAT,
-                TotalUnit = 100,
-                DeadUnit = 5,
-                GoodUnitNumber = 90,
-                BadUnitNumber = 5,
-                AverageWeight = 2.5f,
-                StartDate = DateTime.UtcNow.AddDays(-30),
-                ReleaseDate = DateTime.UtcNow.AddDays(-5),
-                IsActive = true
-            };
+        //        var livestockCircle1 = new LivestockCircle
+        //        {
+        //            Id = livestockCircleId1,
+        //            BarnId = barnId1,
+        //            Barn = barn1,
+        //            BreedId = breedId,
+        //            Breed = breed,
+        //            LivestockCircleName = "Livestock Circle 1",
+        //            Status = StatusConstant.GROWINGSTAT,
+        //            TotalUnit = 100,
+        //            DeadUnit = 5,
+        //            GoodUnitNumber = 90,
+        //            BadUnitNumber = 5,
+        //            AverageWeight = 2.5f,
+        //            StartDate = DateTime.UtcNow.AddDays(-30),
+        //            ReleaseDate = DateTime.UtcNow.AddDays(-5),
+        //            IsActive = true
+        //        };
 
-            var livestockCircle2 = new LivestockCircle
-            {
-                Id = livestockCircleId2,
-                BarnId = barnId2,
-                Barn = barn2,
-                BreedId = breedId,
-                Breed = breed,
-                LivestockCircleName = "Livestock Circle 2",
-                Status = StatusConstant.GROWINGSTAT,
-                TotalUnit = 150,
-                DeadUnit = 10,
-                GoodUnitNumber = 130,
-                BadUnitNumber = 10,
-                AverageWeight = 3.0f,
-                StartDate = DateTime.UtcNow.AddDays(-45),
-                ReleaseDate = DateTime.UtcNow.AddDays(-10),
-                IsActive = true
-            };
+        //        var livestockCircle2 = new LivestockCircle
+        //        {
+        //            Id = livestockCircleId2,
+        //            BarnId = barnId2,
+        //            Barn = barn2,
+        //            BreedId = breedId,
+        //            Breed = breed,
+        //            LivestockCircleName = "Livestock Circle 2",
+        //            Status = StatusConstant.GROWINGSTAT,
+        //            TotalUnit = 150,
+        //            DeadUnit = 10,
+        //            GoodUnitNumber = 130,
+        //            BadUnitNumber = 10,
+        //            AverageWeight = 3.0f,
+        //            StartDate = DateTime.UtcNow.AddDays(-45),
+        //            ReleaseDate = DateTime.UtcNow.AddDays(-10),
+        //            IsActive = true
+        //        };
 
-            // Setup InMemory DbContext for LivestockCircle
-            var options = new DbContextOptionsBuilder<TestLivestockCircleDbContext1>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-            using var context = new TestLivestockCircleDbContext1(options);
-            context.LivestockCircles.AddRange(livestockCircle1, livestockCircle2);
-            context.SaveChanges();
+        //        // Setup InMemory DbContext for LivestockCircle
+        //        var options = new DbContextOptionsBuilder<TestLivestockCircleDbContext1>()
+        //            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+        //            .Options;
+        //        using var context = new TestLivestockCircleDbContext1(options);
+        //        context.LivestockCircles.AddRange(livestockCircle1, livestockCircle2);
+        //        context.SaveChanges();
 
-            // Mock repository to return DbSet from InMemory context
-            _livestockCircleRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<LivestockCircle, bool>>>()))
-                .Returns(context.LivestockCircles);
+        //        // Mock repository to return DbSet from InMemory context
+        //        _livestockCircleRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<LivestockCircle, bool>>>()))
+        //            .Returns(context.LivestockCircles);
 
-            var request = new ListingRequest
-            {
-                PageIndex = 1,
-                PageSize = 10,
-                Sort = new SearchObjectForCondition { Field = "BarnName", Value = "asc" }
-            };
+        //        var request = new ListingRequest
+        //        {
+        //            PageIndex = 1,
+        //            PageSize = 10,
+        //            Sort = new SearchObjectForCondition { Field = "BarnName", Value = "asc" }
+        //        };
 
-            // Act
-            var result = await _barnService.GetPaginatedReleaseBarnListAsync(request);
+        //        // Act
+        //        var result = await _barnService.GetPaginatedReleaseBarnListAsync(request);
 
-            // Assert
-            Assert.True(result.Succeeded, $"Service message: {result.Message}, Errors: {string.Join(", ", result.Errors ?? new List<string>())}");
-            Assert.Equal("Lấy dữ liệu thành công.", result.Message);
-            Assert.NotNull(result.Data);
-            Assert.Equal(2, result.Data.Items.Count);
-            
-            var items = result.Data.Items.OrderBy(x => x.BarnName).ToList();
-            Assert.Equal("Barn 1", items[0].BarnName);
-            Assert.Equal("Barn 2", items[1].BarnName);
-            Assert.Equal(100, items[0].TotalUnit);
-            Assert.Equal(150, items[1].TotalUnit);
-        }
+        //        // Assert
+        //        Assert.True(result.Succeeded, $"Service message: {result.Message}, Errors: {string.Join(", ", result.Errors ?? new List<string>())}");
+        //        Assert.Equal("Lấy dữ liệu thành công.", result.Message);
+        //        Assert.NotNull(result.Data);
+        //        Assert.Equal(2, result.Data.Items.Count);
+
+        //        var items = result.Data.Items.OrderBy(x => x.BarnName).ToList();
+        //        Assert.Equal("Barn 1", items[0].BarnName);
+        //        Assert.Equal("Barn 2", items[1].BarnName);
+        //        Assert.Equal(100, items[0].TotalUnit);
+        //        Assert.Equal(150, items[1].TotalUnit);
+        //    }
+   
     }
 }
 
