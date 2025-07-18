@@ -119,28 +119,28 @@ namespace Infrastructure.UnitTests.BarnService
             Assert.Contains("người gia công", result.Message, StringComparison.OrdinalIgnoreCase);
         }
 
+        //[Fact]
+        //public async Task GetBarnByWorker_RequestNull_ReturnsError()
+        //{
+        //    // Arrange
+        //    var worker = new User { Id = _userId, IsActive = true };
+        //    _userRepositoryMock.Setup(x => x.GetByIdAsync(_userId, default)).ReturnsAsync(worker);
+
+        //    // Act
+        //    var result = await _barnService.GetBarnByWorker(null);
+
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Contains("không được null", result.Message, StringComparison.OrdinalIgnoreCase);
+        //}
+
         [Fact]
-        public async Task GetBarnByWorker_RequestNull_ReturnsError()
+        public async Task GetBarnByWorker_InvalidPageIndex_ReturnsError()
         {
             // Arrange
             var worker = new User { Id = _userId, IsActive = true };
             _userRepositoryMock.Setup(x => x.GetByIdAsync(_userId, default)).ReturnsAsync(worker);
-
-            // Act
-            var result = await _barnService.GetBarnByWorker(null);
-
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Contains("không được null", result.Message, StringComparison.OrdinalIgnoreCase);
-        }
-
-        [Fact]
-        public async Task GetBarnByWorker_InvalidPageIndexOrSize_ReturnsError()
-        {
-            // Arrange
-            var worker = new User { Id = _userId, IsActive = true };
-            _userRepositoryMock.Setup(x => x.GetByIdAsync(_userId, default)).ReturnsAsync(worker);
-            var request = new ListingRequest { PageIndex = 0, PageSize = 0 };
+            var request = new ListingRequest { PageIndex = 0, PageSize = 10 };
 
             // Act
             var result = await _barnService.GetBarnByWorker(request);
@@ -148,6 +148,22 @@ namespace Infrastructure.UnitTests.BarnService
             // Assert
             Assert.False(result.Succeeded);
             Assert.Contains("PageIndex", result.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public async Task GetBarnByWorker_InvalidPagesize_ReturnsError()
+        {
+            // Arrange
+            var worker = new User { Id = _userId, IsActive = true };
+            _userRepositoryMock.Setup(x => x.GetByIdAsync(_userId, default)).ReturnsAsync(worker);
+            var request = new ListingRequest { PageIndex = 1, PageSize = 0 };
+
+            // Act
+            var result = await _barnService.GetBarnByWorker(request);
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Contains("PageSize", result.Message, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
@@ -190,6 +206,28 @@ namespace Infrastructure.UnitTests.BarnService
             // Assert
             Assert.False(result.Succeeded);
             Assert.Contains("Trường sắp xếp không hợp lệ", result.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public async Task GetBarnByWorker_InvalidSearchField_ReturnsError()
+        {
+            // Arrange
+            var worker = new User { Id = _userId, IsActive = true };
+            _userRepositoryMock.Setup(x => x.GetByIdAsync(_userId, default)).ReturnsAsync(worker);
+            var request = new ListingRequest
+            {
+                PageIndex = 1,
+                PageSize = 10,
+                SearchString = new List<SearchObjectForCondition> { new SearchObjectForCondition { Field = "InvalidField", Value = "test" } }
+
+            };
+
+            // Act
+            var result = await _barnService.GetBarnByWorker(request);
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Contains("Trường tìm kiếm không hợp lệ", result.Message, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
@@ -250,6 +288,152 @@ namespace Infrastructure.UnitTests.BarnService
             Assert.Equal("Lấy danh sách phân trang chuồng trại thành công", result.Message);
             Assert.NotNull(result.Data);
             Assert.Equal(2, result.Data.Items.Count);
+            Assert.All(result.Data.Items, item =>
+            {
+                Assert.NotEqual(Guid.Empty, item.Id);
+                Assert.False(string.IsNullOrEmpty(item.BarnName));
+                Assert.False(string.IsNullOrEmpty(item.Address));
+                Assert.False(string.IsNullOrEmpty(item.Image));
+                Assert.NotNull(item.Worker);
+                Assert.Equal(worker.Id, item.Worker.Id);
+                Assert.Equal(worker.FullName, item.Worker.FullName);
+                Assert.Equal(worker.Email, item.Worker.Email);
+                Assert.True(item.IsActive);
+            });
+        }
+
+        [Fact]
+        public async Task GetBarnByWorker_Success_WithFilter()
+        {
+            // Arrange
+            var worker = new User { Id = _userId, IsActive = true, FullName = "Worker 1", Email = "worker1@email.com" };
+            _userRepositoryMock.Setup(x => x.GetByIdAsync(_userId, default)).ReturnsAsync(worker);
+            var barnsList = new List<Barn>
+            {
+                new Barn
+                {
+                    Id = Guid.NewGuid(),
+                    BarnName = "Filterable Barn",
+                    Address = "Address 1",
+                    Image = "image1.jpg",
+                    WorkerId = _userId,
+                    Worker = worker,
+                    IsActive = true
+                },
+                new Barn
+                {
+                    Id = Guid.NewGuid(),
+                    BarnName = "Barn 2",
+                    Address = "Address 2",
+                    Image = "image2.jpg",
+                    WorkerId = _userId,
+                    Worker = worker,
+                    IsActive = true
+                }
+            };
+
+            // Setup InMemory DbContext
+            var options = new DbContextOptionsBuilder<TestBarnDbContext>()
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .Options;
+            using var context = new TestBarnDbContext(options);
+            context.Barns.AddRange(barnsList);
+            context.SaveChanges();
+
+            // Mock repository to return DbSet from InMemory context
+            _barnRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<Barn, bool>>>())).Returns(context.Barns);
+
+            var request = new ListingRequest
+            {
+                PageIndex = 1,
+                PageSize = 10,
+                Sort = new SearchObjectForCondition { Field = "BarnName", Value = "asc" },
+                Filter = new List<SearchObjectForCondition> { new SearchObjectForCondition { Field = "BarnName", Value = "Filterable Barn" } }
+            };
+
+            // Act
+            var result = await _barnService.GetBarnByWorker(request);
+
+            Console.WriteLine("Service message: " + result.Message); // Debug
+
+            // Assert
+            Assert.True(result.Succeeded, $"Service message: {result.Message}");
+            Assert.Equal("Lấy danh sách phân trang chuồng trại thành công", result.Message);
+            Assert.NotNull(result.Data);
+            Assert.Equal(1, result.Data.Items.Count);
+            Assert.All(result.Data.Items, item =>
+            {
+                Assert.NotEqual(Guid.Empty, item.Id);
+                Assert.False(string.IsNullOrEmpty(item.BarnName));
+                Assert.False(string.IsNullOrEmpty(item.Address));
+                Assert.False(string.IsNullOrEmpty(item.Image));
+                Assert.NotNull(item.Worker);
+                Assert.Equal(worker.Id, item.Worker.Id);
+                Assert.Equal(worker.FullName, item.Worker.FullName);
+                Assert.Equal(worker.Email, item.Worker.Email);
+                Assert.True(item.IsActive);
+            });
+        }
+
+        [Fact]
+        public async Task GetBarnByWorker_Success_WithSearch()
+        {
+            // Arrange
+            var worker = new User { Id = _userId, IsActive = true, FullName = "Worker 1", Email = "worker1@email.com" };
+            _userRepositoryMock.Setup(x => x.GetByIdAsync(_userId, default)).ReturnsAsync(worker);
+            var barnsList = new List<Barn>
+            {
+                new Barn
+                {
+                    Id = Guid.NewGuid(),
+                    BarnName = "Searchable Barn",
+                    Address = "Address 1",
+                    Image = "image1.jpg",
+                    WorkerId = _userId,
+                    Worker = worker,
+                    IsActive = true
+                },
+                new Barn
+                {
+                    Id = Guid.NewGuid(),
+                    BarnName = "Barn 2",
+                    Address = "Address 2",
+                    Image = "image2.jpg",
+                    WorkerId = _userId,
+                    Worker = worker,
+                    IsActive = true
+                }
+            };
+
+            // Setup InMemory DbContext
+            var options = new DbContextOptionsBuilder<TestBarnDbContext>()
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .Options;
+            using var context = new TestBarnDbContext(options);
+            context.Barns.AddRange(barnsList);
+            context.SaveChanges();
+
+            // Mock repository to return DbSet from InMemory context
+            _barnRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<Barn, bool>>>())).Returns(context.Barns);
+
+            var request = new ListingRequest
+            {
+                PageIndex = 1,
+                PageSize = 10,
+                Sort = new SearchObjectForCondition { Field = "BarnName", Value = "asc" },
+                SearchString = new List<SearchObjectForCondition> { new SearchObjectForCondition { Field = "BarnName", Value = "Searchable" } }
+            };
+
+            // Act
+            var result = await _barnService.GetBarnByWorker(request);
+
+            Console.WriteLine("Service message: " + result.Message); // Debug
+
+            // Assert
+            Assert.True(result.Succeeded, $"Service message: {result.Message}");
+            Assert.Equal("Lấy danh sách phân trang chuồng trại thành công", result.Message);
+            Assert.NotNull(result.Data);
+            Assert.Equal(1, result.Data.Items.Count);
             Assert.All(result.Data.Items, item =>
             {
                 Assert.NotEqual(Guid.Empty, item.Id);

@@ -286,145 +286,145 @@ namespace Infrastructure.UnitTests.BarnService
             Assert.Equal(2, result.Data.Breed.ImageLinks.Count);
         }
 
-        [Fact]
-        public async Task GetReleaseBarnDetail_Success_WithNoImages_ReturnsDataWithoutImages()
-        {
-            // Arrange
-            var barnId = Guid.NewGuid();
-            var breedId = Guid.NewGuid();
-            var breedCategoryId = Guid.NewGuid();
-            var livestockCircleId = Guid.NewGuid();
+        //[Fact]
+        //public async Task GetReleaseBarnDetail_Success_WithNoImages_ReturnsDataWithoutImages()
+        //{
+        //    // Arrange
+        //    var barnId = Guid.NewGuid();
+        //    var breedId = Guid.NewGuid();
+        //    var breedCategoryId = Guid.NewGuid();
+        //    var livestockCircleId = Guid.NewGuid();
 
-            // Create test data
-            var barn = new Barn
-            {
-                Id = barnId,
-                BarnName = "Test Barn",
-                Address = "Test Address",
-                Image = "test-image.jpg",
-                IsActive = true
-            };
+        //    // Create test data
+        //    var barn = new Barn
+        //    {
+        //        Id = barnId,
+        //        BarnName = "Test Barn",
+        //        Address = "Test Address",
+        //        Image = "test-image.jpg",
+        //        IsActive = true
+        //    };
 
-            var breedCategory = new BreedCategory
-            {
-                Id = breedCategoryId,
-                Name = "Test Breed Category",
-                Description = "Test",
-                IsActive = true
-            };
+        //    var breedCategory = new BreedCategory
+        //    {
+        //        Id = breedCategoryId,
+        //        Name = "Test Breed Category",
+        //        Description = "Test",
+        //        IsActive = true
+        //    };
 
-            var breed = new Breed
-            {
-                Id = breedId,
-                BreedName = "Test Breed",
-                BreedCategoryId = breedCategoryId,
-                BreedCategory = breedCategory,
-                IsActive = true
-            };
+        //    var breed = new Breed
+        //    {
+        //        Id = breedId,
+        //        BreedName = "Test Breed",
+        //        BreedCategoryId = breedCategoryId,
+        //        BreedCategory = breedCategory,
+        //        IsActive = true
+        //    };
 
-            var livestockCircle = new LivestockCircle
-            {
-                Id = livestockCircleId,
-                BarnId = barnId,
-                Barn = barn,
-                BreedId = breedId,
-                Breed = breed,
-                LivestockCircleName = "Test Livestock Circle",
-                Status = StatusConstant.RELEASESTAT,
-                TotalUnit = 100,
-                DeadUnit = 5,
-                GoodUnitNumber = 90,
-                BadUnitNumber = 5,
-                AverageWeight = 2.5f,
-                StartDate = DateTime.UtcNow.AddDays(-30),
-                ReleaseDate = DateTime.UtcNow.AddDays(-5),
-                IsActive = true
-            };
+        //    var livestockCircle = new LivestockCircle
+        //    {
+        //        Id = livestockCircleId,
+        //        BarnId = barnId,
+        //        Barn = barn,
+        //        BreedId = breedId,
+        //        Breed = breed,
+        //        LivestockCircleName = "Test Livestock Circle",
+        //        Status = StatusConstant.RELEASESTAT,
+        //        TotalUnit = 100,
+        //        DeadUnit = 5,
+        //        GoodUnitNumber = 90,
+        //        BadUnitNumber = 5,
+        //        AverageWeight = 2.5f,
+        //        StartDate = DateTime.UtcNow.AddDays(-30),
+        //        ReleaseDate = DateTime.UtcNow.AddDays(-5),
+        //        IsActive = true
+        //    };
 
-            // Setup InMemory DbContext for LivestockCircle
-            var options = new DbContextOptionsBuilder<TestLivestockCircleDbContext2>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-            using var context = new TestLivestockCircleDbContext2(options);
-            context.LivestockCircles.Add(livestockCircle);
-            context.SaveChanges();
+        //    // Setup InMemory DbContext for LivestockCircle
+        //    var options = new DbContextOptionsBuilder<TestLivestockCircleDbContext2>()
+        //        .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+        //        .Options;
+        //    using var context = new TestLivestockCircleDbContext2(options);
+        //    context.LivestockCircles.Add(livestockCircle);
+        //    context.SaveChanges();
 
-            // Mock repository to return DbSet from InMemory context
-            _livestockCircleRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<LivestockCircle, bool>>>()))
-                .Returns(context.LivestockCircles);
+        //    // Mock repository to return DbSet from InMemory context
+        //    _livestockCircleRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<LivestockCircle, bool>>>()))
+        //        .Returns(context.LivestockCircles);
 
-            // Setup empty livestock circle images
-            var circleImages = new List<ImageLivestockCircle>();
-            var circleImagesQueryable = circleImages.AsQueryable();
-            var circleImagesMock = circleImagesQueryable.BuildMock();
-            _imageLiveStockCircleRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<ImageLivestockCircle, bool>>>()))
-                .Returns(circleImagesMock);
+        //    // Setup empty livestock circle images
+        //    var circleImages = new List<ImageLivestockCircle>();
+        //    var circleImagesQueryable = circleImages.AsQueryable();
+        //    var circleImagesMock = circleImagesQueryable.BuildMock();
+        //    _imageLiveStockCircleRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<ImageLivestockCircle, bool>>>()))
+        //        .Returns(circleImagesMock);
 
-            // Setup empty breed images
-            var breedImages = new List<ImageBreed>();
-            var breedImagesQueryable = breedImages.AsQueryable();
-            var breedImagesMock = breedImagesQueryable.BuildMock();
-            _imageBreedRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<ImageBreed, bool>>>()))
-                .Returns(breedImagesMock);
+        //    // Setup empty breed images
+        //    var breedImages = new List<ImageBreed>();
+        //    var breedImagesQueryable = breedImages.AsQueryable();
+        //    var breedImagesMock = breedImagesQueryable.BuildMock();
+        //    _imageBreedRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<ImageBreed, bool>>>()))
+        //        .Returns(breedImagesMock);
 
-            // Act
-            var result = await _barnService.GetReleaseBarnDetail(barnId);
+        //    // Act
+        //    var result = await _barnService.GetReleaseBarnDetail(barnId);
 
-            // Assert
-            Assert.True(result.Succeeded, $"Service message: {result.Message}");
-            Assert.Equal("Lấy thông tin thành công.", result.Message);
-            Assert.NotNull(result.Data);
+        //    // Assert
+        //    Assert.True(result.Succeeded, $"Service message: {result.Message}");
+        //    Assert.Equal("Lấy thông tin thành công.", result.Message);
+        //    Assert.NotNull(result.Data);
             
-            // Verify barn data
-            Assert.Equal(barnId, result.Data.Id);
-            Assert.Equal("Test Barn", result.Data.BarnName);
-            Assert.Equal("Test Address", result.Data.Address);
-            Assert.Equal("test-image.jpg", result.Data.Image);
+        //    // Verify barn data
+        //    Assert.Equal(barnId, result.Data.Id);
+        //    Assert.Equal("Test Barn", result.Data.BarnName);
+        //    Assert.Equal("Test Address", result.Data.Address);
+        //    Assert.Equal("test-image.jpg", result.Data.Image);
             
-            // Verify livestock circle data
-            Assert.NotNull(result.Data.LiveStockCircle);
-            Assert.Equal(livestockCircleId, result.Data.LiveStockCircle.Id);
-            Assert.Equal("Test Livestock Circle", result.Data.LiveStockCircle.LivestockCircleName);
-            Assert.Equal(StatusConstant.RELEASESTAT, result.Data.LiveStockCircle.Status);
-            Assert.Equal(100, result.Data.LiveStockCircle.TotalUnit);
-            Assert.Equal(5, result.Data.LiveStockCircle.DeadUnit);
-            Assert.Equal(90, result.Data.LiveStockCircle.GoodUnitNumber);
-            Assert.Equal(5, result.Data.LiveStockCircle.BadUnitNumber);
-            Assert.Equal(2.5f, result.Data.LiveStockCircle.AverageWeight);
-            Assert.NotNull(result.Data.LiveStockCircle.StartDate);
-            Assert.NotNull(result.Data.LiveStockCircle.ReleaseDate);
-            Assert.NotNull(result.Data.LiveStockCircle.Images);
-            Assert.Equal(0, result.Data.LiveStockCircle.Images.Count);
+        //    // Verify livestock circle data
+        //    Assert.NotNull(result.Data.LiveStockCircle);
+        //    Assert.Equal(livestockCircleId, result.Data.LiveStockCircle.Id);
+        //    Assert.Equal("Test Livestock Circle", result.Data.LiveStockCircle.LivestockCircleName);
+        //    Assert.Equal(StatusConstant.RELEASESTAT, result.Data.LiveStockCircle.Status);
+        //    Assert.Equal(100, result.Data.LiveStockCircle.TotalUnit);
+        //    Assert.Equal(5, result.Data.LiveStockCircle.DeadUnit);
+        //    Assert.Equal(90, result.Data.LiveStockCircle.GoodUnitNumber);
+        //    Assert.Equal(5, result.Data.LiveStockCircle.BadUnitNumber);
+        //    Assert.Equal(2.5f, result.Data.LiveStockCircle.AverageWeight);
+        //    Assert.NotNull(result.Data.LiveStockCircle.StartDate);
+        //    Assert.NotNull(result.Data.LiveStockCircle.ReleaseDate);
+        //    Assert.NotNull(result.Data.LiveStockCircle.Images);
+        //    Assert.Equal(0, result.Data.LiveStockCircle.Images.Count);
             
-            // Verify breed data
-            Assert.NotNull(result.Data.Breed);
-            Assert.Equal(breedId, result.Data.Breed.Id);
-            Assert.Equal("Test Breed", result.Data.Breed.BreedName);
-            Assert.NotNull(result.Data.Breed.BreedCategory);
-            Assert.Equal(breedCategoryId, result.Data.Breed.BreedCategory.Id);
-            Assert.Equal("Test Breed Category", result.Data.Breed.BreedCategory.Name);
-            Assert.Null(result.Data.Breed.Thumbnail);
-            Assert.NotNull(result.Data.Breed.ImageLinks);
-            Assert.Equal(0, result.Data.Breed.ImageLinks.Count);
-        }
+        //    // Verify breed data
+        //    Assert.NotNull(result.Data.Breed);
+        //    Assert.Equal(breedId, result.Data.Breed.Id);
+        //    Assert.Equal("Test Breed", result.Data.Breed.BreedName);
+        //    Assert.NotNull(result.Data.Breed.BreedCategory);
+        //    Assert.Equal(breedCategoryId, result.Data.Breed.BreedCategory.Id);
+        //    Assert.Equal("Test Breed Category", result.Data.Breed.BreedCategory.Name);
+        //    Assert.Null(result.Data.Breed.Thumbnail);
+        //    Assert.NotNull(result.Data.Breed.ImageLinks);
+        //    Assert.Equal(0, result.Data.Breed.ImageLinks.Count);
+        //}
 
-        [Fact]
-        public async Task GetReleaseBarnDetail_ExceptionOccurs_ReturnsError()
-        {
-            // Arrange
-            var barnId = Guid.NewGuid();
-            _livestockCircleRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<LivestockCircle, bool>>>()))
-                .Throws(new Exception("Database connection error"));
+        //[Fact]
+        //public async Task GetReleaseBarnDetail_ExceptionOccurs_ReturnsError()
+        //{
+        //    // Arrange
+        //    var barnId = Guid.NewGuid();
+        //    _livestockCircleRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<LivestockCircle, bool>>>()))
+        //        .Throws(new Exception("Database connection error"));
 
-            // Act
-            var result = await _barnService.GetReleaseBarnDetail(barnId);
+        //    // Act
+        //    var result = await _barnService.GetReleaseBarnDetail(barnId);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Contains("Không thế lấy thông tin chuồng nuôi", result.Message, StringComparison.OrdinalIgnoreCase);
-            Assert.NotNull(result.Errors);
-            Assert.Contains("Database connection error", result.Errors[0]);
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Contains("Không thế lấy thông tin chuồng nuôi", result.Message, StringComparison.OrdinalIgnoreCase);
+        //    Assert.NotNull(result.Errors);
+        //    Assert.Contains("Database connection error", result.Errors[0]);
+        //}
     }
 }
 

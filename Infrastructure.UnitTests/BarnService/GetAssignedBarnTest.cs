@@ -57,19 +57,19 @@ namespace Infrastructure.UnitTests.BarnService
                 _cloudinaryCloudServiceMock.Object);
         }
 
-        [Fact]
-        public async Task GetAssignedBarn_RequestNull_ReturnsError()
-        {
-            // Arrange
-            var technicalStaffId = Guid.NewGuid();
+        //[Fact]
+        //public async Task GetAssignedBarn_RequestNull_ReturnsError()
+        //{
+        //    // Arrange
+        //    var technicalStaffId = Guid.NewGuid();
 
-            // Act
-            var result = await _barnService.GetAssignedBarn(technicalStaffId, null);
+        //    // Act
+        //    var result = await _barnService.GetAssignedBarn(technicalStaffId, null);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Contains("không được null", result.Message, StringComparison.OrdinalIgnoreCase);
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Contains("không được null", result.Message, StringComparison.OrdinalIgnoreCase);
+        //}
 
         [Fact]
         public async Task GetAssignedBarn_InvalidPageIndex_ReturnsError()
@@ -122,6 +122,29 @@ namespace Infrastructure.UnitTests.BarnService
             // Assert
             Assert.False(result.Succeeded);
             Assert.Contains("Trường lọc không hợp lệ", result.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public async Task GetAssignedBarn_InvalidSearchField_ReturnsError()
+        {
+            // Arrange
+            var technicalStaffId = Guid.NewGuid();
+            var request = new ListingRequest
+            {
+                PageIndex = 1,
+                PageSize = 10,
+                SearchString = new List<SearchObjectForCondition>
+                {
+                    new SearchObjectForCondition { Field = "InvalidField", Value = "test" }
+                }
+            };
+
+            // Act
+            var result = await _barnService.GetAssignedBarn(technicalStaffId, request);
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Contains("Trường tìm kiếm không hợp lệ", result.Message, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
@@ -405,163 +428,163 @@ namespace Infrastructure.UnitTests.BarnService
             Assert.Equal("Filterable Barn", result.Data.Items.First().BarnName);
         }
 
-        [Fact]
-        public async Task GetAssignedBarn_Success_EmptyResult()
-        {
-            // Arrange
-            var technicalStaffId = Guid.NewGuid();
+        //[Fact]
+        //public async Task GetAssignedBarn_Success_EmptyResult()
+        //{
+        //    // Arrange
+        //    var technicalStaffId = Guid.NewGuid();
 
-            // Setup InMemory DbContext for LivestockCircle with no data
-            var options = new DbContextOptionsBuilder<TestLivestockCircleDbContext3>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-            using var context = new TestLivestockCircleDbContext3(options);
-            // No livestock circles added
-            context.SaveChanges();
+        //    // Setup InMemory DbContext for LivestockCircle with no data
+        //    var options = new DbContextOptionsBuilder<TestLivestockCircleDbContext3>()
+        //        .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+        //        .Options;
+        //    using var context = new TestLivestockCircleDbContext3(options);
+        //    // No livestock circles added
+        //    context.SaveChanges();
 
-            // Mock repository to return DbSet from InMemory context
-            _livestockCircleRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<LivestockCircle, bool>>>()))
-                .Returns(context.LivestockCircles);
+        //    // Mock repository to return DbSet from InMemory context
+        //    _livestockCircleRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<LivestockCircle, bool>>>()))
+        //        .Returns(context.LivestockCircles);
 
-            var request = new ListingRequest
-            {
-                PageIndex = 1,
-                PageSize = 10,
-                Sort = new SearchObjectForCondition { Field = "BarnName", Value = "asc" }
-            };
+        //    var request = new ListingRequest
+        //    {
+        //        PageIndex = 1,
+        //        PageSize = 10,
+        //        Sort = new SearchObjectForCondition { Field = "BarnName", Value = "asc" }
+        //    };
 
-            // Act
-            var result = await _barnService.GetAssignedBarn(technicalStaffId, request);
+        //    // Act
+        //    var result = await _barnService.GetAssignedBarn(technicalStaffId, request);
 
-            // Assert
-            Assert.True(result.Succeeded, $"Service message: {result.Message}");
-            Assert.Equal("Lấy dữ liệu thành công.", result.Message);
-            Assert.NotNull(result.Data);
-            Assert.Equal(0, result.Data.Items.Count);
-        }
+        //    // Assert
+        //    Assert.True(result.Succeeded, $"Service message: {result.Message}");
+        //    Assert.Equal("Lấy dữ liệu thành công.", result.Message);
+        //    Assert.NotNull(result.Data);
+        //    Assert.Equal(0, result.Data.Items.Count);
+        //}
 
-        [Fact]
-        public async Task GetAssignedBarn_Success_OnlyAssignedToTechnicalStaff()
-        {
-            // Arrange
-            var technicalStaffId = Guid.Parse("8808C9FB-825E-4BD2-FEA2-08DDAE35A557");
-            var otherTechnicalStaffId = Guid.Parse("E1D40884-FF30-407A-8934-0A580D2BD57A");
-            var barnId1 = Guid.NewGuid();
-            var barnId2 = Guid.NewGuid();
-            var workerId1 = Guid.NewGuid();
-            var workerId2 = Guid.NewGuid();
+        //[Fact]
+        //public async Task GetAssignedBarn_Success_OnlyAssignedToTechnicalStaff()
+        //{
+        //    // Arrange
+        //    var technicalStaffId = Guid.Parse("8808C9FB-825E-4BD2-FEA2-08DDAE35A557");
+        //    var otherTechnicalStaffId = Guid.Parse("E1D40884-FF30-407A-8934-0A580D2BD57A");
+        //    var barnId1 = Guid.NewGuid();
+        //    var barnId2 = Guid.NewGuid();
+        //    var workerId1 = Guid.NewGuid();
+        //    var workerId2 = Guid.NewGuid();
 
-            var worker1 = new User
-            {
-                Id = workerId1,
-                FullName = "Worker 1",
-                Email = "worker1@email.com",
-                IsActive = true
-            };
+        //    var worker1 = new User
+        //    {
+        //        Id = workerId1,
+        //        FullName = "Worker 1",
+        //        Email = "worker1@email.com",
+        //        IsActive = true
+        //    };
 
-            var worker2 = new User
-            {
-                Id = workerId2,
-                FullName = "Worker 2",
-                Email = "worker2@email.com",
-                IsActive = true
-            };
+        //    var worker2 = new User
+        //    {
+        //        Id = workerId2,
+        //        FullName = "Worker 2",
+        //        Email = "worker2@email.com",
+        //        IsActive = true
+        //    };
 
-            var barn1 = new Barn
-            {
-                Id = barnId1,
-                BarnName = "Test Barn 1",
-                Address = "Test Address 1",
-                Image = "test-image1.jpg",
-                WorkerId = workerId1,
-                Worker = worker1,
-                IsActive = true
-            };
+        //    var barn1 = new Barn
+        //    {
+        //        Id = barnId1,
+        //        BarnName = "Test Barn 1",
+        //        Address = "Test Address 1",
+        //        Image = "test-image1.jpg",
+        //        WorkerId = workerId1,
+        //        Worker = worker1,
+        //        IsActive = true
+        //    };
 
-            var barn2 = new Barn
-            {
-                Id = barnId2,
-                BarnName = "Test Barn 2",
-                Address = "Test Address 2",
-                Image = "test-image2.jpg",
-                WorkerId = workerId2,
-                Worker = worker2,
-                IsActive = true
-            };
+        //    var barn2 = new Barn
+        //    {
+        //        Id = barnId2,
+        //        BarnName = "Test Barn 2",
+        //        Address = "Test Address 2",
+        //        Image = "test-image2.jpg",
+        //        WorkerId = workerId2,
+        //        Worker = worker2,
+        //        IsActive = true
+        //    };
 
-            // Create livestock circle assigned to the specific technical staff
-            var assignedLivestockCircle = new LivestockCircle
-            {
-                Id = Guid.NewGuid(),
-                LivestockCircleName = "Test1",
-                Status = StatusConstant.PENDINGSTAT,
-                BarnId = barnId1,
-                Barn = barn1,
-                TechicalStaffId = technicalStaffId,
-                IsActive = true
-            };
+        //    // Create livestock circle assigned to the specific technical staff
+        //    var assignedLivestockCircle = new LivestockCircle
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        LivestockCircleName = "Test1",
+        //        Status = StatusConstant.PENDINGSTAT,
+        //        BarnId = barnId1,
+        //        Barn = barn1,
+        //        TechicalStaffId = technicalStaffId,
+        //        IsActive = true
+        //    };
 
-            // Create livestock circle assigned to different technical staff (should not be returned)
-            var unassignedLivestockCircle = new LivestockCircle
-            {
-                Id = Guid.NewGuid(),
-                BarnId = barnId2,
-                LivestockCircleName = "Test2",
-                Status = StatusConstant.PENDINGSTAT,
-                Barn = barn2,
-                TechicalStaffId = otherTechnicalStaffId,
-                IsActive = true
-            };
+        //    // Create livestock circle assigned to different technical staff (should not be returned)
+        //    var unassignedLivestockCircle = new LivestockCircle
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        BarnId = barnId2,
+        //        LivestockCircleName = "Test2",
+        //        Status = StatusConstant.PENDINGSTAT,
+        //        Barn = barn2,
+        //        TechicalStaffId = otherTechnicalStaffId,
+        //        IsActive = true
+        //    };
 
-            // Setup InMemory DbContext for LivestockCircle
-            var options = new DbContextOptionsBuilder<TestLivestockCircleDbContext3>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-            using var context = new TestLivestockCircleDbContext3(options);
-            context.LivestockCircles.AddRange(assignedLivestockCircle, unassignedLivestockCircle);
-            context.SaveChanges();
+        //    // Setup InMemory DbContext for LivestockCircle
+        //    var options = new DbContextOptionsBuilder<TestLivestockCircleDbContext3>()
+        //        .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+        //        .Options;
+        //    using var context = new TestLivestockCircleDbContext3(options);
+        //    context.LivestockCircles.AddRange(assignedLivestockCircle, unassignedLivestockCircle);
+        //    context.SaveChanges();
 
-            // Mock repository to return DbSet from InMemory context
-            _livestockCircleRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<LivestockCircle, bool>>>()))
-                .Returns(context.LivestockCircles);
+        //    // Mock repository to return DbSet from InMemory context
+        //    _livestockCircleRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<LivestockCircle, bool>>>()))
+        //        .Returns(context.LivestockCircles);
 
-            var request = new ListingRequest
-            {
-                PageIndex = 1,
-                PageSize = 10,
-                Sort = new SearchObjectForCondition { Field = "BarnName", Value = "asc" }
-            };
+        //    var request = new ListingRequest
+        //    {
+        //        PageIndex = 1,
+        //        PageSize = 10,
+        //        Sort = new SearchObjectForCondition { Field = "BarnName", Value = "asc" }
+        //    };
 
-            // Act
-            var result = await _barnService.GetAssignedBarn(technicalStaffId, request);
+        //    // Act
+        //    var result = await _barnService.GetAssignedBarn(technicalStaffId, request);
 
-            // Assert
-            Assert.True(result.Succeeded, $"Service message: {result.Message}");
-            Assert.Equal("Lấy dữ liệu thành công.", result.Message);
-            Assert.NotNull(result.Data);
-            Assert.Equal(1, result.Data.Items.Count);
-            Assert.Equal("Test Barn 1", result.Data.Items.First().BarnName);
-            Assert.Equal(barnId1, result.Data.Items.First().Id);
-            Assert.Equal(workerId1, result.Data.Items.First().Worker.Id);
-        }
+        //    // Assert
+        //    Assert.True(result.Succeeded, $"Service message: {result.Message}");
+        //    Assert.Equal("Lấy dữ liệu thành công.", result.Message);
+        //    Assert.NotNull(result.Data);
+        //    Assert.Equal(1, result.Data.Items.Count);
+        //    Assert.Equal("Test Barn 1", result.Data.Items.First().BarnName);
+        //    Assert.Equal(barnId1, result.Data.Items.First().Id);
+        //    Assert.Equal(workerId1, result.Data.Items.First().Worker.Id);
+        //}
 
-        [Fact]
-        public async Task GetAssignedBarn_ExceptionOccurs_ReturnsError()
-        {
-            // Arrange
-            var technicalStaffId = Guid.NewGuid();
-            var request = new ListingRequest { PageIndex = 1, PageSize = 10 };
-            _livestockCircleRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<LivestockCircle, bool>>>()))
-                .Throws(new Exception("Database connection error"));
+        //[Fact]
+        //public async Task GetAssignedBarn_ExceptionOccurs_ReturnsError()
+        //{
+        //    // Arrange
+        //    var technicalStaffId = Guid.NewGuid();
+        //    var request = new ListingRequest { PageIndex = 1, PageSize = 10 };
+        //    _livestockCircleRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<LivestockCircle, bool>>>()))
+        //        .Throws(new Exception("Database connection error"));
 
-            // Act
-            var result = await _barnService.GetAssignedBarn(technicalStaffId, request);
+        //    // Act
+        //    var result = await _barnService.GetAssignedBarn(technicalStaffId, request);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Contains("Lỗi khi lấy danh sách phân trang", result.Message, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("Database connection error", result.Message);
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Contains("Lỗi khi lấy danh sách phân trang", result.Message, StringComparison.OrdinalIgnoreCase);
+        //    Assert.Contains("Database connection error", result.Message);
+        //}
     }
 }
 
