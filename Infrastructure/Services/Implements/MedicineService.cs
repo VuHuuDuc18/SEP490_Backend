@@ -11,6 +11,7 @@ using Infrastructure.Extensions;
 using Infrastructure.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -404,11 +405,12 @@ namespace Infrastructure.Services.Implements
 
                 var images = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == medicineId && x.IsActive).ToListAsync(cancellationToken);
                 var category = await _medicineCategoryRepository.GetByIdAsync(medicine.MedicineCategoryId);
-
+                string[] medicine_sign_detail = medicine.MedicineName.Split('/');
                 var response = new MedicineResponse
                 {
                     Id = medicine.Id,
-                    MedicineName = medicine.MedicineName,
+                    MedicineName = medicine_sign_detail[0],
+                    MedicineCode = medicine_sign_detail[1],
                     MedicineCategory = AutoMapperHelper.AutoMap<MedicineCategory, MedicineCategoryResponse>(category),
                     Stock = medicine.Stock,
                     IsActive = medicine.IsActive,
@@ -451,16 +453,17 @@ namespace Infrastructure.Services.Implements
 
                 var medicines = await query.ToListAsync(cancellationToken);
                 var responses = new List<MedicineResponse>();
-
+                
                 foreach (var medicine in medicines)
                 {
                     var images = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == medicine.Id && x.IsActive).ToListAsync(cancellationToken);
                     var category = await _medicineCategoryRepository.GetByIdAsync(medicine.MedicineCategoryId);
-
+                    string[] medicine_sign_detail = medicine.MedicineName.Split('/');
                     responses.Add(new MedicineResponse
                     {
                         Id = medicine.Id,
-                        MedicineName = medicine.MedicineName,
+                        MedicineName = medicine_sign_detail[0],
+                        MedicineCode = medicine_sign_detail[1],
                         MedicineCategory = AutoMapperHelper.AutoMap<MedicineCategory, MedicineCategoryResponse>(category),
                         Stock = medicine.Stock,
                         IsActive = medicine.IsActive,
@@ -550,11 +553,12 @@ namespace Infrastructure.Services.Implements
                 {
                     var category = await _medicineCategoryRepository.GetByIdAsync(medicine.MedicineCategoryId);
                     var medicineImages = imageGroups.GetValueOrDefault(medicine.Id, new List<ImageMedicine>());
-
+                    string[] medicine_sign_detail = medicine.MedicineName.Split('/');
                     responses.Add(new MedicineResponse
                     {
                         Id = medicine.Id,
-                        MedicineName = medicine.MedicineName,
+                        MedicineName = medicine_sign_detail[0] ?? medicine.MedicineName,
+                        MedicineCode = medicine_sign_detail[1] ?? medicine.MedicineName,
                         MedicineCategory = AutoMapperHelper.AutoMap<MedicineCategory, MedicineCategoryResponse>(category),
                         Stock = medicine.Stock,
                         IsActive = medicine.IsActive,
@@ -645,12 +649,13 @@ namespace Infrastructure.Services.Implements
                 foreach (var medicine in medicines)
                 {
                     var images = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == medicine.Id && x.IsActive).ToListAsync(cancellationToken);
-                    var category = await _medicineCategoryRepository.GetByIdAsync(medicine.MedicineCategoryId);
-
+                    var category = await _medicineCategoryRepository.GetByIdAsync(medicine.MedicineCategoryId);                   
+                    string[] medicine_sign_detail = medicine.MedicineName.Split('/');
                     responses.Add(new MedicineResponse
                     {
                         Id = medicine.Id,
-                        MedicineName = medicine.MedicineName,
+                        MedicineName = medicine_sign_detail[0] ?? medicine.MedicineName,
+                        MedicineCode = medicine_sign_detail[1] ?? medicine.MedicineName,
                         MedicineCategory = AutoMapperHelper.AutoMap<MedicineCategory, MedicineCategoryResponse>(category),
                         Stock = medicine.Stock,
                         IsActive = medicine.IsActive,

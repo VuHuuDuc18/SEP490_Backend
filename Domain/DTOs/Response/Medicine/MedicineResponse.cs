@@ -11,6 +11,7 @@ namespace Domain.Dto.Response.Medicine
     {
         public Guid Id { get; set; }
         public string MedicineName { get; set; }
+        public string MedicineCode {  get; set; }
         public MedicineCategoryResponse MedicineCategory { get; set; }
         public int Stock { get; set; }
         public bool IsActive { get; set; }
