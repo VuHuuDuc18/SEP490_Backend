@@ -14,6 +14,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.Dto.Response.Barn;
+using Application.Wrappers;
 
 namespace Infrastructure.Services.Implements
 {
@@ -54,7 +56,7 @@ namespace Infrastructure.Services.Implements
 
 
             // insert food plan
-            InsertFoodPlan(req.foodPlans, barnPlanDetail.Id);
+            await InsertFoodPlan(req.foodPlans, barnPlanDetail.Id);
             // insert medicine plan
 
             await InsertMedicinePlan(req.medicinePlans, barnPlanDetail.Id);
@@ -71,14 +73,25 @@ namespace Infrastructure.Services.Implements
                     throw new Exception("Yêu cầu không được null.");
                 if (request.PageIndex < 1 || request.PageSize < 1)
                     throw new Exception("PageIndex và PageSize phải lớn hơn 0.");
-
-                var validFields = typeof(BillItem).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var validFields = typeof(ViewBarnPlanResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
+                var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
+                {
                     throw new Exception($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+                }
 
+                if (invalidFieldsSearch.Any())
+                {
+                    throw new Exception($"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFieldsSearch)}");
+                }
 
+                if(!validFields.Contains(request.Sort?.Field))
+                {
+                    throw new Exception($"Trường sắp xếp không hợp lệ: {string.Join(", ", invalidFields)}");
+                }
 
                 var query = _barnplanrepo.GetQueryable(x => x.IsActive).Where(it => it.LivestockCircleId == livestockCircleId);
 
