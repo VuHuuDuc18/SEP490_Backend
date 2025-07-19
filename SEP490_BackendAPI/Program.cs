@@ -1,4 +1,4 @@
-using Infrastructure.Identity;
+﻿using Infrastructure.Identity;
 using Infrastructure;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -56,15 +56,17 @@ namespace SEP490_BackendAPI
             //var servicesProvider = builder.Services.BuildServiceProvider();
             //ServicesExtentions.SeedIdentity(servicesProvider);
 
+            app.UseCors("AllowAllOrigins");
 
             // Configure the HTTP request pipeline.
             //if (app.Environment.IsDevelopment())
             //{
             app.UseSwagger();
-                app.UseSwaggerUI();
+            app.UseSwaggerUI();
             //}
 
-            app.UseHttpsRedirection();
+            //Tự động redirect qua https nếu có
+            //app.UseHttpsRedirection();
 
             app.UseAuthorization();
 

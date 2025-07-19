@@ -121,7 +121,7 @@ namespace Infrastructure.Services.Implements
                 // Lấy danh sách các Sale Staff và tổng số đơn hàng mỗi Sale đang xử lý
                 var Orders = _orderRepository.GetQueryable();
                 //var Staffs = _userManager.GetUsersInRoleAsync(RoleConstant.SalesStaff).Result.AsQueryable();
-                var Staffs = _dbContext.Set<UserRole>().Where(x=>x.User.IsActive && x.Role.Name == RoleConstant.SalesStaff);
+                var Staffs = _dbContext.Set<UserRole>().Where(x => x.User.IsActive && x.Role.Name == RoleConstant.SalesStaff);
                 var query = from o in Orders
                             join s in Staffs on o.SaleStaffId equals s.UserId
                             group o by new { o.SaleStaffId } into g
@@ -142,7 +142,7 @@ namespace Infrastructure.Services.Implements
                         x => x.users.DefaultIfEmpty(),
                         (x, user) => new { x.order, SaleStaff = user }
                     )
-                    .GroupBy(x => new { x.SaleStaff.UserId})
+                    .GroupBy(x => new { x.SaleStaff.UserId })
                     .Select(g => new
                     {
                         SaleStaffId = g.Key.UserId,
@@ -174,7 +174,7 @@ namespace Infrastructure.Services.Implements
                     SaleStaffId = saleStaffId
                 };
 
-                
+
                 var livestockCircle = await _livestockCircleRepository.GetByIdAsync(request.LivestockCircleId);
                 if (livestockCircle == null)
                 {
@@ -234,23 +234,23 @@ namespace Infrastructure.Services.Implements
                     return new Response<OrderResponse>("Đơn hàng không tồn tại hoặc đã bị xóa.");
                 }
                 var livestockCircle = await _livestockCircleRepository.GetByIdAsync(order.LivestockCircleId);
-                var images =await _imageLivestockCircleRepository.GetQueryable(x=>x.IsActive && x.LivestockCircleId == order.LivestockCircleId)
-                    .Select(x=> x.ImageLink).ToListAsync();
-                var customer =await _userManager.FindByIdAsync(_currentUserId.ToString());
+                var images = await _imageLivestockCircleRepository.GetQueryable(x => x.IsActive && x.LivestockCircleId == order.LivestockCircleId)
+                    .Select(x => x.ImageLink).ToListAsync();
+                var customer = await _userManager.FindByIdAsync(_currentUserId.ToString());
                 var result = new OrderResponse()
-                    {
-                        Id = order.Id,
-                        CustomerId = order.CustomerId,
-                        LivestockCircleId = order.LivestockCircleId,
-                        GoodUnitStock = order.GoodUnitStock,
-                        BadUnitStock = order.BadUnitStock,
-                        TotalBill = order.TotalBill,
-                        Status = order.Status,
-                        CreateDate = order.CreatedDate,
-                        PickupDate = order.PickupDate,
-                        BreedName = order.LivestockCircle.Breed.BreedName,
-                        BreedCategory = order.LivestockCircle.Breed.BreedCategory.Name
-                    };
+                {
+                    Id = order.Id,
+                    CustomerId = order.CustomerId,
+                    LivestockCircleId = order.LivestockCircleId,
+                    GoodUnitStock = order.GoodUnitStock,
+                    BadUnitStock = order.BadUnitStock,
+                    TotalBill = order.TotalBill,
+                    Status = order.Status,
+                    CreateDate = order.CreatedDate,
+                    PickupDate = order.PickupDate,
+                    BreedName = order.LivestockCircle.Breed.BreedName,
+                    BreedCategory = order.LivestockCircle.Breed.BreedCategory.Name
+                };
                 result.LivestockCircle = AutoMapperHelper.AutoMap<LivestockCircle, ReleasedLivetockDetail>(livestockCircle);
                 result.LivestockCircle.ImageLinks = images;
                 result.Customer = AutoMapperHelper.AutoMap<User, UserItemResponse>(customer);
@@ -541,7 +541,7 @@ namespace Infrastructure.Services.Implements
             var result = new StatisticsOrderResponse()
             {
                 Datas = ListItem,
-                TotalRevenue = ListItem.Sum(x=>x.Revenue ?? 0),
+                TotalRevenue = ListItem.Sum(x => x.Revenue ?? 0),
                 TotalBadUnitStockSold = ListItem.Sum(x => x.BadUnitStockSold ?? 0),
                 TotalGoodUnitStockSold = ListItem.Sum(x => x.GoodUnitStockSold ?? 0),
             };
@@ -594,14 +594,14 @@ namespace Infrastructure.Services.Implements
             {
                 throw new Exception($"Lỗi khi lấy danh sách: {ex.Message}");
             }
-            
+
         }
 
         public async Task<bool> ApproveOrder(ApproveOrderRequest request)
         {
             try
             {
-                var orderItem =await _orderRepository.GetByIdAsync(request.OrderId);
+                var orderItem = await _orderRepository.GetByIdAsync(request.OrderId);
                 if (orderItem == null)
                 {
                     throw new Exception("Không tìm thấy đơn ");
@@ -621,10 +621,11 @@ namespace Infrastructure.Services.Implements
                     livestockCircleDetail.Status = StatusConstant.DONESTAT;
                 }
                 _livestockCircleRepository.Update(livestockCircleDetail);
-                
-                return (await _orderRepository.CommitAsync() > 0) &&  (await _livestockCircleRepository.CommitAsync() > 0);
 
-            }catch (Exception ex)
+                return (await _orderRepository.CommitAsync() > 0) && (await _livestockCircleRepository.CommitAsync() > 0);
+
+            }
+            catch (Exception ex)
             {
                 return false;
             }
@@ -647,7 +648,7 @@ namespace Infrastructure.Services.Implements
 
 
 
-                var query = _orderRepository.GetQueryable(x => x.IsActive).Where(x=>x.LivestockCircle.Barn.WorkerId == _currentUserId);
+                var query = _orderRepository.GetQueryable(x => x.IsActive).Where(x => x.LivestockCircle.Barn.WorkerId == _currentUserId);
 
                 if (request.SearchString?.Any() == true)
                     query = query.SearchString(request.SearchString);
