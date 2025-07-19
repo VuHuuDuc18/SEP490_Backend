@@ -18,7 +18,7 @@ namespace Domain.Dto.Response.Barn
         public string Address { get; set; }
         public string Image { get; set; }
 
-        public LivestockCircleResponse LiveStockCircle { get; set; }
+        public LivestockCircleResponse LivestockCircle { get; set; }
         public BreedResponse Breed { get; set; }
     }
 

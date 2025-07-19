@@ -1037,11 +1037,11 @@ namespace Infrastructure.Services.Implements
                 var breedImages = _imageBreedeRepository.GetQueryable(x => x.IsActive && x.BreedId == liveStockCircle.BreedId).Select(x=> x.ImageLink).ToList();
                 //map data to response object
                 var result = AutoMapperHelper.AutoMap<Barn,ReleaseBarnDetailResponse>(liveStockCircle.Barn);
-                result.LiveStockCircle = AutoMapperHelper.AutoMap<LivestockCircle, LivestockCircleResponse>(liveStockCircle);
+                result.LivestockCircle = AutoMapperHelper.AutoMap<LivestockCircle, LivestockCircleResponse>(liveStockCircle);
                 result.Breed = AutoMapperHelper.AutoMap<Breed, BreedResponse>(liveStockCircle.Breed);
                 result.Breed.Thumbnail = breedImages.FirstOrDefault();
                 result.Breed.BreedCategory = AutoMapperHelper.AutoMap<BreedCategory, BreedCategoryResponse>(liveStockCircle.Breed.BreedCategory);
-                result.LiveStockCircle.Images = circleImages;
+                result.LivestockCircle.Images = circleImages;
                 result.Breed.ImageLinks = breedImages;
 
                 return new Response<ReleaseBarnDetailResponse>(result, "Lấy thông tin thành công.");

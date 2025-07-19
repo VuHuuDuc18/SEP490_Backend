@@ -260,19 +260,19 @@ namespace Infrastructure.UnitTests.BarnService
             Assert.Equal("test-image.jpg", result.Data.Image);
             
             // Verify livestock circle data
-            Assert.NotNull(result.Data.LiveStockCircle);
-            Assert.Equal(livestockCircleId, result.Data.LiveStockCircle.Id);
-            Assert.Equal("Test Livestock Circle", result.Data.LiveStockCircle.LivestockCircleName);
-            Assert.Equal(StatusConstant.RELEASESTAT, result.Data.LiveStockCircle.Status);
-            Assert.Equal(100, result.Data.LiveStockCircle.TotalUnit);
-            Assert.Equal(5, result.Data.LiveStockCircle.DeadUnit);
-            Assert.Equal(90, result.Data.LiveStockCircle.GoodUnitNumber);
-            Assert.Equal(5, result.Data.LiveStockCircle.BadUnitNumber);
-            Assert.Equal(2.5f, result.Data.LiveStockCircle.AverageWeight);
-            Assert.NotNull(result.Data.LiveStockCircle.StartDate);
-            Assert.NotNull(result.Data.LiveStockCircle.ReleaseDate);
-            Assert.NotNull(result.Data.LiveStockCircle.Images);
-            Assert.Equal(2, result.Data.LiveStockCircle.Images.Count);
+            Assert.NotNull(result.Data.LivestockCircle);
+            Assert.Equal(livestockCircleId, result.Data.LivestockCircle.Id);
+            Assert.Equal("Test Livestock Circle", result.Data.LivestockCircle.LivestockCircleName);
+            Assert.Equal(StatusConstant.RELEASESTAT, result.Data.LivestockCircle.Status);
+            Assert.Equal(100, result.Data.LivestockCircle.TotalUnit);
+            Assert.Equal(5, result.Data.LivestockCircle.DeadUnit);
+            Assert.Equal(90, result.Data.LivestockCircle.GoodUnitNumber);
+            Assert.Equal(5, result.Data.LivestockCircle.BadUnitNumber);
+            Assert.Equal(2.5f, result.Data.LivestockCircle.AverageWeight);
+            Assert.NotNull(result.Data.LivestockCircle.StartDate);
+            Assert.NotNull(result.Data.LivestockCircle.ReleaseDate);
+            Assert.NotNull(result.Data.LivestockCircle.Images);
+            Assert.Equal(2, result.Data.LivestockCircle.Images.Count);
             
             // Verify breed data
             Assert.NotNull(result.Data.Breed);
