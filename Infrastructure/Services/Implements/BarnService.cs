@@ -559,9 +559,7 @@ namespace Infrastructure.Services.Implements
                 };
             }
         }
-        public async Task<Response<PaginationSet<BarnResponse>>> GetPaginatedBarnList(
-    ListingRequest request,
-    CancellationToken cancellationToken = default)
+        public async Task<Response<PaginationSet<BarnResponse>>> GetPaginatedBarnList(ListingRequest request,CancellationToken cancellationToken = default)
         {
             try
             {
@@ -672,9 +670,7 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-        public async Task<Response<PaginationSet<AdminBarnResponse>>> GetPaginatedAdminBarnListAsync(
-            ListingRequest request,
-            CancellationToken cancellationToken = default)
+        public async Task<Response<PaginationSet<AdminBarnResponse>>> GetPaginatedAdminBarnListAsync(ListingRequest request,CancellationToken cancellationToken = default)
         {
             try
             {
@@ -802,9 +798,7 @@ namespace Infrastructure.Services.Implements
                 };
             }
         }
-        public async Task<Response<AdminBarnDetailResponse>> GetAdminBarnDetailAsync(
-            Guid barnId,
-            CancellationToken cancellationToken = default)
+        public async Task<Response<AdminBarnDetailResponse>> GetAdminBarnDetailAsync(Guid barnId,CancellationToken cancellationToken = default)
         {
             try
             {
@@ -941,9 +935,7 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-        public async Task<Response<PaginationSet<ReleaseBarnResponse>>> GetPaginatedReleaseBarnListAsync(
-            ListingRequest request,
-            CancellationToken cancellationToken = default)
+        public async Task<Response<PaginationSet<ReleaseBarnResponse>>> GetPaginatedReleaseBarnListAsync(ListingRequest request,CancellationToken cancellationToken = default)
         {
             try
             {
@@ -1027,9 +1019,7 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-        public async Task<Response<ReleaseBarnDetailResponse>> GetReleaseBarnDetail(
-            Guid BarnId,
-            CancellationToken cancellationToken = default)
+        public async Task<Response<ReleaseBarnDetailResponse>> GetReleaseBarnDetail(Guid BarnId,CancellationToken cancellationToken = default)
         {
             try
             {
@@ -1040,18 +1030,18 @@ namespace Infrastructure.Services.Implements
                     return new Response<ReleaseBarnDetailResponse>("Không tìm thấy thông tin chuồng nuôi.");
                 }
                 //get livestock circle images
-                var circleImages = _imageLiveStockCircleRepository.GetQueryable(x=>x.IsActive && x.LivestockCircleId == liveStockCircle.Id)
+                var circleImages =await  _imageLiveStockCircleRepository.GetQueryable(x=>x.IsActive && x.LivestockCircleId == liveStockCircle.Id)
                     .Select(x=> AutoMapperHelper.AutoMap<ImageLivestockCircle, ImageLivestockCircleResponse>(x))
-                    .ToList();
+                    .ToListAsync();
                 //get breed images
                 var breedImages = _imageBreedeRepository.GetQueryable(x => x.IsActive && x.BreedId == liveStockCircle.BreedId).Select(x=> x.ImageLink).ToList();
                 //map data to response object
                 var result = AutoMapperHelper.AutoMap<Barn,ReleaseBarnDetailResponse>(liveStockCircle.Barn);
-                result.LiveStockCircle = AutoMapperHelper.AutoMap<LivestockCircle, LivestockCircleResponse>(liveStockCircle);
+                result.LivestockCircle = AutoMapperHelper.AutoMap<LivestockCircle, LivestockCircleResponse>(liveStockCircle);
                 result.Breed = AutoMapperHelper.AutoMap<Breed, BreedResponse>(liveStockCircle.Breed);
                 result.Breed.Thumbnail = breedImages.FirstOrDefault();
                 result.Breed.BreedCategory = AutoMapperHelper.AutoMap<BreedCategory, BreedCategoryResponse>(liveStockCircle.Breed.BreedCategory);
-                result.LiveStockCircle.Images = circleImages;
+                result.LivestockCircle.Images = circleImages;
                 result.Breed.ImageLinks = breedImages;
 
                 return new Response<ReleaseBarnDetailResponse>(result, "Lấy thông tin thành công.");

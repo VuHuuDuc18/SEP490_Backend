@@ -46,4 +46,11 @@ namespace Domain.Dto.Response.LivestockCircle
         public BreedBillResponse Breed { get; set; }
         public UserItemResponse TechicalStaffId { get; set; }
     }
+
+    public class ImageLivestockCircleResponse
+    {
+        public Guid Id { get; set; }
+        public string Thumnail { get; set; }
+        public string ImageLink { get; set; }
+    }
 }

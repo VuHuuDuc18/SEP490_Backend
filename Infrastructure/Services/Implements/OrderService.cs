@@ -11,12 +11,15 @@ using Domain.Helper;
 using Domain.Helper.Constants;
 using Domain.IServices;
 using Entities.EntityModel;
+using Infrastructure.DBContext;
 using Infrastructure.Extensions;
 using Infrastructure.Repository;
+using MailKit.Search;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.IdentityModel.Tokens;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -25,29 +28,41 @@ namespace Infrastructure.Services.Implements
     public class OrderService : IOrderService
     {
         private readonly IRepository<Order> _orderRepository;
+        private readonly IRepository<User> _userRepository;
         private UserManager<User> _userManager;
+        private RoleManager<Role> _roleManager;
+        private IRepository<Role> _roleRepository;
         private readonly IRepository<LivestockCircle> _livestockCircleRepository;
         private readonly IRepository<Breed> _breedRepository;
         private readonly IRepository<ImageLivestockCircle> _imageLivestockCircleRepository;
         private readonly IRepository<BreedCategory> _breedCategoryRepository;
         private readonly Guid _currentUserId;
+        private readonly LCFMSDBContext _dbContext;
         public OrderService
         (
             IRepository<Order> orderRepository,
             IHttpContextAccessor httpContextAccessor,
             IRepository<LivestockCircle> livestockCircleRepository,
             UserManager<User> userManager,
+            RoleManager<Role> roleManager,
+            IRepository<User> userRepository,
             IRepository<Breed> breedrepo,
             IRepository<BreedCategory> bcrepo,
-            IRepository<ImageLivestockCircle> imageLivestockCircleRepository
+            IRepository<ImageLivestockCircle> imageLivestockCircleRepository,
+            IRepository<Role> roleRepository,
+            DbContext dbContext
         )
         {
+            _dbContext = (LCFMSDBContext)dbContext;
+            _userRepository = userRepository;
             _orderRepository = orderRepository;
             _breedRepository = breedrepo;
             _livestockCircleRepository = livestockCircleRepository;
             _breedCategoryRepository = bcrepo;
             _userManager = userManager;
+            _roleManager = roleManager;
             _imageLivestockCircleRepository = imageLivestockCircleRepository;
+            _roleRepository = roleRepository;
 
             // Lấy current user từ JWT token claims
             _currentUserId = Guid.Empty;
@@ -95,7 +110,7 @@ namespace Infrastructure.Services.Implements
             {
                 //Kiểm tra đơn hàng đã tồn tại chưa
                 var existingOrder = _orderRepository.GetQueryable(x => x.CustomerId == _currentUserId && x.LivestockCircleId == request.LivestockCircleId);
-                if (existingOrder != null)
+                if (!existingOrder.IsNullOrEmpty())
                 {
                     return new Response<string>()
                     {
@@ -103,6 +118,47 @@ namespace Infrastructure.Services.Implements
                         Message = "Đã tồn tại đơn hàng với chuồng nuôi hiện tại. Vui lòng kiểm tra lại các đơn hàng của bạn.",
                     };
                 }
+                // Lấy danh sách các Sale Staff và tổng số đơn hàng mỗi Sale đang xử lý
+                var Orders = _orderRepository.GetQueryable();
+                //var Staffs = _userManager.GetUsersInRoleAsync(RoleConstant.SalesStaff).Result.AsQueryable();
+                var Staffs = _dbContext.Set<UserRole>().Where(x => x.User.IsActive && x.Role.Name == RoleConstant.SalesStaff);
+                var query = from o in Orders
+                            join s in Staffs on o.SaleStaffId equals s.UserId
+                            group o by new { o.SaleStaffId } into g
+                            orderby g.Count()
+                            select new
+                            {
+                                SaleStaffId = g.Key.SaleStaffId,
+                                TotalOrders = g.Count()
+                            };
+                var saleStaffs = Orders
+                    .GroupJoin(
+                        Staffs,
+                        o => o.SaleStaffId,
+                        u => u.UserId,
+                        (order, users) => new { order, users }
+                    )
+                    .SelectMany(
+                        x => x.users.DefaultIfEmpty(),
+                        (x, user) => new { x.order, SaleStaff = user }
+                    )
+                    .GroupBy(x => new { x.SaleStaff.UserId })
+                    .Select(g => new
+                    {
+                        SaleStaffId = g.Key.UserId,
+                        TotalOrders = g.Count()
+                    })
+                    .OrderBy(x => x.TotalOrders)
+                    .ToList();
+                if (saleStaffs.IsNullOrEmpty())
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Không có nhân viên sale nào xử lý đơn hàng.",
+                    };
+                }
+                var saleStaffId = saleStaffs.FirstOrDefault().SaleStaffId;
                 //Tạo đơn hàng mới
                 var order = new Order()
                 {
@@ -114,8 +170,11 @@ namespace Infrastructure.Services.Implements
                     CreatedDate = DateTime.UtcNow,
                     CreatedBy = _currentUserId,
                     IsActive = true,
-                    PickupDate = request.PickupDate
+                    PickupDate = request.PickupDate,
+                    SaleStaffId = saleStaffId
                 };
+
+
                 var livestockCircle = await _livestockCircleRepository.GetByIdAsync(request.LivestockCircleId);
                 if (livestockCircle == null)
                 {
@@ -175,23 +234,23 @@ namespace Infrastructure.Services.Implements
                     return new Response<OrderResponse>("Đơn hàng không tồn tại hoặc đã bị xóa.");
                 }
                 var livestockCircle = await _livestockCircleRepository.GetByIdAsync(order.LivestockCircleId);
-                var images =await _imageLivestockCircleRepository.GetQueryable(x=>x.IsActive && x.LivestockCircleId == order.LivestockCircleId)
-                    .Select(x=> x.ImageLink).ToListAsync();
-                var customer =await _userManager.FindByIdAsync(_currentUserId.ToString());
+                var images = await _imageLivestockCircleRepository.GetQueryable(x => x.IsActive && x.LivestockCircleId == order.LivestockCircleId)
+                    .Select(x => x.ImageLink).ToListAsync();
+                var customer = await _userManager.FindByIdAsync(_currentUserId.ToString());
                 var result = new OrderResponse()
-                    {
-                        Id = order.Id,
-                        CustomerId = order.CustomerId,
-                        LivestockCircleId = order.LivestockCircleId,
-                        GoodUnitStock = order.GoodUnitStock,
-                        BadUnitStock = order.BadUnitStock,
-                        TotalBill = order.TotalBill,
-                        Status = order.Status,
-                        CreateDate = order.CreatedDate,
-                        PickupDate = order.PickupDate,
-                        BreedName = order.LivestockCircle.Breed.BreedName,
-                        BreedCategory = order.LivestockCircle.Breed.BreedCategory.Name
-                    };
+                {
+                    Id = order.Id,
+                    CustomerId = order.CustomerId,
+                    LivestockCircleId = order.LivestockCircleId,
+                    GoodUnitStock = order.GoodUnitStock,
+                    BadUnitStock = order.BadUnitStock,
+                    TotalBill = order.TotalBill,
+                    Status = order.Status,
+                    CreateDate = order.CreatedDate,
+                    PickupDate = order.PickupDate,
+                    BreedName = order.LivestockCircle.Breed.BreedName,
+                    BreedCategory = order.LivestockCircle.Breed.BreedCategory.Name
+                };
                 result.LivestockCircle = AutoMapperHelper.AutoMap<LivestockCircle, ReleasedLivetockDetail>(livestockCircle);
                 result.LivestockCircle.ImageLinks = images;
                 result.Customer = AutoMapperHelper.AutoMap<User, UserItemResponse>(customer);
@@ -482,7 +541,7 @@ namespace Infrastructure.Services.Implements
             var result = new StatisticsOrderResponse()
             {
                 Datas = ListItem,
-                TotalRevenue = ListItem.Sum(x=>x.Revenue ?? 0),
+                TotalRevenue = ListItem.Sum(x => x.Revenue ?? 0),
                 TotalBadUnitStockSold = ListItem.Sum(x => x.BadUnitStockSold ?? 0),
                 TotalGoodUnitStockSold = ListItem.Sum(x => x.GoodUnitStockSold ?? 0),
             };
@@ -535,14 +594,14 @@ namespace Infrastructure.Services.Implements
             {
                 throw new Exception($"Lỗi khi lấy danh sách: {ex.Message}");
             }
-            
+
         }
 
         public async Task<bool> ApproveOrder(ApproveOrderRequest request)
         {
             try
             {
-                var orderItem =await _orderRepository.GetByIdAsync(request.OrderId);
+                var orderItem = await _orderRepository.GetByIdAsync(request.OrderId);
                 if (orderItem == null)
                 {
                     throw new Exception("Không tìm thấy đơn ");
@@ -562,10 +621,11 @@ namespace Infrastructure.Services.Implements
                     livestockCircleDetail.Status = StatusConstant.DONESTAT;
                 }
                 _livestockCircleRepository.Update(livestockCircleDetail);
-                
-                return (await _orderRepository.CommitAsync() > 0) &&  (await _livestockCircleRepository.CommitAsync() > 0);
 
-            }catch (Exception ex)
+                return (await _orderRepository.CommitAsync() > 0) && (await _livestockCircleRepository.CommitAsync() > 0);
+
+            }
+            catch (Exception ex)
             {
                 return false;
             }
@@ -588,7 +648,7 @@ namespace Infrastructure.Services.Implements
 
 
 
-                var query = _orderRepository.GetQueryable(x => x.IsActive).Where(x=>x.LivestockCircle.Barn.WorkerId == _currentUserId);
+                var query = _orderRepository.GetQueryable(x => x.IsActive).Where(x => x.LivestockCircle.Barn.WorkerId == _currentUserId);
 
                 if (request.SearchString?.Any() == true)
                     query = query.SearchString(request.SearchString);
