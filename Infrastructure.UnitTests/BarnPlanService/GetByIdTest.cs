@@ -72,7 +72,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
                 IsActive = true
             };
             var foodPlans = new List<BarnPlanFood> { foodPlan }.AsQueryable().BuildMockDbSet();
-            _barnPlanFoodRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BarnPlanFood, bool>>>() ) )
+            _barnPlanFoodRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BarnPlanFood, bool>>>()))
                 .Returns(foodPlans.Object);
 
             // Medicine
@@ -89,7 +89,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
                 IsActive = true
             };
             var medicinePlans = new List<BarnPlanMedicine> { medicinePlan }.AsQueryable().BuildMockDbSet();
-            _barnPlanMedicineRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BarnPlanMedicine, bool>>>() ) )
+            _barnPlanMedicineRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BarnPlanMedicine, bool>>>()))
                 .Returns(medicinePlans.Object);
 
             // Act
@@ -97,22 +97,22 @@ namespace Infrastructure.UnitTests.BarnPlanService
 
             // Assert
             Xunit.Assert.NotNull(result);
-            Xunit.Assert.Equal(barnPlanId, result.Id);
-            Xunit.Assert.Equal("Test Note", result.Note);
-            Xunit.Assert.Equal(barnPlan.StartDate, result.StartDate);
-            Xunit.Assert.Equal(barnPlan.EndDate, result.EndDate);
-            Xunit.Assert.NotNull(result.foodPlans);
-            Xunit.Assert.Single(result.foodPlans);
-            Xunit.Assert.Equal(foodId, result.foodPlans[0].FoodId);
-            Xunit.Assert.Equal("Corn", result.foodPlans[0].FoodName);
-            Xunit.Assert.Equal(10, result.foodPlans[0].Stock);
-            Xunit.Assert.Equal("Feed in morning", result.foodPlans[0].Note);
-            Xunit.Assert.NotNull(result.medicinePlans);
-            Xunit.Assert.Single(result.medicinePlans);
-            Xunit.Assert.Equal(medicineId, result.medicinePlans[0].MedicineId);
-            Xunit.Assert.Equal("Antibiotic", result.medicinePlans[0].MedicineName);
-            Xunit.Assert.Equal(5, result.medicinePlans[0].Stock);
-            Xunit.Assert.Equal("After meal", result.medicinePlans[0].Note);
+            Xunit.Assert.Equal(barnPlanId, result.Data.Id);
+            Xunit.Assert.Equal("Test Note", result.Data.Note);
+            Xunit.Assert.Equal(barnPlan.StartDate, result.Data.StartDate);
+            Xunit.Assert.Equal(barnPlan.EndDate, result.Data.EndDate);
+            Xunit.Assert.NotNull(result.Data.foodPlans);
+            Xunit.Assert.Single(result.Data.foodPlans);
+            Xunit.Assert.Equal(foodId, result.Data.foodPlans[0].FoodId);
+            Xunit.Assert.Equal("Corn", result.Data.foodPlans[0].FoodName);
+            Xunit.Assert.Equal(10, result.Data.foodPlans[0].Stock);
+            Xunit.Assert.Equal("Feed in morning", result.Data.foodPlans[0].Note);
+            Xunit.Assert.NotNull(result.Data.medicinePlans);
+            Xunit.Assert.Single(result.Data.medicinePlans);
+            Xunit.Assert.Equal(medicineId, result.Data.medicinePlans[0].MedicineId);
+            Xunit.Assert.Equal("Antibiotic", result.Data.medicinePlans[0].MedicineName);
+            Xunit.Assert.Equal(5, result.Data.medicinePlans[0].Stock);
+            Xunit.Assert.Equal("After meal", result.Data.medicinePlans[0].Note);
         }
     }
 }

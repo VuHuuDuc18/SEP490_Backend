@@ -14,12 +14,12 @@ namespace Domain.IServices
 {
     public interface ILivestockCircleService
     {
-        public Task<Guid> CreateLiveStockCircle(CreateLivestockCircleRequest request);
+        public Task<Response<Guid>> CreateLiveStockCircle(CreateLivestockCircleRequest request);
 
-        Task<(bool Success, string ErrorMessage)> UpdateLiveStockCircle(
-            Guid livestockCircleId, 
-            UpdateLivestockCircleRequest request, 
-            CancellationToken cancellationToken = default);
+        //Task<(bool Success, string ErrorMessage)> UpdateLiveStockCircle(
+        //    Guid livestockCircleId, 
+        //    UpdateLivestockCircleRequest request, 
+        //    CancellationToken cancellationToken = default);
 
         Task<(bool Success, string ErrorMessage)> DisableLiveStockCircle(
             Guid livestockCircleId, 
@@ -29,19 +29,19 @@ namespace Domain.IServices
             Guid livestockCircleId, 
             CancellationToken cancellationToken = default);
 
-        Task<(List<LivestockCircleResponse> Circles, string ErrorMessage)> GetLiveStockCircleByBarnIdAndStatus(
-            string status = null, 
-            Guid? barnId = null, 
-            CancellationToken cancellationToken = default);
+        //Task<(List<LivestockCircleResponse> Circles, string ErrorMessage)> GetLiveStockCircleByBarnIdAndStatus(
+        //    string status = null, 
+        //    Guid? barnId = null, 
+        //    CancellationToken cancellationToken = default);
 
-        Task<(List<LivestockCircleResponse> Circles, string ErrorMessage)> GetLiveStockCircleByTechnicalStaff(
-            Guid technicalStaffId, 
-            CancellationToken cancellationToken = default);
+        //Task<(List<LivestockCircleResponse> Circles, string ErrorMessage)> GetLiveStockCircleByTechnicalStaff(
+        //    Guid technicalStaffId, 
+        //    CancellationToken cancellationToken = default);
 
-        Task<(PaginationSet<LivestockCircleResponse> Result, string ErrorMessage)> GetPaginatedListByStatus(
-            string status,
-            ListingRequest request,
-            CancellationToken cancellationToken = default);
+        //Task<(PaginationSet<LivestockCircleResponse> Result, string ErrorMessage)> GetPaginatedListByStatus(
+        //    string status,
+        //    ListingRequest request,
+        //    CancellationToken cancellationToken = default);
 
         Task<(bool Success, string ErrorMessage)> UpdateAverageWeight(
             Guid livestockCircleId,
@@ -74,14 +74,14 @@ namespace Domain.IServices
              CancellationToken cancellationToken = default);
 
         // cap nhat trang thai xuat chuong cho 1 lua nuoi
-        public Task<bool> ReleaseBarn(Guid id);
+        public Task<Response<bool>> ReleaseBarn(Guid id);
         //lay danh sach cac chuong duoc giao quan ly
         //public Task<PaginationSet<LivestockCircleResponse>> GetAssignedBarn(Guid tsid,ListingRequest req);
         // danh sach lich su chan nuoi cua 1 chuong
-        public Task<PaginationSet<LiveStockCircleHistoryItem>> GetLivestockCircleHistory(Guid barnId,ListingRequest req);
+        public Task<Response<PaginationSet<LiveStockCircleHistoryItem>>> GetLivestockCircleHistory(Guid barnId,ListingRequest req);
 
-        public Task<PaginationSet<ReleasedLivetockItem>> GetReleasedLivestockCircleList(ListingRequest req);
-        public Task<ReleasedLivetockDetail> GetReleasedLivestockCircleById(Guid livestockCircleId);
+        public Task<Response<PaginationSet<ReleasedLivetockItem>>> GetReleasedLivestockCircleList(ListingRequest req);
+        //public Task<Response<ReleasedLivetockDetail>> GetReleasedLivestockCircleById(Guid livestockCircleId);
 
         public Task<(bool Success, string ErrorMessage)> UpdateImageLiveStocCircle(
             Guid livestockCircleId,

@@ -51,7 +51,7 @@ namespace SEP490_BackendAPI.Controllers
         public async Task<IActionResult> GetStatisticList([FromBody]StatisticsOrderRequest request)
         {
             var result = await _orderService.GetStatisticData(request);
-            return Ok(result.Datas);
+            return Ok(result);
         }
         [HttpPost("admin/export")]
         public async Task<IActionResult> ExportStatistic([FromBody] StatisticsOrderRequest request)
@@ -62,13 +62,13 @@ namespace SEP490_BackendAPI.Controllers
 
                 var summaryItem = new OrderItem()
                 {
-                    Revenue = data.TotalRevenue,
-                    BadUnitStockSold = data.TotalBadUnitStockSold,
-                    GoodUnitStockSold = data.TotalGoodUnitStockSold,
+                    Revenue = data.Data.TotalRevenue,
+                    BadUnitStockSold = data.Data.TotalBadUnitStockSold,
+                    GoodUnitStockSold = data.Data.TotalGoodUnitStockSold,
                     BreedName = "Total"
                 };
 
-                var result = data.Datas;
+                var result = data.Data.Datas;
                 result.Add(summaryItem);
 
                 // Thiết lập license context cho EPPlus (phiên bản mới)
@@ -109,7 +109,7 @@ namespace SEP490_BackendAPI.Controllers
         [HttpPost("sale/get-order-list")]
         public async Task<IActionResult> GetOrderList(ListingRequest request)
         {
-            return Ok(await _orderService.GetAllOrder(request));
+            return Ok(await _orderService.SaleGetAllOrder(request));
         }
         [HttpPost("worker/worker-get-order-list")]
         public async Task<IActionResult> WorderGetOrderList(ListingRequest request)

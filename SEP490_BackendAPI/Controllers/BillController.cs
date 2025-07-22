@@ -26,7 +26,7 @@ namespace SEP490_BackendAPI.Controllers
         private readonly ILivestockCircleService _livestockCircleService;
         public BillController(IBillService billService, ILivestockCircleService livestockCircleService)
         {
-            _billService = billService; 
+            _billService = billService;
             _livestockCircleService = livestockCircleService;
         }
         [HttpPost("technical-staff/get-bill-food-list")]
@@ -88,7 +88,7 @@ namespace SEP490_BackendAPI.Controllers
             return Ok(await _billService.CancelBill(billId));
         }
 
-      
+
         [HttpPatch("disable/bill-item/{billItemId}")]
         public async Task<IActionResult> DisableBillItem([FromRoute] Guid billItemId)
         {
@@ -242,11 +242,19 @@ namespace SEP490_BackendAPI.Controllers
                     TechicalStaffId = request.TechnicalStaffId,
                     TotalUnit = request.Stock
                 };
-                var livestockCircleId = await _livestockCircleService.CreateLiveStockCircle(createLivestockCircleRequest);
+                var livestockCircle = await _livestockCircleService.CreateLiveStockCircle(createLivestockCircleRequest);
+                if (!livestockCircle.Succeeded)
+                {
+                    return Ok(new Application.Wrappers.Response<bool>()
+                    {
+                        Succeeded = false,
+                        Message = "Không thể tạo yêu cầu giống"
 
+                    });
+                }
                 var BillBreedToRequest = new CreateBreedRequestDto()
                 {
-                    LivestockCircleId = livestockCircleId,
+                    LivestockCircleId = livestockCircle.Data,
                     Note = request.Note,
                     UserRequestId = Guid.Parse(User.FindFirst("uid")?.Value),
                     BreedItems = new List<BreedItemRequest>()
@@ -261,12 +269,34 @@ namespace SEP490_BackendAPI.Controllers
 
                 var result = await _billService.RequestBreed(BillBreedToRequest);
                 if (!result.Success)
-                    return BadRequest(new { error = result.ErrorMessage });
-                return Ok(new { message = "Yêu cầu Breed được tạo thành công." });
+                {
+                    await _livestockCircleService.DisableLiveStockCircle(livestockCircle.Data);
+
+                    return Ok(new Application.Wrappers.Response<bool>()
+                    {
+                        Succeeded = false,
+                        Message = "Không thể tạo yêu cầu giống"
+
+                    });
+                }
+
+                //return BadRequest(new { error = result.ErrorMessage });
+                return Ok(new Application.Wrappers.Response<bool>()
+                {
+                    Succeeded = true,
+                    Message = "Tạo yêu cầu giống thành công"
+
+                });
+
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                return Ok(new Application.Wrappers.Response<bool>()
+                {
+                    Succeeded = false,
+                    Message = "Không thể tạo yêu cầu giống"
+
+                });
             }
         }
 

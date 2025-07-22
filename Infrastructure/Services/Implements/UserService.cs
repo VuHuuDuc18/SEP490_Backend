@@ -150,6 +150,7 @@ namespace Infrastructure.Services.Implements
                 IsActive = true,
                 CreatedBy = userId,
                 CreatedDate = DateTime.UtcNow,
+                UserName = request.Email
             };
             var result = await _userManager.CreateAsync(user, request.Password);
             if (result.Succeeded)

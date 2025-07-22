@@ -36,10 +36,10 @@ namespace Infrastructure.Services.Implements
             CloudinaryCloudService cloudinaryCloudService,
             IHttpContextAccessor httpContextAccessor)
         {
-            _medicineRepository = medicineRepository ;
-            _medicineCategoryRepository = medicineCategoryRepository ;
-            _imageMedicineRepository = imageMedicineRepository ;
-            _cloudinaryCloudService = cloudinaryCloudService ;
+            _medicineRepository = medicineRepository;
+            _medicineCategoryRepository = medicineCategoryRepository;
+            _imageMedicineRepository = imageMedicineRepository;
+            _cloudinaryCloudService = cloudinaryCloudService;
 
             // Lấy current user từ JWT token claims
             _currentUserId = Guid.Empty;
@@ -453,7 +453,7 @@ namespace Infrastructure.Services.Implements
 
                 var medicines = await query.ToListAsync(cancellationToken);
                 var responses = new List<MedicineResponse>();
-                
+
                 foreach (var medicine in medicines)
                 {
                     var images = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == medicine.Id && x.IsActive).ToListAsync(cancellationToken);
@@ -594,50 +594,60 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-        public async Task<bool> ExcelDataHandle(List<CellMedicineItem> data)
+        public async Task<Response<bool>> ExcelDataHandle(List<CellMedicineItem> data)
         {
-            foreach (var it in data)
+            try
             {
-                var MedicineDetail = await _medicineRepository.GetQueryable(x => x.IsActive).FirstOrDefaultAsync(x => x.MedicineName.Contains(it.Ma_dang_ky));
-                var ListCategory = await _medicineCategoryRepository.GetQueryable(x => x.IsActive).ToListAsync();
-                if (MedicineDetail == null)
+
+                foreach (var it in data)
                 {
-                    // add thuoc
-                    var MedicineCategoryDetail = ListCategory.FirstOrDefault(x => StringKeyComparer.CompareStrings(x.Name, it.Phan_Loai_Thuoc));
-                    if (MedicineCategoryDetail == null)
+                    var MedicineDetail = await _medicineRepository.GetQueryable(x => x.IsActive).FirstOrDefaultAsync(x => x.MedicineName.Contains(it.Ma_dang_ky));
+                    var ListCategory = await _medicineCategoryRepository.GetQueryable(x => x.IsActive).ToListAsync();
+                    if (MedicineDetail == null)
                     {
-                        // add category
-                        var MedicineCategoryToInsert = new MedicineCategory()
+                        // add thuoc
+                        var MedicineCategoryDetail = ListCategory.FirstOrDefault(x => StringKeyComparer.CompareStrings(x.Name, it.Phan_Loai_Thuoc));
+                        if (MedicineCategoryDetail == null)
                         {
-                            Name = it.Phan_Loai_Thuoc,
-                            Description = it.Phan_Loai_Thuoc
+                            // add category
+                            var MedicineCategoryToInsert = new MedicineCategory()
+                            {
+                                Name = it.Phan_Loai_Thuoc,
+                                Description = it.Phan_Loai_Thuoc
+                            };
+                            // luu db
+                            _medicineCategoryRepository.Insert(MedicineCategoryToInsert);
+                            await _medicineCategoryRepository.CommitAsync();
+                            // gan lai du lieu chung
+                            MedicineCategoryDetail = MedicineCategoryToInsert;
+                        }
+
+                        Medicine MedicineToInsert = new Medicine()
+                        {
+                            MedicineName = it.Ten_Thuoc + "/" + it.Ma_dang_ky,
+                            Stock = it.So_luong,
+                            MedicineCategoryId = MedicineCategoryDetail.Id
                         };
-                        // luu db
-                        _medicineCategoryRepository.Insert(MedicineCategoryToInsert);
-                        await _medicineCategoryRepository.CommitAsync();
-                        // gan lai du lieu chung
-                        MedicineCategoryDetail = MedicineCategoryToInsert;
+                        _medicineRepository.Insert(MedicineToInsert);
                     }
-
-                    Medicine MedicineToInsert = new Medicine()
+                    else
                     {
-                        MedicineName = it.Ten_Thuoc + "/" + it.Ma_dang_ky,
-                        Stock = it.So_luong,
-                        MedicineCategoryId = MedicineCategoryDetail.Id
-                    };
-                    _medicineRepository.Insert(MedicineToInsert);
+                        // add sos luong
+                        MedicineDetail.Stock += it.So_luong;
+
+                    }
                 }
-                else
+                return new Application.Wrappers.Response<bool>()
                 {
-                    // add sos luong
-                    MedicineDetail.Stock += it.So_luong;
-
-                }
+                    Succeeded = true,
+                    Message = "Nhập dữ liệu thành công"
+                };
             }
-            ;
-            return await _medicineRepository.CommitAsync() > 0;
+            catch (Exception ex)
+            {
+                return new Response<bool>("Lỗi dữ liệu");
+            }
         }
-
         public async Task<Response<List<MedicineResponse>>> GetAllMedicine(CancellationToken cancellationToken = default)
         {
             try
@@ -649,7 +659,7 @@ namespace Infrastructure.Services.Implements
                 foreach (var medicine in medicines)
                 {
                     var images = await _imageMedicineRepository.GetQueryable(x => x.MedicineId == medicine.Id && x.IsActive).ToListAsync(cancellationToken);
-                    var category = await _medicineCategoryRepository.GetByIdAsync(medicine.MedicineCategoryId);                   
+                    var category = await _medicineCategoryRepository.GetByIdAsync(medicine.MedicineCategoryId);
                     string[] medicine_sign_detail = medicine.MedicineName.Split('/');
                     responses.Add(new MedicineResponse
                     {

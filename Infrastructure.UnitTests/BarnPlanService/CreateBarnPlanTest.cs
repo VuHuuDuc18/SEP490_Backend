@@ -74,7 +74,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
                 EndDate = DateTime.Today.AddDays(2),
                 IsActive = true
             };
-            _barnPlanRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BarnPlan, bool>>>() ))
+            _barnPlanRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BarnPlan, bool>>>()))
                 .Returns(new List<BarnPlan> { conflictPlan }.AsQueryable().BuildMock());
             var ex = await Xunit.Assert.ThrowsAsync<ArgumentException>(() => _service.CreateBarnPlan(req));
             Xunit.Assert.Contains("Đã đặt kế hoạch cho ngày này", ex.Message);
@@ -89,7 +89,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
                 IsDaily = true,
                 Note = "Test"
             };
-            _barnPlanRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BarnPlan, bool>>>() ))
+            _barnPlanRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BarnPlan, bool>>>()))
                 .Returns(new List<BarnPlan>().AsQueryable().BuildMock());
             _barnPlanRepoMock.Setup(x => x.CommitAsync(default)).ReturnsAsync(-1);
             var ex = await Xunit.Assert.ThrowsAsync<Exception>(() => _service.CreateBarnPlan(req));
@@ -106,7 +106,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
                 Note = "Test",
                 foodPlans = new List<FoodPlan> { new FoodPlan { FoodId = Guid.NewGuid(), Stock = 1, Note = "F" } }
             };
-            _barnPlanRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BarnPlan, bool>>>() ))
+            _barnPlanRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BarnPlan, bool>>>()))
                 .Returns(new List<BarnPlan>().AsQueryable().BuildMock());
             _barnPlanRepoMock.Setup(x => x.CommitAsync(default)).ReturnsAsync(1);
             _barnPlanFoodRepoMock.Setup(x => x.GetQueryable()).Returns(new List<BarnPlanFood>().AsQueryable().BuildMock());
@@ -127,7 +127,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
                 Note = "Test",
                 medicinePlans = new List<MedicinePlan> { new MedicinePlan { MedicineId = Guid.NewGuid(), Stock = 1, Note = "M" } }
             };
-            _barnPlanRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BarnPlan, bool>>>() ))
+            _barnPlanRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BarnPlan, bool>>>()))
                 .Returns(new List<BarnPlan>().AsQueryable().BuildMock());
             _barnPlanRepoMock.Setup(x => x.CommitAsync(default)).ReturnsAsync(1);
             _barnPlanFoodRepoMock.Setup(x => x.GetQueryable()).Returns(new List<BarnPlanFood>().AsQueryable().BuildMock());
@@ -149,7 +149,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
                 foodPlans = new List<FoodPlan> { new FoodPlan { FoodId = Guid.NewGuid(), Stock = 1, Note = "F" } },
                 medicinePlans = new List<MedicinePlan> { new MedicinePlan { MedicineId = Guid.NewGuid(), Stock = 1, Note = "M" } }
             };
-            _barnPlanRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BarnPlan, bool>>>() ))
+            _barnPlanRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BarnPlan, bool>>>()))
                 .Returns(new List<BarnPlan>().AsQueryable().BuildMock());
             _barnPlanRepoMock.Setup(x => x.CommitAsync(default)).ReturnsAsync(1);
             _barnPlanFoodRepoMock.Setup(x => x.GetQueryable()).Returns(new List<BarnPlanFood>().AsQueryable().BuildMock());
@@ -157,7 +157,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
             _barnPlanMedicineRepoMock.Setup(x => x.GetQueryable()).Returns(new List<BarnPlanMedicine>().AsQueryable().BuildMock());
             _barnPlanMedicineRepoMock.Setup(x => x.CommitAsync(default)).ReturnsAsync(1);
             var result = await _service.CreateBarnPlan(req);
-            Xunit.Assert.True(result);
+            Xunit.Assert.True(result.Succeeded);
             _barnPlanRepoMock.Verify(x => x.Insert(It.IsAny<BarnPlan>()), Moq.Times.Once);
             _barnPlanFoodRepoMock.Verify(x => x.Insert(It.IsAny<BarnPlanFood>()), Moq.Times.Once);
             _barnPlanMedicineRepoMock.Verify(x => x.Insert(It.IsAny<BarnPlanMedicine>()), Moq.Times.Once);
@@ -174,7 +174,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
                 foodPlans = null,
                 medicinePlans = null
             };
-            _barnPlanRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BarnPlan, bool>>>() ))
+            _barnPlanRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BarnPlan, bool>>>()))
                 .Returns(new List<BarnPlan>().AsQueryable().BuildMock());
             _barnPlanRepoMock.Setup(x => x.CommitAsync(default)).ReturnsAsync(1);
             _barnPlanFoodRepoMock.Setup(x => x.GetQueryable()).Returns(new List<BarnPlanFood>().AsQueryable().BuildMock());
@@ -182,7 +182,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
             _barnPlanMedicineRepoMock.Setup(x => x.GetQueryable()).Returns(new List<BarnPlanMedicine>().AsQueryable().BuildMock());
             _barnPlanMedicineRepoMock.Setup(x => x.CommitAsync(default)).ReturnsAsync(1);
             var result = await _service.CreateBarnPlan(req);
-            Xunit.Assert.True(result);
+            Xunit.Assert.True(result.Succeeded);
             _barnPlanRepoMock.Verify(x => x.Insert(It.IsAny<BarnPlan>()), Moq.Times.Once);
             _barnPlanFoodRepoMock.Verify(x => x.Insert(It.IsAny<BarnPlanFood>()), Moq.Times.Never);
             _barnPlanMedicineRepoMock.Verify(x => x.Insert(It.IsAny<BarnPlanMedicine>()), Moq.Times.Never);

@@ -26,7 +26,7 @@ namespace Domain.IServices
             ListingRequest request,
             CancellationToken cancellationToken = default);
 
-        public Task<bool> ExcelDataHandle(List<CellMedicineItem> data);
+        public Task<Response<bool>> ExcelDataHandle(List<CellMedicineItem> data);
 
 
     }

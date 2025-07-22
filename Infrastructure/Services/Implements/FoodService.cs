@@ -673,7 +673,7 @@ namespace Infrastructure.Services.Implements
             }).ToList();
         }
 
-        public async Task<bool> ExcelDataHandle(List<CellFoodItem> data)
+        public async Task<Response<bool>> ExcelDataHandle(List<CellFoodItem> data)
         {
             try
             {
@@ -719,11 +719,15 @@ namespace Infrastructure.Services.Implements
 
                 }
 
-                return await _foodRepository.CommitAsync() > 0;
+                return new Application.Wrappers.Response<bool>()
+                {
+                    Succeeded = true,
+                    Message = "Nhập dữ liệu thành công"
+                };
             }
             catch (Exception ex)
             {
-                throw new Exception("Loi du lieu");
+                return new Response<bool>("Lỗi dữ liệu");
             }
         }
     }

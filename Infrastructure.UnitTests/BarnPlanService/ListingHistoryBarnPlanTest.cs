@@ -54,7 +54,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
         {
 
             var req = new ListingRequest { PageIndex = 1, PageSize = 0 };
-            var  ex = await Assert.ThrowsAsync<Exception>(() => _service.ListingHistoryBarnPlan(Guid.NewGuid(), req));
+            var ex = await Assert.ThrowsAsync<Exception>(() => _service.ListingHistoryBarnPlan(Guid.NewGuid(), req));
             Assert.Contains("PageIndex và PageSize phải lớn hơn 0", ex.Message);
         }
 
@@ -136,9 +136,9 @@ namespace Infrastructure.UnitTests.BarnPlanService
             var result = await _service.ListingHistoryBarnPlan(livestockCircleId, req);
 
             Assert.NotNull(result);
-            Assert.Equal(2, result.Items.Count);
-            Assert.Contains(result.Items, x => x.Note == "Plan 1");
-            Assert.Contains(result.Items, x => x.Note == "Plan 2");
+            Assert.Equal(2, result.Data.Items.Count);
+            Assert.Contains(result.Data.Items, x => x.Note == "Plan 1");
+            Assert.Contains(result.Data.Items, x => x.Note == "Plan 2");
         }
 
         [Fact]
@@ -182,8 +182,8 @@ namespace Infrastructure.UnitTests.BarnPlanService
             var result = await _service.ListingHistoryBarnPlan(livestockCircleId, req);
 
             Assert.NotNull(result);
-            Assert.Equal(1, result.Items.Count);
-            Assert.Contains(result.Items, x => x.Note == "Searchable");
+            Assert.Equal(1, result.Data.Items.Count);
+            Assert.Contains(result.Data.Items, x => x.Note == "Searchable");
         }
 
         [Fact]
@@ -227,8 +227,8 @@ namespace Infrastructure.UnitTests.BarnPlanService
             var result = await _service.ListingHistoryBarnPlan(livestockCircleId, req);
 
             Assert.NotNull(result);
-            Assert.Equal(1, result.Items.Count);
-            Assert.Contains(result.Items, x => x.Note == "Filterable");
+            Assert.Equal(1, result.Data.Items.Count);
+            Assert.Contains(result.Data.Items, x => x.Note == "Filterable");
         }
     }
 }

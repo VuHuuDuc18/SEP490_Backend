@@ -24,6 +24,6 @@ namespace Domain.IServices
             ListingRequest request,
             CancellationToken cancellationToken = default);
         Task<List<BreedResponse>> GetAllBreed(CancellationToken cancellationToken = default);
-        public Task<bool> ExcelDataHandle(List<CellBreedItem> data);
+        public Task<Response<bool>> ExcelDataHandle(List<CellBreedItem> data);
     }
 }
