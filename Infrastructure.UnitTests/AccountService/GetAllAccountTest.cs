@@ -121,7 +121,7 @@ namespace Infrastructure.UnitTests.AccountService
 
             // Assert
             Assert.True(result.Succeeded);
-            Assert.Equal(users, result.Data);
+            Assert.Equal(users, (IAsyncEnumerable<User>?)result.Data);
             Assert.Equal(2, result.Data.Count);
             Assert.Equal("Lấy danh sách tài khoản thành công.", result.Message);
         }
