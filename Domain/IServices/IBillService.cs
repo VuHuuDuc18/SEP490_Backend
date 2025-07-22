@@ -31,7 +31,7 @@ namespace Domain.IServices
         Task<Response<BillResponse>> GetBillById(
              Guid billId,
              CancellationToken cancellationToken = default);
-        Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetPaginatedBillList(ListingRequest request, CancellationToken cancellationToken = default);
+        //Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetPaginatedBillList(ListingRequest request, CancellationToken cancellationToken = default);
         Task<Response<PaginationSet<BillResponse>>> GetPaginatedBillListHistory(
                     ListingRequest request,
                     string billType,
@@ -76,7 +76,7 @@ namespace Domain.IServices
         Task<Response<bool>> UpdateBillMedicine(
              UpdateBillMedicineDto request,
              CancellationToken cancellationToken = default);
-        Task<(bool Success, string ErrorMessage)> UpdateBillBreed(Guid billId, UpdateBillBreedDto request, CancellationToken cancellationToken = default);
+        //Task<(bool Success, string ErrorMessage)> UpdateBillBreed(Guid billId, UpdateBillBreedDto request, CancellationToken cancellationToken = default);
 
         Task<Response<PaginationSet<BillResponse>>> GetApprovedBillsByWorker(
             ListingRequest request,
@@ -89,6 +89,6 @@ namespace Domain.IServices
               ListingRequest request,
               string billType,
               CancellationToken cancellationToken = default);
-        public Task<bool> AdminUpdateBill(Admin_UpdateBarnRequest request);
+        public Task<Response<bool>> AdminUpdateBill(Admin_UpdateBarnRequest request);
     }
 }

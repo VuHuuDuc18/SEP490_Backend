@@ -71,7 +71,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
 
             var result = await _service.DisableBarnPlan(id);
 
-            Assert.True(result);
+            Assert.True(result.Succeeded);
             Assert.False(barnPlan.IsActive);
             Assert.True((now - barnPlan.EndDate).TotalSeconds < 5); // EndDate được set về gần DateTime.Now
             Assert.All(foods, f => Assert.False(f.IsActive));
@@ -108,7 +108,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
 
             var result = await _service.DisableBarnPlan(id);
 
-            Assert.True(result);
+            Assert.True(result.Succeeded);
             Assert.False(barnPlan.IsActive);
             Assert.All(foods, f => Assert.False(f.IsActive));
             Assert.All(medicines, m => Assert.False(m.IsActive));
@@ -144,7 +144,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
 
             var result = await _service.DisableBarnPlan(id);
 
-            Assert.False(result);
+            Assert.False(result.Succeeded);
             Assert.False(barnPlan.IsActive);
         }
     }

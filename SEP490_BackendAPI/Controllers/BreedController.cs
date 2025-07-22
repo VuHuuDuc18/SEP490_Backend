@@ -124,7 +124,7 @@ namespace SEP490_BackendAPI.Controllers
             }
             catch (Exception ex)
             {
-                throw new Exception("Lỗi dữ liệu file");
+                return Ok(new Application.Wrappers.Response<bool>("Lỗi dữ liệu file"));
             }
         }
         [HttpGet("download-template")]

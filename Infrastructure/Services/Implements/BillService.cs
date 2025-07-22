@@ -607,88 +607,88 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-        public async Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetPaginatedBillList(ListingRequest request, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                if (request == null) return (null, "Yêu cầu không được để trống.");
-                if (request.PageIndex < 1 || request.PageSize < 1) return (null, "PageIndex và PageSize phải lớn hơn 0.");
+        //public async Task<(PaginationSet<BillResponse> Result, string ErrorMessage)> GetPaginatedBillList(ListingRequest request, CancellationToken cancellationToken = default)
+        //{
+        //    try
+        //    {
+        //        if (request == null) return (null, "Yêu cầu không được để trống.");
+        //        if (request.PageIndex < 1 || request.PageSize < 1) return (null, "PageIndex và PageSize phải lớn hơn 0.");
 
-                var validFields = typeof(Bill).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
-                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
-                    .Select(f => f.Field).ToList() ?? new List<string>();
-                if (invalidFields.Any()) return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+        //        var validFields = typeof(Bill).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        //        var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+        //            .Select(f => f.Field).ToList() ?? new List<string>();
+        //        if (invalidFields.Any()) return (null, $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
 
-                var query = _billRepository.GetQueryable(x => x.IsActive);
+        //        var query = _billRepository.GetQueryable(x => x.IsActive);
 
-                if (request.SearchString?.Any() == true) query = query.SearchString(request.SearchString);
-                if (request.Filter?.Any() == true) query = query.Filter(request.Filter);
+        //        if (request.SearchString?.Any() == true) query = query.SearchString(request.SearchString);
+        //        if (request.Filter?.Any() == true) query = query.Filter(request.Filter);
 
-                var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
+        //        var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
 
-                var responses = new List<BillResponse>();
-                foreach (var bill in paginationResult.Items)
-                {
-                    var userRequest = await _userRepository.GetByIdAsync(bill.UserRequestId);
-                    var lscInfo = await _livestockCircleRepository.GetByIdAsync(bill.LivestockCircleId);
-                    var barnInfo = await _barnRepository.GetByIdAsync(lscInfo.BarnId);
-                    var wokerInfo = await _userRepository.GetByIdAsync(barnInfo.WorkerId);
-                    var userRequestResponse = new UserRequestResponse
-                    {
-                        Id = userRequest.Id,
-                        FullName = userRequest.FullName,
-                        Email = userRequest.Email
-                    };
-                    var workerReponse = new WokerResponse
-                    {
-                        Id = wokerInfo.Id,
-                        FullName = wokerInfo.FullName,
-                        Email = wokerInfo.Email
-                    };
-                    var barnInfoResponse = new BarnDetailResponse
-                    {
-                        Id = barnInfo.Id,
-                        Address = barnInfo.Address,
-                        BarnName = barnInfo.BarnName,
-                        Image = barnInfo.Image,
-                        Worker = workerReponse
-                    };
-                    var lscInfoResponse = new LivestockCircleBillResponse
-                    {
-                        Id = lscInfo.Id,
-                        BarnDetailResponse = barnInfoResponse,
-                        LivestockCircleName = lscInfo.LivestockCircleName,
-                    };
-                    responses.Add(new BillResponse
-                    {
-                        Id = bill.Id,
-                        UserRequest = userRequestResponse,
-                        LivestockCircle = lscInfoResponse,
-                        Name = bill.Name,
-                        Note = bill.Note,
-                        Total = bill.Total,
-                        Status = bill.Status,
-                        Weight = bill.Weight,
-                        IsActive = bill.IsActive
-                    });
-                }
+        //        var responses = new List<BillResponse>();
+        //        foreach (var bill in paginationResult.Items)
+        //        {
+        //            var userRequest = await _userRepository.GetByIdAsync(bill.UserRequestId);
+        //            var lscInfo = await _livestockCircleRepository.GetByIdAsync(bill.LivestockCircleId);
+        //            var barnInfo = await _barnRepository.GetByIdAsync(lscInfo.BarnId);
+        //            var wokerInfo = await _userRepository.GetByIdAsync(barnInfo.WorkerId);
+        //            var userRequestResponse = new UserRequestResponse
+        //            {
+        //                Id = userRequest.Id,
+        //                FullName = userRequest.FullName,
+        //                Email = userRequest.Email
+        //            };
+        //            var workerReponse = new WokerResponse
+        //            {
+        //                Id = wokerInfo.Id,
+        //                FullName = wokerInfo.FullName,
+        //                Email = wokerInfo.Email
+        //            };
+        //            var barnInfoResponse = new BarnDetailResponse
+        //            {
+        //                Id = barnInfo.Id,
+        //                Address = barnInfo.Address,
+        //                BarnName = barnInfo.BarnName,
+        //                Image = barnInfo.Image,
+        //                Worker = workerReponse
+        //            };
+        //            var lscInfoResponse = new LivestockCircleBillResponse
+        //            {
+        //                Id = lscInfo.Id,
+        //                BarnDetailResponse = barnInfoResponse,
+        //                LivestockCircleName = lscInfo.LivestockCircleName,
+        //            };
+        //            responses.Add(new BillResponse
+        //            {
+        //                Id = bill.Id,
+        //                UserRequest = userRequestResponse,
+        //                LivestockCircle = lscInfoResponse,
+        //                Name = bill.Name,
+        //                Note = bill.Note,
+        //                Total = bill.Total,
+        //                Status = bill.Status,
+        //                Weight = bill.Weight,
+        //                IsActive = bill.IsActive
+        //            });
+        //        }
 
-                var result = new PaginationSet<BillResponse>
-                {
-                    PageIndex = paginationResult.PageIndex,
-                    Count = responses.Count,
-                    TotalCount = paginationResult.TotalCount,
-                    TotalPages = paginationResult.TotalPages,
-                    Items = responses
-                };
+        //        var result = new PaginationSet<BillResponse>
+        //        {
+        //            PageIndex = paginationResult.PageIndex,
+        //            Count = responses.Count,
+        //            TotalCount = paginationResult.TotalCount,
+        //            TotalPages = paginationResult.TotalPages,
+        //            Items = responses
+        //        };
 
-                return (result, null);
-            }
-            catch (Exception ex)
-            {
-                return (null, $"Lỗi khi lấy danh sách hóa đơn: {ex.Message}");
-            }
-        }
+        //        return (result, null);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return (null, $"Lỗi khi lấy danh sách hóa đơn: {ex.Message}");
+        //    }
+        //}
 
 
         //Lấy tất cả các bill theo loại cho các room staff các hóa đơn đang đc request
@@ -1967,18 +1967,18 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-        public async Task<bool> AdminUpdateBill(Admin_UpdateBarnRequest request)
+        public async Task<Response<bool>> AdminUpdateBill(Admin_UpdateBarnRequest request)
         {
             try
             {
                 var BillToUpdate = await _billRepository.GetByIdAsync(request.BillId);
                 if (BillToUpdate == null || !BillToUpdate.Status.Equals(StatusConstant.REQUESTED))
                 {
-                    return false;
+                    return new Response<bool>("Yêu cầu đã duyệt, không thể cập nhật");
                 }
                 if (!(await ValidBreedStock(request.BreedId, request.Stock)))
                 {
-                    throw new Exception("Giống không khả dụng hoặc giống không đủ số lượng");
+                    return new Response<bool>("Giống không khả dụng hoặc giống không đủ số lượng");
                 }
 
                 var UpdatedBreed = await _billItemRepository.GetQueryable(x => x.IsActive).FirstOrDefaultAsync(it => it.BillId == BillToUpdate.Id);
@@ -1995,11 +1995,15 @@ namespace Infrastructure.Services.Implements
                 _livestockCircleRepository.Update(UpdatedLivestockCircle);
                 await _livestockCircleRepository.CommitAsync();
 
-                return true;
+                return new Response<bool>()
+                {
+                    Succeeded = true,
+                    Message = "Yêu cầu cập nhật thành công"
+                };
             }
             catch (Exception ex)
             {
-                throw new ArgumentException(ex.Message);
+                return new Response<bool>("Yêu cầu cập nhật thất bại");
             }
         }
         public async Task<Response<bool>> UpdateBillFood(

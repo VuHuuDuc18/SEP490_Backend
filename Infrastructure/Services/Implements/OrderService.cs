@@ -3,6 +3,7 @@ using Domain.Dto.Request;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Barn;
 using Domain.Dto.Response.BarnPlan;
+using Domain.Dto.Response.Bill;
 using Domain.Dto.Response.LivestockCircle;
 using Domain.Dto.Response.User;
 using Domain.DTOs.Request.Order;
@@ -501,10 +502,18 @@ namespace Infrastructure.Services.Implements
 
         }
 
-        public async Task<StatisticsOrderResponse> GetStatisticData(StatisticsOrderRequest request)
+        public async Task<Response<StatisticsOrderResponse>> GetStatisticData(StatisticsOrderRequest request)
         {
             DateTime froms, to;
-            (froms, to) = DateTimeExcutor.TimeRangeSetting(request);
+            try
+            {
+                (froms, to) = DateTimeExcutor.TimeRangeSetting(request);
+            }
+            catch (Exception ex)
+            {
+                return new Response<StatisticsOrderResponse>(ex.Message);
+            }
+
             var LivestockCircles = _livestockCircleRepository.GetQueryable();
             var Orders = _orderRepository.GetQueryable();
             var Breeds = _breedRepository.GetQueryable();
@@ -535,23 +544,27 @@ namespace Infrastructure.Services.Implements
                 TotalBadUnitStockSold = ListItem.Sum(x => x.BadUnitStockSold ?? 0),
                 TotalGoodUnitStockSold = ListItem.Sum(x => x.GoodUnitStockSold ?? 0),
             };
-            return result;
+            return new Response<StatisticsOrderResponse>()
+            {
+                Succeeded = true,
+                Data = result
+            };
         }
 
-        public async Task<PaginationSet<OrderResponse>> GetAllOrder(ListingRequest request)
+        public async Task<Response<PaginationSet<OrderResponse>>> SaleGetAllOrder(ListingRequest request)
         {
             try
             {
                 if (request == null)
-                    throw new Exception("Yêu cầu không được null.");
+                    return new Response<PaginationSet<OrderResponse>>("Yêu cầu không được null.");
                 if (request.PageIndex < 1 || request.PageSize < 1)
-                    throw new Exception("PageIndex và PageSize phải lớn hơn 0.");
+                    return new Response<PaginationSet<OrderResponse>>("PageIndex và PageSize phải lớn hơn 0.");
 
                 var validFields = typeof(BillItem).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
-                    throw new Exception($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+                    return new Response<PaginationSet<OrderResponse>>($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
 
 
 
@@ -578,23 +591,27 @@ namespace Infrastructure.Services.Implements
                     BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name
                 }).Pagination(request.PageIndex, request.PageSize, request.Sort);
 
-                return (result);
+                return new Response<PaginationSet<OrderResponse>>()
+                {
+                    Succeeded = true,
+                    Data = result
+                };
             }
             catch (Exception ex)
             {
-                throw new Exception($"Lỗi khi lấy danh sách: {ex.Message}");
+                return new Response<PaginationSet<OrderResponse>>($"Lỗi khi lấy danh sách: {ex.Message}");
             }
 
         }
 
-        public async Task<bool> ApproveOrder(ApproveOrderRequest request)
+        public async Task<Response<bool>> ApproveOrder(ApproveOrderRequest request)
         {
             try
             {
                 var orderItem = await _orderRepository.GetByIdAsync(request.OrderId);
                 if (orderItem == null)
                 {
-                    throw new Exception("Không tìm thấy đơn ");
+                   return new Response<bool>("Không tìm thấy đơn ");
                 }
                 orderItem.Status = StatusConstant.APPROVED;
                 orderItem.GoodUnitPrice = request.GoodUnitPrice;
@@ -602,7 +619,7 @@ namespace Infrastructure.Services.Implements
                 orderItem.TotalBill = request.GoodUnitPrice * orderItem.GoodUnitStock + request.BadUnitPrice * orderItem.BadUnitStock;
 
                 _orderRepository.Update(orderItem);
-
+                await _orderRepository.CommitAsync();
                 var livestockCircleDetail = await _livestockCircleRepository.GetByIdAsync(orderItem.LivestockCircleId);
                 livestockCircleDetail.GoodUnitNumber -= orderItem.GoodUnitStock;
                 livestockCircleDetail.BadUnitNumber -= orderItem.BadUnitStock;
@@ -612,30 +629,83 @@ namespace Infrastructure.Services.Implements
                 }
                 _livestockCircleRepository.Update(livestockCircleDetail);
 
-                return (await _orderRepository.CommitAsync() > 0) && (await _livestockCircleRepository.CommitAsync() > 0);
+                await _livestockCircleRepository.CommitAsync();
+                return new Response<bool>()
+                {
+                    Succeeded = true,
+                    Message = "Cập nhật thành công"
+                };
 
             }
             catch (Exception ex)
             {
-                return false;
+                return new Response<bool>()
+                {
+                    Succeeded = false,
+                    Message = "Cập nhật thất bại"
+                };
             }
         }
 
-        public async Task<PaginationSet<OrderResponse>> WorkerGetallOrder(ListingRequest request)
+        public async Task<Response<PaginationSet<OrderResponse>>> WorkerGetallOrder(ListingRequest request)
         {
             try
             {
                 if (request == null)
-                    throw new Exception("Yêu cầu không được null.");
+                {
+                    return new Response<PaginationSet<OrderResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = "Yêu cầu không được để trống",
+                        Errors = new List<string> { "Yêu cầu không được để trống" }
+                    };
+                }
+
                 if (request.PageIndex < 1 || request.PageSize < 1)
-                    throw new Exception("PageIndex và PageSize phải lớn hơn 0.");
+                {
+                    return new Response<PaginationSet<OrderResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = "PageIndex và PageSize phải lớn hơn 0",
+                        Errors = new List<string> { "PageIndex và PageSize phải lớn hơn 0" }
+                    };
+                }
 
                 var validFields = typeof(BillItem).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+    .Select(f => f.Field).ToList() ?? new List<string>();
+                var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
-                    throw new Exception($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+                {
+                    return new Response<PaginationSet<OrderResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
 
+                if (invalidFieldsSearch.Any())
+                {
+                    return new Response<PaginationSet<OrderResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFields)}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
+
+
+                if (!validFields.Contains(request.Sort?.Field))
+                {
+                    return new Response<PaginationSet<OrderResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường sắp xếp không hợp lệ: {request.Sort?.Field}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
 
 
                 var query = _orderRepository.GetQueryable(x => x.IsActive).Where(x => x.LivestockCircle.Barn.WorkerId == _currentUserId);
@@ -661,11 +731,15 @@ namespace Infrastructure.Services.Implements
                     BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name
                 }).Pagination(request.PageIndex, request.PageSize, request.Sort);
 
-                return (result);
+                return new Response<PaginationSet<OrderResponse>>()
+                {
+                    Succeeded = true,
+                    Data = result
+                };
             }
             catch (Exception ex)
             {
-                throw new Exception($"Lỗi khi lấy danh sách: {ex.Message}");
+                return new Response<PaginationSet<OrderResponse>>($"Lỗi khi lấy danh sách: {ex.Message}");
             }
         }
     }

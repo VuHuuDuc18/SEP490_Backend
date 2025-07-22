@@ -97,7 +97,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
             var result = await _service.UpdateBarnPlan(req);
 
             // Assert
-            Xunit.Assert.True(result);
+            Xunit.Assert.True(result.Succeeded);
             Xunit.Assert.Equal("Updated Note", barnPlan.Note);
             Xunit.Assert.Equal(now.Date, barnPlan.StartDate.Date);
             Xunit.Assert.Equal(now.AddDays(2).Date.AddDays(1).AddSeconds(-1).Date, barnPlan.EndDate.Date);
@@ -144,7 +144,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
             var result = await _service.UpdateBarnPlan(req);
 
             // Assert
-            Xunit.Assert.False(result);
+            Xunit.Assert.False(result.Succeeded);
         }
     }
 }

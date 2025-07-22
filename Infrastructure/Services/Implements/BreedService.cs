@@ -1,22 +1,22 @@
-﻿using Entities.EntityModel;
+﻿using Application.Wrappers;
+using Domain.Dto.Request;
+using Domain.Dto.Request.Breed;
+using Domain.Dto.Response;
+using Domain.Dto.Response.Breed;
+using Domain.IServices;
+using Entities.EntityModel;
 using Infrastructure.Core;
+using Infrastructure.Extensions;
 using Infrastructure.Repository;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.ComponentModel.DataAnnotations;
-using Domain.IServices;
-using Microsoft.EntityFrameworkCore;
-using Domain.Dto.Request.Breed;
-using Domain.Dto.Response.Breed;
-using Domain.Dto.Response;
-using Domain.Dto.Request;
-using Infrastructure.Extensions;
-using Microsoft.AspNetCore.Http;
-using Application.Wrappers;
 
 namespace Infrastructure.Services.Implements
 {
@@ -666,7 +666,7 @@ namespace Infrastructure.Services.Implements
                 };
             }).ToList();
         }
-        public async Task<bool> ExcelDataHandle(List<CellBreedItem> data)
+        public async Task<Application.Wrappers.Response<bool>> ExcelDataHandle(List<CellBreedItem> data)
         {
             try
             {
@@ -712,11 +712,15 @@ namespace Infrastructure.Services.Implements
 
                 }
 
-                return await _breedRepository.CommitAsync() > 0;
+                return new Application.Wrappers.Response<bool>()
+                {
+                    Succeeded = true,
+                    Message = "Nhập dữ liệu thành công"
+                };
             }
             catch (Exception ex)
             {
-                throw new Exception("Loi du lieu");
+                return new Response<bool>("Lỗi dữ liệu");
             }
         }
     }

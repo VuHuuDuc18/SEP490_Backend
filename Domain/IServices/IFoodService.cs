@@ -29,6 +29,6 @@ namespace Domain.IServices
 
         Task<List<FoodResponse>> GetAllFood(CancellationToken cancellationToken = default);
 
-        public Task<bool> ExcelDataHandle(List<CellFoodItem> data);
+        public Task<Response<bool>> ExcelDataHandle(List<CellFoodItem> data);
     }
 }
