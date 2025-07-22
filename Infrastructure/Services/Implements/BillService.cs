@@ -299,6 +299,8 @@ namespace Infrastructure.Services.Implements
 
                 var validFields = typeof(BillItem).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+    .Select(f => f.Field).ToList() ?? new List<string>();
+                var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
                 {
@@ -306,10 +308,30 @@ namespace Infrastructure.Services.Implements
                     {
                         Succeeded = false,
                         Message = $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}",
-                        Errors = new List<string> { $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}" }
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
                     };
                 }
 
+                if (invalidFieldsSearch.Any())
+                {
+                    return new Response<PaginationSet<BillItemResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFields)}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
+
+
+                if (!validFields.Contains(request.Sort?.Field))
+                {
+                    return new Response<PaginationSet<BillItemResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường sắp xếp không hợp lệ: {request.Sort?.Field}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
                 var bill = await _billRepository.GetByIdAsync(billId);
                 if (bill == null || !bill.IsActive)
                 {
@@ -709,6 +731,8 @@ namespace Infrastructure.Services.Implements
 
                 var validFields = typeof(Bill).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+    .Select(f => f.Field).ToList() ?? new List<string>();
+                var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
                 {
@@ -716,7 +740,28 @@ namespace Infrastructure.Services.Implements
                     {
                         Succeeded = false,
                         Message = $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}",
-                        Errors = new List<string> { $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}" }
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
+
+                if (invalidFieldsSearch.Any())
+                {
+                    return new Response<PaginationSet<BillResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFields)}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
+
+
+                if (!validFields.Contains(request.Sort?.Field))
+                {
+                    return new Response<PaginationSet<BillResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường sắp xếp không hợp lệ: {request.Sort?.Field}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
                     };
                 }
 
