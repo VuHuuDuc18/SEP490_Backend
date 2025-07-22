@@ -145,12 +145,14 @@ namespace Infrastructure.Services.Implements
             {
                 Id = userId,
                 Email = request.Email,
+                UserName = request.Email,
                 FullName = request.FullName,
                 PhoneNumber = request.PhoneNumber,
                 IsActive = true,
                 CreatedBy = userId,
                 CreatedDate = DateTime.UtcNow,
-                UserName = request.Email
+                //Ko cần comfirm
+                EmailConfirmed = true
             };
             var result = await _userManager.CreateAsync(user, request.Password);
             if (result.Succeeded)
