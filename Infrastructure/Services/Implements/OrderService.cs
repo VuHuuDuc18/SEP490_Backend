@@ -109,7 +109,7 @@ namespace Infrastructure.Services.Implements
             try
             {
                 //Kiểm tra đơn hàng đã tồn tại chưa
-                var existingOrder = _orderRepository.GetQueryable(x => x.CustomerId == _currentUserId && x.LivestockCircleId == request.LivestockCircleId);
+                var existingOrder = _orderRepository.GetQueryable(x => x.CustomerId == _currentUserId && x.LivestockCircleId == request.LivestockCircleId && x.Status!=OrderStatus.CANCELLED);
                 if (!existingOrder.IsNullOrEmpty())
                 {
                     return new Response<string>()
@@ -121,34 +121,25 @@ namespace Infrastructure.Services.Implements
                 // Lấy danh sách các Sale Staff và tổng số đơn hàng mỗi Sale đang xử lý
                 var Orders = _orderRepository.GetQueryable();
                 //var Staffs = _userManager.GetUsersInRoleAsync(RoleConstant.SalesStaff).Result.AsQueryable();
-                var Staffs = _dbContext.Set<UserRole>().Where(x => x.User.IsActive && x.Role.Name == RoleConstant.SalesStaff);
-                var query = from o in Orders
-                            join s in Staffs on o.SaleStaffId equals s.UserId
-                            group o by new { o.SaleStaffId } into g
-                            orderby g.Count()
-                            select new
-                            {
-                                SaleStaffId = g.Key.SaleStaffId,
-                                TotalOrders = g.Count()
-                            };
-                var saleStaffs = Orders
+                var Staffs = _dbContext.Set<UserRole>()
+                    .Include(x => x.User)
+                    .Include(x => x.Role)
+                    .Where(x => x.User.IsActive && x.Role.Name == RoleConstant.SalesStaff)
+                    .Select(x => x.User); // lấy danh sách người dùng (User) là nhân viên sale
+                var saleStaffs = Staffs
                     .GroupJoin(
-                        Staffs,
-                        o => o.SaleStaffId,
-                        u => u.UserId,
-                        (order, users) => new { order, users }
+                        Orders,
+                        staff => staff.Id,
+                        order => order.SaleStaffId,
+                        (staff, orderGroup) => new { staff, orderGroup }
                     )
-                    .SelectMany(
-                        x => x.users.DefaultIfEmpty(),
-                        (x, user) => new { x.order, SaleStaff = user }
-                    )
-                    .GroupBy(x => new { x.SaleStaff.UserId })
-                    .Select(g => new
+                    .Select(x => new
                     {
-                        SaleStaffId = g.Key.UserId,
-                        TotalOrders = g.Count()
+                        SaleStaffId = x.staff.Id,
+                        SaleStaffName = x.staff.FullName,
+                        TotalOrders = x.orderGroup.Count()
                     })
-                    .OrderBy(x => x.TotalOrders)
+                    .OrderByDescending(x => x.TotalOrders)
                     .ToList();
                 if (saleStaffs.IsNullOrEmpty())
                 {
@@ -174,7 +165,6 @@ namespace Infrastructure.Services.Implements
                     SaleStaffId = saleStaffId
                 };
 
-
                 var livestockCircle = await _livestockCircleRepository.GetByIdAsync(request.LivestockCircleId);
                 if (livestockCircle == null)
                 {
@@ -186,7 +176,7 @@ namespace Infrastructure.Services.Implements
                         }
                     };
                 }
-                if (order.GoodUnitStock >= livestockCircle.GoodUnitNumber || order.BadUnitStock >= livestockCircle.BadUnitNumber)
+                if (order.GoodUnitStock > livestockCircle.GoodUnitNumber || order.BadUnitStock > livestockCircle.BadUnitNumber)
                 {
                     return new Response<string>()
                     {
