@@ -141,7 +141,9 @@ namespace Infrastructure.Services.Implements
             if (livestockCircle != null)
             {
                 livestockCircle.Status = StatusConstant.GROWINGSTAT;
-                livestockCircle.TotalUnit = (quantity - (deadUnit ?? 0));
+                livestockCircle.TotalUnit = quantity;
+                livestockCircle.GoodUnitNumber = (quantity - (deadUnit ?? 0));
+                livestockCircle.DeadUnit = deadUnit ?? 0;
                 livestockCircle.StartDate = DateTime.UtcNow;
                 livestockCircle.AverageWeight = averageWeight ?? livestockCircle.AverageWeight;
                 _livestockCircleRepository.Update(livestockCircle);
