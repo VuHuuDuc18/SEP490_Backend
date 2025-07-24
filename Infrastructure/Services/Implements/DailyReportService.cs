@@ -160,7 +160,7 @@ namespace Infrastructure.Services.Implements
                     DeadUnit = requestDto.DeadUnit,
                     GoodUnit = goodUnit,
                     AgeInDays = ageInDays,
-                    Status = requestDto.Status ?? DailyReportStatus.TODAY,
+                    Status = DailyReportStatus.TODAY,
                     BadUnit = requestDto.BadUnit,
                     Note = requestDto.Note ?? "Không có ghi chú",
                     IsActive = true,
