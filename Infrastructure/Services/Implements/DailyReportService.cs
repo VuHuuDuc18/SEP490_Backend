@@ -1625,7 +1625,7 @@ namespace Infrastructure.Services.Implements
                     };
                 }
 
-                var today = DateTime.UtcNow.Date;
+                var today = DateTime.Now.Date;
                 var dailyReport = await _dailyReportRepository.GetQueryable(x =>
                     x.LivestockCircleId == livestockCircleId &&
                     x.IsActive &&
