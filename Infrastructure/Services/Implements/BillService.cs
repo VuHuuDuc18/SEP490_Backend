@@ -2488,6 +2488,8 @@ namespace Infrastructure.Services.Implements
                 var validFields = typeof(Bill).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
+                var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
                 {
                     return new Response<PaginationSet<BillResponse>>()
@@ -2495,6 +2497,27 @@ namespace Infrastructure.Services.Implements
                         Succeeded = false,
                         Message = $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}",
                         Errors = new List<string> { $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}" }
+                    };
+                }
+
+                if (invalidFieldsSearch.Any())
+                {
+                    return new Response<PaginationSet<BillResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFieldsSearch)}",
+                        Errors = new List<string> { $"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFieldsSearch)}" }
+                    };
+                }
+
+
+                if (!validFields.Contains(request.Sort?.Field))
+                {
+                    return new Response<PaginationSet<BillResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường sắp xếp không hợp lệ: {request.Sort?.Field}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
                     };
                 }
 
@@ -2636,6 +2659,8 @@ namespace Infrastructure.Services.Implements
                 var validFields = typeof(Bill).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
+                var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
                 {
                     return new Response<PaginationSet<BillResponse>>()
@@ -2643,6 +2668,27 @@ namespace Infrastructure.Services.Implements
                         Succeeded = false,
                         Message = $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}",
                         Errors = new List<string> { $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}" }
+                    };
+                }
+
+                if (invalidFieldsSearch.Any())
+                {
+                    return new Response<PaginationSet<BillResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFieldsSearch)}",
+                        Errors = new List<string> { $"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFieldsSearch)}" }
+                    };
+                }
+
+
+                if (!validFields.Contains(request.Sort?.Field))
+                {
+                    return new Response<PaginationSet<BillResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường sắp xếp không hợp lệ: {request.Sort?.Field}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
                     };
                 }
 
@@ -2781,6 +2827,8 @@ namespace Infrastructure.Services.Implements
                 var validFields = typeof(Bill).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
+                var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
                 {
                     return new Response<PaginationSet<BillResponse>>()
@@ -2791,6 +2839,26 @@ namespace Infrastructure.Services.Implements
                     };
                 }
 
+                if (invalidFieldsSearch.Any())
+                {
+                    return new Response<PaginationSet<BillResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFieldsSearch)}",
+                        Errors = new List<string> { $"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFieldsSearch)}" }
+                    };
+                }
+
+
+                if (!validFields.Contains(request.Sort?.Field))
+                {
+                    return new Response<PaginationSet<BillResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường sắp xếp không hợp lệ: {request.Sort?.Field}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
                 // Lấy các BarnId hợp lệ của worker
                 var validBarnIds = await _barnRepository.GetQueryable(b => b.WorkerId == worker.Id)
                     .Select(b => b.Id)
@@ -2938,6 +3006,8 @@ namespace Infrastructure.Services.Implements
                 var validFields = typeof(Bill).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
+                var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
                 {
                     return new Response<PaginationSet<BillResponse>>()
@@ -2945,6 +3015,27 @@ namespace Infrastructure.Services.Implements
                         Succeeded = false,
                         Message = $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}",
                         Errors = new List<string> { $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}" }
+                    };
+                }
+
+                if (invalidFieldsSearch.Any())
+                {
+                    return new Response<PaginationSet<BillResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFieldsSearch)}",
+                        Errors = new List<string> { $"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFieldsSearch)}" }
+                    };
+                }
+
+
+                if (!validFields.Contains(request.Sort?.Field))
+                {
+                    return new Response<PaginationSet<BillResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường sắp xếp không hợp lệ: {request.Sort?.Field}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
                     };
                 }
 

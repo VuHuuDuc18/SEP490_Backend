@@ -23,7 +23,7 @@ namespace Domain.Dto.Request.DailyReport
 
         public string? Note { get; set; }
 
-        public string? Status { get; set; }
+        //public string? Status { get; set; }
 
         public List<string>? ImageLinks { get; set; } = new List<string>();
 
