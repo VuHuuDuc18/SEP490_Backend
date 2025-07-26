@@ -418,7 +418,8 @@ namespace Infrastructure.Services.Implements
                     CreateDate = x.CreatedDate,
                     PickupDate = x.PickupDate,
                     BreedName = x.LivestockCircle.Breed.BreedName,
-                    BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name
+                    BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name,
+                    Barn = AutoMapperHelper.AutoMap<Barn, BarnResponse>(x.LivestockCircle.Barn)
                 }).OrderByDescending(x => x.CreateDate).ToList();
                 return new Response<List<OrderResponse>>(result, "Lấy danh sách đơn hàng thành công");
 
@@ -478,8 +479,10 @@ namespace Infrastructure.Services.Implements
                         CreateDate = x.CreatedDate,
                         PickupDate = x.PickupDate,
                         BreedName = x.LivestockCircle.Breed.BreedName,
-                        BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name
+                        BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name,
+                        Barn = AutoMapperHelper.AutoMap<Barn,BarnResponse>(x.LivestockCircle.Barn)
                     });
+                
                 if (request.SearchString?.Any() == true)
                     orders = orders.SearchString(request.SearchString);
 
@@ -588,7 +591,8 @@ namespace Infrastructure.Services.Implements
                     CreateDate = x.CreatedDate,
                     PickupDate = x.PickupDate,
                     BreedName = x.LivestockCircle.Breed.BreedName,
-                    BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name
+                    BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name,
+                    Customer = AutoMapperHelper.AutoMap<User, UserItemResponse>(x.Customer),
                 }).Pagination(request.PageIndex, request.PageSize, request.Sort);
 
                 return new Response<PaginationSet<OrderResponse>>()
