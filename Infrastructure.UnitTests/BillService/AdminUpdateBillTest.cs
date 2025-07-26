@@ -55,7 +55,7 @@ namespace Infrastructure.UnitTests.BillService
             _billRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Infrastructure.Core.Ref<Infrastructure.Core.CheckError>>())).ReturnsAsync((Bill)null);
             var request = new Admin_UpdateBarnRequest { BillId = Guid.NewGuid(), BreedId = Guid.NewGuid(), Stock = 5 };
             var result = await _service.AdminUpdateBill(request);
-            Assert.False(result);
+            Assert.False(result.Succeeded);
         }
 
         [Fact]
@@ -65,7 +65,7 @@ namespace Infrastructure.UnitTests.BillService
             _billRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Infrastructure.Core.Ref<Infrastructure.Core.CheckError>>())).ReturnsAsync(bill);
             var request = new Admin_UpdateBarnRequest { BillId = bill.Id, BreedId = Guid.NewGuid(), Stock = 5 };
             var result = await _service.AdminUpdateBill(request);
-            Assert.False(result);
+            Assert.False(result.Succeeded);
         }
 
         [Fact]
@@ -98,7 +98,7 @@ namespace Infrastructure.UnitTests.BillService
             _livestockCircleRepoMock.Setup(x => x.CommitAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
             var request = new Admin_UpdateBarnRequest { BillId = billId, BreedId = breedId, Stock = 5 };
             var result = await _service.AdminUpdateBill(request);
-            Assert.True(result);
+            Assert.True(result.Succeeded);
         }
 
         [Fact]
