@@ -160,7 +160,7 @@ namespace Infrastructure.Services.Implements
                     DeadUnit = requestDto.DeadUnit,
                     GoodUnit = goodUnit,
                     AgeInDays = ageInDays,
-                    Status = requestDto.Status ?? DailyReportStatus.TODAY,
+                    Status = DailyReportStatus.TODAY,
                     BadUnit = requestDto.BadUnit,
                     Note = requestDto.Note ?? "Không có ghi chú",
                     IsActive = true,
@@ -1625,7 +1625,7 @@ namespace Infrastructure.Services.Implements
                     };
                 }
 
-                var today = DateTime.UtcNow.Date;
+                var today = DateTime.Now.Date;
                 var dailyReport = await _dailyReportRepository.GetQueryable(x =>
                     x.LivestockCircleId == livestockCircleId &&
                     x.IsActive &&
