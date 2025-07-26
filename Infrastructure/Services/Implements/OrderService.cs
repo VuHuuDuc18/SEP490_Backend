@@ -591,7 +591,8 @@ namespace Infrastructure.Services.Implements
                     CreateDate = x.CreatedDate,
                     PickupDate = x.PickupDate,
                     BreedName = x.LivestockCircle.Breed.BreedName,
-                    BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name
+                    BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name,
+                    Customer = AutoMapperHelper.AutoMap<User, UserItemResponse>(x.Customer),
                 }).Pagination(request.PageIndex, request.PageSize, request.Sort);
 
                 return new Response<PaginationSet<OrderResponse>>()

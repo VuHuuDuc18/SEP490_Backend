@@ -24,5 +24,6 @@ namespace Domain.DTOs.Request.Order
         public ReleasedLivetockDetail? LivestockCircle { get; set; }
         public UserItemResponse? Customer { get; set; }
         public BarnResponse? Barn { get; set; }
+        public UserItemResponse? Saler { get; set; }
     }
 }
