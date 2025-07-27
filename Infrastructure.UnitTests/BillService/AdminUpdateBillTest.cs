@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using MockQueryable.Moq;
 using System.Threading;
 using MockQueryable;
+using Infrastructure.UnitTests.BarnPlanService;
 
 namespace Infrastructure.UnitTests.BillService
 {
@@ -53,7 +54,7 @@ namespace Infrastructure.UnitTests.BillService
         public async Task AdminUpdateBill_ReturnsFalse_WhenBillNotFound()
         {
             _billRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Infrastructure.Core.Ref<Infrastructure.Core.CheckError>>())).ReturnsAsync((Bill)null);
-            var request = new Admin_UpdateBarnRequest { BillId = Guid.NewGuid(), BreedId = Guid.NewGuid(), Stock = 5 };
+            var request = new Admin_UpdateBarnRequest { LivestockCircleId = Guid.NewGuid(), BreedId = Guid.NewGuid(), Stock = 5 };
             var result = await _service.AdminUpdateBill(request);
             Assert.False(result.Succeeded);
         }
@@ -61,9 +62,10 @@ namespace Infrastructure.UnitTests.BillService
         [Fact]
         public async Task AdminUpdateBill_ReturnsFalse_WhenBillStatusNotRequested()
         {
-            var bill = new Bill { Id = Guid.NewGuid(), Status = "APPROVED" };
+            var lscId = Guid.NewGuid();
+            var bill = new Bill { Id = Guid.NewGuid(), Status = "APPROVED" , LivestockCircleId = lscId};
             _billRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Infrastructure.Core.Ref<Infrastructure.Core.CheckError>>())).ReturnsAsync(bill);
-            var request = new Admin_UpdateBarnRequest { BillId = bill.Id, BreedId = Guid.NewGuid(), Stock = 5 };
+            var request = new Admin_UpdateBarnRequest { LivestockCircleId = lscId, BreedId = Guid.NewGuid(), Stock = 5 };
             var result = await _service.AdminUpdateBill(request);
             Assert.False(result.Succeeded);
         }
@@ -71,10 +73,12 @@ namespace Infrastructure.UnitTests.BillService
         [Fact]
         public async Task AdminUpdateBill_ThrowsException_WhenBreedStockNotValid()
         {
-            var bill = new Bill { Id = Guid.NewGuid(), Status = "REQUESTED", LivestockCircleId = Guid.NewGuid() };
+            var lscid = Guid.NewGuid();
+            var bill = new Bill { Id = Guid.NewGuid(), Status = "REQUESTED", LivestockCircleId = lscid };
+            
             _billRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Infrastructure.Core.Ref<Infrastructure.Core.CheckError>>())).ReturnsAsync(bill);
             _breedRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Infrastructure.Core.Ref<Infrastructure.Core.CheckError>>())).ReturnsAsync((Breed)null);
-            var request = new Admin_UpdateBarnRequest { BillId = bill.Id, BreedId = Guid.NewGuid(), Stock = 5 };
+            var request = new Admin_UpdateBarnRequest { LivestockCircleId = lscid, BreedId = Guid.NewGuid(), Stock = 5 };
             await Assert.ThrowsAsync<ArgumentException>(async () => await _service.AdminUpdateBill(request));
         }
 
@@ -96,7 +100,7 @@ namespace Infrastructure.UnitTests.BillService
             _billItemRepoMock.Setup(x => x.CommitAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
             _livestockCircleRepoMock.Setup(x => x.Update(It.IsAny<LivestockCircle>()));
             _livestockCircleRepoMock.Setup(x => x.CommitAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
-            var request = new Admin_UpdateBarnRequest { BillId = billId, BreedId = breedId, Stock = 5 };
+            var request = new Admin_UpdateBarnRequest { LivestockCircleId = lscId, BreedId = breedId, Stock = 5 };
             var result = await _service.AdminUpdateBill(request);
             Assert.True(result.Succeeded);
         }
@@ -116,7 +120,7 @@ namespace Infrastructure.UnitTests.BillService
             _billItemRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BillItem, bool>>>())).Returns(new List<BillItem> { billItem }.AsQueryable().BuildMock());
             _livestockCircleRepoMock.Setup(x => x.GetByIdAsync(lscId, It.IsAny<Infrastructure.Core.Ref<Infrastructure.Core.CheckError>>())).ReturnsAsync(lsc);
             _billItemRepoMock.Setup(x => x.Update(It.IsAny<BillItem>())).Throws(new Exception("DB error"));
-            var request = new Admin_UpdateBarnRequest { BillId = billId, BreedId = breedId, Stock = 5 };
+            var request = new Admin_UpdateBarnRequest { LivestockCircleId = lscId, BreedId = breedId, Stock = 5 };
             await Assert.ThrowsAsync<ArgumentException>(async () => await _service.AdminUpdateBill(request));
         }
     }

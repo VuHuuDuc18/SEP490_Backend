@@ -18,6 +18,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
         private readonly Mock<IRepository<BarnPlan>> _barnPlanRepoMock;
         private readonly Mock<IRepository<BarnPlanFood>> _barnPlanFoodRepoMock;
         private readonly Mock<IRepository<BarnPlanMedicine>> _barnPlanMedicineRepoMock;
+        private readonly Mock<IRepository<User>> _userRepoMock;
         private readonly Infrastructure.Services.Implements.BarnPlanService _service;
 
         public DisableBarnPlanTest()
@@ -28,7 +29,8 @@ namespace Infrastructure.UnitTests.BarnPlanService
             _service = new Infrastructure.Services.Implements.BarnPlanService(
                 _barnPlanRepoMock.Object,
                 _barnPlanFoodRepoMock.Object,
-                _barnPlanMedicineRepoMock.Object);
+                _barnPlanMedicineRepoMock.Object,
+                _userRepoMock.Object);
         }
 
         [Fact]

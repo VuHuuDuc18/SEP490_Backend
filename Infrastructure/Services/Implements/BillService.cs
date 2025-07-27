@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.VisualBasic;
 using Application.Wrappers;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Services.Implements
 {
@@ -1973,7 +1974,16 @@ namespace Infrastructure.Services.Implements
         {
             try
             {
-                var BillToUpdate = await _billRepository.GetByIdAsync(request.BillId);
+                var UpdatedLivestockCircle = await _livestockCircleRepository.GetByIdAsync(request.LivestockCircleId);
+
+                var BillToUpdate = await _billRepository.GetQueryable(x=> x.LivestockCircleId == request.LivestockCircleId && x.Status.Equals(StatusConstant.REQUESTED)).FirstOrDefaultAsync();
+                // update total stock va note cuar bill
+                if (!string.IsNullOrEmpty(request.Note))
+                {
+                    BillToUpdate.Note = request.Note;
+                }
+                BillToUpdate.Total = request.Stock;
+
                 if (BillToUpdate == null || !BillToUpdate.Status.Equals(StatusConstant.REQUESTED))
                 {
                     return new Response<bool>("Yêu cầu đã duyệt, không thể cập nhật");
@@ -1983,6 +1993,7 @@ namespace Infrastructure.Services.Implements
                     return new Response<bool>("Giống không khả dụng hoặc giống không đủ số lượng");
                 }
 
+                // update item trong bill
                 var UpdatedBreed = await _billItemRepository.GetQueryable(x => x.IsActive).FirstOrDefaultAsync(it => it.BillId == BillToUpdate.Id);
                 UpdatedBreed.BreedId = request.BreedId;
                 UpdatedBreed.Stock = request.Stock;
@@ -1990,12 +2001,15 @@ namespace Infrastructure.Services.Implements
                 _billItemRepository.Update(UpdatedBreed);
                 await _billItemRepository.CommitAsync();
 
-                // cap nhat livestockCircle
-                var UpdatedLivestockCircle = await _livestockCircleRepository.GetByIdAsync(BillToUpdate.LivestockCircleId);
+                // cap nhat livestockCircle total unit va breed
+                //var UpdatedLivestockCircle = await _livestockCircleRepository.GetByIdAsync(BillToUpdate.LivestockCircleId);
+                
                 UpdatedLivestockCircle.BreedId = request.BreedId;
-
+                UpdatedLivestockCircle.TotalUnit = request.Stock;
                 _livestockCircleRepository.Update(UpdatedLivestockCircle);
                 await _livestockCircleRepository.CommitAsync();
+
+                _billRepository.Update(BillToUpdate);
 
                 return new Response<bool>()
                 {
