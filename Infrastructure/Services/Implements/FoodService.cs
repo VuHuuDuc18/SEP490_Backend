@@ -58,15 +58,15 @@ namespace Infrastructure.Services.Implements
         {
             try
             {
-                //if (_currentUserId == Guid.Empty)
-                //{
-                //    return new Response<string>()
-                //    {
-                //        Succeeded = false,
-                //        Message = "Hãy đăng nhập và thử lại",
-                //        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
-                //    };
-                //}
+                if (_currentUserId == Guid.Empty)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Hãy đăng nhập và thử lại",
+                        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                    };
+                }
 
                 if (request == null)
                 {
