@@ -500,7 +500,7 @@ namespace Infrastructure.Services.Implements
                 return new Response<bool>()
                 {
                     Succeeded = false,
-                    Message = "Không thể thay đổi trạng thái"
+                    Message = "Lỗi hệ thống. Không thể xuất chuồng trại vào lúc này. Vui lòng thử lại sau"
                 };
             }
             releaseItem.Status = StatusConstant.RELEASESTAT;
