@@ -18,6 +18,7 @@ namespace Domain.IServices
         public Task<Response<StatisticsOrderResponse>> GetStatisticData(StatisticsOrderRequest request);
         public Task<Response<PaginationSet<OrderResponse>>> SaleGetAllOrder(ListingRequest request);
         public Task<Response<bool>> ApproveOrder(ApproveOrderRequest request);
+        public Task<Response<bool>> DenyOrder(Guid orderId);
         public Task<Response<PaginationSet<OrderResponse>>> WorkerGetallOrder(ListingRequest request);
 
     }

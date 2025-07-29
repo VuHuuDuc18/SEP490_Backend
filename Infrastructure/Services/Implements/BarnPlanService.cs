@@ -18,6 +18,7 @@ using Domain.Dto.Response.Barn;
 using Application.Wrappers;
 using System.Data.SqlTypes;
 using FluentValidation.TestHelper;
+using Domain.Dto.Response.User;
 
 namespace Infrastructure.Services.Implements
 {
@@ -26,71 +27,84 @@ namespace Infrastructure.Services.Implements
         private readonly IRepository<BarnPlan> _barnplanrepo;
         private readonly IRepository<BarnPlanFood> _bpfoodrepo;
         private readonly IRepository<BarnPlanMedicine> _bpmedicinerepo;
+        private readonly IRepository<User> _userrepo;
 
-        public BarnPlanService(IRepository<BarnPlan> barnplanrepo, IRepository<BarnPlanFood> bpfoodrepo, IRepository<BarnPlanMedicine> bpmedicinerepo)
+        public BarnPlanService(IRepository<BarnPlan> barnplanrepo, IRepository<BarnPlanFood> bpfoodrepo, IRepository<BarnPlanMedicine> bpmedicinerepo, IRepository<User> userrepo)
         {
             _barnplanrepo = barnplanrepo;
             _bpfoodrepo = bpfoodrepo;
             _bpmedicinerepo = bpmedicinerepo;
+            _userrepo = userrepo;
         }
 
         public async Task<Response<bool>> CreateBarnPlan(Domain.Dto.Request.BarnPlan.CreateBarnPlanRequest req)
         {
-            // xu ly daily
-            DateTime formatedStartDate, formatedEndDate;
-            var validResponse = ValidTime(true, (bool)(req.IsDaily == null ? false : req.IsDaily), req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
-            if (!validResponse.Equals("Success"))
-            {
-                return new Response<bool>()
-                {
-                    Succeeded = false,
-                    Message = validResponse
-                };
-
-            }
-            // insert barn
-            BarnPlan barnPlanDetail = new BarnPlan()
-            {
-                LivestockCircleId = req.livstockCircleId,
-                Id = Guid.NewGuid(),
-                Note = req.Note,
-                StartDate = formatedStartDate,
-                EndDate = formatedEndDate
-            };
-
-            _barnplanrepo.Insert(barnPlanDetail);
-            if (await _barnplanrepo.CommitAsync() < 0)
-            {
-                return new Response<bool>("Không thể tạo kế hoạch");
-            }
-
             try
             {
-                // insert food plan
-                await InsertFoodPlan(req.foodPlans, barnPlanDetail.Id);
-                // insert medicine plan
+                // xu ly daily
+                DateTime formatedStartDate, formatedEndDate;
+                var validResponse = ValidTime(true, (bool)(req.IsDaily == null ? false : req.IsDaily), req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
+                if (!validResponse.Equals("Success"))
+                {
+                    return new Response<bool>()
+                    {
+                        Succeeded = false,
+                        Message = validResponse
+                    };
 
-                await InsertMedicinePlan(req.medicinePlans, barnPlanDetail.Id);
+                }
+                // insert barn
+                BarnPlan barnPlanDetail = new BarnPlan()
+                {
+                    LivestockCircleId = req.livstockCircleId,
+                    Id = Guid.NewGuid(),
+                    Note = req.Note,
+                    StartDate = formatedStartDate,
+                    EndDate = formatedEndDate
+                };
+
+                _barnplanrepo.Insert(barnPlanDetail);
+                if (await _barnplanrepo.CommitAsync() < 0)
+                {
+                    return new Response<bool>("Không thể tạo kế hoạch");
+                }
+
+                try
+                {
+                    // insert food plan
+                    await InsertFoodPlan(req.foodPlans, barnPlanDetail.Id);
+                    // insert medicine plan
+
+                    await InsertMedicinePlan(req.medicinePlans, barnPlanDetail.Id);
+                }
+                catch (Exception ex)
+                {
+                    barnPlanDetail.IsActive = false;
+                    _barnplanrepo.Update(barnPlanDetail);
+                    return new Response<bool>()
+                    {
+                        Succeeded = false,
+                        Message = ex.Message,
+                    };
+                }
+
+
+                // create response
+                //await _barnplanrepo.CommitAsync();
+                return new Response<bool>()
+                {
+                    Succeeded = true,
+                    Message = "Tạo kế hoạch thành công"
+                };
             }
             catch (Exception ex)
             {
-                barnPlanDetail.IsActive = false;
-                _barnplanrepo.Update(barnPlanDetail);
                 return new Response<bool>()
                 {
                     Succeeded = false,
-                    Message = ex.Message,
+                    Errors = new List<string> { ex.Message }
                 };
             }
-
-
-            // create response
-            //await _barnplanrepo.CommitAsync();
-            return new Response<bool>()
-            {
-                Succeeded = true,
-                Message = "Tạo kế hoạch thành công"
-            };
         }
 
         public async Task<Response<PaginationSet<ViewBarnPlanResponse>>> ListingHistoryBarnPlan(Guid livestockCircleId, ListingRequest request)
@@ -138,15 +152,27 @@ namespace Infrastructure.Services.Implements
                 if (request.Filter?.Any() == true)
                     query = query.Filter(request.Filter);
 
-                var result = await query.Select(i => new ViewBarnPlanResponse
-                {
-                    Id = i.Id,
-                    EndDate = i.EndDate,
-                    foodPlans = null,
-                    medicinePlans = null,
-                    Note = i.Note,
-                    StartDate = i.StartDate
-                }).Pagination(request.PageIndex, request.PageSize, request.Sort);
+                var result = await (from i in query
+                                    join u in _userrepo.GetQueryable() on i.CreatedBy equals u.Id into userGroup
+                                    from user in userGroup.DefaultIfEmpty()
+                                    select new ViewBarnPlanResponse
+                                    {
+                                        Id = i.Id,
+                                        EndDate = i.EndDate,
+                                        foodPlans = new List<Domain.Dto.Response.BarnPlan.FoodPlan>(),
+                                        medicinePlans = new List<Domain.Dto.Response.BarnPlan.MedicinePlan>(),
+                                        Note = i.Note,
+                                        StartDate = i.StartDate,
+                                        CreatedBy = (i.CreatedBy == Guid.Empty) ? null : (user == null ? null : new UserItemResponse
+                                        {
+                                            Id = user.Id,
+                                            Email = user.Email,
+                                            Fullname = user.FullName,
+                                            PhoneNumber = user.PhoneNumber
+                                        }),
+                                        CreatedDate = i.CreatedDate,
+                                    })
+                    .Pagination(request.PageIndex, request.PageSize, request.Sort);
 
                 return new Response<PaginationSet<ViewBarnPlanResponse>>(result);
             }
@@ -163,205 +189,276 @@ namespace Infrastructure.Services.Implements
 
         public async Task<Response<bool>> DisableBarnPlan(Guid id)
         {
-            var deleteItem = await _barnplanrepo.GetByIdAsync(id);
-            if (deleteItem == null)
-            {
-                return new Response<bool>()
-                {
-                    Succeeded = false,
-                    Message = "Kế khoạch không tồn tại"
-                };
-                
-            }
-
-            var barnPlanFood = _bpfoodrepo.GetQueryable(x => x.IsActive).Where(x => x.BarnPlanId == id).ToList();
-            foreach (var it in barnPlanFood)
-            {
-                it.IsActive = false;
-                _bpfoodrepo.Update(it);
-            }
-
-            await _bpfoodrepo.CommitAsync();
-
-            var barnPlanMedicine = _bpmedicinerepo.GetQueryable(x => x.IsActive).Where(x => x.BarnPlanId == id).ToList();
-            foreach (var it in barnPlanMedicine)
-            {
-                it.IsActive = false;
-                _bpmedicinerepo.Update(it);
-            }
-            await _bpmedicinerepo.CommitAsync();
-
-            if (deleteItem.EndDate >= DateTime.Now)
-            {
-                deleteItem.IsActive = false;
-                deleteItem.EndDate = DateTime.Now;
-                //return await _barnplanrepo.CommitAsync() > 0;
-            }
-            else
-            {
-                deleteItem.IsActive = false;
-            }
-            _barnplanrepo.Update(deleteItem);
-            await _barnplanrepo.CommitAsync();
-            return new Response<bool>()
-            {
-                Succeeded = true,
-                Message = "Xóa kế hoạch thành công"
-            };
-
-        }
-        public async Task<Response<ViewBarnPlanResponse>> GetByLiveStockCircleId(Guid id)
-        {
-            var barnPlanDetail = await _barnplanrepo.GetQueryable(x => x.IsActive)
-                .FirstOrDefaultAsync(it => it.EndDate >= DateTime.Now && it.StartDate <= DateTime.Now && it.LivestockCircleId == id);
-
-            if (barnPlanDetail == null)
-            {
-                return new Response<ViewBarnPlanResponse>()
-                {
-                    Succeeded = false,
-                    Message = "Không tìm thấy kế hoạch cho chuồng "
-                };
-            }
-            ViewBarnPlanResponse result = new ViewBarnPlanResponse()
-            {
-                Id = barnPlanDetail.Id,
-                EndDate = barnPlanDetail.EndDate,
-                StartDate = barnPlanDetail.StartDate,
-                Note = barnPlanDetail.Note,
-                foodPlans = await _bpfoodrepo.GetQueryable(x => x.IsActive)
-                                        .Where(x => x.BarnPlanId == barnPlanDetail.Id)
-                                        .Include(x => x.Food)
-                                        .Select(it => new Domain.Dto.Response.BarnPlan.FoodPlan()
-                                        {
-                                            FoodId = it.FoodId,
-                                            FoodName = it.Food.FoodName,
-                                            Note = it.Note,
-                                            Stock = it.Stock
-                                        }).ToListAsync(),
-                medicinePlans = await _bpmedicinerepo.GetQueryable(x => x.IsActive)
-                                        .Where(x => x.BarnPlanId == barnPlanDetail.Id)
-                                        .Include(x => x.Medicine)
-                                        .Select(it => new Domain.Dto.Response.BarnPlan.MedicinePlan()
-                                        {
-                                            MedicineId = it.MedicineId,
-                                            MedicineName = it.Medicine.MedicineName,
-                                            Note = it.Note,
-                                            Stock = it.Stock
-                                        }).ToListAsync(),
-            };
-            return new Response<ViewBarnPlanResponse>()
-            {
-                Succeeded = true,
-                Data = result,
-            };
-
-        }
-        public async Task<Response<ViewBarnPlanResponse>> GetById(Guid id)
-        {
-            var barnPlanDetail = await _barnplanrepo.GetByIdAsync(id);
-            if (barnPlanDetail == null)
-            {
-                return new Response<ViewBarnPlanResponse>()
-                {
-                    Succeeded = false,
-                    Message = "Không tìm thấy kế hoạch cho chuồng "
-                };
-            }
-            ViewBarnPlanResponse result = new ViewBarnPlanResponse()
-            {
-                Id = barnPlanDetail.Id,
-                EndDate = barnPlanDetail.EndDate,
-                StartDate = barnPlanDetail.StartDate,
-                Note = barnPlanDetail.Note,
-                foodPlans = await _bpfoodrepo.GetQueryable(x => x.IsActive)
-                                        .Where(x => x.BarnPlanId == id)
-                                        .Include(x => x.Food)
-                                        .Select(it => new Domain.Dto.Response.BarnPlan.FoodPlan()
-                                        {
-                                            FoodId = it.FoodId,
-                                            FoodName = it.Food.FoodName,
-                                            Note = it.Note,
-                                            Stock = it.Stock
-                                        }).ToListAsync(),
-                medicinePlans = await _bpmedicinerepo.GetQueryable(x => x.IsActive)
-                                        .Where(x => x.BarnPlanId == id)
-                                        .Include(x => x.Medicine)
-                                        .Select(it => new Domain.Dto.Response.BarnPlan.MedicinePlan()
-                                        {
-                                            MedicineId = it.MedicineId,
-                                            MedicineName = it.Medicine.MedicineName,
-                                            Note = it.Note,
-                                            Stock = it.Stock
-                                        }).ToListAsync(),
-            };
-            return new Response<ViewBarnPlanResponse>()
-            {
-                Succeeded = true,
-                Data = result,
-            };
-        }
-
-        public async Task<Response<bool>> UpdateBarnPlan(UpdateBarnPlanRequest req)
-        {
-            var updateItem = await _barnplanrepo.GetByIdAsync(req.Id);
-            string validDateResponse;
-            DateTime formatedStartDate, formatedEndDate;
-            if (req.IsDaily == true)
-            {
-                validDateResponse = ValidTime(false, false, updateItem.StartDate, updateItem.EndDate, out formatedStartDate, out formatedEndDate);
-            }
-            else
-            {
-                validDateResponse = ValidTime(false, (bool)(req.IsDaily == null ? false : req.IsDaily), req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
-            }
-            if (!validDateResponse.Equals("Success"))
-            {
-                return new Response<bool>()
-                {
-                    Succeeded = false,
-                    Message = validDateResponse
-                };
-            }
-
-
-            if (updateItem == null)
-            {
-                return new Response<bool>()
-                {
-                    Succeeded = false,
-                    Message = "Kế hoạch không tồn tại"
-                };
-
-            }
-            updateItem.Note = req.Note;
-            updateItem.StartDate = formatedStartDate;
-            updateItem.EndDate = formatedEndDate;
-
             try
             {
-                // insert food plan
-                await InsertFoodPlan(req.foodPlans, req.Id);
-                // insert medicine plan
 
-                await InsertMedicinePlan(req.medicinePlans, req.Id);
+                var deleteItem = await _barnplanrepo.GetByIdAsync(id);
+                if (deleteItem == null)
+                {
+                    return new Response<bool>()
+                    {
+                        Succeeded = false,
+                        Message = "Kế khoạch không tồn tại"
+                    };
+
+                }
+
+                var barnPlanFood = _bpfoodrepo.GetQueryable(x => x.IsActive).Where(x => x.BarnPlanId == id).ToList();
+                foreach (var it in barnPlanFood)
+                {
+                    it.IsActive = false;
+                    _bpfoodrepo.Update(it);
+                }
+
+                await _bpfoodrepo.CommitAsync();
+
+                var barnPlanMedicine = _bpmedicinerepo.GetQueryable(x => x.IsActive).Where(x => x.BarnPlanId == id).ToList();
+                foreach (var it in barnPlanMedicine)
+                {
+                    it.IsActive = false;
+                    _bpmedicinerepo.Update(it);
+                }
+                await _bpmedicinerepo.CommitAsync();
+
+                if (deleteItem.EndDate >= DateTime.Now)
+                {
+                    deleteItem.IsActive = false;
+                    deleteItem.EndDate = DateTime.Now;
+                    //return await _barnplanrepo.CommitAsync() > 0;
+                }
+                else
+                {
+                    deleteItem.IsActive = false;
+                }
+                _barnplanrepo.Update(deleteItem);
+                await _barnplanrepo.CommitAsync();
+                return new Response<bool>()
+                {
+                    Succeeded = true,
+                    Message = "Xóa kế hoạch thành công"
+                };
             }
             catch (Exception ex)
             {
                 return new Response<bool>()
                 {
                     Succeeded = false,
-                    Message = ex.Message,
+                    Errors = new List<string> { ex.Message
+    }
+                };
+            }
+        }
+        public async Task<Response<ViewBarnPlanResponse>> GetByLiveStockCircleId(Guid id)
+        {
+            try
+            {
+
+
+                var barnPlanDetail = await _barnplanrepo.GetQueryable(x => x.IsActive)
+                    .FirstOrDefaultAsync(it => it.EndDate >= DateTime.Now && it.StartDate <= DateTime.Now && it.LivestockCircleId == id);
+
+                if (barnPlanDetail == null)
+                {
+                    return new Response<ViewBarnPlanResponse>()
+                    {
+                        Succeeded = false,
+                        Message = "Không tìm thấy kế hoạch cho chuồng "
+                    };
+                }
+                ViewBarnPlanResponse result = new ViewBarnPlanResponse()
+                {
+                    Id = barnPlanDetail.Id,
+                    EndDate = barnPlanDetail.EndDate,
+                    StartDate = barnPlanDetail.StartDate,
+                    Note = barnPlanDetail.Note,
+                    foodPlans = await _bpfoodrepo.GetQueryable(x => x.IsActive)
+                                            .Where(x => x.BarnPlanId == barnPlanDetail.Id)
+                                            .Include(x => x.Food)
+                                            .Select(it => new Domain.Dto.Response.BarnPlan.FoodPlan()
+                                            {
+                                                FoodId = it.FoodId,
+                                                FoodName = it.Food.FoodName,
+                                                Note = it.Note,
+                                                Stock = it.Stock
+                                            }).ToListAsync(),
+                    medicinePlans = await _bpmedicinerepo.GetQueryable(x => x.IsActive)
+                                            .Where(x => x.BarnPlanId == barnPlanDetail.Id)
+                                            .Include(x => x.Medicine)
+                                            .Select(it => new Domain.Dto.Response.BarnPlan.MedicinePlan()
+                                            {
+                                                MedicineId = it.MedicineId,
+                                                MedicineName = it.Medicine.MedicineName,
+                                                Note = it.Note,
+                                                Stock = it.Stock
+                                            }).ToListAsync(),
+                    CreatedBy = _userrepo.GetQueryable(x => x.Id == barnPlanDetail.CreatedBy)
+                                                .Select(it => new UserItemResponse()
+                                                {
+                                                    Id = it.Id,
+                                                    Email = it.Email,
+                                                    Fullname = it.FullName,
+                                                    PhoneNumber = it.PhoneNumber
+                                                }).FirstOrDefault(),
+                    CreatedDate = barnPlanDetail.CreatedDate,
+
+                };
+                return new Response<ViewBarnPlanResponse>()
+                {
+                    Succeeded = true,
+                    Data = result,
+                };
+            }
+            catch (Exception ex)
+            {
+                return new Response<ViewBarnPlanResponse>()
+                {
+                    Succeeded = false,
+                    Errors = new List<string> { ex.Message }
                 };
             }
 
-            _barnplanrepo.Update(updateItem);
-            var updateResponse = await _barnplanrepo.CommitAsync() > 0;
-            return new Response<bool>()
+        }
+        public async Task<Response<ViewBarnPlanResponse>> GetById(Guid id)
+        {
+            try
             {
-                Succeeded = true,
-                Message = "Cập nhật kế hoạch thành công"
-            }; ;
+
+
+                var barnPlanDetail = await _barnplanrepo.GetByIdAsync(id);
+                if (barnPlanDetail == null)
+                {
+                    return new Response<ViewBarnPlanResponse>()
+                    {
+                        Succeeded = false,
+                        Message = "Không tìm thấy kế hoạch cho chuồng "
+                    };
+                }
+                
+
+                ViewBarnPlanResponse result = new ViewBarnPlanResponse()
+                {
+                    Id = barnPlanDetail.Id,
+                    EndDate = barnPlanDetail.EndDate,
+                    StartDate = barnPlanDetail.StartDate,
+                    Note = barnPlanDetail.Note,
+                    foodPlans = await _bpfoodrepo.GetQueryable(x => x.IsActive)
+                                            .Where(x => x.BarnPlanId == id)
+                                            .Include(x => x.Food)
+                                            .Select(it => new Domain.Dto.Response.BarnPlan.FoodPlan()
+                                            {
+                                                FoodId = it.FoodId,
+                                                FoodName = it.Food.FoodName,
+                                                Note = it.Note,
+                                                Stock = it.Stock
+                                            }).ToListAsync(),
+                    medicinePlans = await _bpmedicinerepo.GetQueryable(x => x.IsActive)
+                                            .Where(x => x.BarnPlanId == id)
+                                            .Include(x => x.Medicine)
+                                            .Select(it => new Domain.Dto.Response.BarnPlan.MedicinePlan()
+                                            {
+                                                MedicineId = it.MedicineId,
+                                                MedicineName = it.Medicine.MedicineName,
+                                                Note = it.Note,
+                                                Stock = it.Stock
+                                            }).ToListAsync(),
+                    CreatedBy = await _userrepo.GetQueryable(x => x.Id == barnPlanDetail.CreatedBy)
+                                                .Select(it => new UserItemResponse()
+                                                {
+                                                    Id = it.Id,
+                                                    Email = it.Email,
+                                                    Fullname = it.FullName,
+                                                    PhoneNumber = it.PhoneNumber
+                                                }).FirstOrDefaultAsync(),
+                    CreatedDate = barnPlanDetail.CreatedDate,
+                };
+                return new Response<ViewBarnPlanResponse>()
+                {
+                    Succeeded = true,
+                    Data = result,
+                };
+            }
+            catch (Exception ex)
+            {
+                return new Response<ViewBarnPlanResponse>()
+                {
+                    Succeeded = false,
+                    Errors = new List<string> { ex.Message }
+                };
+            }
+        }
+
+        public async Task<Response<bool>> UpdateBarnPlan(UpdateBarnPlanRequest req)
+        {
+            try
+            {
+
+                var updateItem = await _barnplanrepo.GetByIdAsync(req.Id);
+                string validDateResponse;
+                DateTime formatedStartDate, formatedEndDate;
+                if (req.IsDaily == true)
+                {
+                    validDateResponse = ValidTime(false, false, updateItem.StartDate, updateItem.EndDate, out formatedStartDate, out formatedEndDate);
+                }
+                else
+                {
+                    validDateResponse = ValidTime(false, (bool)(req.IsDaily == null ? false : req.IsDaily), req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
+                }
+                if (!validDateResponse.Equals("Success"))
+                {
+                    return new Response<bool>()
+                    {
+                        Succeeded = false,
+                        Message = validDateResponse
+                    };
+                }
+
+
+                if (updateItem == null)
+                {
+                    return new Response<bool>()
+                    {
+                        Succeeded = false,
+                        Message = "Kế hoạch không tồn tại"
+                    };
+
+                }
+                updateItem.Note = req.Note;
+                updateItem.StartDate = formatedStartDate;
+                updateItem.EndDate = formatedEndDate;
+
+                try
+                {
+                    // insert food plan
+                    await InsertFoodPlan(req.foodPlans, req.Id);
+                    // insert medicine plan
+
+                    await InsertMedicinePlan(req.medicinePlans, req.Id);
+                }
+                catch (Exception ex)
+                {
+                    return new Response<bool>()
+                    {
+                        Succeeded = false,
+                        Message = ex.Message,
+                    };
+                }
+
+                _barnplanrepo.Update(updateItem);
+                var updateResponse = await _barnplanrepo.CommitAsync() > 0;
+                return new Response<bool>()
+                {
+                    Succeeded = true,
+                    Message = "Cập nhật kế hoạch thành công"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new Response<bool>()
+                {
+                    Succeeded = false,
+                    Errors = new List<string> { ex.Message }
+                };
+            }
         }
 
 
@@ -369,7 +466,8 @@ namespace Infrastructure.Services.Implements
         #region common func
         protected async Task InsertFoodPlan(List<Domain.Dto.Request.BarnPlan.FoodPlan> req, Guid bpid)
         {
-            
+
+
             // xoa bo plan cu
             var previous_Food_Plan = await _bpfoodrepo.GetQueryable().Where(it => it.BarnPlanId == bpid).ToListAsync();
 
@@ -382,7 +480,7 @@ namespace Infrastructure.Services.Implements
             if (req == null) throw new Exception("Không có thông tin thức ăn");
             // them plan moi
             foreach (var it in req)
-            {                
+            {
                 var foodPlan = new BarnPlanFood()
                 {
                     Note = it.Note,

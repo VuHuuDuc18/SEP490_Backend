@@ -553,12 +553,23 @@ namespace Infrastructure.Services.Implements
                 var validFields = typeof(BreedResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
+                var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
                 {
                     return new Response<PaginationSet<BreedResponse>>()
                     {
                         Succeeded = false,
                         Message = $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(",", validFields)}" }
+                    };
+                }
+                if (invalidFieldsSearch.Any())
+                {
+                    return new Response<PaginationSet<BreedResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFieldsSearch)}",
                         Errors = new List<string> { $"Trường hợp lệ: {string.Join(",", validFields)}" }
                     };
                 }

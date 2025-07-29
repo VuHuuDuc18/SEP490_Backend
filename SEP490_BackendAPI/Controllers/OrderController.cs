@@ -121,6 +121,11 @@ namespace SEP490_BackendAPI.Controllers
         {
             return Ok(await _orderService.ApproveOrder(request));
         }
+        [HttpPut("sale/deny-order/{orderId}")]
+        public async Task<IActionResult> DenyOrder(Guid orderId)
+        {
+            return Ok(await _orderService.DenyOrder(orderId));
+        }
 
     }
 }

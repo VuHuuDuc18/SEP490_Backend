@@ -227,7 +227,7 @@ namespace Infrastructure.Services.Implements
                     return new Response<string>()
                     {
                         Succeeded = false,
-                        Message = "Danh mục thuốc không tồn tại ",
+                        Message = "Danh mục thuốc không tồn tại",
                         Errors = new List<string> { "Danh mục thuốc không tồn tại" }
                     };
                 }

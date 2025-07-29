@@ -3,6 +3,7 @@ using Domain.Dto.Request;
 using Domain.Dto.Request.Category;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Breed;
+using Domain.Dto.Response.Category;
 using Domain.IServices;
 using Entities.EntityModel;
 using Infrastructure.Core;
@@ -350,7 +351,7 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-        public async Task<Response<PaginationSet<BreedCategoryResponse>>> GetPaginatedBreedCategoryList(
+        public async Task<Response<PaginationSet<CategoryResponse>>> GetPaginatedBreedCategoryList(
             ListingRequest request,
             CancellationToken cancellationToken = default)
         {
@@ -358,7 +359,7 @@ namespace Infrastructure.Services.Implements
             {
                 if (request == null)
                 {
-                    return new Response<PaginationSet<BreedCategoryResponse>>()
+                    return new Response<PaginationSet<CategoryResponse>>()
                     {
                         Succeeded = false,
                         Message = "Yêu cầu không được null",
@@ -368,7 +369,7 @@ namespace Infrastructure.Services.Implements
 
                 if (request.PageIndex < 1 || request.PageSize < 1)
                 {
-                    return new Response<PaginationSet<BreedCategoryResponse>>()
+                    return new Response<PaginationSet<CategoryResponse>>()
                     {
                         Succeeded = false,
                         Message = "PageIndex và PageSize phải lớn hơn 0",
@@ -376,12 +377,14 @@ namespace Infrastructure.Services.Implements
                     };
                 }
 
-                var validFields = typeof(BreedCategoryResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var validFields = typeof(CategoryResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
                 {
-                    return new Response<PaginationSet<BreedCategoryResponse>>()
+                    return new Response<PaginationSet<CategoryResponse>>()
                     {
                         Succeeded = false,
                         Message = $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}",
@@ -389,9 +392,19 @@ namespace Infrastructure.Services.Implements
                     };
                 }
 
+                if (invalidFieldsSearch.Any())
+                {
+                    return new Response<PaginationSet<CategoryResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường lọc không hợp lệ: {string.Join(", ", invalidFieldsSearch)}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(",", invalidFieldsSearch)}" }
+                    };
+                }
+
                 if (!validFields.Contains(request.Sort?.Field))
                 {
-                    return new Response<PaginationSet<BreedCategoryResponse>>()
+                    return new Response<PaginationSet<CategoryResponse>>()
                     {
                         Succeeded = false,
                         Message = $"Trường sắp xếp không hợp lệ: {request.Sort?.Field}",
@@ -409,14 +422,15 @@ namespace Infrastructure.Services.Implements
 
                 var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
 
-                var responses = paginationResult.Items.Select(c => new BreedCategoryResponse
+                var responses = paginationResult.Items.Select(c => new CategoryResponse
                 {
                     Id = c.Id,
                     Name = c.Name,
-                    Description = c.Description
+                    Description = c.Description,
+                    IsActive = c.IsActive,
                 }).ToList();
 
-                var result = new PaginationSet<BreedCategoryResponse>
+                var result = new PaginationSet<CategoryResponse>
                 {
                     PageIndex = paginationResult.PageIndex,
                     Count = responses.Count,
@@ -425,7 +439,7 @@ namespace Infrastructure.Services.Implements
                     Items = responses
                 };
 
-                return new Response<PaginationSet<BreedCategoryResponse>>()
+                return new Response<PaginationSet<CategoryResponse>>()
                 {
                     Succeeded = true,
                     Message = "Lấy danh sách phân trang thành công",
@@ -434,7 +448,7 @@ namespace Infrastructure.Services.Implements
             }
             catch (Exception ex)
             {
-                return new Response<PaginationSet<BreedCategoryResponse>>()
+                return new Response<PaginationSet<CategoryResponse>>()
                 {
                     Succeeded = false,
                     Message = "Lỗi khi lấy danh sách phân trang",

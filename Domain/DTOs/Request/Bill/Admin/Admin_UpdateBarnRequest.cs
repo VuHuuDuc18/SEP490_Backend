@@ -10,7 +10,7 @@ namespace Domain.Dto.Request.Bill.Admin
     public class Admin_UpdateBarnRequest
     {
         [Required]
-        public Guid BillId { get; set; }
+        public Guid LivestockCircleId { get; set; }
         //[Required]
        // public Guid BarnId { get; set; }
         [Required]
@@ -18,7 +18,8 @@ namespace Domain.Dto.Request.Bill.Admin
         [Required]
         [Range(1, 100001, ErrorMessage = "Số lượng phải trong 0 - 100001.")]
         public int Stock { get; set; }
-        
+        public string? Note { get; set; }
+
 
     }
 }

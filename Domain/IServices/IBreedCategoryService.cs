@@ -3,6 +3,7 @@ using Domain.Dto.Request;
 using Domain.Dto.Request.Category;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Breed;
+using Domain.Dto.Response.Category;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -23,7 +24,7 @@ namespace Domain.IServices
 
         Task<Response<List<BreedCategoryResponse>>> GetBreedCategoryByName(string name = null, CancellationToken cancellationToken = default);
 
-        Task<Response<PaginationSet<BreedCategoryResponse>>> GetPaginatedBreedCategoryList(
+        Task<Response<PaginationSet<CategoryResponse>>> GetPaginatedBreedCategoryList(
             ListingRequest request,
             CancellationToken cancellationToken = default);
 

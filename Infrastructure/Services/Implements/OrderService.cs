@@ -617,7 +617,7 @@ namespace Infrastructure.Services.Implements
                 {
                    return new Response<bool>("Không tìm thấy đơn ");
                 }
-                orderItem.Status = StatusConstant.APPROVED;
+                orderItem.Status = OrderStatus.APPROVED;
                 orderItem.GoodUnitPrice = request.GoodUnitPrice;
                 orderItem.BadUnitPrice = request.BadUnitPrice;
                 orderItem.TotalBill = request.GoodUnitPrice * orderItem.GoodUnitStock + request.BadUnitPrice * orderItem.BadUnitStock;
@@ -650,7 +650,37 @@ namespace Infrastructure.Services.Implements
                 };
             }
         }
+        public async Task<Response<bool>> DenyOrder(Guid orderId)
+        {
+            try
+            {
+                var orderItem = await _orderRepository.GetByIdAsync(orderId);
+                if (orderItem == null)
+                {
+                    return new Response<bool>("Không tìm thấy đơn ");
+                }
+                orderItem.Status = OrderStatus.DENIED;
+                
 
+                _orderRepository.Update(orderItem);
+                await _orderRepository.CommitAsync();
+                
+                return new Response<bool>()
+                {
+                    Succeeded = true,
+                    Message = "Cập nhật thành công"
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new Response<bool>()
+                {
+                    Succeeded = false,
+                    Message = "Cập nhật thất bại"
+                };
+            }
+        }
         public async Task<Response<PaginationSet<OrderResponse>>> WorkerGetallOrder(ListingRequest request)
         {
             try
@@ -746,5 +776,7 @@ namespace Infrastructure.Services.Implements
                 return new Response<PaginationSet<OrderResponse>>($"Lỗi khi lấy danh sách: {ex.Message}");
             }
         }
+
+        
     }
 }

@@ -57,15 +57,15 @@ namespace Infrastructure.Services.Implements
         {
             try
             {
-                //if (_currentUserId == Guid.Empty)
-                //{
-                //    return new Response<string>()
-                //    {
-                //        Succeeded = false,
-                //        Message = "Hãy đăng nhập và thử lại",
-                //        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
-                //    };
-                //}
+                if (_currentUserId == Guid.Empty)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Hãy đăng nhập và thử lại",
+                        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                    };
+                }
 
                 if (request == null)
                 {
@@ -89,6 +89,9 @@ namespace Infrastructure.Services.Implements
                     };
                 }
 
+
+               
+
                 string medicineName = $"{request.MedicineName}/{request.MedicineCode}";
                 var exists = await _medicineRepository.GetQueryable(x =>
                     x.MedicineName == medicineName &&
@@ -104,7 +107,16 @@ namespace Infrastructure.Services.Implements
                         Errors = new List<string> { $"Thuốc với tên '{medicineName}' trong danh mục này đã tồn tại" }
                     };
                 }
-
+                var medicineCategory = await _medicineCategoryRepository.GetByIdAsync(request.MedicineCategoryId);
+                if (medicineCategory == null || !medicineCategory.IsActive)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Danh mục thuốc không tồn tại hoặc đã bị xóa",
+                        Errors = new List<string> { "Danh mục thuốc không tồn tại hoặc đã bị xóa" }
+                    };
+                }
                 var medicine = new Medicine
                 {
                     MedicineName = medicineName,
@@ -184,15 +196,15 @@ namespace Infrastructure.Services.Implements
         {
             try
             {
-                //if (_currentUserId == Guid.Empty)
-                //{
-                //    return new Response<string>()
-                //    {
-                //        Succeeded = false,
-                //        Message = "Hãy đăng nhập và thử lại",
-                //        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
-                //    };
-                //}
+                if (_currentUserId == Guid.Empty)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Hãy đăng nhập và thử lại",
+                        Errors = new List<string> { "Hãy đăng nhập và thử lại" }
+                    };
+                }
 
                 if (request == null)
                 {
@@ -241,6 +253,17 @@ namespace Infrastructure.Services.Implements
                         Succeeded = false,
                         Message = $"Thuốc với tên '{medicineName}' trong danh mục này đã tồn tại",
                         Errors = new List<string> { $"Thuốc với tên '{medicineName}' trong danh mục này đã tồn tại" }
+                    };
+                }
+
+                var medicineCategory = await _medicineCategoryRepository.GetByIdAsync(request.MedicineCategoryId);
+                if (medicineCategory == null || !medicineCategory.IsActive)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Danh mục thuốc không tồn tại hoặc đã bị xóa",
+                        Errors = new List<string> { "Danh mục thuốc không tồn tại hoặc đã bị xóa" }
                     };
                 }
 
@@ -342,7 +365,7 @@ namespace Infrastructure.Services.Implements
                     return new Response<string>()
                     {
                         Succeeded = false,
-                        Message = "Thuốc không tồn tại ",
+                        Message = "Thuốc không tồn tại",
                         Errors = new List<string> { "Thuốc không tồn tại" }
                     };
                 }
