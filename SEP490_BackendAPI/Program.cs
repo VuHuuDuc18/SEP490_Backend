@@ -51,12 +51,10 @@ namespace SEP490_BackendAPI
             builder.Services.AddEndpointsApiExplorer();
             
             var app = builder.Build();
-            
-            await app.MigrateDatabaseAsync();
-            //var servicesProvider = builder.Services.BuildServiceProvider();
-            //ServicesExtentions.SeedIdentity(servicesProvider);
 
             app.UseCors("AllowAllOrigins");
+
+            await app.MigrateDatabaseAsync();
 
             // Configure the HTTP request pipeline.
             //if (app.Environment.IsDevelopment())
@@ -68,8 +66,8 @@ namespace SEP490_BackendAPI
             //Tự động redirect qua https nếu có
             //app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 
