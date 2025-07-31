@@ -333,7 +333,7 @@ namespace Infrastructure.Services.Implements
                         Message = "Không tìm thấy kế hoạch cho chuồng "
                     };
                 }
-                
+
 
                 ViewBarnPlanResponse result = new ViewBarnPlanResponse()
                 {
@@ -395,14 +395,9 @@ namespace Infrastructure.Services.Implements
                 var updateItem = await _barnplanrepo.GetByIdAsync(req.Id);
                 string validDateResponse;
                 DateTime formatedStartDate, formatedEndDate;
-                if (req.IsDaily == true)
-                {
-                    validDateResponse = ValidTime(false, false, updateItem.StartDate, updateItem.EndDate, out formatedStartDate, out formatedEndDate);
-                }
-                else
-                {
-                    validDateResponse = ValidTime(false, (bool)(req.IsDaily == null ? false : req.IsDaily), req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
-                }
+
+                validDateResponse = ValidTime(false, false, req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
+
                 if (!validDateResponse.Equals("Success"))
                 {
                     return new Response<bool>()
