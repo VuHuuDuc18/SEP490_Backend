@@ -91,7 +91,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
                 Note = "Updated Note",
                 StartDate = now,
                 EndDate = now.AddDays(2),
-                IsDaily = false,
+                //IsDaily = false,
                 foodPlans = new List<Domain.Dto.Request.BarnPlan.FoodPlan> { foodPlanReq },
                 medicinePlans = new List<Domain.Dto.Request.BarnPlan.MedicinePlan> { medicinePlanReq }
             };
@@ -138,7 +138,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
                 Note = "Updated Note",
                 StartDate = now,
                 EndDate = now.AddDays(2),
-                IsDaily = false,
+                //IsDaily = false,
                 foodPlans = new List<Domain.Dto.Request.BarnPlan.FoodPlan>(),
                 medicinePlans = new List<Domain.Dto.Request.BarnPlan.MedicinePlan>()
             };
