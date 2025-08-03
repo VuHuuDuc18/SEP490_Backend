@@ -28,12 +28,13 @@ namespace Infrastructure.UnitTests.BarnPlanService
             _barnPlanRepoMock = new Mock<IRepository<BarnPlan>>();
             _barnPlanFoodRepoMock = new Mock<IRepository<BarnPlanFood>>();
             _barnPlanMedicineRepoMock = new Mock<IRepository<BarnPlanMedicine>>();
-            _service = new Infrastructure.Services.Implements.BarnPlanService(
+            _userRepoMock = new Mock<IRepository<User>>();
+
+            _service = new Services.Implements.BarnPlanService(
                 _barnPlanRepoMock.Object,
                 _barnPlanFoodRepoMock.Object,
                 _barnPlanMedicineRepoMock.Object,
-                _userRepoMock.Object
-                );
+                _userRepoMock.Object);
         }
 
         //[Fact]
@@ -47,8 +48,9 @@ namespace Infrastructure.UnitTests.BarnPlanService
         public async Task ListingHistoryBarnPlan_Throws_WhenPageIndexInvalid()
         {
             var req = new ListingRequest { PageIndex = 0, PageSize = 10 };
-            var ex = await Assert.ThrowsAsync<Exception>(() => _service.ListingHistoryBarnPlan(Guid.NewGuid(), req));
-            Assert.Contains("PageIndex và PageSize phải lớn hơn 0", ex.Message);
+            var result = await _service.ListingHistoryBarnPlan(Guid.NewGuid(), req);
+            Xunit.Assert.False(result.Succeeded);
+            Assert.Contains("PageIndex và PageSize phải lớn hơn 0", result.Message);
 
         }
 
@@ -57,8 +59,9 @@ namespace Infrastructure.UnitTests.BarnPlanService
         {
 
             var req = new ListingRequest { PageIndex = 1, PageSize = 0 };
-            var ex = await Assert.ThrowsAsync<Exception>(() => _service.ListingHistoryBarnPlan(Guid.NewGuid(), req));
-            Assert.Contains("PageIndex và PageSize phải lớn hơn 0", ex.Message);
+            var result = await _service.ListingHistoryBarnPlan(Guid.NewGuid(), req);
+            Xunit.Assert.False(result.Succeeded);
+            Assert.Contains("PageIndex và PageSize phải lớn hơn 0", result.Message);
         }
 
         [Fact]
@@ -70,8 +73,9 @@ namespace Infrastructure.UnitTests.BarnPlanService
                 PageSize = 10,
                 Filter = new List<SearchObjectForCondition> { new SearchObjectForCondition { Field = "InvalidField", Value = "test" } }
             };
-            var ex = await Assert.ThrowsAsync<Exception>(() => _service.ListingHistoryBarnPlan(Guid.NewGuid(), req));
-            Assert.Contains("Trường lọc không hợp lệ", ex.Message);
+            var result = await _service.ListingHistoryBarnPlan(Guid.NewGuid(), req);
+            Xunit.Assert.False(result.Succeeded);
+            Assert.Contains("Trường lọc không hợp lệ", result.Message);
         }
 
         [Fact]
@@ -83,8 +87,9 @@ namespace Infrastructure.UnitTests.BarnPlanService
                 PageSize = 10,
                 SearchString = new List<SearchObjectForCondition> { new SearchObjectForCondition { Field = "InvalidField", Value = "test" } }
             };
-            var ex = await Assert.ThrowsAsync<Exception>(() => _service.ListingHistoryBarnPlan(Guid.NewGuid(), req));
-            Assert.Contains("Trường tìm kiếm không hợp lệ", ex.Message);
+            var result = await _service.ListingHistoryBarnPlan(Guid.NewGuid(), req);
+            Xunit.Assert.False(result.Succeeded);
+            Assert.Contains("Trường tìm kiếm không hợp lệ", result.Message);
         }
 
         [Fact]
@@ -96,8 +101,9 @@ namespace Infrastructure.UnitTests.BarnPlanService
                 PageSize = 10,
                 Sort = new SearchObjectForCondition { Field = "InvalidField", Value = "asc" }
             };
-            var ex = await Assert.ThrowsAsync<Exception>(() => _service.ListingHistoryBarnPlan(Guid.NewGuid(), req));
-            Assert.Contains("Trường sắp xếp không hợp lệ", ex.Message);
+            var result = await _service.ListingHistoryBarnPlan(Guid.NewGuid(), req);
+            Xunit.Assert.False(result.Succeeded);
+            Assert.Contains("Trường sắp xếp không hợp lệ", result.Message);
         }
 
         [Fact]

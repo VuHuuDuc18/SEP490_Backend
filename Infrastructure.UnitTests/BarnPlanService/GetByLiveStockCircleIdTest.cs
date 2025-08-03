@@ -9,6 +9,7 @@ using MockQueryable.Moq;
 using Xunit;
 using Microsoft.EntityFrameworkCore;
 using Domain.Dto.Response.BarnPlan;
+using Org.BouncyCastle.Ocsp;
 
 namespace Infrastructure.UnitTests.BarnPlanService
 {
@@ -25,7 +26,9 @@ namespace Infrastructure.UnitTests.BarnPlanService
             _barnPlanRepoMock = new Mock<IRepository<BarnPlan>>();
             _barnPlanFoodRepoMock = new Mock<IRepository<BarnPlanFood>>();
             _barnPlanMedicineRepoMock = new Mock<IRepository<BarnPlanMedicine>>();
-            _service = new Infrastructure.Services.Implements.BarnPlanService(
+            _userRepoMock = new Mock<IRepository<User>>();
+
+            _service = new Services.Implements.BarnPlanService(
                 _barnPlanRepoMock.Object,
                 _barnPlanFoodRepoMock.Object,
                 _barnPlanMedicineRepoMock.Object,
@@ -42,8 +45,9 @@ namespace Infrastructure.UnitTests.BarnPlanService
                 .Returns(barnPlans.Object);
 
             // Act & Assert
-            var ex = await Xunit.Assert.ThrowsAsync<Exception>(() => _service.GetByLiveStockCircleId(livestockCircleId));
-            Xunit.Assert.Contains("Không tìm thấy kế hoạch cho chuồng", ex.Message);
+            var result = await _service.GetByLiveStockCircleId(livestockCircleId);
+            Xunit.Assert.False(result.Succeeded);
+            Xunit.Assert.Contains("Không tìm thấy kế hoạch cho chuồng", result.Message);
         }
 
         [Fact]
