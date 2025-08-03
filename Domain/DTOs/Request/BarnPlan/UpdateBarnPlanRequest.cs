@@ -11,8 +11,7 @@ namespace Domain.Dto.Request.BarnPlan
         public Guid Id { get; set; }
         public string Note { get; set; }
         public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
-        public bool? IsDaily { get; set; }
+        public DateTime? EndDate { get; set; }        
         public List<FoodPlan>? foodPlans { get; set; }
         public List<MedicinePlan>? medicinePlans { get; set; }
     }

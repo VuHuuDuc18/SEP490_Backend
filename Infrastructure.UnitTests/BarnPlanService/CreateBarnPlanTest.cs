@@ -38,7 +38,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
         {
             var req = new CreateBarnPlanRequest
             {
-                livstockCircleId = Guid.NewGuid(),
+                livestockCircleId = Guid.NewGuid(),
                 IsDaily = false,
                 StartDate = null,
                 EndDate = null
@@ -53,7 +53,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
         {
             var req = new CreateBarnPlanRequest
             {
-                livstockCircleId = Guid.NewGuid(),
+                livestockCircleId = Guid.NewGuid(),
                 IsDaily = false,
                 StartDate = DateTime.Today.AddDays(2),
                 EndDate = DateTime.Today.AddDays(1)
@@ -68,7 +68,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
         {
             var req = new CreateBarnPlanRequest
             {
-                livstockCircleId = Guid.NewGuid(),
+                livestockCircleId = Guid.NewGuid(),
                 IsDaily = false,
                 StartDate = DateTime.Today,
                 EndDate = DateTime.Today.AddDays(1)
@@ -92,7 +92,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
         {
             var req = new CreateBarnPlanRequest
             {
-                livstockCircleId = Guid.NewGuid(),
+                livestockCircleId = Guid.NewGuid(),
                 IsDaily = true,
                 Note = "Test"
             };
@@ -109,7 +109,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
         {
             var req = new CreateBarnPlanRequest
             {
-                livstockCircleId = Guid.NewGuid(),
+                livestockCircleId = Guid.NewGuid(),
                 IsDaily = true,
                 Note = "Test",
                 foodPlans = new List<FoodPlan> { new FoodPlan { FoodId = Guid.NewGuid(), Stock = 1, Note = "F" } }
@@ -131,7 +131,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
         {
             var req = new CreateBarnPlanRequest
             {
-                livstockCircleId = Guid.NewGuid(),
+                livestockCircleId = Guid.NewGuid(),
                 IsDaily = true,
                 Note = "Test",
                 medicinePlans = new List<MedicinePlan> { new MedicinePlan { MedicineId = Guid.NewGuid(), Stock = 1, Note = "M" } }
@@ -153,7 +153,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
         {
             var req = new CreateBarnPlanRequest
             {
-                livstockCircleId = Guid.NewGuid(),
+                livestockCircleId = Guid.NewGuid(),
                 IsDaily = true,
                 Note = "Test",
                 foodPlans = new List<FoodPlan> { new FoodPlan { FoodId = Guid.NewGuid(), Stock = 1, Note = "F" } },
@@ -197,5 +197,6 @@ namespace Infrastructure.UnitTests.BarnPlanService
         //    _barnPlanFoodRepoMock.Verify(x => x.Insert(It.IsAny<BarnPlanFood>()), Moq.Times.Never);
         //    _barnPlanMedicineRepoMock.Verify(x => x.Insert(It.IsAny<BarnPlanMedicine>()), Moq.Times.Never);
         //}
+
     }
 }
