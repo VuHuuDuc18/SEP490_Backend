@@ -228,6 +228,7 @@ namespace Infrastructure.Services.Implements
                 var images = await _imageLivestockCircleRepository.GetQueryable(x => x.IsActive && x.LivestockCircleId == order.LivestockCircleId)
                     .Select(x => x.ImageLink).ToListAsync();
                 var customer = await _userManager.FindByIdAsync(_currentUserId.ToString());
+                var saler = await _userManager.FindByIdAsync(order.SaleStaffId.ToString());
                 var result = new OrderResponse()
                 {
                     Id = order.Id,
@@ -246,6 +247,7 @@ namespace Infrastructure.Services.Implements
                 result.LivestockCircle.ImageLinks = images;
                 result.Customer = AutoMapperHelper.AutoMap<User, UserItemResponse>(customer);
                 result.Barn = AutoMapperHelper.AutoMap<Barn, BarnResponse>(livestockCircle.Barn);
+                result.Saler = AutoMapperHelper.AutoMap<User, UserItemResponse>(saler);
                 return new Response<OrderResponse>()
                 {
                     Succeeded = true,
@@ -571,7 +573,7 @@ namespace Infrastructure.Services.Implements
 
 
 
-                var query = _orderRepository.GetQueryable(x => x.IsActive);
+                var query = _orderRepository.GetQueryable(x => x.IsActive && x.SaleStaffId == _currentUserId);
 
                 if (request.SearchString?.Any() == true)
                     query = query.SearchString(request.SearchString);
