@@ -8,7 +8,7 @@ namespace Domain.Dto.Request.BarnPlan
 {
     public class CreateBarnPlanRequest
     {     
-        public Guid livstockCircleId {  get; set; }
+        public Guid livestockCircleId {  get; set; }
         public string Note { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
