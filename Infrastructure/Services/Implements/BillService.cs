@@ -396,7 +396,7 @@ namespace Infrastructure.Services.Implements
                             Id = billItem.Id,
                             Medicine = medicineResponse,
                             Stock = billItem.Stock,
-                            IsActive = billItem.IsActive
+                            IsActive = billItem.IsActive                          
                         });
                     }
                     else if (bill.TypeBill == TypeBill.BREED && billItem.BreedId.HasValue)
@@ -589,6 +589,7 @@ namespace Infrastructure.Services.Implements
                     Status = bill.Status,
                     Weight = bill.Weight,
                     IsActive = bill.IsActive,
+                    CreatedDate = bill.CreatedDate,
                     BillItem = billItemResponses // Thêm danh sách BillItems
                 };
 
@@ -843,7 +844,8 @@ namespace Infrastructure.Services.Implements
                         Total = bill.Total,
                         Status = bill.Status,
                         Weight = bill.Weight,
-                        IsActive = bill.IsActive
+                        IsActive = bill.IsActive,
+                        CreatedDate = bill.CreatedDate,
                     });
                 }
 
@@ -2587,7 +2589,8 @@ namespace Infrastructure.Services.Implements
                         TypeBill = bill.TypeBill,
                         Status = bill.Status,
                         Weight = bill.Weight,
-                        IsActive = bill.IsActive
+                        IsActive = bill.IsActive,
+                        CreatedDate = bill.CreatedDate,
                     });
                 }
 
@@ -2760,7 +2763,8 @@ namespace Infrastructure.Services.Implements
                         TypeBill = bill.TypeBill,
                         Status = bill.Status,
                         Weight = bill.Weight,
-                        IsActive = bill.IsActive
+                        IsActive = bill.IsActive,
+                        CreatedDate = bill.CreatedDate,
                     });
                 }
 
@@ -2939,7 +2943,8 @@ namespace Infrastructure.Services.Implements
                         TypeBill = bill.TypeBill,
                         Status = bill.Status,
                         Weight = bill.Weight,
-                        IsActive = bill.IsActive
+                        IsActive = bill.IsActive,
+                        CreatedDate    = bill.CreatedDate,
                     });
                 }
 
@@ -3120,7 +3125,8 @@ namespace Infrastructure.Services.Implements
                         TypeBill = bill.TypeBill,
                         Status = bill.Status,
                         Weight = bill.Weight,
-                        IsActive = bill.IsActive
+                        IsActive = bill.IsActive,
+                        CreatedDate = bill.CreatedDate,
                     });
                 }
 
