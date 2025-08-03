@@ -10,6 +10,7 @@ using MockQueryable.Moq;
 using Xunit;
 using MockQueryable;
 using Assert = Xunit.Assert;
+using Org.BouncyCastle.Ocsp;
 
 namespace Infrastructure.UnitTests.BarnPlanService
 {
@@ -26,7 +27,9 @@ namespace Infrastructure.UnitTests.BarnPlanService
             _barnPlanRepoMock = new Mock<IRepository<BarnPlan>>();
             _barnPlanFoodRepoMock = new Mock<IRepository<BarnPlanFood>>();
             _barnPlanMedicineRepoMock = new Mock<IRepository<BarnPlanMedicine>>();
-            _service = new Infrastructure.Services.Implements.BarnPlanService(
+            _userRepoMock = new Mock<IRepository<User>>();
+
+            _service = new Services.Implements.BarnPlanService(
                 _barnPlanRepoMock.Object,
                 _barnPlanFoodRepoMock.Object,
                 _barnPlanMedicineRepoMock.Object,
@@ -38,8 +41,9 @@ namespace Infrastructure.UnitTests.BarnPlanService
         {
             _barnPlanRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), null)).ReturnsAsync(() => null);
 
-            var ex = await Assert.ThrowsAsync<Exception>(() => _service.DisableBarnPlan(Guid.NewGuid()));
-            Assert.Contains("Kế khoạch không tồn tại", ex.Message);
+            var result = await _service.DisableBarnPlan(Guid.NewGuid());
+            Xunit.Assert.False(result.Succeeded); 
+            Assert.Contains("Kế khoạch không tồn tại", result.Message);
         }
 
         [Fact]
@@ -146,7 +150,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
 
             var result = await _service.DisableBarnPlan(id);
 
-            Assert.False(result.Succeeded);
+            Assert.True(result.Succeeded);
             Assert.False(barnPlan.IsActive);
         }
     }

@@ -9,6 +9,7 @@ using MockQueryable.Moq;
 using Xunit;
 using Microsoft.EntityFrameworkCore;
 using Domain.Dto.Response.BarnPlan;
+using Org.BouncyCastle.Ocsp;
 
 namespace Infrastructure.UnitTests.BarnPlanService
 {
@@ -25,7 +26,9 @@ namespace Infrastructure.UnitTests.BarnPlanService
             _barnPlanRepoMock = new Mock<IRepository<BarnPlan>>();
             _barnPlanFoodRepoMock = new Mock<IRepository<BarnPlanFood>>();
             _barnPlanMedicineRepoMock = new Mock<IRepository<BarnPlanMedicine>>();
-            _service = new Infrastructure.Services.Implements.BarnPlanService(
+            _userRepoMock = new Mock<IRepository<User>>();
+
+            _service = new Services.Implements.BarnPlanService(
                 _barnPlanRepoMock.Object,
                 _barnPlanFoodRepoMock.Object,
                 _barnPlanMedicineRepoMock.Object,
@@ -40,8 +43,9 @@ namespace Infrastructure.UnitTests.BarnPlanService
             _barnPlanRepoMock.Setup(x => x.GetByIdAsync(barnPlanId, null)).ReturnsAsync((BarnPlan)null);
 
             // Act & Assert
-            var ex = await Xunit.Assert.ThrowsAsync<Exception>(() => _service.GetById(barnPlanId));
-            Xunit.Assert.Contains("Không tìm thấy kế hoạch cho chuồng", ex.Message);
+            var result = await _service.GetById(barnPlanId);
+            Xunit.Assert.False(result.Succeeded);
+            Xunit.Assert.Contains("Không tìm thấy kế hoạch cho chuồng", result.Message);
         }
 
         [Fact]
@@ -49,16 +53,32 @@ namespace Infrastructure.UnitTests.BarnPlanService
         {
             // Arrange
             var barnPlanId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
             var now = DateTime.Now;
+
             var barnPlan = new BarnPlan
             {
                 Id = barnPlanId,
                 Note = "Test Note",
                 StartDate = now.AddDays(-1),
                 EndDate = now.AddDays(1),
-                IsActive = true
+                IsActive = true,
+                CreatedBy = userId // Explicitly set CreatedBy
             };
+
             _barnPlanRepoMock.Setup(x => x.GetByIdAsync(barnPlanId, null)).ReturnsAsync(barnPlan);
+
+            // User
+            var user = new User
+            {
+                Id = userId,
+                Email = "test@example.com",
+                FullName = "Test User",
+                PhoneNumber = "1234567890"
+            };
+            var users = new List<User> { user }.AsQueryable().BuildMockDbSet();
+            _userRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<User, bool>>>()))
+                .Returns(users.Object);
 
             // Food
             var foodId = Guid.NewGuid();
@@ -99,6 +119,8 @@ namespace Infrastructure.UnitTests.BarnPlanService
 
             // Assert
             Xunit.Assert.NotNull(result);
+            Xunit.Assert.True(result.Succeeded);
+            Xunit.Assert.NotNull(result.Data);
             Xunit.Assert.Equal(barnPlanId, result.Data.Id);
             Xunit.Assert.Equal("Test Note", result.Data.Note);
             Xunit.Assert.Equal(barnPlan.StartDate, result.Data.StartDate);
@@ -115,6 +137,11 @@ namespace Infrastructure.UnitTests.BarnPlanService
             Xunit.Assert.Equal("Antibiotic", result.Data.medicinePlans[0].MedicineName);
             Xunit.Assert.Equal(5, result.Data.medicinePlans[0].Stock);
             Xunit.Assert.Equal("After meal", result.Data.medicinePlans[0].Note);
+            Xunit.Assert.NotNull(result.Data.CreatedBy);
+            Xunit.Assert.Equal(userId, result.Data.CreatedBy.Id);
+            Xunit.Assert.Equal("test@example.com", result.Data.CreatedBy.Email);
+            Xunit.Assert.Equal("Test User", result.Data.CreatedBy.Fullname);
+            Xunit.Assert.Equal("1234567890", result.Data.CreatedBy.PhoneNumber);
         }
     }
 }
