@@ -110,7 +110,7 @@ namespace Infrastructure.Services.Implements
             try
             {
                 //Kiểm tra đơn hàng đã tồn tại chưa
-                var existingOrder = _orderRepository.GetQueryable(x => x.CustomerId == _currentUserId && x.LivestockCircleId == request.LivestockCircleId && x.Status!=OrderStatus.CANCELLED);
+                var existingOrder = _orderRepository.GetQueryable(x => x.CustomerId == _currentUserId && x.LivestockCircleId == request.LivestockCircleId && x.Status != OrderStatus.CANCELLED);
                 if (!existingOrder.IsNullOrEmpty())
                 {
                     return new Response<string>()
@@ -228,6 +228,7 @@ namespace Infrastructure.Services.Implements
                 var images = await _imageLivestockCircleRepository.GetQueryable(x => x.IsActive && x.LivestockCircleId == order.LivestockCircleId)
                     .Select(x => x.ImageLink).ToListAsync();
                 var customer = await _userManager.FindByIdAsync(_currentUserId.ToString());
+                var saler = await _userManager.FindByIdAsync(order.SaleStaffId.ToString());
                 var result = new OrderResponse()
                 {
                     Id = order.Id,
@@ -246,6 +247,7 @@ namespace Infrastructure.Services.Implements
                 result.LivestockCircle.ImageLinks = images;
                 result.Customer = AutoMapperHelper.AutoMap<User, UserItemResponse>(customer);
                 result.Barn = AutoMapperHelper.AutoMap<Barn, BarnResponse>(livestockCircle.Barn);
+                result.Saler = AutoMapperHelper.AutoMap<User, UserItemResponse>(saler);
                 return new Response<OrderResponse>()
                 {
                     Succeeded = true,
@@ -494,9 +496,9 @@ namespace Infrastructure.Services.Implements
                         PickupDate = x.PickupDate,
                         BreedName = x.LivestockCircle.Breed.BreedName,
                         BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name,
-                        Barn = AutoMapperHelper.AutoMap<Barn,BarnResponse>(x.LivestockCircle.Barn)
+                        Barn = AutoMapperHelper.AutoMap<Barn, BarnResponse>(x.LivestockCircle.Barn)
                     });
-                
+
                 if (request.SearchString?.Any() == true)
                     orders = orders.SearchString(request.SearchString);
 
@@ -583,67 +585,50 @@ namespace Infrastructure.Services.Implements
                 var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
-                {
-                    return new Response<PaginationSet<OrderResponse>>($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}")
+                    return new Response<PaginationSet<OrderResponse>>($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+
+                    var query = from o in Orders
+                                join c in Customers on o.CustomerId equals c.Id
+                                where o.IsActive && o.SaleStaffId == _currentUserId
+                                select new OrderResponse()
+                                {
+                                    Id = o.Id,
+                                    CustomerId = o.CustomerId,
+                                    LivestockCircleId = o.LivestockCircleId,
+                                    GoodUnitStock = o.GoodUnitStock,
+                                    BadUnitStock = o.BadUnitStock,
+                                    TotalBill = o.TotalBill,
+                                    Status = o.Status,
+                                    CreateDate = o.CreatedDate,
+                                    PickupDate = o.PickupDate,
+                                    BreedName = o.LivestockCircle.Breed.BreedName,
+                                    BreedCategory = o.LivestockCircle.Breed.BreedCategory.Name,
+                                    Customer = new UserItemResponse()
+                                    {
+                                        Id = c.Id,
+                                        PhoneNumber = c.PhoneNumber,
+                                        Email = c.Email,
+                                        Fullname = c.FullName
+                                    }
+                                };
+
+                    //  var query = _orderRepository.GetQueryable(x => x.IsActive && x.SaleStaffId == _currentUserId);
+
+                    if (request.SearchString?.Any() == true)
+                        query = query.SearchStringIncludeObject(request.SearchString);
+
+                    if (request.Filter?.Any() == true)
+                        query = query.Filter(request.Filter);
+
+                    var result = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                    return new Response<PaginationSet<OrderResponse>>()
                     {
-                        Errors = new List<string>()
-                        {
-                            $"Trường hợp lệ: {string.Join(",",validFields)}"
-                        }
+                        Succeeded = true,
+                        Data = result
                     };
-                }
-                if (invalidFieldsSearch.Any())
-                {
-                    return new Response<PaginationSet<OrderResponse>>($"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFieldsSearch)}")
-                    {
-                        Errors = new List<string>()
-                        {
-                            $"Trường hợp lệ: {string.Join(",",validFields)}"
-                        }
-                    };
-                }
-                if (!validFields.Contains(request.Sort?.Field))
-                {
-                    return new Response<PaginationSet<OrderResponse>>($"Trường sắp xếp không hợp lệ: {request.Sort?.Field}")
-                    {
-                        Errors = new List<string>()
-                        {
-                            $"Trường hợp lệ: {string.Join(",",validFields)}"
-                        }
-                    };
-                }
+               
 
-
-
-                var query = _orderRepository.GetQueryable(x => x.IsActive);
-
-                if (request.SearchString?.Any() == true)
-                    query = query.SearchString(request.SearchString);
-
-                if (request.Filter?.Any() == true)
-                    query = query.Filter(request.Filter);
-
-                var result = await query.Select(x => new OrderResponse()
-                {
-                    Id = x.Id,
-                    CustomerId = x.CustomerId,
-                    LivestockCircleId = x.LivestockCircleId,
-                    GoodUnitStock = x.GoodUnitStock,
-                    BadUnitStock = x.BadUnitStock,
-                    TotalBill = x.TotalBill,
-                    Status = x.Status,
-                    CreateDate = x.CreatedDate,
-                    PickupDate = x.PickupDate,
-                    BreedName = x.LivestockCircle.Breed.BreedName,
-                    BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name,
-                    Customer = AutoMapperHelper.AutoMap<User, UserItemResponse>(x.Customer),
-                }).Pagination(request.PageIndex, request.PageSize, request.Sort);
-
-                return new Response<PaginationSet<OrderResponse>>()
-                {
-                    Succeeded = true,
-                    Data = result
-                };
             }
             catch (Exception ex)
             {
@@ -659,7 +644,7 @@ namespace Infrastructure.Services.Implements
                 var orderItem = await _orderRepository.GetByIdAsync(request.OrderId);
                 if (orderItem == null)
                 {
-                   return new Response<bool>("Không tìm thấy đơn ");
+                    return new Response<bool>("Không tìm thấy đơn ");
                 }
                 orderItem.Status = OrderStatus.APPROVED;
                 orderItem.GoodUnitPrice = request.GoodUnitPrice;
@@ -704,11 +689,11 @@ namespace Infrastructure.Services.Implements
                     return new Response<bool>("Không tìm thấy đơn ");
                 }
                 orderItem.Status = OrderStatus.DENIED;
-                
+
 
                 _orderRepository.Update(orderItem);
                 await _orderRepository.CommitAsync();
-                
+
                 return new Response<bool>()
                 {
                     Succeeded = true,
@@ -821,6 +806,6 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-        
+
     }
 }

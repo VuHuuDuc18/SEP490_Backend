@@ -45,10 +45,10 @@ namespace SEP490_BackendAPI.Controllers
         {
             return Ok(await _barnPlanService.DisableBarnPlan(id));
         }
-        [HttpPost("history/{id}")]
-        public async Task<IActionResult> getPlanHistory([FromRoute]Guid id,[FromBody]ListingRequest req)
+        [HttpPost("history/{livestockCircleid}")]
+        public async Task<IActionResult> getPlanHistory([FromRoute]Guid livestockCircleid,[FromBody]ListingRequest req)
         {
-            var result = await _barnPlanService.ListingHistoryBarnPlan(id,req);
+            var result = await _barnPlanService.ListingHistoryBarnPlan(livestockCircleid, req);
             return Ok(result);  
         }
     }
