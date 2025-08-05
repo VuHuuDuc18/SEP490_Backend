@@ -447,7 +447,10 @@ namespace Infrastructure.Services.Implements
                 var validFields = typeof(OrderResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
+                var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
+                {
                     return new Response<PaginationSet<OrderResponse>>($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}")
                     {
                         Errors = new List<string>()
@@ -455,6 +458,17 @@ namespace Infrastructure.Services.Implements
                             $"Trường hợp lệ: {string.Join(",",validFields)}"
                         }
                     };
+                }
+                if (invalidFieldsSearch.Any())
+                {
+                    return new Response<PaginationSet<OrderResponse>>($"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFieldsSearch)}")
+                    {
+                        Errors = new List<string>()
+                        {
+                            $"Trường hợp lệ: {string.Join(",",validFields)}"
+                        }
+                    };
+                }
                 if (!validFields.Contains(request.Sort?.Field))
                 {
                     return new Response<PaginationSet<OrderResponse>>($"Trường sắp xếp không hợp lệ: {request.Sort?.Field}")
@@ -563,11 +577,41 @@ namespace Infrastructure.Services.Implements
                 if (request.PageIndex < 1 || request.PageSize < 1)
                     return new Response<PaginationSet<OrderResponse>>("PageIndex và PageSize phải lớn hơn 0.");
 
-                var validFields = typeof(BillItem).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var validFields = typeof(OrderResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
+                var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
-                    return new Response<PaginationSet<OrderResponse>>($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}");
+                {
+                    return new Response<PaginationSet<OrderResponse>>($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}")
+                    {
+                        Errors = new List<string>()
+                        {
+                            $"Trường hợp lệ: {string.Join(",",validFields)}"
+                        }
+                    };
+                }
+                if (invalidFieldsSearch.Any())
+                {
+                    return new Response<PaginationSet<OrderResponse>>($"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFieldsSearch)}")
+                    {
+                        Errors = new List<string>()
+                        {
+                            $"Trường hợp lệ: {string.Join(",",validFields)}"
+                        }
+                    };
+                }
+                if (!validFields.Contains(request.Sort?.Field))
+                {
+                    return new Response<PaginationSet<OrderResponse>>($"Trường sắp xếp không hợp lệ: {request.Sort?.Field}")
+                    {
+                        Errors = new List<string>()
+                        {
+                            $"Trường hợp lệ: {string.Join(",",validFields)}"
+                        }
+                    };
+                }
 
 
 
