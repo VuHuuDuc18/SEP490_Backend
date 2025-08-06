@@ -12,7 +12,7 @@ namespace Domain.Helper.Constants
         public static string TechnicalStaff = "Technical Staff";
         public static string FeedRoomStaff = "Feed Room Staff";
         public static string MedicineRoomStaff = "Medicine Room Staff";
-        public static string WeighingRoomStaff = "Breeding Room Staff";
+        public static string BreedingRoomStaff = "Breeding Room Staff";
         public static string Worker = "Worker";
         public static string SalesStaff = "Sales Staff";
         public static string Customer = "Customer";
