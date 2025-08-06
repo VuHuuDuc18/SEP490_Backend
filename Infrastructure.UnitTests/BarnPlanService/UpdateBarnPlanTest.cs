@@ -184,7 +184,7 @@ namespace Infrastructure.UnitTests.BarnPlanService
                 Note = "Updated Note",
                 StartDate = now.AddDays(2),
                 EndDate = now.AddDays(1), 
-                IsDaily = false,
+                //IsDaily = false,
                 foodPlans = new List<Domain.Dto.Request.BarnPlan.FoodPlan>(),
                 medicinePlans = new List<Domain.Dto.Request.BarnPlan.MedicinePlan>()
             };
