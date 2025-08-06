@@ -25,7 +25,7 @@ namespace Domain.IServices
         Task<Response<AuthenticationResponse>> LoginAsync(AuthenticationRequest request, string ipAddress);
         Task<Response<string>> CreateCustomerAccountAsync(CreateNewAccountRequest request, string origin);
         Task<Response<string>> ConfirmEmailAsync(string userId, string code);
-        Task ForgotPassword(ForgotPasswordRequest model, string origin);
+        Task<Response<string>> ForgotPassword(ForgotPasswordRequest model, string origin);
         Task<Response<string>> ResetPassword(ResetPasswordRequest model);
         Task<Response<string>> ChangePassword(ChangePasswordRequest req);
         Task<Response<AuthenticationResponse>> RefreshTokenAsync(string token, string ipAddress);
