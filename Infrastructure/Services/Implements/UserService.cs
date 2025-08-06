@@ -163,6 +163,16 @@ namespace Infrastructure.Services.Implements
                     //Test - ko cần confirm email
                     //EmailConfirmed = true
                 };
+
+                //Check role exists
+                var isRoleExists = await _roleManager.RoleExistsAsync(RoleConstant.Customer);
+                if (!isRoleExists) return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Lỗi tạo tài khoản.",
+                    Errors = new List<string>() { $"Vai trò {RoleConstant.Customer} không tồn tại."}
+                };
+
                 var result = await _userManager.CreateAsync(user, request.Password);
                 if (result.Succeeded)
                 {

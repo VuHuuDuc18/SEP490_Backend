@@ -75,12 +75,12 @@ namespace Infrastructure.Services.Implements
         }
 
 
-        public async Task<Response<List<(AccountResponse, RoleResponse)>>> GetAllAccountsAsync()
+        public async Task<Response<List<AccountAndRoleResponse>>> GetAllAccountsAsync()
         {
             try
             {
                 var users = await _userManager.Users.ToListAsync();
-                var userNRole = new List<(AccountResponse user, RoleResponse role)>();
+                var userNRole = new List<AccountAndRoleResponse>();
 
                 foreach (var user in users)
                 {
@@ -109,14 +109,18 @@ namespace Infrastructure.Services.Implements
                         Name = role?.Name
                     };
                     
-                    userNRole.Add((userResponse, roleResponse));
+                    userNRole.Add(new AccountAndRoleResponse()
+                    {
+                        Account = userResponse,
+                        Role = roleResponse
+                    });
                 }
 
-                return new Response<List<(AccountResponse, RoleResponse)>>(userNRole, message: $"Lấy danh sách tài khoản thành công.");
+                return new Response<List<AccountAndRoleResponse>>(userNRole, message: $"Lấy danh sách tài khoản thành công.");
             }
             catch (Exception ex)
             {
-                return new Response<List<(AccountResponse, RoleResponse)>>($"Lỗi: {ex.Message}");
+                return new Response<List<AccountAndRoleResponse>>($"Lỗi khi lấy danh sách tài khoản.");
             }
         }
         public async Task<Response<User>> GetAccountByEmailAsync(string email)
@@ -137,6 +141,16 @@ namespace Infrastructure.Services.Implements
                 CreatedBy = _currentUserId,
                 CreatedDate = DateTime.UtcNow,
             };
+
+            //Check role exists
+            var isRoleExists = await _roleManager.RoleExistsAsync(request.RoleName);
+            if (!isRoleExists) return new Response<string>()
+            {
+                Succeeded = false,
+                Message = "Lỗi tạo tài khoản.",
+                Errors = new List<string>() { $"Vai trò {request.RoleName} không tồn tại." }
+            };
+
             var userWithSameEmail = await _userManager.FindByEmailAsync(request.Email);
             if (userWithSameEmail == null)
             {

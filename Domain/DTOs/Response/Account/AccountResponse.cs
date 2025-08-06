@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.DTOs.Response.Role;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,5 +19,12 @@ namespace Domain.Dto.Response.Account
         public Guid? UpdatedBy { get; set; }
         public DateTime? CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
+    }
+
+    public class AccountAndRoleResponse
+    {
+        public AccountResponse? Account { get; set; }
+
+        public RoleResponse? Role { get; set; }
     }
 }
