@@ -449,7 +449,10 @@ namespace Infrastructure.Services.Implements
                 var validFields = typeof(OrderResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
                     .Select(f => f.Field).ToList() ?? new List<string>();
+                var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
                 if (invalidFields.Any())
+                {
                     return new Response<PaginationSet<OrderResponse>>($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}")
                     {
                         Errors = new List<string>()
@@ -457,6 +460,17 @@ namespace Infrastructure.Services.Implements
                             $"Trường hợp lệ: {string.Join(",",validFields)}"
                         }
                     };
+                }
+                if (invalidFieldsSearch.Any())
+                {
+                    return new Response<PaginationSet<OrderResponse>>($"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFieldsSearch)}")
+                    {
+                        Errors = new List<string>()
+                        {
+                            $"Trường hợp lệ: {string.Join(",",validFields)}"
+                        }
+                    };
+                }
                 if (!validFields.Contains(request.Sort?.Field))
                 {
                     return new Response<PaginationSet<OrderResponse>>($"Trường sắp xếp không hợp lệ: {request.Sort?.Field}")
@@ -571,59 +585,59 @@ namespace Infrastructure.Services.Implements
                 if (invalidFields.Any())
                     return new Response<PaginationSet<OrderResponse>>($"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}")
                     {
-                        Errors = new List<string>(){$"Trường hợp lệ: {string.Join(",",validFields)}"      }
+                        Errors = new List<string>() { $"Trường hợp lệ: {string.Join(",", validFields)}" }
                     };
                 if (!validFields.Contains(request.Sort?.Field))
                 {
                     return new Response<PaginationSet<OrderResponse>>($"Trường sắp xếp không hợp lệ: {request.Sort?.Field}")
                     {
-                        Errors = new List<string>(){$"Trường hợp lệ: {string.Join(",",validFields)}"}
+                        Errors = new List<string>() { $"Trường hợp lệ: {string.Join(",", validFields)}" }
                     };
                 }
                 var Orders = _orderRepository.GetQueryable();
                 var Customers = _userRepository.GetQueryable();
 
-                    var query = from o in Orders
-                                join c in Customers on o.CustomerId equals c.Id
-                                where o.IsActive && o.SaleStaffId == _currentUserId
-                                select new OrderResponse()
+                var query = from o in Orders
+                            join c in Customers on o.CustomerId equals c.Id
+                            where o.IsActive && o.SaleStaffId == _currentUserId
+                            select new OrderResponse()
+                            {
+                                Id = o.Id,
+                                CustomerId = o.CustomerId,
+                                LivestockCircleId = o.LivestockCircleId,
+                                GoodUnitStock = o.GoodUnitStock,
+                                BadUnitStock = o.BadUnitStock,
+                                TotalBill = o.TotalBill,
+                                Status = o.Status,
+                                CreateDate = o.CreatedDate,
+                                PickupDate = o.PickupDate,
+                                BreedName = o.LivestockCircle.Breed.BreedName,
+                                BreedCategory = o.LivestockCircle.Breed.BreedCategory.Name,
+                                Customer = new UserItemResponse()
                                 {
-                                    Id = o.Id,
-                                    CustomerId = o.CustomerId,
-                                    LivestockCircleId = o.LivestockCircleId,
-                                    GoodUnitStock = o.GoodUnitStock,
-                                    BadUnitStock = o.BadUnitStock,
-                                    TotalBill = o.TotalBill,
-                                    Status = o.Status,
-                                    CreateDate = o.CreatedDate,
-                                    PickupDate = o.PickupDate,
-                                    BreedName = o.LivestockCircle.Breed.BreedName,
-                                    BreedCategory = o.LivestockCircle.Breed.BreedCategory.Name,
-                                    Customer = new UserItemResponse()
-                                    {
-                                        Id = c.Id,
-                                        PhoneNumber = c.PhoneNumber,
-                                        Email = c.Email,
-                                        Fullname = c.FullName
-                                    }
-                                };
+                                    Id = c.Id,
+                                    PhoneNumber = c.PhoneNumber,
+                                    Email = c.Email,
+                                    Fullname = c.FullName
+                                }
+                            };
 
-                    //  var query = _orderRepository.GetQueryable(x => x.IsActive && x.SaleStaffId == _currentUserId);
+                //  var query = _orderRepository.GetQueryable(x => x.IsActive && x.SaleStaffId == _currentUserId);
 
-                    if (request.SearchString?.Any() == true)
-                        query = query.SearchStringIncludeObject(request.SearchString);
+                if (request.SearchString?.Any() == true)
+                    query = query.SearchStringIncludeObject(request.SearchString);
 
-                    if (request.Filter?.Any() == true)
-                        query = query.Filter(request.Filter);
+                if (request.Filter?.Any() == true)
+                    query = query.Filter(request.Filter);
 
-                    var result = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
+                var result = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
 
-                    return new Response<PaginationSet<OrderResponse>>()
-                    {
-                        Succeeded = true,
-                        Data = result
-                    };
-               
+                return new Response<PaginationSet<OrderResponse>>()
+                {
+                    Succeeded = true,
+                    Data = result
+                };
+
 
             }
             catch (Exception ex)
