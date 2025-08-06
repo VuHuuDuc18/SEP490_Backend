@@ -11,8 +11,8 @@ namespace Domain.Dto.Request.User
         [EmailAddress]
         public string? Email { get; set; } = string.Empty;
         public string? FullName { get; set; } = string.Empty;
-        [Phone]
         public string? Address { get; set; } = string.Empty;
+        [Phone]
         public string? PhoneNumber { get; set; } = string.Empty;
     }
 } 

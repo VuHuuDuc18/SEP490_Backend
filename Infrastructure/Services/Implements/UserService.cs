@@ -151,8 +151,8 @@ namespace Infrastructure.Services.Implements
                 IsActive = true,
                 CreatedBy = userId,
                 CreatedDate = DateTime.UtcNow,
-                //Ko cần comfirm
-                EmailConfirmed = true
+                //Test - ko cần confirm email
+                //EmailConfirmed = true
             };
             var result = await _userManager.CreateAsync(user, request.Password);
             if (result.Succeeded)
