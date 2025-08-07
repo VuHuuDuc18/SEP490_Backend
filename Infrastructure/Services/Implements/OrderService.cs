@@ -186,6 +186,12 @@ namespace Infrastructure.Services.Implements
                         Errors = new List<string>() { "Số lượng con tốt hoặc con xấu vượt quá số lượng con trong chu kì nuôi." }
                     };
                 }
+
+                if (livestockCircle.ReleaseDate == null)
+                {
+                    return new Response<string>("Lỗi khi tạo đơn hàng. Không có ngày xuất chuồng.");
+                }
+
                 if (((DateTime)order.PickupDate - (DateTime)livestockCircle.ReleaseDate).Days > 3)
                 {
                     return new Response<string>()
@@ -206,6 +212,7 @@ namespace Infrastructure.Services.Implements
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return new Response<string>()
                 {
                     Succeeded = false,
