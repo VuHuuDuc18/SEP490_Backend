@@ -675,12 +675,14 @@ namespace Infrastructure.Services.Implements
 
         public async Task<Response<bool>> ExcelDataHandle(List<CellFoodItem> data)
         {
+            var ListCategory = await _foodCategoryRepository.GetQueryable(x => x.IsActive).ToListAsync();
+            var ListFood = await _foodRepository.GetQueryable(x => x.IsActive).ToListAsync();
             try
             {
                 foreach (CellFoodItem item in data)
                 {
-                    var FoodDetail = await _foodRepository.GetQueryable(x => x.IsActive).FirstOrDefaultAsync(x => StringKeyComparer.CompareStrings(x.FoodName, item.Ten));
-                    var ListCategory = await _foodCategoryRepository.GetQueryable(x => x.IsActive).ToListAsync();
+                    var FoodDetail = ListFood.FirstOrDefault(x => StringKeyComparer.CompareStrings(x.FoodName, item.Ten));
+                    
                     if (FoodDetail == null)
                     {
                         // add food
@@ -713,12 +715,13 @@ namespace Infrastructure.Services.Implements
                     else
                     {
                         FoodDetail.Stock += item.So_luong;
+                        _foodRepository.Update(FoodDetail);
                     }
                     // update stock
 
 
                 }
-
+                await _foodRepository.CommitAsync();
                 return new Application.Wrappers.Response<bool>()
                 {
                     Succeeded = true,
@@ -727,7 +730,12 @@ namespace Infrastructure.Services.Implements
             }
             catch (Exception ex)
             {
-                return new Response<bool>("Lỗi dữ liệu");
+                return new Response<bool>()
+                {
+                    Message = "Lỗi dữ liệu",
+                    Succeeded = false,
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
     }

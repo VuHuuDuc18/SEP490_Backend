@@ -619,13 +619,14 @@ namespace Infrastructure.Services.Implements
 
         public async Task<Response<bool>> ExcelDataHandle(List<CellMedicineItem> data)
         {
+            var ListCategory = await _medicineCategoryRepository.GetQueryable(x => x.IsActive).ToListAsync();
             try
             {
 
                 foreach (var it in data)
                 {
                     var MedicineDetail = await _medicineRepository.GetQueryable(x => x.IsActive).FirstOrDefaultAsync(x => x.MedicineName.Contains(it.Ma_dang_ky));
-                    var ListCategory = await _medicineCategoryRepository.GetQueryable(x => x.IsActive).ToListAsync();
+                   
                     if (MedicineDetail == null)
                     {
                         // add thuoc
@@ -668,7 +669,12 @@ namespace Infrastructure.Services.Implements
             }
             catch (Exception ex)
             {
-                return new Response<bool>("Lỗi dữ liệu");
+                return new Response<bool>()
+                {
+                    Message = "Lỗi dữ liệu",
+                    Succeeded = false,
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
         public async Task<Response<List<MedicineResponse>>> GetAllMedicine(CancellationToken cancellationToken = default)

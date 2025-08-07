@@ -679,12 +679,14 @@ namespace Infrastructure.Services.Implements
         }
         public async Task<Application.Wrappers.Response<bool>> ExcelDataHandle(List<CellBreedItem> data)
         {
+            var ListCategory = await _breedCategoryRepository.GetQueryable(x => x.IsActive).ToListAsync();
+            var ListBreed = await _breedRepository.GetQueryable(x => x.IsActive).ToListAsync();
             try
             {
                 foreach (CellBreedItem item in data)
                 {
-                    var breedDetail = await _breedRepository.GetQueryable(x => x.IsActive).FirstOrDefaultAsync(x => StringKeyComparer.CompareStrings(x.BreedName, item.Ten));
-                    var ListCategory = await _breedCategoryRepository.GetQueryable(x => x.IsActive).ToListAsync();
+                    var breedDetail = ListBreed.FirstOrDefault(x => StringKeyComparer.CompareStrings(x.BreedName, item.Ten));
+
                     if (breedDetail == null)
                     {
                         // add breed
@@ -716,13 +718,15 @@ namespace Infrastructure.Services.Implements
                     }
                     else
                     {
+                        // update stock
                         breedDetail.Stock += item.So_luong;
+                        _breedRepository.Update(breedDetail);
                     }
-                    // update stock
+
 
 
                 }
-
+                await _breedRepository.CommitAsync();
                 return new Application.Wrappers.Response<bool>()
                 {
                     Succeeded = true,
@@ -731,7 +735,12 @@ namespace Infrastructure.Services.Implements
             }
             catch (Exception ex)
             {
-                return new Response<bool>("Lỗi dữ liệu");
+                return new Response<bool>()
+                {
+                    Message = "Lỗi dữ liệu",
+                    Succeeded = false,
+                    Errors = new List<string> { ex.Message }
+                };
             }
         }
     }
