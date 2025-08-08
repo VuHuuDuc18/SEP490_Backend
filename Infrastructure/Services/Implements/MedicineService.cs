@@ -658,9 +658,10 @@ namespace Infrastructure.Services.Implements
                     {
                         // add sos luong
                         MedicineDetail.Stock += it.So_luong;
-
+                        _medicineRepository.Update(MedicineDetail); 
                     }
                 }
+                await _medicineRepository.CommitAsync();
                 return new Application.Wrappers.Response<bool>()
                 {
                     Succeeded = true,
