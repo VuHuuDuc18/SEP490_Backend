@@ -258,7 +258,7 @@ namespace Infrastructure.Services.Implements
                 return new Response<bool>()
                 {
                     Succeeded = true,
-                    Message = "Xóa kế hoạch thành công"
+                    Message = "Vô hiệu kế hoạch thành công"
                 };
             }
             catch (Exception ex)
