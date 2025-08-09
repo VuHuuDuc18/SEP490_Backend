@@ -486,9 +486,9 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-        public async Task<Response<bool>> ReleaseBarn(Guid id)
+        public async Task<Response<bool>> ReleaseBarn(ReleaseBarnRequest req)
         {
-            var releaseItem = await _livestockCircleRepository.GetByIdAsync(id);
+            var releaseItem = await _livestockCircleRepository.GetByIdAsync(req.LivestockCircleId);
 
             if (releaseItem == null) return new Response<bool>()
             {
@@ -505,11 +505,12 @@ namespace Infrastructure.Services.Implements
                 };
             }
             releaseItem.Status = StatusConstant.RELEASESTAT;
+            releaseItem.ReleaseDate = req.ReleaseDate;
             await _livestockCircleRepository.CommitAsync();
             return new Response<bool>()
             {
                 Succeeded = true,
-                Message = "Xuất chuồng thành công"
+                Message = "Xuất chuồng thành công vào ngày :" + req.ReleaseDate.ToString("dd/MM/yyyy"),
             };
         }
 
@@ -1081,6 +1082,43 @@ namespace Infrastructure.Services.Implements
                 {
                     Succeeded = false,
                     Message = "Lỗi khi lấy danh sách thuốc còn lại",
+                    Errors = new List<string> { ex.Message }
+                };
+            }
+        }
+
+        public async Task<Response<string>> SetPreOrderField(SetPreOrderFieldRequest request)
+        {
+            try
+            {
+                var livestockCircle = await _livestockCircleRepository.GetByIdAsync(request.LivestockCircleId);
+                if (livestockCircle == null)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Chu kỳ chăn nuôi không tồn tại",
+                        Errors = new List<string> { "Chu kỳ chăn nuôi không tồn tại" }
+                    };
+                }
+                livestockCircle.PreSoldDate = request.PreOrderDate;
+                livestockCircle.SamplePrice = request.SamplePrice;
+
+                _livestockCircleRepository.Update(livestockCircle);
+                await _livestockCircleRepository.CommitAsync();
+
+                return new Response<string>()
+                {
+                    Succeeded = true,
+                    Message = "Chuồng sẽ được mở bán vào ngày " + ((DateTime)request.PreOrderDate).ToString("dd/MM/yyyy"),
+                };
+            }
+            catch (Exception ex)
+            {
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = $"Lỗi khi cập nhật trường đặt trước",
                     Errors = new List<string> { ex.Message }
                 };
             }

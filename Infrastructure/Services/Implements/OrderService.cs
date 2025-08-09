@@ -669,18 +669,33 @@ namespace Infrastructure.Services.Implements
                 orderItem.BadUnitPrice = request.BadUnitPrice;
                 //orderItem.TotalBill = request.GoodUnitPrice * orderItem.GoodUnitStock + request.BadUnitPrice * orderItem.BadUnitStock;
 
-                _orderRepository.Update(orderItem);
-                await _orderRepository.CommitAsync();
+
                 var livestockCircleDetail = await _livestockCircleRepository.GetByIdAsync(orderItem.LivestockCircleId);
+                if (request.IsDone || orderItem.Status.Equals(OrderStatus.APPROVED))
+                {
+                    if (request.IsDone)
+                        orderItem.Status = OrderStatus.DONE;
+                    livestockCircleDetail.GoodUnitNumber += orderItem.GoodUnitStock;
+                    livestockCircleDetail.BadUnitNumber += orderItem.BadUnitStock;
+                    orderItem.GoodUnitStock = (int)request.GoodUnitStock;
+                    orderItem.BadUnitStock = (int)request.BadUnitStock;
+                }
+
                 livestockCircleDetail.GoodUnitNumber -= orderItem.GoodUnitStock;
                 livestockCircleDetail.BadUnitNumber -= orderItem.BadUnitStock;
                 if (livestockCircleDetail.GoodUnitNumber == 0 && livestockCircleDetail.BadUnitNumber == 0)
                 {
                     livestockCircleDetail.Status = StatusConstant.DONESTAT;
                 }
-                _livestockCircleRepository.Update(livestockCircleDetail);
 
+
+                // update database
+                _livestockCircleRepository.Update(livestockCircleDetail);
                 await _livestockCircleRepository.CommitAsync();
+
+                _orderRepository.Update(orderItem);
+                await _orderRepository.CommitAsync();
+
                 return new Response<bool>()
                 {
                     Succeeded = true,
