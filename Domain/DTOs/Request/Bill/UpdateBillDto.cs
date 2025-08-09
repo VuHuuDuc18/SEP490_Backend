@@ -14,7 +14,8 @@ namespace Domain.Dto.Request.Bill
             public Guid BillId { get; set; }
             [Required(ErrorMessage = "Phải cung cấp danh sách mặt hàng thức ăn.")]
             public List<FoodItemRequest> FoodItems { get; set; } = new List<FoodItemRequest>();
-        }
+            public DateTime DeliveryDate { get; set; }
+    }
 
         public class UpdateBillMedicineDto
         {
@@ -22,7 +23,8 @@ namespace Domain.Dto.Request.Bill
              public Guid BillId { get; set; }
              [Required(ErrorMessage = "Phải cung cấp danh sách mặt hàng thuốc.")]
             public List<MedicineItemRequest> MedicineItems { get; set; } = new List<MedicineItemRequest>();
-        }
+            public DateTime DeliveryDate { get; set; }
+    }
 
         public class UpdateBillBreedDto
         {
@@ -30,6 +32,6 @@ namespace Domain.Dto.Request.Bill
             //public Guid BillId { get; set; }
             [Required(ErrorMessage = "Phải cung cấp danh sách mặt hàng giống.")]
             public List<BreedItemRequest> BreedItems { get; set; } = new List<BreedItemRequest>();
-        }
+    }
     
 }

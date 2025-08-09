@@ -175,8 +175,8 @@ namespace Infrastructure.UnitTests.BillService
 
             // Bill liên kết đúng LivestockCircle
             var bills = new List<Bill> {
-        new Bill { Id = Guid.NewGuid(), UserRequestId = _userId, IsActive = true, TypeBill = "Food", Name = "Bill1", Note = "N1", Total = 1, Status = StatusConstant.APPROVED, Weight = 1, LivestockCircleId = lscId1 },
-        new Bill { Id = Guid.NewGuid(), UserRequestId = _userId, IsActive = true, TypeBill = "Food", Name = "Bill2", Note = "N2", Total = 2, Status = StatusConstant.APPROVED, Weight = 2, LivestockCircleId = lscId2 }
+        new Bill { Id = Guid.NewGuid(), UserRequestId = _userId, IsActive = true, TypeBill = "Food", Name = "Bill1", Note = "N1", DeliveryDate = DateTime.Now, Total = 1, Status = StatusConstant.APPROVED, Weight = 1, LivestockCircleId = lscId1 },
+        new Bill { Id = Guid.NewGuid(), UserRequestId = _userId, IsActive = true, TypeBill = "Food", Name = "Bill2", Note = "N2", DeliveryDate = DateTime.Now, Total = 2, Status = StatusConstant.APPROVED, Weight = 2, LivestockCircleId = lscId2 }
     };
             var billsMock = bills.AsQueryable().BuildMock();
             _billRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Bill, bool>>>())).Returns((System.Linq.Expressions.Expression<Func<Bill, bool>> expr) => billsMock.Where(expr));

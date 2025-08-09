@@ -148,6 +148,7 @@ namespace Infrastructure.UnitTests.BillService
             {
                 LivestockCircleId = Guid.NewGuid(),
                 Note = "Test",
+                DeliveryDate = DateTime.Now,
                 FoodItems = new List<FoodItemRequest> { new FoodItemRequest { ItemId = foodId, Quantity = 2 } }
             };
             var food = new Food { Id = foodId, IsActive = true, Stock = 10, WeighPerUnit = 1.5f };
@@ -169,6 +170,7 @@ namespace Infrastructure.UnitTests.BillService
             {
                 LivestockCircleId = Guid.NewGuid(),
                 Note = "Test",
+                DeliveryDate = DateTime.Now,
                 FoodItems = new List<FoodItemRequest> { new FoodItemRequest { ItemId = foodId, Quantity = 2 } }
             };
             var food = new Food { Id = foodId, IsActive = true, Stock = 10, WeighPerUnit = 1.5f };

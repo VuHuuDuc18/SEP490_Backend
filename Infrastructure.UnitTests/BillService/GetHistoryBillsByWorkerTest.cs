@@ -156,8 +156,8 @@ namespace Infrastructure.UnitTests.BillService
             var barnId = Guid.NewGuid();
             var lscId = Guid.NewGuid();
             var bills = new List<Bill> {
-                new Bill { Id = Guid.NewGuid(), LivestockCircleId = lscId, IsActive = true, Status = "COMPLETED", UserRequestId = _userId },
-                new Bill { Id = Guid.NewGuid(), LivestockCircleId = lscId, IsActive = true, Status = "DONE", UserRequestId = _userId }
+                new Bill { Id = Guid.NewGuid(), LivestockCircleId = lscId, IsActive = true,DeliveryDate = DateTime.Now,  Status = "COMPLETED", UserRequestId = _userId },
+                new Bill { Id = Guid.NewGuid(), LivestockCircleId = lscId, IsActive = true, DeliveryDate = DateTime.Now, Status = "DONE", UserRequestId = _userId }
             };
             var lscs = new List<LivestockCircle> { new LivestockCircle { Id = lscId, BarnId = barnId } };
             var barns = new List<Barn> { new Barn { Id = barnId, WorkerId = _userId } };

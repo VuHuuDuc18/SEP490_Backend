@@ -124,7 +124,7 @@ namespace Infrastructure.UnitTests.BillService
             var lscId = Guid.NewGuid();
             var barnId = Guid.NewGuid();
             var workerId = Guid.NewGuid();
-            var bill = new Bill { Id = billId, UserRequestId = userRequestId, LivestockCircleId = lscId, TypeBill = "Food", IsActive = true };
+            var bill = new Bill { Id = billId, UserRequestId = userRequestId, LivestockCircleId = lscId, DeliveryDate = DateTime.Now, TypeBill = "Food", IsActive = true };
             var billItems = new List<BillItem> { new BillItem { Id = Guid.NewGuid(), BillId = billId, FoodId = foodId, Stock = 5, IsActive = true } };
             var food = new Food { Id = foodId, FoodName = "Cám", WeighPerUnit = 1, IsActive = true };
             var foodImages = new List<ImageFood> { new ImageFood { Id = Guid.NewGuid(), FoodId = foodId, Thumnail = "true", ImageLink = "img.jpg" } };
@@ -164,7 +164,7 @@ namespace Infrastructure.UnitTests.BillService
             var lscId = Guid.NewGuid();
             var barnId = Guid.NewGuid();
             var workerId = Guid.NewGuid();
-            var bill = new Bill { Id = billId, UserRequestId = userRequestId, LivestockCircleId = lscId, TypeBill = "Medicine", IsActive = true };
+            var bill = new Bill { Id = billId, UserRequestId = userRequestId, LivestockCircleId = lscId, DeliveryDate = DateTime.Now, TypeBill = "Medicine", IsActive = true };
             var billItems = new List<BillItem> { new BillItem { Id = Guid.NewGuid(), BillId = billId, MedicineId = medicineId, Stock = 3, IsActive = true } };
             var medicine = new Medicine { Id = medicineId, MedicineName = "Thuốc A", IsActive = true };
             var medicineImages = new List<ImageMedicine> { new ImageMedicine { Id = Guid.NewGuid(), MedicineId = medicineId, Thumnail = "true", ImageLink = "med.jpg" } };
@@ -203,7 +203,7 @@ namespace Infrastructure.UnitTests.BillService
             var lscId = Guid.NewGuid();
             var barnId = Guid.NewGuid();
             var workerId = Guid.NewGuid();
-            var bill = new Bill { Id = billId, UserRequestId = userRequestId, LivestockCircleId = lscId, TypeBill = "Breed", IsActive = true };
+            var bill = new Bill { Id = billId, UserRequestId = userRequestId, LivestockCircleId = lscId, DeliveryDate = DateTime.Now, TypeBill = "Breed", IsActive = true };
             var billItems = new List<BillItem> { new BillItem { Id = Guid.NewGuid(), BillId = billId, BreedId = breedId, Stock = 2, IsActive = true } };
             var breed = new Breed { Id = breedId, BreedName = "Heo", IsActive = true };
             var breedImages = new List<ImageBreed> { new ImageBreed { Id = Guid.NewGuid(), BreedId = breedId, Thumnail = "true", ImageLink = "heo.jpg" } };
