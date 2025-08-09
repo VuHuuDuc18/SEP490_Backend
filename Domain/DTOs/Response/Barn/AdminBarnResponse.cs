@@ -17,6 +17,7 @@ namespace Domain.Dto.Response.Barn
             public string BarnName { get; set; }
             public string Address { get; set; }
             public string Image { get; set; }
+            public string? Description { get; set; }
             public WokerResponse Worker { get; set; }
             public bool IsActive { get; set; }
             public bool HasActiveLivestockCircle { get; set; } // Trạng thái có LivestockCircle đang hoạt động hay không
@@ -29,6 +30,7 @@ namespace Domain.Dto.Response.Barn
             public string BarnName { get; set; }
             public string Address { get; set; }
             public string Image { get; set; }
+            public string? Description { get; set; }
             public WokerResponse Worker { get; set; }
             public bool IsActive { get; set; }
             public ActiveLivestockCircleResponse? ActiveLivestockCircle { get; set; } // Thông tin LivestockCircle đang hoạt động (nếu có)

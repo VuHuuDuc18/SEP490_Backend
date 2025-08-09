@@ -162,8 +162,8 @@ namespace Infrastructure.UnitTests.BillService
                 .ReturnsAsync((Guid id, Infrastructure.Core.Ref<Infrastructure.Core.CheckError> _) => new Barn { Id = id, BarnName = "Barn", Address = "Addr", Image = "img", WorkerId = Guid.NewGuid() });
 
             var bills = new List<Bill> {
-                new Bill { Id = Guid.NewGuid(), UserRequestId = _userId, IsActive = true, TypeBill = "Food", Name = "Bill1", Note = "N1", Total = 1, Status = "REQUESTED", Weight = 1 },
-                new Bill { Id = Guid.NewGuid(), UserRequestId = _userId, IsActive = true, TypeBill = "Food", Name = "Bill2", Note = "N2", Total = 2, Status = "REQUESTED", Weight = 2 }
+                new Bill { Id = Guid.NewGuid(), UserRequestId = _userId, IsActive = true, TypeBill = "Food", Name = "Bill1",DeliveryDate = DateTime.Now,  Note = "N1", Total = 1, Status = "REQUESTED", Weight = 1 },
+                new Bill { Id = Guid.NewGuid(), UserRequestId = _userId, IsActive = true, TypeBill = "Food", Name = "Bill2",DeliveryDate = DateTime.Now,  Note = "N2", Total = 2, Status = "REQUESTED", Weight = 2 }
             };
             var billsDb = new TestBillDbContext().SetupBills(bills);
             _billRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Bill, bool>>>()))
