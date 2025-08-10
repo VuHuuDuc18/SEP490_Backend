@@ -875,6 +875,24 @@ namespace Infrastructure.Services.Implements
                         Errors = new List<string> { "Chu kỳ chăn nuôi không tồn tại" }
                     };
                 }
+                if (livestockCircle.ReleaseDate == null)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Chu kỳ chăn nuôi chưa có ngày xuất chuồng",
+                        Errors = new List<string> { "Chu kỳ chăn nuôi chưa có ngày xuất chuồng" }
+                    };
+                }
+                if (((DateTime)livestockCircle.ReleaseDate).Date < DateTime.Now)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = "Đã xuất chuồng, không để đặt ngày pre-order",
+                        Errors = new List<string> { "Chu kỳ chăn nuôi đã được xuất chuồng" }
+                    };
+                }
                 livestockCircle.PreSoldDate = request.PreOrderDate;
                 livestockCircle.SamplePrice = request.SamplePrice;
 
