@@ -135,8 +135,8 @@ namespace SEP490_BackendAPI.Controllers
 
             CategoryList = await _breedCategoryService.GetAllCategory();
 
-            var fileBytes = ExportExcelHelper.GenerateExcelTemplateAndData<CellBreedItem, BreedCategoryResponse>("Bảng thuốc", "Phân loại mẫu thuốc", CategoryList);
-            string fileName = $"breed-Import-Data-{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+            var fileBytes = ExportExcelHelper.GenerateExcelTemplateAndData<CellBreedItem, BreedCategoryResponse>("Bảng giống", "Phân loại giống", CategoryList);
+            string fileName = $"Breed-Import-Data-{DateTime.Now:yyyyMMddHHmmss}.xlsx";
             return File(fileBytes,
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         fileName);

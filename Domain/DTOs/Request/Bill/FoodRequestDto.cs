@@ -11,6 +11,7 @@ namespace Domain.Dto.Request.Bill
         public string Note { get; set; }
         [Required(ErrorMessage = "Phải cung cấp ít nhất một mặt hàng thức ăn.")]
         public List<FoodItemRequest> FoodItems { get; set; } = new List<FoodItemRequest>();
+        public DateTime DeliveryDate { get; set; }
     }
 
     public class AddFoodItemToBillDto

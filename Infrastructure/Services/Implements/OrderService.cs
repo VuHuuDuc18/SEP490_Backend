@@ -259,7 +259,7 @@ namespace Infrastructure.Services.Implements
                     LivestockCircleId = order.LivestockCircleId,
                     GoodUnitStock = order.GoodUnitStock,
                     BadUnitStock = order.BadUnitStock,
-                    TotalBill = order.TotalBill,
+                    //TotalBill = order.TotalBill,
                     Status = order.Status,
                     CreateDate = order.CreatedDate,
                     PickupDate = order.PickupDate,
@@ -438,7 +438,7 @@ namespace Infrastructure.Services.Implements
                     LivestockCircleId = x.LivestockCircleId,
                     GoodUnitStock = x.GoodUnitStock,
                     BadUnitStock = x.BadUnitStock,
-                    TotalBill = x.TotalBill,
+                    //TotalBill = x.TotalBill,
                     Status = x.Status,
                     CreateDate = x.CreatedDate,
                     PickupDate = x.PickupDate,
@@ -513,7 +513,7 @@ namespace Infrastructure.Services.Implements
                         LivestockCircleId = x.LivestockCircleId,
                         GoodUnitStock = x.GoodUnitStock,
                         BadUnitStock = x.BadUnitStock,
-                        TotalBill = x.TotalBill,
+                        //TotalBill = x.TotalBill,
                         Status = x.Status,
                         CreateDate = x.CreatedDate,
                         PickupDate = x.PickupDate,
@@ -576,7 +576,8 @@ namespace Infrastructure.Services.Implements
                             BadUnitStockSold = g.Sum(x => x.BadUnitStock),
                             AverageBadUnitPrice = g.Average(x => x.BadUnitPrice ?? 0),
                             BreedCategoryName = g.Key.Name,
-                            Revenue = g.Sum(x => x.TotalBill ?? 0)
+                            Revenue = g.Sum(x => x.GoodUnitStock) * g.Average(x => x.GoodUnitPrice ?? 0) +
+                                      g.Sum(x => x.BadUnitStock) * g.Average(x => x.BadUnitPrice ?? 0)
                         };
             var ListItem = await query.ToListAsync();
             var result = new StatisticsOrderResponse()
@@ -630,7 +631,7 @@ namespace Infrastructure.Services.Implements
                                 LivestockCircleId = o.LivestockCircleId,
                                 GoodUnitStock = o.GoodUnitStock,
                                 BadUnitStock = o.BadUnitStock,
-                                TotalBill = o.TotalBill,
+                                //TotalBill = o.TotalBill,
                                 Status = o.Status,
                                 CreateDate = o.CreatedDate,
                                 PickupDate = o.PickupDate,
@@ -682,20 +683,35 @@ namespace Infrastructure.Services.Implements
                 orderItem.Status = OrderStatus.APPROVED;
                 orderItem.GoodUnitPrice = request.GoodUnitPrice;
                 orderItem.BadUnitPrice = request.BadUnitPrice;
-                orderItem.TotalBill = request.GoodUnitPrice * orderItem.GoodUnitStock + request.BadUnitPrice * orderItem.BadUnitStock;
+                //orderItem.TotalBill = request.GoodUnitPrice * orderItem.GoodUnitStock + request.BadUnitPrice * orderItem.BadUnitStock;
 
-                _orderRepository.Update(orderItem);
-                await _orderRepository.CommitAsync();
+
                 var livestockCircleDetail = await _livestockCircleRepository.GetByIdAsync(orderItem.LivestockCircleId);
+                if (request.IsDone || orderItem.Status.Equals(OrderStatus.APPROVED))
+                {
+                    if (request.IsDone)
+                        orderItem.Status = OrderStatus.DONE;
+                    livestockCircleDetail.GoodUnitNumber += orderItem.GoodUnitStock;
+                    livestockCircleDetail.BadUnitNumber += orderItem.BadUnitStock;
+                    orderItem.GoodUnitStock = (int)request.GoodUnitStock;
+                    orderItem.BadUnitStock = (int)request.BadUnitStock;
+                }
+
                 livestockCircleDetail.GoodUnitNumber -= orderItem.GoodUnitStock;
                 livestockCircleDetail.BadUnitNumber -= orderItem.BadUnitStock;
                 if (livestockCircleDetail.GoodUnitNumber == 0 && livestockCircleDetail.BadUnitNumber == 0)
                 {
                     livestockCircleDetail.Status = StatusConstant.DONESTAT;
                 }
-                _livestockCircleRepository.Update(livestockCircleDetail);
 
+
+                // update database
+                _livestockCircleRepository.Update(livestockCircleDetail);
                 await _livestockCircleRepository.CommitAsync();
+
+                _orderRepository.Update(orderItem);
+                await _orderRepository.CommitAsync();
+
                 return new Response<bool>()
                 {
                     Succeeded = true,
@@ -819,7 +835,7 @@ namespace Infrastructure.Services.Implements
                     LivestockCircleId = x.LivestockCircleId,
                     GoodUnitStock = x.GoodUnitStock,
                     BadUnitStock = x.BadUnitStock,
-                    TotalBill = x.TotalBill,
+                    //TotalBill = x.TotalBill,
                     Status = x.Status,
                     CreateDate = x.CreatedDate,
                     PickupDate = x.PickupDate,

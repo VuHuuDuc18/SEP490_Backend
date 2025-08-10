@@ -95,7 +95,7 @@ namespace Infrastructure.UnitTests.OrderService
                 LivestockCircleId = livestockCircleId,
                 GoodUnitStock = 5,
                 BadUnitStock = 2,
-                TotalBill = 1000,
+                //TotalBill = 1000,
                 Status = OrderStatus.PENDING,
                 CreatedDate = DateTime.UtcNow,
                 PickupDate = DateTime.UtcNow.AddDays(1),

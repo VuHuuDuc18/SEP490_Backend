@@ -88,11 +88,15 @@ namespace Infrastructure.UnitTests.LiveStockCircleService
                 .ReturnsAsync(1);
 
             // Act
-            var result = await _livestockCircleService.ReleaseBarn(livestockCircleId);
+            var result = await _livestockCircleService.ReleaseBarn(new Domain.DTOs.Request.LivestockCircle.ReleaseBarnRequest()
+            {
+                LivestockCircleId = livestockCircleId,
+                ReleaseDate = DateTime.Now.Date
+            });
 
             // Assert
             Assert.True(result.Succeeded);
-            Assert.Equal("Xuất chuồng thành công", result.Message);
+            Assert.Equal("Xuất chuồng thành công vào ngày :"+ DateTime.Now.Date, result.Message);
             Assert.Null(result.Errors);
             _livestockCircleRepositoryMock.Verify(x => x.GetByIdAsync(livestockCircleId, It.IsAny<Ref<CheckError>>()), Times.Once());
             //_livestockCircleRepositoryMock.Verify(x => x.Update(It.Is<LivestockCircle>(lc => lc.Id == livestockCircleId && lc.Status == StatusConstant.RELEASESTAT)), Times.Once());
@@ -110,7 +114,11 @@ namespace Infrastructure.UnitTests.LiveStockCircleService
                 .ReturnsAsync((LivestockCircle)null);
 
             // Act
-            var result = await _livestockCircleService.ReleaseBarn(livestockCircleId);
+            var result = await _livestockCircleService.ReleaseBarn(new Domain.DTOs.Request.LivestockCircle.ReleaseBarnRequest()
+            {
+                LivestockCircleId = livestockCircleId,
+                ReleaseDate = DateTime.Now.Date
+            });
 
             // Assert
             Assert.False(result.Succeeded);
@@ -138,7 +146,11 @@ namespace Infrastructure.UnitTests.LiveStockCircleService
                 .ReturnsAsync(livestockCircle);
 
             // Act
-            var result = await _livestockCircleService.ReleaseBarn(livestockCircleId);
+            var result = await _livestockCircleService.ReleaseBarn(new Domain.DTOs.Request.LivestockCircle.ReleaseBarnRequest()
+            {
+                LivestockCircleId = livestockCircleId,
+                ReleaseDate = DateTime.Now.Date
+            });
 
             // Assert
             Assert.False(result.Succeeded);
@@ -160,7 +172,7 @@ namespace Infrastructure.UnitTests.LiveStockCircleService
                 .ReturnsAsync((LivestockCircle)null);
 
             // Act
-            var result = await _livestockCircleService.ReleaseBarn(livestockCircleId);
+            var result = await _livestockCircleService.ReleaseBarn(new Domain.DTOs.Request.LivestockCircle.ReleaseBarnRequest() { LivestockCircleId = livestockCircleId, ReleaseDate = DateTime.Now.Date });
 
             // Assert
             Assert.False(result.Succeeded);
@@ -193,7 +205,7 @@ namespace Infrastructure.UnitTests.LiveStockCircleService
                 .ThrowsAsync(new Exception("Commit failed"));
 
             // Act & Assert
-            await Assert.ThrowsAsync<Exception>(() => _livestockCircleService.ReleaseBarn(livestockCircleId));
+            await Assert.ThrowsAsync<Exception>(() => _livestockCircleService.ReleaseBarn(new Domain.DTOs.Request.LivestockCircle.ReleaseBarnRequest() { LivestockCircleId = livestockCircleId, ReleaseDate = DateTime.Now.Date }));
             _livestockCircleRepositoryMock.Verify(x => x.GetByIdAsync(livestockCircleId, It.IsAny<Ref<CheckError>>()), Times.Once());
             //_livestockCircleRepositoryMock.Verify(x => x.Update(It.Is<LivestockCircle>(lc => lc.Id == livestockCircleId && lc.Status == StatusConstant.RELEASESTAT)), Times.Once());
             //_livestockCircleRepositoryMock.Verify(x => x.CommitAsync(It.IsAny<CancellationToken>()), Times.Once());

@@ -97,7 +97,7 @@ namespace ExcelControl.Handler
                 wsTemplate.DefaultColWidth = 30;
                 if (dataList != null)
                 {
-                    wsTemplate.Cells[1, 5].Value = "Tham khảo phân loại thuốc tại sheet số 2";
+                    wsTemplate.Cells[1, 5].Value = "Tham khảo phân loại tại sheet số 2";
                     // Sheet 2: export data
                     var wsData = package.Workbook.Worksheets.Add(dataSheetName);
                     wsData.Cells[1, 1].Value = "Thông tin phân loại";                    

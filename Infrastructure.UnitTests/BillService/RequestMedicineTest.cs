@@ -143,6 +143,7 @@ namespace Infrastructure.UnitTests.BillService
             {
                 LivestockCircleId = Guid.NewGuid(),
                 Note = "Test",
+                DeliveryDate = DateTime.Now,
                 MedicineItems = new List<MedicineItemRequest> { new MedicineItemRequest { ItemId = medicineId, Quantity = 2 } }
             };
             var medicine = new Medicine { Id = medicineId, IsActive = true, Stock = 10 };
@@ -163,6 +164,7 @@ namespace Infrastructure.UnitTests.BillService
             {
                 LivestockCircleId = Guid.NewGuid(),
                 Note = "Test",
+                DeliveryDate = DateTime.Now,
                 MedicineItems = new List<MedicineItemRequest> { new MedicineItemRequest { ItemId = medicineId, Quantity = 2 } }
             };
             var medicine = new Medicine { Id = medicineId, IsActive = true, Stock = 10 };

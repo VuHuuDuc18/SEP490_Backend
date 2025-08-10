@@ -16,6 +16,7 @@ namespace Domain.Dto.Response.Bill
         public string Note { get; set; }
         public string Status { get; set; }
         public string TypeBill { get; set; }
+        public DateTime DeliveryDate { get; set; }
         public int Total { get; set; }
         public float? Weight { get; set; }
         public bool IsActive { get; set; }

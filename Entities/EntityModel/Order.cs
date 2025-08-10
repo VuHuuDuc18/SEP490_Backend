@@ -15,7 +15,6 @@ namespace Entities.EntityModel
         public float? GoodUnitPrice { get; set; }
         public int BadUnitStock { get; set; }
         public float? BadUnitPrice { get; set; }
-        public float? TotalBill { get; set; }
         public DateTime? PickupDate { get; set; }
         public string Status {  get; set; }
         public string? Note { get; set; }

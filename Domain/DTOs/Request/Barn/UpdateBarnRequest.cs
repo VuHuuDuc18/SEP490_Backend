@@ -21,5 +21,6 @@ namespace Domain.Dto.Request.Barn
 
         [Required(ErrorMessage = "ID người gia công là bắt buộc.")]
         public Guid WorkerId { get; set; }
+        public string? Description { get; set; }
     }
 }

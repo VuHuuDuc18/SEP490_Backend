@@ -169,6 +169,7 @@ namespace Infrastructure.UnitTests.BillService
                 TypeBill = "Food",
                 Status = StatusConstant.REQUESTED,
                 IsActive = true,
+                DeliveryDate = DateTime.Now,
                 Note = "Test note",
                 Total = 1,
                 Weight = 1
@@ -200,6 +201,7 @@ namespace Infrastructure.UnitTests.BillService
                 Status = StatusConstant.REQUESTED,
                 IsActive = true,
                 Note = "Test note",
+                DeliveryDate = DateTime.Now,
                 Total = 1,
                 Weight = 1
             };
@@ -229,6 +231,7 @@ namespace Infrastructure.UnitTests.BillService
                 TypeBill = "Food",
                 Status = StatusConstant.REQUESTED,
                 IsActive = true,
+                DeliveryDate = DateTime.Now,
                 Note = "Test note",
                 Total = 1,
                 Weight = 1
@@ -258,6 +261,7 @@ namespace Infrastructure.UnitTests.BillService
                 TypeBill = "Food",
                 Status = StatusConstant.REQUESTED,
                 IsActive = true,
+                DeliveryDate = DateTime.Now,
                 Note = "Test note",
                 Total = 1,
                 Weight = 1
@@ -289,6 +293,7 @@ namespace Infrastructure.UnitTests.BillService
                 TypeBill = "Food",
                 Status = StatusConstant.REQUESTED,
                 IsActive = true,
+                DeliveryDate = DateTime.Now,
                 Note = "Test note",
                 Total = 1,
                 Weight = 1

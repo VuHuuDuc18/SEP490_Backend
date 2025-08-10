@@ -141,7 +141,7 @@ namespace SEP490_BackendAPI.Controllers
 
             CategoryList = await _foodCategoryService.GetAllCategory();
 
-            var fileBytes = ExportExcelHelper.GenerateExcelTemplateAndData<CellFoodItem, FoodCategoryResponse>("Bảng thuốc", "Phân loại mẫu thuốc", CategoryList);
+            var fileBytes = ExportExcelHelper.GenerateExcelTemplateAndData<CellFoodItem, FoodCategoryResponse>("Bảng thức ăn", "Phân loại mẫu thức ăn", CategoryList);
             string fileName = $"Food-Import-Data-{DateTime.Now:yyyyMMddHHmmss}.xlsx";
             return File(fileBytes,
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

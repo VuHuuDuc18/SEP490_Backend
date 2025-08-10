@@ -34,6 +34,7 @@ namespace Domain.Helper.Constants
         public readonly static string APPROVED = "APPROVED";
         public readonly static string DENIED = "DENIED";
         public readonly static string CANCELLED = "CANCELLED";
+        public readonly static string DONE = "DONE";
     }
 
     public static class TypeBill 
