@@ -16,6 +16,7 @@ namespace Entities.EntityModel
         public float? Weight { get; set; }
         public string Status { get; set; }
         public string TypeBill { get; set; }
+        public DateTime DeliveryDate { get; set; }
         public virtual User UserRequest { get; set; }
         public virtual LivestockCircle LivestockCircle { get; set; }
     }

@@ -11,6 +11,8 @@ namespace Domain.Dto.Request.Bill
         public string Note { get; set; }
         [Required(ErrorMessage = "Phải cung cấp ít nhất một mặt hàng thuốc.")]
         public List<MedicineItemRequest> MedicineItems { get; set; } = new List<MedicineItemRequest>();
+
+        public DateTime DeliveryDate { get; set; }
     }
 
     public class AddMedicineItemToBillDto

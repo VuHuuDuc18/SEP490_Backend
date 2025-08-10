@@ -19,7 +19,9 @@ namespace Entities.EntityModel
         public float AverageWeight { get; set; }
         public int GoodUnitNumber { get; set; }
         public int BadUnitNumber { get; set; }
-        public DateTime? ReleaseDate { get; set; }
+        public DateTime? ReleaseDate { get; set; } // set ngày bán chính thức / techincal staff set
+        public DateTime? PreSoldDate { get; set; } // set ngày bán dự kiến / sale set
+        public float? SamplePrice { get; set; } 
         public Guid BreedId { get; set; }
         public Guid BarnId { get; set; }
         public Guid TechicalStaffId { get; set; }   

@@ -95,7 +95,7 @@ namespace Infrastructure.UnitTests.BillService
         [Fact]
         public async Task UpdateBillFood_ReturnsError_WhenBillNotFoundOrInactive()
         {
-            var request = new UpdateBillFoodDto { BillId = Guid.NewGuid(), FoodItems = new List<FoodItemRequest> { new FoodItemRequest { ItemId = Guid.NewGuid(), Quantity = 1 } } };
+            var request = new UpdateBillFoodDto { BillId = Guid.NewGuid(), DeliveryDate = DateTime.Now, FoodItems = new List<FoodItemRequest> { new FoodItemRequest { ItemId = Guid.NewGuid(), Quantity = 1 } } };
             _billRepoMock.Setup(x => x.GetByIdAsync(request.BillId, It.IsAny<Infrastructure.Core.Ref<Infrastructure.Core.CheckError>>())).ReturnsAsync((Bill)null);
             var result = await _service.UpdateBillFood(request);
             Assert.False(result.Succeeded);
@@ -106,13 +106,13 @@ namespace Infrastructure.UnitTests.BillService
         public async Task UpdateBillFood_ReturnsError_WhenBillHasNonFoodItems()
         {
             var billId = Guid.NewGuid();
-            var bill = new Bill { Id = billId, IsActive = true };
+            var bill = new Bill { Id = billId, IsActive = true, DeliveryDate = DateTime.Now};
             var billItems = new List<BillItem>
     {
         new BillItem { Id = Guid.NewGuid(), BillId = billId, IsActive = true, FoodId = Guid.NewGuid(), MedicineId = null },
         new BillItem { Id = Guid.NewGuid(), BillId = billId, IsActive = true, FoodId = null, MedicineId = Guid.NewGuid() }
     };
-            var request = new UpdateBillFoodDto { BillId = billId, FoodItems = new List<FoodItemRequest> { new FoodItemRequest { ItemId = Guid.NewGuid(), Quantity = 1 } } };
+            var request = new UpdateBillFoodDto { BillId = billId, DeliveryDate = DateTime.Now, FoodItems = new List<FoodItemRequest> { new FoodItemRequest { ItemId = Guid.NewGuid(), Quantity = 1 } } };
             _billRepoMock.Setup(x => x.GetByIdAsync(billId, It.IsAny<Infrastructure.Core.Ref<Infrastructure.Core.CheckError>>())).ReturnsAsync(bill);
             _billItemRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BillItem, bool>>>()))
                 .Returns((System.Linq.Expressions.Expression<Func<BillItem, bool>> expr) => billItems.AsQueryable().Where(expr));
@@ -127,9 +127,9 @@ namespace Infrastructure.UnitTests.BillService
         public async Task UpdateBillFood_ReturnsError_WhenValidationFails()
         {
             var billId = Guid.NewGuid();
-            var bill = new Bill { Id = billId, IsActive = true };
+            var bill = new Bill { Id = billId, IsActive = true , DeliveryDate = DateTime.Now };
             var billItems = new List<BillItem>();
-            var request = new UpdateBillFoodDto { BillId = billId, FoodItems = new List<FoodItemRequest> { new FoodItemRequest { ItemId = Guid.NewGuid(), Quantity = 0 } } };
+            var request = new UpdateBillFoodDto { BillId = billId, DeliveryDate = DateTime.Now, FoodItems = new List<FoodItemRequest> { new FoodItemRequest { ItemId = Guid.NewGuid(), Quantity = 0 } } };
             _billRepoMock.Setup(x => x.GetByIdAsync(billId, It.IsAny<Infrastructure.Core.Ref<Infrastructure.Core.CheckError>>())).ReturnsAsync(bill);
             _billItemRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BillItem, bool>>>())).Returns(billItems.AsQueryable());
             var result = await _service.UpdateBillFood(request);
@@ -143,9 +143,9 @@ namespace Infrastructure.UnitTests.BillService
             // Giả lập ValidateItem trả về lỗi bằng cách tạo một bill với food không đủ stock
             var billId = Guid.NewGuid();
             var foodId = Guid.NewGuid();
-            var bill = new Bill { Id = billId, IsActive = true };
+            var bill = new Bill { Id = billId, IsActive = true,DeliveryDate = DateTime.Now, };
             var billItems = new List<BillItem>();
-            var request = new UpdateBillFoodDto { BillId = billId, FoodItems = new List<FoodItemRequest> { new FoodItemRequest { ItemId = foodId, Quantity = 10 } } };
+            var request = new UpdateBillFoodDto { BillId = billId, DeliveryDate = DateTime.Now, FoodItems = new List<FoodItemRequest> { new FoodItemRequest { ItemId = foodId, Quantity = 10 } } };
             var food = new Food { Id = foodId, IsActive = true, Stock = 5 };
             _billRepoMock.Setup(x => x.GetByIdAsync(billId, It.IsAny<Infrastructure.Core.Ref<Infrastructure.Core.CheckError>>())).ReturnsAsync(bill);
             _billItemRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BillItem, bool>>>())).Returns(billItems.AsQueryable());
@@ -159,10 +159,10 @@ namespace Infrastructure.UnitTests.BillService
         public async Task UpdateBillFood_ReturnsError_WhenFoodNotFound()
         {
             var billId = Guid.NewGuid();
-            var bill = new Bill { Id = billId, IsActive = true };
+            var bill = new Bill { Id = billId, DeliveryDate = DateTime.Now, IsActive = true };
             var billItems = new List<BillItem>();
             var foodId = Guid.NewGuid();
-            var request = new UpdateBillFoodDto { BillId = billId, FoodItems = new List<FoodItemRequest> { new FoodItemRequest { ItemId = foodId, Quantity = 1 } } };
+            var request = new UpdateBillFoodDto { BillId = billId, DeliveryDate = DateTime.Now, FoodItems = new List<FoodItemRequest> { new FoodItemRequest { ItemId = foodId, Quantity = 1 } } };
             _billRepoMock.Setup(x => x.GetByIdAsync(billId, It.IsAny<Infrastructure.Core.Ref<Infrastructure.Core.CheckError>>())).ReturnsAsync(bill);
             _billItemRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BillItem, bool>>>())).Returns(billItems.AsQueryable());
             _foodRepoMock.Setup(x => x.GetByIdAsync(foodId, It.IsAny<Infrastructure.Core.Ref<Infrastructure.Core.CheckError>>())).ReturnsAsync((Food?)null);
@@ -175,10 +175,10 @@ namespace Infrastructure.UnitTests.BillService
         public async Task UpdateBillFood_Success()
         {
             var billId = Guid.NewGuid();
-            var bill = new Bill { Id = billId, IsActive = true };
+            var bill = new Bill { Id = billId, DeliveryDate = DateTime.Now, IsActive = true };
             var billItems = new List<BillItem>();
             var foodId = Guid.NewGuid();
-            var request = new UpdateBillFoodDto { BillId = billId, FoodItems = new List<FoodItemRequest> { new FoodItemRequest { ItemId = foodId, Quantity = 2 } } };
+            var request = new UpdateBillFoodDto { BillId = billId, DeliveryDate = DateTime.Now, FoodItems = new List<FoodItemRequest> { new FoodItemRequest { ItemId = foodId, Quantity = 2 } } };
             var food = new Food { Id = foodId, IsActive = true, Stock = 10, WeighPerUnit = 1.5f };
             _billRepoMock.Setup(x => x.GetByIdAsync(billId, It.IsAny<Infrastructure.Core.Ref<Infrastructure.Core.CheckError>>())).ReturnsAsync(bill);
             _billItemRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BillItem, bool>>>())).Returns(billItems.AsQueryable());
@@ -196,10 +196,10 @@ namespace Infrastructure.UnitTests.BillService
         public async Task UpdateBillFood_ReturnsError_WhenExceptionThrown()
         {
             var billId = Guid.NewGuid();
-            var bill = new Bill { Id = billId, IsActive = true };
+            var bill = new Bill { Id = billId, DeliveryDate = DateTime.Now, IsActive = true };
             var billItems = new List<BillItem>();
             var foodId = Guid.NewGuid();
-            var request = new UpdateBillFoodDto { BillId = billId, FoodItems = new List<FoodItemRequest> { new FoodItemRequest { ItemId = foodId, Quantity = 2 } } };
+            var request = new UpdateBillFoodDto { BillId = billId, DeliveryDate = DateTime.Now, FoodItems = new List<FoodItemRequest> { new FoodItemRequest { ItemId = foodId, Quantity = 2 } } };
             var food = new Food { Id = foodId, IsActive = true, Stock = 10, WeighPerUnit = 1.5f };
             _billRepoMock.Setup(x => x.GetByIdAsync(billId, It.IsAny<Infrastructure.Core.Ref<Infrastructure.Core.CheckError>>())).ReturnsAsync(bill);
             _billItemRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BillItem, bool>>>())).Returns(billItems.AsQueryable());

@@ -28,31 +28,54 @@ namespace Infrastructure.Extensions
 
                 try
                 {
+                    Expression propertyAccess = Expression.Property(param, getter.Name);
+
                     if (getter.PropertyType == typeof(Guid))
                     {
                         if (Guid.TryParse(item.Value, out var guidValue))
                             convertedValue = guidValue;
                         else
-                            continue; // Skip if Guid parsing fails
+                            continue;
+                    }
+                    else if (getter.PropertyType == typeof(DateTime))
+                    {
+                        if (DateTime.TryParse(item.Value, out var dateValue))
+                        {
+                            convertedValue = dateValue.Date;
+
+                            // Compare only the Date part
+                            var dateProperty = Expression.Property(propertyAccess, nameof(DateTime.Date));
+                            var dateComparison = Expression.Equal(
+                                dateProperty,
+                                Expression.Constant(dateValue.Date, typeof(DateTime)));
+
+                            var dateLambda = Expression.Lambda<Func<T, bool>>(dateComparison, param);
+                            input = input.Where(dateLambda);
+                            continue; // Skip rest of loop
+                        }
+                        else
+                        {
+                            continue;
+                        }
                     }
                     else
                     {
                         convertedValue = Convert.ChangeType(item.Value, getter.PropertyType);
                     }
 
-                    var body = Expression.Equal(
-                        Expression.Property(param, getter.Name),
+                    var generalComparison = Expression.Equal(
+                        propertyAccess,
                         Expression.Constant(convertedValue, getter.PropertyType));
 
-                    var lambda = Expression.Lambda<Func<T, bool>>(body, param);
-                    input = input.Where(lambda);
+                    var generalLambda = Expression.Lambda<Func<T, bool>>(generalComparison, param);
+                    input = input.Where(generalLambda);
                 }
                 catch
                 {
-                    // Skip if conversion or expression building fails
                     continue;
                 }
             }
+
             return input;
         }
     }

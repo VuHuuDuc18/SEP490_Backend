@@ -39,6 +39,7 @@ namespace Infrastructure.Services.Implements
         private readonly IRepository<BreedCategory> _breedCategoryRepository;
         private readonly Guid _currentUserId;
         private readonly LCFMSDBContext _dbContext;
+        private readonly IEmailService _emailService;
         public OrderService
         (
             IRepository<Order> orderRepository,
@@ -51,7 +52,8 @@ namespace Infrastructure.Services.Implements
             IRepository<BreedCategory> bcrepo,
             IRepository<ImageLivestockCircle> imageLivestockCircleRepository,
             IRepository<Role> roleRepository,
-            DbContext dbContext
+            DbContext dbContext,
+            IEmailService emailServices
         )
         {
             _dbContext = (LCFMSDBContext)dbContext;
@@ -64,6 +66,7 @@ namespace Infrastructure.Services.Implements
             _roleManager = roleManager;
             _imageLivestockCircleRepository = imageLivestockCircleRepository;
             _roleRepository = roleRepository;
+            _emailService = emailServices;
 
             // Lấy current user từ JWT token claims
             _currentUserId = Guid.Empty;
@@ -87,6 +90,16 @@ namespace Infrastructure.Services.Implements
                     Succeeded = false,
                     Message = "Hãy đăng nhập và thử lại",
                     Errors = new List<string>() { "Hãy đăng nhập và thử lại" }
+                };
+            }
+            var currentUser = await _userManager.FindByIdAsync(_currentUserId.ToString());
+            if (currentUser==null)
+            {
+                return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Hãy đăng nhập lại và thử lại.",
+                    Errors = new List<string>() { "Không tìm thấy thông tin người dùng." }
                 };
             }
             if (request.GoodUnitStock <= 0 || request.BadUnitStock < 0)
@@ -192,17 +205,20 @@ namespace Infrastructure.Services.Implements
                     return new Response<string>("Lỗi khi tạo đơn hàng. Không có ngày xuất chuồng.");
                 }
 
-                if (((DateTime)order.PickupDate - (DateTime)livestockCircle.ReleaseDate).Days > 3)
+                if (((DateTime)order.PickupDate - (DateTime)livestockCircle.ReleaseDate).Days > 5)
                 {
                     return new Response<string>()
                     {
                         Succeeded = false,
-                        Message = "Ngày lấy hàng phải trong vòng 3 ngày kể từ ngày xuất chuồng",
-                        Errors = new List<string>() { "Ngày lấy hàng phải trong vòng 3 ngày kể từ ngày xuất chuồng" }
+                        Message = "Ngày lấy hàng phải trong vòng 5 ngày kể từ ngày xuất chuồng",
+                        Errors = new List<string>() { "Ngày lấy hàng phải trong vòng 5 ngày kể từ ngày xuất chuồng" }
                     };
                 }
                 _orderRepository.Insert(order);
                 await _orderRepository.CommitAsync(cancellationToken);
+
+                //Tạo order thành công
+                _emailService.SendEmailAsync(currentUser.Email, EmailConstant.EMAILSUBJECTORDERCREATED, MailBodyGenerate.BodyCreateOrder(currentUser.Email, ""));
                 return new Response<string>()
                 {
                     Succeeded = true,
@@ -243,7 +259,7 @@ namespace Infrastructure.Services.Implements
                     LivestockCircleId = order.LivestockCircleId,
                     GoodUnitStock = order.GoodUnitStock,
                     BadUnitStock = order.BadUnitStock,
-                    TotalBill = order.TotalBill,
+                    //TotalBill = order.TotalBill,
                     Status = order.Status,
                     CreateDate = order.CreatedDate,
                     PickupDate = order.PickupDate,
@@ -422,7 +438,7 @@ namespace Infrastructure.Services.Implements
                     LivestockCircleId = x.LivestockCircleId,
                     GoodUnitStock = x.GoodUnitStock,
                     BadUnitStock = x.BadUnitStock,
-                    TotalBill = x.TotalBill,
+                    //TotalBill = x.TotalBill,
                     Status = x.Status,
                     CreateDate = x.CreatedDate,
                     PickupDate = x.PickupDate,
@@ -497,7 +513,7 @@ namespace Infrastructure.Services.Implements
                         LivestockCircleId = x.LivestockCircleId,
                         GoodUnitStock = x.GoodUnitStock,
                         BadUnitStock = x.BadUnitStock,
-                        TotalBill = x.TotalBill,
+                        //TotalBill = x.TotalBill,
                         Status = x.Status,
                         CreateDate = x.CreatedDate,
                         PickupDate = x.PickupDate,
@@ -560,7 +576,8 @@ namespace Infrastructure.Services.Implements
                             BadUnitStockSold = g.Sum(x => x.BadUnitStock),
                             AverageBadUnitPrice = g.Average(x => x.BadUnitPrice ?? 0),
                             BreedCategoryName = g.Key.Name,
-                            Revenue = g.Sum(x => x.TotalBill ?? 0)
+                            Revenue = g.Sum(x => x.GoodUnitStock) * g.Average(x => x.GoodUnitPrice ?? 0) +
+                                      g.Sum(x => x.BadUnitStock) * g.Average(x => x.BadUnitPrice ?? 0)
                         };
             var ListItem = await query.ToListAsync();
             var result = new StatisticsOrderResponse()
@@ -614,7 +631,7 @@ namespace Infrastructure.Services.Implements
                                 LivestockCircleId = o.LivestockCircleId,
                                 GoodUnitStock = o.GoodUnitStock,
                                 BadUnitStock = o.BadUnitStock,
-                                TotalBill = o.TotalBill,
+                                //TotalBill = o.TotalBill,
                                 Status = o.Status,
                                 CreateDate = o.CreatedDate,
                                 PickupDate = o.PickupDate,
@@ -666,20 +683,35 @@ namespace Infrastructure.Services.Implements
                 orderItem.Status = OrderStatus.APPROVED;
                 orderItem.GoodUnitPrice = request.GoodUnitPrice;
                 orderItem.BadUnitPrice = request.BadUnitPrice;
-                orderItem.TotalBill = request.GoodUnitPrice * orderItem.GoodUnitStock + request.BadUnitPrice * orderItem.BadUnitStock;
+                //orderItem.TotalBill = request.GoodUnitPrice * orderItem.GoodUnitStock + request.BadUnitPrice * orderItem.BadUnitStock;
 
-                _orderRepository.Update(orderItem);
-                await _orderRepository.CommitAsync();
+
                 var livestockCircleDetail = await _livestockCircleRepository.GetByIdAsync(orderItem.LivestockCircleId);
+                if (request.IsDone || orderItem.Status.Equals(OrderStatus.APPROVED))
+                {
+                    if (request.IsDone)
+                        orderItem.Status = OrderStatus.DONE;
+                    livestockCircleDetail.GoodUnitNumber += orderItem.GoodUnitStock;
+                    livestockCircleDetail.BadUnitNumber += orderItem.BadUnitStock;
+                    orderItem.GoodUnitStock = (int)request.GoodUnitStock;
+                    orderItem.BadUnitStock = (int)request.BadUnitStock;
+                }
+
                 livestockCircleDetail.GoodUnitNumber -= orderItem.GoodUnitStock;
                 livestockCircleDetail.BadUnitNumber -= orderItem.BadUnitStock;
                 if (livestockCircleDetail.GoodUnitNumber == 0 && livestockCircleDetail.BadUnitNumber == 0)
                 {
                     livestockCircleDetail.Status = StatusConstant.DONESTAT;
                 }
-                _livestockCircleRepository.Update(livestockCircleDetail);
 
+
+                // update database
+                _livestockCircleRepository.Update(livestockCircleDetail);
                 await _livestockCircleRepository.CommitAsync();
+
+                _orderRepository.Update(orderItem);
+                await _orderRepository.CommitAsync();
+
                 return new Response<bool>()
                 {
                     Succeeded = true,
@@ -803,7 +835,7 @@ namespace Infrastructure.Services.Implements
                     LivestockCircleId = x.LivestockCircleId,
                     GoodUnitStock = x.GoodUnitStock,
                     BadUnitStock = x.BadUnitStock,
-                    TotalBill = x.TotalBill,
+                    //TotalBill = x.TotalBill,
                     Status = x.Status,
                     CreateDate = x.CreatedDate,
                     PickupDate = x.PickupDate,

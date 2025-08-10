@@ -100,7 +100,7 @@ namespace Infrastructure.UnitTests.OrderService
                 Status = StatusConstant.REQUESTED,
                 GoodUnitPrice = 100,
                 BadUnitPrice = 50,
-                TotalBill = 600,
+                //TotalBill = 600,
                 CreatedDate = DateTime.UtcNow.AddDays(-3),
                 IsActive = true
             };
@@ -114,7 +114,7 @@ namespace Infrastructure.UnitTests.OrderService
                 Status = StatusConstant.REQUESTED,
                 GoodUnitPrice = 120,
                 BadUnitPrice = 60,
-                TotalBill = 420,
+                //TotalBill = 420,
                 CreatedDate = DateTime.UtcNow.AddDays(-2),
                 IsActive = true
             };
@@ -206,7 +206,7 @@ namespace Infrastructure.UnitTests.OrderService
                 Status = StatusConstant.REQUESTED,
                 GoodUnitPrice = 100,
                 BadUnitPrice = 50,
-                TotalBill = 600,
+                //TotalBill = 600,
                 CreatedDate = DateTime.UtcNow.AddDays(-10), // Ngoài phạm vi
                 IsActive = true
             };

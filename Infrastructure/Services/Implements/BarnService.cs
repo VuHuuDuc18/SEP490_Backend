@@ -144,6 +144,7 @@ namespace Infrastructure.Services.Implements
                     BarnName = requestDto.BarnName,
                     Address = requestDto.Address,
                     WorkerId = requestDto.WorkerId,
+                    Description = requestDto.Description,
                     IsActive = true,
                     CreatedBy = _currentUserId,
                     CreatedDate = DateTime.UtcNow
@@ -256,6 +257,7 @@ namespace Infrastructure.Services.Implements
                 existing.BarnName = requestDto.BarnName;
                 existing.Address = requestDto.Address;
                 existing.WorkerId = requestDto.WorkerId;
+                existing.Description = requestDto.Description;
                 existing.UpdatedBy = _currentUserId;
                 existing.UpdatedDate = DateTime.UtcNow;
 
@@ -762,6 +764,7 @@ namespace Infrastructure.Services.Implements
                         BarnName = barn.BarnName,
                         Address = barn.Address,
                         Image = barn.Image,
+                        Description = barn.Description,
                         Worker = new WokerResponse
                         {
                             Id = barn.Worker.Id,
@@ -912,6 +915,7 @@ namespace Infrastructure.Services.Implements
                     BarnName = barn.BarnName,
                     Address = barn.Address,
                     Image = barn.Image,
+                    Description = barn.Description,
                     Worker = workerResponse,
                     IsActive = barn.IsActive,
                     ActiveLivestockCircle = activeLivestockCircleResponse
