@@ -97,5 +97,34 @@ namespace Infrastructure.Extensions
 
             return GenerateBaseTemplate("Yêu cầu xác thực tài khoản!", content);
         }
+        public static string BodyCreateOrder(string email, string orderLink)
+        {
+            var content = $@"
+    <div class='info'>Cảm ơn bạn đã đặt hàng tại hệ thống của chúng tôi.</div>
+    <div class='info'><strong>Email đặt hàng:</strong> {email}</div>
+    <div class='info'>Đơn hàng của bạn đã được tạo thành công. Vui lòng nhấp vào nút bên dưới để xem chi tiết đơn hàng:</div>
+    <a class='btn' href='{orderLink}'>Xem đơn hàng</a>
+    <div class='info' style='margin-top: 20px; font-size: 12px; color: #666;'>
+        Nếu bạn không phải là người thực hiện đơn hàng này, vui lòng liên hệ với chúng tôi để được hỗ trợ.
+    </div>";
+
+            return GenerateBaseTemplate("Xác nhận tạo đơn hàng!", content);
+        }
+
+        public static string BodyOrderApproved(string email, string orderLink)
+        {
+            var content = $@"
+    <div class='info'>Đơn hàng của bạn đã được duyệt.</div>
+    <div class='info'><strong>Email đặt hàng:</strong> {email}</div>
+    <div class='info'>Bạn có thể kiểm tra trạng thái đơn hàng, thông tin nhận hàng và chi tiết sản phẩm bằng cách nhấp vào nút dưới đây:</div>
+    <a class='btn' href='{orderLink}'>Xem đơn hàng</a>
+    <div class='info' style='margin-top: 20px; font-size: 12px; color: #666;'>
+        Nếu bạn có bất kỳ thắc mắc hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi qua thông tin trên website.
+    </div>";
+
+            return GenerateBaseTemplate("Đơn hàng đã được duyệt!", content);
+        }
+
+
     }
 }
