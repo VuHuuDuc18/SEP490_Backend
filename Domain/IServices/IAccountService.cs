@@ -18,5 +18,6 @@ namespace Domain.IServices
         Task<Response<string>> EnableAccountAsync(string email);
         Task<Response<string>> UpdateAccountAsync(UpdateAccountRequest request);
         Task<Response<PaginationSet<AccountResponse>>> GetListAccount(ListingRequest req);
+        Task<Response<string>> ResetAllAccountPassword(string newPassword);
     }
 }
