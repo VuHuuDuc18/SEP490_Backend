@@ -74,7 +74,7 @@ namespace Domain.IServices
              CancellationToken cancellationToken = default);
 
         // cap nhat trang thai xuat chuong cho 1 lua nuoi
-        public Task<Response<bool>> ReleaseBarn(Guid id);
+        public Task<Response<bool>> ReleaseBarn(ReleaseBarnRequest req);
         //lay danh sach cac chuong duoc giao quan ly
         //public Task<PaginationSet<LivestockCircleResponse>> GetAssignedBarn(Guid tsid,ListingRequest req);
         // danh sach lich su chan nuoi cua 1 chuong
@@ -87,6 +87,6 @@ namespace Domain.IServices
             Guid livestockCircleId,
             UpdateImageLiveStockCircle request,
             CancellationToken cancellationToken = default);
-
+        Task<Response<string>> SetPreOrderField(SetPreOrderFieldRequest request);
     }
 }

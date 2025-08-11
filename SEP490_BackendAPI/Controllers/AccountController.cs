@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 using Domain.Dto.Request.User;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Domain.IServices;
+using Microsoft.AspNetCore.Authorization;
+using Domain.Helper.Constants;
 
 namespace WebApi.Controllers
 {
@@ -75,6 +77,17 @@ namespace WebApi.Controllers
         {
             var result = await _accountService.GetListAccount(req);
             return Ok(result);
+        }
+        [Authorize(Roles = RoleConstant.CompanyAdmin)]
+        [HttpPost("reset-all-password")]
+        public async Task<IActionResult> ResetAllAccountPassword([FromQuery] string newPassword)
+        {
+            return Ok(await _accountService.ResetAllAccountPassword(newPassword));
+        }
+        [HttpDelete]
+        public async Task<IActionResult> DeleteAccountByEmail([FromQuery]string email)
+        {
+            return Ok(await _accountService.DeleteAccountByEmailAsync(email));
         }
     }
 }

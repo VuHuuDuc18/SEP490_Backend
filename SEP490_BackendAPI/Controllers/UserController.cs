@@ -1,13 +1,15 @@
-﻿using System;
+﻿using Domain.Dto.Request;
+using Domain.Dto.Request.Account;
+using Domain.Dto.Request.User;
+using Domain.IServices;
+using Entities.EntityModel;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Domain.Dto.Request.Account;
-using Domain.Dto.Request;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Domain.Dto.Request.User;
-using Domain.IServices;
+using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace WebApi.Controllers
 {
@@ -32,7 +34,7 @@ namespace WebApi.Controllers
             var origin = Request.Headers["origin"].ToString();
             if (string.IsNullOrEmpty(origin))
             {
-                origin = Request.Headers["Referer"].ToString() ?? "https://localhost:7074";
+                origin = Request.Headers["Referer"].ToString();
             }
             return Ok(await _userServices.CreateCustomerAccountAsync(request, origin));
         }
@@ -40,11 +42,6 @@ namespace WebApi.Controllers
         [HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmEmailAsync([FromQuery]string userId, [FromQuery]string code)
         {
-            var origin = Request.Headers["origin"].ToString();
-            if (string.IsNullOrEmpty(origin))
-            {
-                origin = Request.Headers["Referer"].ToString() ?? "https://localhost:7074";
-            }
             return Ok(await _userServices.ConfirmEmailAsync(userId, code));
         }
 
@@ -95,6 +92,17 @@ namespace WebApi.Controllers
         public async Task<IActionResult> Profile()
         {
             return Ok(await _userServices.GetUserProfile());
+        }
+
+        [HttpPost("resend-verify-email")]
+        public async Task<IActionResult> ResendVerifyEmail([FromQuery] string email)
+        {
+            var origin = Request.Headers["origin"].ToString();
+            if (string.IsNullOrEmpty(origin))
+            {
+                origin = Request.Headers["Referer"].ToString();
+            }
+            return Ok(await _userServices.ResendVerifyEmailAsync(email,origin));
         }
 
         private string GenerateIPAddress()

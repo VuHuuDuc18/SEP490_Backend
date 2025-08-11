@@ -81,7 +81,7 @@ namespace Infrastructure.Services.Implements
                 }
             }
         }
-        
+
 
 
         public async Task<Response<AuthenticationResponse>> LoginAsync(AuthenticationRequest request, string ipAddress)
@@ -93,7 +93,7 @@ namespace Infrastructure.Services.Implements
                 {
                     return new Response<AuthenticationResponse>($"Không tìm thấy tài khoản với email {request.Email}.");
                 }
-                if(!user.IsActive)
+                if (!user.IsActive)
                 {
                     return new Response<AuthenticationResponse>($"Tài khoản với email {request.Email} đã bị khóa.");
                 }
@@ -133,9 +133,9 @@ namespace Infrastructure.Services.Implements
             }
             catch (Exception ex)
             {
-                return new Response<AuthenticationResponse>($"Lỗi đăng nhập") 
-                { 
-                    Errors = new List<string>() { ex.Message } 
+                return new Response<AuthenticationResponse>($"Lỗi đăng nhập")
+                {
+                    Errors = new List<string>() { ex.Message }
                 };
             }
         }
@@ -170,7 +170,7 @@ namespace Infrastructure.Services.Implements
                 {
                     Succeeded = false,
                     Message = "Lỗi tạo tài khoản.",
-                    Errors = new List<string>() { $"Vai trò {RoleConstant.Customer} không tồn tại."}
+                    Errors = new List<string>() { $"Vai trò {RoleConstant.Customer} không tồn tại." }
                 };
 
                 var result = await _userManager.CreateAsync(user, request.Password);
@@ -192,9 +192,9 @@ namespace Infrastructure.Services.Implements
             }
             catch (Exception ex)
             {
-                return new Response<string>($"Lỗi tạo tài khoản") 
-                { 
-                    Errors = new List<string>() { ex.Message } 
+                return new Response<string>($"Lỗi tạo tài khoản")
+                {
+                    Errors = new List<string>() { ex.Message }
                 };
             }
         }
@@ -295,8 +295,16 @@ namespace Infrastructure.Services.Implements
             {
                 if (string.IsNullOrEmpty(userId)) return new Response<string>("The UserId field is a require.");
                 if (string.IsNullOrEmpty(code)) return new Response<string>("The Code field is a require.");
+
                 var user = await _userManager.FindByIdAsync(userId);
                 if (user == null) return new Response<string>("Không tìm thấy tài khoản.");
+
+                if (user.EmailConfirmed) return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = $"Xác nhận không thành công. Hoặc tài khoản đã được xác nhận."
+                };
+
                 code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
                 var result = await _userManager.ConfirmEmailAsync(user, code);
                 if (result.Succeeded)
@@ -315,10 +323,47 @@ namespace Infrastructure.Services.Implements
             }
             catch (Exception ex)
             {
-                return new Response<string>($"Lỗi xác thực email") 
-                { 
-                    Errors = new List<string>() { ex.Message } 
+                return new Response<string>($"Lỗi xác thực email")
+                {
+                    Errors = new List<string>() { ex.Message }
                 };
+            }
+        }
+
+        public async Task<Response<string>> ResendVerifyEmailAsync(string email, string origin)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = $"Không tìm thấy tài khoản đăng ký với email {email}. Hãy kiểm tra lại email đã nhập."
+                    };
+                }
+
+                if (user.EmailConfirmed)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = $"Tài khoản {email} đã được xác nhận."
+                    };
+                }
+                await SendVerificationEmail(user, origin);
+
+                return new Response<string>
+                {
+                    Succeeded = true,
+                    Message = $"Đã gửi email xác nhận tới email: {email}"
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return new Response<string>("Lỗi gửi email xác nhận.");
             }
         }
 
@@ -398,9 +443,9 @@ namespace Infrastructure.Services.Implements
             }
             catch (Exception ex)
             {
-                return new Response<string>($"Lỗi đặt lại mật khẩu") 
-                { 
-                    Errors = new List<string>() { ex.Message } 
+                return new Response<string>($"Lỗi đặt lại mật khẩu")
+                {
+                    Errors = new List<string>() { ex.Message }
                 };
             }
         }
@@ -409,7 +454,7 @@ namespace Infrastructure.Services.Implements
         {
             try
             {
-                if (req == null) return new Response<string>("Yêu cầu không được để trống.");           
+                if (req == null) return new Response<string>("Yêu cầu không được để trống.");
                 var validationContext = new ValidationContext(req);
                 var validationResults = new List<ValidationResult>();
                 if (!Validator.TryValidateObject(req, validationContext, validationResults, validateAllProperties: true))
@@ -440,9 +485,9 @@ namespace Infrastructure.Services.Implements
             }
             catch (Exception ex)
             {
-                return new Response<string>($"Lỗi đổi mật khẩu") 
-                { 
-                    Errors = new List<string>() { ex.Message } 
+                return new Response<string>($"Lỗi đổi mật khẩu")
+                {
+                    Errors = new List<string>() { ex.Message }
                 };
             }
         }
@@ -493,9 +538,9 @@ namespace Infrastructure.Services.Implements
             }
             catch (Exception ex)
             {
-                return new Response<AuthenticationResponse>($"Lỗi refresh token") 
-                { 
-                    Errors = new List<string>() { ex.Message } 
+                return new Response<AuthenticationResponse>($"Lỗi refresh token")
+                {
+                    Errors = new List<string>() { ex.Message }
                 };
             }
         }
@@ -517,13 +562,13 @@ namespace Infrastructure.Services.Implements
                 refreshToken.RevokedByIp = ipAddress;
                 await _context.SaveChangesAsync();
 
-                return new Response<string>("","Hủy token thành công.");
+                return new Response<string>("", "Hủy token thành công.");
             }
             catch (Exception ex)
             {
-                return new Response<string>($"Lỗi hủy token") 
-                { 
-                    Errors = new List<string>() { ex.Message } 
+                return new Response<string>($"Lỗi hủy token")
+                {
+                    Errors = new List<string>() { ex.Message }
                 };
             }
         }
@@ -541,7 +586,8 @@ namespace Infrastructure.Services.Implements
                 var user = await _userManager.FindByIdAsync(_currentUserId.ToString());
                 if (user == null)
                 {
-                    return new Response<string>($"Không tìm thấy tài khoản."){
+                    return new Response<string>($"Không tìm thấy tài khoản.")
+                    {
                         Errors = new List<string>(){
                             $"Không tìm thấy tài khoản với ID:{_currentUserId}"
                         }
@@ -553,7 +599,7 @@ namespace Infrastructure.Services.Implements
                     user.Email = request.Email;
                     isChanged = true;
                 }
-                
+
                 if (!string.IsNullOrEmpty(request.PhoneNumber) && user.PhoneNumber != request.PhoneNumber)
                 {
                     user.PhoneNumber = request.PhoneNumber;
@@ -594,9 +640,9 @@ namespace Infrastructure.Services.Implements
             }
             catch (Exception ex)
             {
-                return new Response<string>($"Lỗi cập nhật tài khoản") 
-                { 
-                    Errors = new List<string>() { ex.Message } 
+                return new Response<string>($"Lỗi cập nhật tài khoản")
+                {
+                    Errors = new List<string>() { ex.Message }
                 };
             }
         }
@@ -614,7 +660,8 @@ namespace Infrastructure.Services.Implements
                 var user = await _userManager.FindByIdAsync(userIdClaim);
                 if (user == null)
                 {
-                    return new Response<User>($"Không tìm thấy tài khoản."){
+                    return new Response<User>($"Không tìm thấy tài khoản.")
+                    {
                         Errors = new List<string>(){
                             $"Không tìm thấy tài khoản với ID:{_currentUserId}"
                         }
@@ -625,9 +672,9 @@ namespace Infrastructure.Services.Implements
             }
             catch (Exception ex)
             {
-                return new Response<User>($"Lỗi lấy thông tin tài khoản") 
-                { 
-                    Errors = new List<string>() { ex.Message } 
+                return new Response<User>($"Lỗi lấy thông tin tài khoản")
+                {
+                    Errors = new List<string>() { ex.Message }
                 };
             }
         }
@@ -677,10 +724,11 @@ namespace Infrastructure.Services.Implements
         {
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-            var route = "api/account/confirm-email/";
+            var route = "confirm-email/";
             var _enpointUri = new Uri(string.Concat($"{origin}/", route));
             var verificationUri = QueryHelpers.AddQueryString(_enpointUri.ToString(), "userId", user.Id.ToString());
             verificationUri = QueryHelpers.AddQueryString(verificationUri, "code", code);
+            verificationUri = QueryHelpers.AddQueryString(verificationUri, "email", user.Email);
             //Email Service Call Here
             _emailService.SendEmailAsync(user.Email, EmailConstant.EMAILSUBJECTCONFIRMEMAIL, MailBodyGenerate.BodyCreateConfirmEmail(user.Email, verificationUri));
             return verificationUri;

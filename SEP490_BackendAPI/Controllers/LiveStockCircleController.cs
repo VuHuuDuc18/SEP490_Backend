@@ -9,6 +9,7 @@ using System.Security.Claims;
 using Entities.EntityModel;
 using Domain.Helper.Constants;
 using Domain.IServices;
+using Domain.DTOs.Request.LivestockCircle;
 
 namespace SEP490_BackendAPI.Controllers
 {
@@ -161,6 +162,12 @@ namespace SEP490_BackendAPI.Controllers
             var result = await _livestockCircleService.GetLiveStockCircleById(id);
             return Ok(result);
         }
+        [HttpPut("sale/set-pre-order-field")]
+        public async Task<IActionResult> SetPreOrderField([FromBody] SetPreOrderFieldRequest request)
+        {            
+            return Ok(await _livestockCircleService.SetPreOrderField(request));
+        }
+
 
         [HttpPost("get-food-remaining/{liveStockCircleId}")]
         public async Task<IActionResult> GetFoodRemaining(
@@ -179,10 +186,10 @@ namespace SEP490_BackendAPI.Controllers
         {
             return Ok(await _livestockCircleService.GetMedicineRemaining(liveStockCircleId, request));
         }
-        [HttpPut("technical-taff/release-barn/{id}")]
-        public async Task<IActionResult> ReleaseBarn([FromRoute] Guid id)
+        [HttpPut("technical-taff/release-barn")]
+        public async Task<IActionResult> ReleaseBarn([FromBody] ReleaseBarnRequest req)
         {
-            return Ok(await _livestockCircleService.ReleaseBarn(id));
+            return Ok(await _livestockCircleService.ReleaseBarn(req));
         }
     }
 }

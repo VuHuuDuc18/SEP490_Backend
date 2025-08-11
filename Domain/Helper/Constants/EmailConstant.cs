@@ -13,6 +13,8 @@ namespace Domain.Helper.Constants
         public readonly static string EMAILSUBJECTFORGOTPASSWORD = "QUÊN MẬT KHẨU";
         public readonly static string EMAILSUBJECTCONFIRMEMAIL = "XÁC NHẬN EMAIL";
         public readonly static string EMAILSUBJECTUPDATEWEIGHT = "THÔNG BÁO CẬP NHẬT CÂN NẶNG CỦA LỨA NUÔI";
+        public readonly static string EMAILSUBJECTORDERCREATED = "ĐƠN HÀNG CỦA BẠN ĐÃ ĐƯỢC TẠO THÀNH CÔNG";
+        public readonly static string EMAILSUBJECTORDERCONFIRMED = "ĐƠN HÀNG CỦA BẠN ĐÃ DUYỆT";
     }
 
 }
