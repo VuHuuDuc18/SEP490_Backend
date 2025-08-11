@@ -19,7 +19,7 @@ namespace Infrastructure.Services.Implements
     {
         private readonly IConfiguration _configuration;
         private readonly IServiceScopeFactory _scopeFactory;
-        private readonly TimeSpan _interval = TimeSpan.FromSeconds(30); // Kiểm tra mỗi ngày
+        private readonly TimeSpan _interval = TimeSpan.FromDays(1); // Kiểm tra mỗi ngày
 
         public LivestockWeightUpdateEmailService(IConfiguration configuration, IServiceScopeFactory scopeFactory)
         {
