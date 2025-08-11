@@ -123,11 +123,24 @@ namespace Infrastructure.Services.Implements
                 return new Response<List<AccountAndRoleResponse>>($"Lỗi khi lấy danh sách tài khoản.");
             }
         }
-        public async Task<Response<User>> GetAccountByEmailAsync(string email)
+        public async Task<Response<AccountResponse>> GetAccountByEmailAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
-            if (user == null) return new Response<User>($"Không tìm thấy tài khoản với email {email}.");
-            return new Response<User>(user, message: $"Lấy tài khoản thành công.");
+            if (user == null) return new Response<AccountResponse>($"Không tìm thấy tài khoản với email {email}.");
+            var userResponse = new AccountResponse
+            {
+                Id = user.Id,
+                Email = user.Email,
+                FullName = user.FullName,
+                PhoneNumber = user.PhoneNumber,
+                IsActive = user.IsActive,
+                RoleName = (await _userManager.GetRolesAsync(user)).FirstOrDefault(),
+                CreatedDate = user.CreatedDate,
+                CreatedBy = user.CreatedBy,
+                UpdatedDate = user.UpdatedDate,
+                UpdatedBy = user.UpdatedBy
+            };
+            return new Response<AccountResponse>(userResponse, message: $"Lấy tài khoản thành công.");
         }
         public async Task<Response<string>> CreateAccountAsync(CreateAccountRequest request, string origin)
         {
