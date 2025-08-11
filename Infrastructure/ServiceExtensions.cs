@@ -1,4 +1,4 @@
-using Domain.IServices;
+﻿using Domain.IServices;
 using Domain.Settings;
 using Entities.EntityModel;
 using Infrastructure.DBContext;
@@ -67,6 +67,15 @@ namespace Infrastructure
             services.AddScoped<IRepository<LivestockCircleFood>, Repository<LivestockCircleFood>>();
             services.AddScoped<IRepository<LivestockCircleMedicine>, Repository<LivestockCircleMedicine>>();
             services.AddScoped<IRepository<DailyReport>, Repository<DailyReport>>();
+
+            // Thêm Background Service (Singleton)
+            services.AddHostedService<LivestockWeightUpdateEmailService>();
+
+            // Đăng ký interface
+            services.AddScoped<ILivestockWeightUpdateEmailService, LivestockWeightUpdateEmailService>();
+
+
+
 
         }
 

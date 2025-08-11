@@ -12,6 +12,7 @@ namespace Domain.Helper.Constants
         public readonly static string EMAILSUBJECTRESETPASSWORD = "THÔNG BÁO LÀM MỚI MẬT KHẨU";
         public readonly static string EMAILSUBJECTFORGOTPASSWORD = "QUÊN MẬT KHẨU";
         public readonly static string EMAILSUBJECTCONFIRMEMAIL = "XÁC NHẬN EMAIL";
+        public readonly static string EMAILSUBJECTUPDATEWEIGHT = "THÔNG BÁO CẬP NHẬT CÂN NẶNG CỦA LỨA NUÔI";
     }
 
 }

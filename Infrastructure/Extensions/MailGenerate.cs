@@ -97,5 +97,25 @@ namespace Infrastructure.Extensions
 
             return GenerateBaseTemplate("Yêu cầu xác thực tài khoản!", content);
         }
+
+        public static string BodyLivestockWeightUpdate(string workerName, string livestockCircleName, string barnName, DateTime startDate, int ageInDays, string updateLink)
+        {
+            var content = $@"
+            <div class='info'>Kính gửi <strong>{workerName}</strong>,</div>
+            <div class='info'>Lứa nuôi <strong>{livestockCircleName}</strong> trong chuồng <strong>{barnName}</strong> đã đến thời điểm cập nhật cân nặng.</div>
+            <div class='info'><strong>Tên lứa nuôi:</strong> {livestockCircleName}</div>
+            <div class='info'><strong>Tên chuồng:</strong> {barnName}</div>
+            <div class='info'><strong>Ngày bắt đầu nuôi:</strong> {startDate:dd/MM/yyyy}</div>
+            <div class='info'><strong>Ngày tuổi:</strong> {ageInDays} ngày (tuần {ageInDays / 7})</div>
+            <div class='info'>Vui lòng nhấp vào nút bên dưới để cập nhật cân nặng:</div>
+            <a class='btn' href='{updateLink}'>Cập nhật cân nặng</a>
+            <div class='info' style='margin-top: 20px; font-size: 12px; color: #666;'>
+                Nếu bạn không phải người phụ trách, vui lòng bỏ qua email này.
+            </div>";
+
+            return GenerateBaseTemplate("Thông báo cập nhật cân nặng", content);
+        }
+
+
     }
 }
