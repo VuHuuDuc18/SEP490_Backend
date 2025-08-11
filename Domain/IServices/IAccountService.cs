@@ -10,7 +10,7 @@ namespace Domain.IServices
     public interface IAccountService
     {
         Task<Response<List<AccountAndRoleResponse>>> GetAllAccountsAsync();
-        Task<Response<User>> GetAccountByEmailAsync(string email);
+        Task<Response<AccountResponse>> GetAccountByEmailAsync(string email);
         Task<Response<string>> CreateAccountAsync(CreateAccountRequest request, string origin);
         Task<Response<string>> ResetPassword(ResetPasswordRequest model);
         Task<Response<string>> DeleteAccount(string email);
