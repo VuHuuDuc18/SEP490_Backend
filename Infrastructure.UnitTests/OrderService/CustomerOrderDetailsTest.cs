@@ -40,6 +40,7 @@ namespace Infrastructure.UnitTests.OrderService
         private readonly Mock<IRepository<BreedCategory>> _breedCategoryRepositoryMock;
         private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
         private readonly Mock<LCFMSDBContext> _dbContextMock;
+        private readonly Mock<Infrastructure.Services.IEmailService> _emailService = new Mock<Infrastructure.Services.IEmailService>();
         private readonly Infrastructure.Services.Implements.OrderService _service;
         private readonly Guid _currentUserId = Guid.NewGuid();
 
@@ -56,7 +57,7 @@ namespace Infrastructure.UnitTests.OrderService
             _roleRepositoryMock = new Mock<IRepository<Role>>();
             _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
             _dbContextMock = new Mock<LCFMSDBContext>(new DbContextOptions<LCFMSDBContext>());
-
+            _emailService = new Mock<Infrastructure.Services.IEmailService>();
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, _currentUserId.ToString()),
@@ -78,7 +79,8 @@ namespace Infrastructure.UnitTests.OrderService
                 _breedCategoryRepositoryMock.Object,
                 _imageLivestockCircleRepositoryMock.Object,
                 _roleRepositoryMock.Object,
-                _dbContextMock.Object
+                _dbContextMock.Object,
+                _emailService.Object
             );
         }
 

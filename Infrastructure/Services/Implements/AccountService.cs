@@ -273,6 +273,11 @@ namespace Infrastructure.Services.Implements
             if (!string.IsNullOrEmpty(request.Email)) user.Email = request.Email;
             if (!string.IsNullOrEmpty(request.PhoneNumber)) user.PhoneNumber = request.PhoneNumber;
             if (!string.IsNullOrEmpty(request.FullName)) user.FullName = request.FullName;
+            var userDuplicate = await _userManager.FindByEmailAsync(request.Email);
+            if (userDuplicate != null && userDuplicate.Id != user.Id)
+            {
+                return new Response<string>($"Email {request.Email} đã được đăng ký.");
+            }
             user.UpdatedBy = _currentUserId;
             user.UpdatedDate = DateTime.UtcNow;
             await _userManager.UpdateAsync(user);
