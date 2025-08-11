@@ -84,5 +84,10 @@ namespace WebApi.Controllers
         {
             return Ok(await _accountService.ResetAllAccountPassword(newPassword));
         }
+        [HttpDelete]
+        public async Task<IActionResult> DeleteAccountByEmail([FromQuery]string email)
+        {
+            return Ok(await _accountService.DeleteAccountByEmailAsync(email));
+        }
     }
 }
