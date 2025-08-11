@@ -76,5 +76,11 @@ namespace WebApi.Controllers
             var result = await _accountService.GetListAccount(req);
             return Ok(result);
         }
+
+        [HttpPost("reset-all-password")]
+        public async Task<IActionResult> ResetAllAccountPassword()
+        {
+            return Ok(await _accountService.ResetAllAccountPassword());
+        }
     }
 }

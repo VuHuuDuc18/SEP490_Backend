@@ -382,6 +382,33 @@ namespace Infrastructure.Services.Implements
                 };
             }
         }
+
+        public async Task<Response<string>> ResetAllAccountPassword()
+        {
+            try
+            {
+                var users = _userManager.Users;
+
+                foreach (User user in users)
+                {
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    await _userManager.ResetPasswordAsync(user, token, "@Password1");
+
+                }
+                return new Response<string>()
+                {
+                    Succeeded = true,
+                    Message = "Đặt lại tất cả mật khẩu thành công.",
+                    Data = "Mật khẩu mới: @Password1"
+                };
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return new Response<string>("Lỗi khi đặt lại mật khẩu.");
+            }
+        }
+
         private async Task<string> SendVerificationEmail(User user, string origin)
         {
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -394,5 +421,7 @@ namespace Infrastructure.Services.Implements
             await _emailService.SendEmailAsync(user.Email, EmailConstant.EMAILSUBJECTCONFIRMEMAIL, MailBodyGenerate.BodyCreateConfirmEmail(user.Email, verificationUri));
             return verificationUri;
         }
+
+       
     }
 }
