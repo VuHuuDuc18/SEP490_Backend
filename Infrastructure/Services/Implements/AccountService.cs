@@ -383,7 +383,7 @@ namespace Infrastructure.Services.Implements
             }
         }
 
-        public async Task<Response<string>> ResetAllAccountPassword()
+        public async Task<Response<string>> ResetAllAccountPassword(string newPassword)
         {
             try
             {
@@ -392,20 +392,27 @@ namespace Infrastructure.Services.Implements
                 foreach (User user in users)
                 {
                     var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                    await _userManager.ResetPasswordAsync(user, token, "@Password1");
+                    await _userManager.ResetPasswordAsync(user, token, newPassword);
 
                 }
                 return new Response<string>()
                 {
                     Succeeded = true,
                     Message = "Đặt lại tất cả mật khẩu thành công.",
-                    Data = "Mật khẩu mới: @Password1"
+                    Data = "Mật khẩu mới: "+ newPassword
                 };
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return new Response<string>("Lỗi khi đặt lại mật khẩu.");
+                return new Response<string>("Lỗi khi đặt lại mật khẩu.")
+                {
+                    Errors = new List<string>()
+                    {
+                        e.Message,
+                        e.ToString(),
+                    }
+                };
             }
         }
 
