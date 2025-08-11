@@ -382,7 +382,6 @@ namespace Infrastructure.Services.Implements
                 };
             }
         }
-
         public async Task<Response<string>> ResetAllAccountPassword(string newPassword)
         {
             try
@@ -415,7 +414,47 @@ namespace Infrastructure.Services.Implements
                 };
             }
         }
+        public async Task<Response<string>> DeleteAccountByEmailAsync(string email)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null) return new Response<string>($"Không tìm thấy tài khoản với email: {email}.");
 
+                var userRoles = await _userManager.GetRolesAsync(user);
+                await _userManager.RemoveFromRolesAsync(user, userRoles);
+
+                var result = await _userManager.DeleteAsync(user);
+                if (!result.Succeeded) return new Response<string>()
+                {
+                    Succeeded = false,
+                    Message = "Xóa không thành công.",
+                    Errors = result.Errors.Select(x => $"{x.Code}: {x.Description}").ToList()
+                };
+                return new Response<string>()
+                {
+                    Succeeded = true,
+                    Message = $"Đã xóa tài khoản thành công. Email: {email}."
+                };
+            } catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return new Response<string>("Lỗi khi xóa tài khoản.")
+                {
+                    Errors = new List<string>()
+                    {
+                        e.Message,
+                        e.ToString(),
+                        e.StackTrace,
+                        e.GetType().ToString(),
+                        e.InnerException.Message,
+                        e.InnerException.ToString(),
+                        e.InnerException.StackTrace,
+                        e.InnerException.GetType().ToString(),
+                    }
+                };
+            }
+        }
         private async Task<string> SendVerificationEmail(User user, string origin)
         {
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
