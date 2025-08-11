@@ -298,6 +298,7 @@ namespace Infrastructure.Services.Implements
                         Id = user.Id,
                         Email = user.Email,
                         FullName = user.FullName,
+                        PhoneNumber = user.PhoneNumber,
                         IsActive = user.IsActive,
                         RoleName = role,
                         CreatedDate = user.CreatedDate,
