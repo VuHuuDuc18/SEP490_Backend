@@ -32,6 +32,7 @@ namespace Domain.IServices
         Task<Response<string>> RevokeTokenAsync(string token, string ipAddress);
         Task<Response<string>> UpdateAccountAsync(UserUpdateAccountRequest request);
         Task<Response<User>> GetUserProfile();
+        Task<Response<string>> ResendVerifyEmailAsync(string email, string origin);
 
     }
 }
