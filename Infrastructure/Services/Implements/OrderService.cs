@@ -252,7 +252,7 @@ namespace Infrastructure.Services.Implements
                     return new Response<OrderResponse>("Đơn hàng không tồn tại hoặc đã bị xóa.");
                 }
 
-                if (_currentUserId != order.CustomerId || _currentUserId!= order.SaleStaffId)
+                if (_currentUserId != order.CustomerId && _currentUserId!= order.SaleStaffId)
                     return new Response<OrderResponse>()
                     {
                         Succeeded = false,
@@ -606,7 +606,7 @@ namespace Infrastructure.Services.Implements
             };
         }
 
-        public async Task<Response<PaginationSet<OrderResponse>>> SaleGetAllOrder(ListingRequest request)
+        public async Task<Response<PaginationSet<OrderResponse>>> SaleGetPaginatedOrderList(ListingRequest request)
         {
             try
             {

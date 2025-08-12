@@ -152,7 +152,7 @@ namespace Infrastructure.UnitTests.OrderService
             };
 
             // Act
-            var result = await _service.SaleGetAllOrder(request);
+            var result = await _service.SaleGetPaginatedOrderList(request);
 
             // Assert
             Assert.False(result.Succeeded, $"Succeeded is false. Message: {result.Message}, Errors: {string.Join(", ", result.Errors ?? new List<string>())}");
@@ -174,7 +174,7 @@ namespace Infrastructure.UnitTests.OrderService
             // No request object
 
             // Act
-            var result = await _service.SaleGetAllOrder(null);
+            var result = await _service.SaleGetPaginatedOrderList(null);
 
             // Assert
             Assert.False(result.Succeeded);
@@ -189,7 +189,7 @@ namespace Infrastructure.UnitTests.OrderService
             var request = new ListingRequest { PageIndex = 0, PageSize = 10 };
 
             // Act
-            var result = await _service.SaleGetAllOrder(request);
+            var result = await _service.SaleGetPaginatedOrderList(request);
 
             // Assert
             Assert.False(result.Succeeded);
@@ -204,7 +204,7 @@ namespace Infrastructure.UnitTests.OrderService
             var request = new ListingRequest { PageIndex = 1, PageSize = 0 };
 
             // Act
-            var result = await _service.SaleGetAllOrder(request);
+            var result = await _service.SaleGetPaginatedOrderList(request);
 
             // Assert
             Assert.False(result.Succeeded);
@@ -267,7 +267,7 @@ namespace Infrastructure.UnitTests.OrderService
             };
 
             // Act
-            var result = await _service.SaleGetAllOrder(request);
+            var result = await _service.SaleGetPaginatedOrderList(request);
 
             // Assert
             Assert.False(result.Succeeded);
@@ -331,7 +331,7 @@ namespace Infrastructure.UnitTests.OrderService
             };
 
             // Act
-            var result = await _service.SaleGetAllOrder(request);
+            var result = await _service.SaleGetPaginatedOrderList(request);
 
             // Assert
             Assert.False(result.Succeeded);
@@ -395,7 +395,7 @@ namespace Infrastructure.UnitTests.OrderService
             };
 
             // Act
-            var result = await _service.SaleGetAllOrder(request);
+            var result = await _service.SaleGetPaginatedOrderList(request);
 
             // Assert
             Assert.False(result.Succeeded);

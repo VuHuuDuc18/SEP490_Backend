@@ -109,7 +109,7 @@ namespace SEP490_BackendAPI.Controllers
         [HttpPost("sale/get-order-list")]
         public async Task<IActionResult> GetOrderList(ListingRequest request)
         {
-            return Ok(await _orderService.SaleGetAllOrder(request));
+            return Ok(await _orderService.SaleGetPaginatedOrderList(request));
         }
         [HttpPost("worker/worker-get-order-list")]
         public async Task<IActionResult> WorderGetOrderList(ListingRequest request)
