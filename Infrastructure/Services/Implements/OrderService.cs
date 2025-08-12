@@ -93,7 +93,7 @@ namespace Infrastructure.Services.Implements
                 };
             }
             var currentUser = await _userManager.FindByIdAsync(_currentUserId.ToString());
-            if (currentUser==null)
+            if (currentUser == null)
             {
                 return new Response<string>()
                 {
@@ -123,13 +123,17 @@ namespace Infrastructure.Services.Implements
             try
             {
                 //Kiểm tra đơn hàng đã tồn tại chưa
-                var existingOrder = _orderRepository.GetQueryable(x => x.CustomerId == _currentUserId && x.LivestockCircleId == request.LivestockCircleId && x.Status != OrderStatus.CANCELLED);
-                if (!existingOrder.IsNullOrEmpty())
+                var existingOrder = _orderRepository.GetQueryable(
+                    x => x.CustomerId == _currentUserId
+                    && x.LivestockCircleId == request.LivestockCircleId
+                    && (x.Status == OrderStatus.PENDING || x.Status == OrderStatus.APPROVED)
+                );
+                if (existingOrder.Any())
                 {
                     return new Response<string>()
                     {
                         Succeeded = false,
-                        Message = "Đã tồn tại đơn hàng với chuồng nuôi hiện tại. Vui lòng kiểm tra lại các đơn hàng của bạn.",
+                        Message = "Đã tồn tại đơn hàng chưa hoàn thành với chuồng nuôi hiện tại.",
                     };
                 }
                 // Lấy danh sách các Sale Staff và tổng số đơn hàng mỗi Sale đang xử lý
