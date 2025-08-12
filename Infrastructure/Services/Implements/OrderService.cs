@@ -222,7 +222,7 @@ namespace Infrastructure.Services.Implements
                 await _orderRepository.CommitAsync(cancellationToken);
 
                 //Tạo order thành công
-                _emailService.SendEmailAsync(currentUser.Email, EmailConstant.EMAILSUBJECTORDERCREATED, MailBodyGenerate.BodyCreateOrder(currentUser.Email, ""));
+                await _emailService.SendEmailAsync(currentUser.Email, EmailConstant.EMAILSUBJECTORDERCREATED, MailBodyGenerate.BodyCreateOrder(currentUser.Email, ""));
                 return new Response<string>()
                 {
                     Succeeded = true,
@@ -251,11 +251,19 @@ namespace Infrastructure.Services.Implements
                 {
                     return new Response<OrderResponse>("Đơn hàng không tồn tại hoặc đã bị xóa.");
                 }
+
+                if (_currentUserId != order.CustomerId || _currentUserId!= order.SaleStaffId)
+                    return new Response<OrderResponse>()
+                    {
+                        Succeeded = false,
+                        Message = $"Không thể xem đơn hàng của người khác."
+                    };
                 var livestockCircle = await _livestockCircleRepository.GetByIdAsync(order.LivestockCircleId);
                 var images = await _imageLivestockCircleRepository.GetQueryable(x => x.IsActive && x.LivestockCircleId == order.LivestockCircleId)
                     .Select(x => x.ImageLink).ToListAsync();
-                var customer = await _userManager.FindByIdAsync(_currentUserId.ToString());
+                var customer = await _userManager.FindByIdAsync(order.CustomerId.ToString());
                 var saler = await _userManager.FindByIdAsync(order.SaleStaffId.ToString());
+
                 var result = new OrderResponse()
                 {
                     Id = order.Id,
@@ -278,7 +286,7 @@ namespace Infrastructure.Services.Implements
                 return new Response<OrderResponse>()
                 {
                     Succeeded = true,
-                    Message = "Xem chi tiết đơn hàng thành công",
+                    Message = "Lấy chi tiết đơn hàng thành công",
                     Data = result
                 };
             }
