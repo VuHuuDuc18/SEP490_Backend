@@ -9,6 +9,7 @@ namespace Domain.Dto.Request.Breed
     public class AdminCreateBreedBillRequest
     {
         public string LivestockCircleName {  get; set; }
+        public DateTime DeliveryDate { get; set; }
         public Guid TechnicalStaffId { get; set; }
         public Guid BarnId {  get; set; }
         public Guid BreedId { get; set; }

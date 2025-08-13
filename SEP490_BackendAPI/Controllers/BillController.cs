@@ -255,6 +255,7 @@ namespace SEP490_BackendAPI.Controllers
                 var BillBreedToRequest = new CreateBreedRequestDto()
                 {
                     LivestockCircleId = livestockCircle.Data,
+                    DeliveryDate = request.DeliveryDate,
                     Note = request.Note,
                     UserRequestId = Guid.Parse(User.FindFirst("uid")?.Value),
                     BreedItems = new List<BreedItemRequest>()
