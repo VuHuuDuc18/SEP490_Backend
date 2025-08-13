@@ -44,7 +44,7 @@ namespace Infrastructure.Services.Implements
             {
                 // xu ly daily
                 DateTime formatedStartDate, formatedEndDate;
-                var validResponse = ValidTime(true, (bool)(req.IsDaily == null ? false : req.IsDaily), req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
+                var validResponse = ValidTime(true, false, req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
                 if (!validResponse.Equals("Success"))
                 {
                     return new Response<bool>()
