@@ -984,7 +984,7 @@ namespace Infrastructure.Services.Implements
                     };
                 }
 
-                var query = _livestockCircleRepository.GetQueryable(x => x.IsActive && x.Status == StatusConstant.RELEASESTAT)
+                var query = _livestockCircleRepository.GetQueryable(x => x.IsActive && x.Status == StatusConstant.RELEASESTAT && x.PreSoldDate != null)
                     .Include(x => x.Barn)
                     .Include(x => x.Breed)
                     .ThenInclude(x => x.BreedCategory)
