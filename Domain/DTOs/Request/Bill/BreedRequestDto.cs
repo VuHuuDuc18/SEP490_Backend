@@ -15,6 +15,7 @@ namespace Domain.Dto.Request.Bill
         public string Note { get; set; }
         [Required(ErrorMessage = "Phải cung cấp ít nhất một mặt hàng giống.")]
         public List<BreedItemRequest> BreedItems { get; set; } = new List<BreedItemRequest>();
+        public DateTime DeliveryDate { get; set; }
     }
 
     public class AddBreedItemToBillDto

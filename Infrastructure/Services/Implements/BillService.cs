@@ -1943,6 +1943,7 @@ namespace Infrastructure.Services.Implements
             var bill = new Bill
             {
                 UserRequestId = request.UserRequestId,
+                DeliveryDate = request.DeliveryDate,
                 LivestockCircleId = request.LivestockCircleId,
                 Name = $"Yêu cầu giống - {DateTime.UtcNow}",
                 Note = request.Note,
