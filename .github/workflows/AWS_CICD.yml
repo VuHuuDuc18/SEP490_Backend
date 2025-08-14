@@ -1,0 +1,46 @@
+name: Deploy API to AWS Elastic Beanstalk
+
+on:
+  push:
+    branches:
+      - deploy # Hoặc branch mà bạn muốn auto deploy
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Lấy code về
+      - uses: actions/checkout@v4
+
+      # Cài .NET (nếu là ASP.NET Core)
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # Khôi phục package (dotnet restore), làm trong folder dự án
+      - name: Dotnet Restore
+        working-directory: ./SEP490_BackendAPI
+        run: dotnet restore
+
+      # Build & Publish project trong folder dự án
+      - name: Build & Publish
+        working-directory: ./SEP490_BackendAPI
+        run: dotnet publish -c Release -o ./publish --self-contained false
+
+      # ZIP thư mục publish (lưu ý thư mục publish nằm trong SEP490_BackendAPI/publish)
+      - name: Zip publish folder
+        run: |
+          cd SEP490_BackendAPI/publish
+          zip -r ../../publish.zip .
+
+      # Deploy lên Elastic Beanstalk, file publish.zip ở root repo
+      - name: Deploy to AWS Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v21
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: 'Livestock Contract Farming Management System'
+          environment_name: 'lcfms-test'
+          region: 'ap-southeast-2'
+          version_label: ${{ github.run_number }}
+          deployment_package: publish.zip
