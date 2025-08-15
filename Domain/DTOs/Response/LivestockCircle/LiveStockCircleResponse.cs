@@ -29,6 +29,8 @@ namespace Domain.Dto.Response.LivestockCircle
         public Guid BarnId { get; set; }
         public Guid TechicalStaffId { get; set; }
         public bool IsActive { get; set; }
+        public DateTime? PreSoldDate { get; set; } // set ngày bán dự kiến / sale set
+        public float? SamplePrice { get; set; }
         public List<ImageLivestockCircleResponse>? Images { get; set; }
     }
 

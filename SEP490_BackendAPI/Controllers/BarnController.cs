@@ -118,7 +118,12 @@ namespace SEP490_BackendAPI.Controllers
         {
             return Ok(await _barnService.GetReleaseBarnDetail(BarnId, cancellationToken));
         }
-
+        [HttpPost("sale/get-barn")]
+        public async Task<IActionResult> SaleGetReleasedBarnList([FromBody] ListingRequest req)
+        {
+            var result = await _barnService.SaleGetReleasedBarnList(req);
+            return Ok(result);
+        }
     }
 }
 

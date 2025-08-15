@@ -13,7 +13,7 @@ namespace Domain.Dto.Response.Barn
         public string BarnName { get; set; }
         public string Address { get; set; }
         public string Image { get; set; }
-
+     
         public int TotalUnit { get; set; }
         public int Age { get; set; }
         public int DeadUnit { get; set; }
@@ -24,5 +24,7 @@ namespace Domain.Dto.Response.Barn
         public string Breed{ get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? ReleaseDate { get; set; }
+        public DateTime? PreSoldDate { get; set; }
+        public float? SamplePrice { get; set; }
     }
 }

@@ -38,6 +38,7 @@ namespace Domain.IServices
         Task<Response<PaginationSet<ReleaseBarnResponse>>> GetPaginatedReleaseBarnListAsync(
             ListingRequest request,
             CancellationToken cancellationToken = default);
+        Task<Response<PaginationSet<ReleaseBarnResponse>>> SaleGetReleasedBarnList(ListingRequest request);
         Task<Response<ReleaseBarnDetailResponse>> GetReleaseBarnDetail(
             Guid BarnId,
             CancellationToken cancellationToken = default);

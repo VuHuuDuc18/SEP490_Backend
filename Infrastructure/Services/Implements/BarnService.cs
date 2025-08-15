@@ -984,7 +984,7 @@ namespace Infrastructure.Services.Implements
                     };
                 }
 
-                var query = _livestockCircleRepository.GetQueryable(x => x.IsActive && x.Status == StatusConstant.RELEASESTAT && x.PreSoldDate != null)
+                var query = _livestockCircleRepository.GetQueryable(x => x.IsActive && x.Status == StatusConstant.RELEASESTAT && x.PreSoldDate != null && DateTime.Now >= ((DateTime)x.PreSoldDate).Date)
                     .Include(x => x.Barn)
                     .Include(x => x.Breed)
                     .ThenInclude(x => x.BreedCategory)
@@ -1004,6 +1004,8 @@ namespace Infrastructure.Services.Implements
                         Breed = x.Breed.BreedName,
                         StartDate = x.StartDate,
                         ReleaseDate = x.ReleaseDate,
+                        PreSoldDate = x.PreSoldDate,
+                        SamplePrice = x.SamplePrice,
                         Age = (DateTime.UtcNow - (DateTime)x.StartDate).Days < 0 ? 0 : (DateTime.UtcNow - (DateTime)x.StartDate).Days
                     });
 
@@ -1062,7 +1064,7 @@ namespace Infrastructure.Services.Implements
             }
             
         }
-
+        // technical staff get assigned barn
         public async Task<Response<PaginationSet<BarnResponse>>> GetAssignedBarn(Guid tsid, ListingRequest request)
         {
             try
@@ -1140,6 +1142,92 @@ namespace Infrastructure.Services.Implements
             catch (Exception ex)
             {
                 return new Response<PaginationSet<BarnResponse>>($"Lỗi khi lấy danh sách phân trang: {ex.Message}");
+            }
+        }
+
+        public async Task<Response<PaginationSet<ReleaseBarnResponse>>> SaleGetReleasedBarnList(ListingRequest request)
+        {
+            try
+            {
+                if (request == null)
+                    return new Response<PaginationSet<ReleaseBarnResponse>>("Yêu cầu không được null.");
+                if (request.PageIndex < 1 || request.PageSize < 1)
+                    return new Response<PaginationSet<ReleaseBarnResponse>>("PageIndex và PageSize phải lớn hơn 0.");
+
+                var validFields = typeof(ReleaseBarnResponse).GetProperties().Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var invalidFields = request.Filter?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                var invalidFieldsSearch = request.SearchString?.Where(f => !string.IsNullOrEmpty(f.Field) && !validFields.Contains(f.Field))
+                    .Select(f => f.Field).ToList() ?? new List<string>();
+                if (invalidFields.Any())
+                {
+                    return new Response<PaginationSet<ReleaseBarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường lọc không hợp lệ: {string.Join(", ", invalidFields)}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
+
+                if (invalidFieldsSearch.Any())
+                {
+                    return new Response<PaginationSet<ReleaseBarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường tìm kiếm không hợp lệ: {string.Join(", ", invalidFields)}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
+
+
+                if (!validFields.Contains(request.Sort?.Field))
+                {
+                    return new Response<PaginationSet<ReleaseBarnResponse>>()
+                    {
+                        Succeeded = false,
+                        Message = $"Trường sắp xếp không hợp lệ: {request.Sort?.Field}",
+                        Errors = new List<string> { $"Trường hợp lệ: {string.Join(", ", validFields)}" }
+                    };
+                }
+
+                var query = _livestockCircleRepository.GetQueryable(x => x.IsActive && x.Status == StatusConstant.RELEASESTAT)
+                    .Include(x => x.Barn)
+                    .Include(x => x.Breed)
+                    .ThenInclude(x => x.BreedCategory)
+                    .Select(x => new ReleaseBarnResponse()
+                    {
+                        Id = x.Barn.Id,
+                        BarnName = x.Barn.BarnName,
+                        Address = x.Barn.Address,
+                        Image = x.Barn.Image,
+
+                        TotalUnit = x.TotalUnit,
+                        DeadUnit = x.DeadUnit,
+                        GoodUnitNumber = x.GoodUnitNumber,
+                        BadUnitNumber = x.BadUnitNumber,
+                        AverageWeight = x.AverageWeight,
+                        BreedCategory = x.Breed.BreedCategory.Name,
+                        Breed = x.Breed.BreedName,
+                        StartDate = x.StartDate,
+                        ReleaseDate = x.ReleaseDate,
+                        SamplePrice = x.SamplePrice,
+                        PreSoldDate = x.PreSoldDate,
+                        Age = (DateTime.UtcNow - (DateTime)x.StartDate).Days < 0 ? 0 : (DateTime.UtcNow - (DateTime)x.StartDate).Days
+                    });
+
+                if (request.SearchString?.Any() == true)
+                    query = query.SearchString(request.SearchString);
+
+                if (request.Filter?.Any() == true)
+                    query = query.Filter(request.Filter);
+
+                var paginationResult = await query.Pagination(request.PageIndex, request.PageSize, request.Sort);
+
+                return new Response<PaginationSet<ReleaseBarnResponse>>(paginationResult, "Lấy dữ liệu thành công.");
+            }
+            catch (Exception ex)
+            {
+                return new Response<PaginationSet<ReleaseBarnResponse>>($"Lỗi khi lấy danh sách phân trang: {ex.Message}");
             }
         }
     }
