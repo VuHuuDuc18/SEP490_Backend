@@ -150,18 +150,18 @@ namespace SEP490_BackendAPI.Controllers
             return Ok(await _livestockCircleService.GetLivestockCircleHistory(barnId, req));
         }
 
-        [HttpPost("sale/getBarn")]
-        public async Task<IActionResult> GetReleasedBarn([FromBody] ListingRequest req)
-        {
-            var result = await _livestockCircleService.GetReleasedLivestockCircleList(req);
-            return Ok(result);
-        }
-        [HttpGet("sale/getBarnById/{id}")]
-        public async Task<IActionResult> GetReleasedBarnById([FromRoute] Guid id)
-        {
-            var result = await _livestockCircleService.GetLiveStockCircleById(id);
-            return Ok(result);
-        }
+        //[HttpPost("sale/getBarn")]
+        //public async Task<IActionResult> GetReleasedBarn([FromBody] ListingRequest req)
+        //{
+        //    var result = await _livestockCircleService.GetReleasedLivestockCircleList(req);
+        //    return Ok(result);
+        //}
+        //[HttpGet("sale/getBarnById/{id}")]
+        //public async Task<IActionResult> GetReleasedBarnById([FromRoute] Guid id)
+        //{
+        //    var result = await _livestockCircleService.GetLiveStockCircleById(id);
+        //    return Ok(result);
+        //}
         [HttpPut("sale/set-pre-order-field")]
         public async Task<IActionResult> SetPreOrderField([FromBody] SetPreOrderFieldRequest request)
         {            
