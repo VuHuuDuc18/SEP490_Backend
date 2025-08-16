@@ -42,5 +42,5 @@ jobs:
           application_name: 'Livestock Contract Farming Management System'
           environment_name: 'lcfms-test'
           region: 'ap-southeast-2'
-          version_label: ${{ github.run_number }}
+          version_label: ${{ github.ref_name }}-${{ github.run_number }}
           deployment_package: publish.zip
