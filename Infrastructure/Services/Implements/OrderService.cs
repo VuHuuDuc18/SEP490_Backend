@@ -252,12 +252,7 @@ namespace Infrastructure.Services.Implements
                     return new Response<OrderResponse>("Đơn hàng không tồn tại hoặc đã bị xóa.");
                 }
 
-                if (_currentUserId != order.CustomerId && _currentUserId!= order.SaleStaffId)
-                    return new Response<OrderResponse>()
-                    {
-                        Succeeded = false,
-                        Message = $"Không thể xem đơn hàng của người khác."
-                    };
+                
                 var livestockCircle = await _livestockCircleRepository.GetByIdAsync(order.LivestockCircleId);
                 var images = await _imageLivestockCircleRepository.GetQueryable(x => x.IsActive && x.LivestockCircleId == order.LivestockCircleId)
                     .Select(x => x.ImageLink).ToListAsync();
