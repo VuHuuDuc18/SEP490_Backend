@@ -355,7 +355,7 @@ namespace Infrastructure.Services.Implements
                 Message = "Không tìm thấy chuồng"
             };
             // BR-3
-            if (!releaseItem.Status.Equals(StatusConstant.GROWINGSTAT))
+            if (!releaseItem.Status.Equals(StatusConstant.GROWINGSTAT) && !releaseItem.Status.Equals(StatusConstant.RELEASESTAT))
             {
                 return new Response<bool>()
                 {
