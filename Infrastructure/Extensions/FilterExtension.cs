@@ -24,34 +24,42 @@ namespace Infrastructure.Extensions
                     continue;
 
                 var param = Expression.Parameter(typeof(T), "item");
+                Expression propertyAccess = Expression.Property(param, getter.Name);
                 object convertedValue = null;
 
                 try
                 {
-                    Expression propertyAccess = Expression.Property(param, getter.Name);
-
-                    if (getter.PropertyType == typeof(Guid))
+                    if (getter.PropertyType == typeof(Guid) || getter.PropertyType == typeof(Guid?))
                     {
                         if (Guid.TryParse(item.Value, out var guidValue))
                             convertedValue = guidValue;
                         else
                             continue;
                     }
-                    else if (getter.PropertyType == typeof(DateTime))
+                    else if (getter.PropertyType == typeof(DateTime) || getter.PropertyType == typeof(DateTime?))
                     {
                         if (DateTime.TryParse(item.Value, out var dateValue))
                         {
                             convertedValue = dateValue.Date;
 
-                            // Compare only the Date part
-                            var dateProperty = Expression.Property(propertyAccess, nameof(DateTime.Date));
+                            Expression dateProperty;
+                            if (getter.PropertyType == typeof(DateTime?))
+                            {
+                                var valueProperty = Expression.Property(propertyAccess, "Value");
+                                dateProperty = Expression.Property(valueProperty, nameof(DateTime.Date));
+                            }
+                            else
+                            {
+                                dateProperty = Expression.Property(propertyAccess, nameof(DateTime.Date));
+                            }
+
                             var dateComparison = Expression.Equal(
                                 dateProperty,
                                 Expression.Constant(dateValue.Date, typeof(DateTime)));
 
                             var dateLambda = Expression.Lambda<Func<T, bool>>(dateComparison, param);
                             input = input.Where(dateLambda);
-                            continue; // Skip rest of loop
+                            continue;
                         }
                         else
                         {
@@ -60,15 +68,16 @@ namespace Infrastructure.Extensions
                     }
                     else
                     {
-                        convertedValue = Convert.ChangeType(item.Value, getter.PropertyType);
+                        Type targetType = Nullable.GetUnderlyingType(getter.PropertyType) ?? getter.PropertyType;
+                        convertedValue = Convert.ChangeType(item.Value, targetType);
                     }
 
-                    var generalComparison = Expression.Equal(
+                    var comparison = Expression.Equal(
                         propertyAccess,
                         Expression.Constant(convertedValue, getter.PropertyType));
 
-                    var generalLambda = Expression.Lambda<Func<T, bool>>(generalComparison, param);
-                    input = input.Where(generalLambda);
+                    var lambda = Expression.Lambda<Func<T, bool>>(comparison, param);
+                    input = input.Where(lambda);
                 }
                 catch
                 {
