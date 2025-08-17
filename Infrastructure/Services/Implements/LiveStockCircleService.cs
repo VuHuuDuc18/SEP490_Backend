@@ -6,6 +6,7 @@ using Domain.Dto.Request.LivestockCircle;
 using Domain.Dto.Response;
 using Domain.Dto.Response.Barn;
 using Domain.Dto.Response.Bill;
+using Domain.Dto.Response.Breed;
 using Domain.Dto.Response.LivestockCircle;
 using Domain.Dto.Response.User;
 using Domain.DTOs.Request.LivestockCircle;
@@ -24,6 +25,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Infrastructure.Services.Implements
 {
@@ -172,7 +174,26 @@ namespace Infrastructure.Services.Implements
 
             if (livestockCircle == null)
                 return (null, "Không tìm thấy chu kỳ chăn nuôi.");
+            var images = await _imageBreedRepository.GetQueryable(x => x.BreedId == livestockCircle.BreedId).ToListAsync(cancellationToken);
 
+            var breed = await _breedRepository.GetQueryable(x=>x.Id == livestockCircle.BreedId)
+                .Include(x=>x.BreedCategory)
+                .Select( x => new BreedResponse()
+                {
+                    Id = x.Id,
+                    BreedName = x.BreedName,
+                    Stock = x.Stock,
+                    ImageLinks = images.Select(x=>x.ImageLink).ToList(),
+                    Thumbnail = "",
+                    IsActive = x.IsActive,
+                    BreedCategory = new BreedCategoryResponse
+                    {
+                        Id = x.BreedCategory.Id,
+                        Name = x.BreedCategory.Name,
+                        Description = x.BreedCategory.Description
+                    }
+                })
+                .FirstOrDefaultAsync();
             var response = new LivestockCircleResponse
             {
                 Id = livestockCircle.Id,
@@ -188,7 +209,19 @@ namespace Infrastructure.Services.Implements
                 BreedId = livestockCircle.BreedId,
                 BarnId = livestockCircle.BarnId,
                 TechicalStaffId = livestockCircle.TechicalStaffId,
-                IsActive = livestockCircle.IsActive
+                IsActive = livestockCircle.IsActive,
+                Breed = breed,
+                PreSoldDate = livestockCircle.PreSoldDate,
+                ReleaseDate = livestockCircle.ReleaseDate,
+                SamplePrice = livestockCircle.SamplePrice,
+                TechicalStaff = await _userRepository.GetQueryable(x => x.Id == livestockCircle.TechicalStaffId)
+                    .Select(x => new UserItemResponse
+                    {
+                        Id = x.Id,
+                        Fullname = x.FullName,
+                        Email = x.Email,
+                        PhoneNumber = x.PhoneNumber
+                    }).FirstOrDefaultAsync(),
             };
             return (response, null);
         }

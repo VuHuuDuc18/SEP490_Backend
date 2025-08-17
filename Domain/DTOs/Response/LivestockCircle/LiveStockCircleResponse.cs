@@ -2,6 +2,7 @@
 ﻿using Domain.Dto.Response.Barn;
 
 ﻿using Domain.Dto.Response.Bill;
+using Domain.Dto.Response.Breed;
 using Domain.Dto.Response.User;
 
 using System;
@@ -32,6 +33,8 @@ namespace Domain.Dto.Response.LivestockCircle
         public DateTime? PreSoldDate { get; set; } // set ngày bán dự kiến / sale set
         public float? SamplePrice { get; set; }
         public List<ImageLivestockCircleResponse>? Images { get; set; }
+        public BreedResponse? Breed { get; set; }
+        public UserItemResponse? TechicalStaff { get; set; }
     }
 
     public class LiveStockCircleActive
