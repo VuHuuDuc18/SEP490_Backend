@@ -392,7 +392,7 @@ namespace Infrastructure.Services.Implements
                     };
                 }
 
-                var query = _medicineCategoryRepository.GetQueryable(x => x.IsActive);
+                var query = _medicineCategoryRepository.GetQueryable();
 
                 if (request.SearchString?.Any() == true)
                     query = query.SearchString(request.SearchString);
