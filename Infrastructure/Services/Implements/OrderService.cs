@@ -271,7 +271,10 @@ namespace Infrastructure.Services.Implements
                     CreatedDate = order.CreatedDate,
                     PickupDate = order.PickupDate,
                     BreedName = order.LivestockCircle.Breed.BreedName,
-                    BreedCategory = order.LivestockCircle.Breed.BreedCategory.Name
+                    BreedCategory = order.LivestockCircle.Breed.BreedCategory.Name,
+                    GoodUnitPrice = order.GoodUnitPrice ?? 0,
+                    BadUnitPrice = order.BadUnitPrice ?? 0 
+                    //TotalBill = (order.GoodUnitPrice ?? 0) * order.GoodUnitStock + (order.BadUnitPrice ?? 0) * order.BadUnitStock
                 };
                 result.LivestockCircle = AutoMapperHelper.AutoMap<LivestockCircle, ReleasedLivetockDetail>(livestockCircle);
                 result.LivestockCircle.ImageLinks = images;
@@ -451,7 +454,9 @@ namespace Infrastructure.Services.Implements
                     PickupDate = x.PickupDate,
                     BreedName = x.LivestockCircle.Breed.BreedName,
                     BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name,
-                    Barn = AutoMapperHelper.AutoMap<Barn, BarnResponse>(x.LivestockCircle.Barn)
+                    Barn = AutoMapperHelper.AutoMap<Barn, BarnResponse>(x.LivestockCircle.Barn),
+                    GoodUnitPrice = x.GoodUnitPrice ?? 0,
+                    BadUnitPrice = x.BadUnitPrice ?? 0
                 }).OrderByDescending(x => x.CreatedDate).ToList();
                 return new Response<List<OrderResponse>>(result, "Lấy danh sách đơn hàng thành công");
 
@@ -526,7 +531,9 @@ namespace Infrastructure.Services.Implements
                         PickupDate = x.PickupDate,
                         BreedName = x.LivestockCircle.Breed.BreedName,
                         BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name,
-                        Barn = AutoMapperHelper.AutoMap<Barn, BarnResponse>(x.LivestockCircle.Barn)
+                        Barn = AutoMapperHelper.AutoMap<Barn, BarnResponse>(x.LivestockCircle.Barn),
+                        GoodUnitPrice = x.GoodUnitPrice ?? 0,
+                        BadUnitPrice = x.BadUnitPrice ?? 0
                     });
 
                 if (request.SearchString?.Any() == true)
@@ -644,6 +651,8 @@ namespace Infrastructure.Services.Implements
                                 PickupDate = o.PickupDate,
                                 BreedName = o.LivestockCircle.Breed.BreedName,
                                 BreedCategory = o.LivestockCircle.Breed.BreedCategory.Name,
+                                GoodUnitPrice = o.GoodUnitPrice ?? 0,
+                                BadUnitPrice = o.BadUnitPrice ?? 0,
                                 Customer = new UserItemResponse()
                                 {
                                     Id = c.Id,
@@ -847,7 +856,9 @@ namespace Infrastructure.Services.Implements
                     CreatedDate = x.CreatedDate,
                     PickupDate = x.PickupDate,
                     BreedName = x.LivestockCircle.Breed.BreedName,
-                    BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name
+                    BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name,
+                    GoodUnitPrice = x.GoodUnitPrice ?? 0,
+                    BadUnitPrice = x.BadUnitPrice ?? 0
                 }).Pagination(request.PageIndex, request.PageSize, request.Sort);
 
                 return new Response<PaginationSet<OrderResponse>>()
