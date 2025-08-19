@@ -15,7 +15,7 @@ namespace Domain.DTOs.Request.Order
         public float AverageWeight { get; set; }
         public float? TotalBill { get; set; }
         public string Status { get; set; }
-        public DateTime? CreateDate { get; set; }
+        public DateTime? CreatedDate { get; set; }
         public DateTime? PickupDate { get; set; }
         public Guid LivestockCircleId { get; set; }
         public Guid CustomerId { get; set; }
