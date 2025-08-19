@@ -268,7 +268,7 @@ namespace Infrastructure.Services.Implements
                     BadUnitStock = order.BadUnitStock,
                     //TotalBill = order.TotalBill,
                     Status = order.Status,
-                    CreateDate = order.CreatedDate,
+                    CreatedDate = order.CreatedDate,
                     PickupDate = order.PickupDate,
                     BreedName = order.LivestockCircle.Breed.BreedName,
                     BreedCategory = order.LivestockCircle.Breed.BreedCategory.Name
@@ -447,12 +447,12 @@ namespace Infrastructure.Services.Implements
                     BadUnitStock = x.BadUnitStock,
                     //TotalBill = x.TotalBill,
                     Status = x.Status,
-                    CreateDate = x.CreatedDate,
+                    CreatedDate = x.CreatedDate,
                     PickupDate = x.PickupDate,
                     BreedName = x.LivestockCircle.Breed.BreedName,
                     BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name,
                     Barn = AutoMapperHelper.AutoMap<Barn, BarnResponse>(x.LivestockCircle.Barn)
-                }).OrderByDescending(x => x.CreateDate).ToList();
+                }).OrderByDescending(x => x.CreatedDate).ToList();
                 return new Response<List<OrderResponse>>(result, "Lấy danh sách đơn hàng thành công");
 
             }
@@ -522,7 +522,7 @@ namespace Infrastructure.Services.Implements
                         BadUnitStock = x.BadUnitStock,
                         //TotalBill = x.TotalBill,
                         Status = x.Status,
-                        CreateDate = x.CreatedDate,
+                        CreatedDate = x.CreatedDate,
                         PickupDate = x.PickupDate,
                         BreedName = x.LivestockCircle.Breed.BreedName,
                         BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name,
@@ -640,7 +640,7 @@ namespace Infrastructure.Services.Implements
                                 BadUnitStock = o.BadUnitStock,
                                 //TotalBill = o.TotalBill,
                                 Status = o.Status,
-                                CreateDate = o.CreatedDate,
+                                CreatedDate = o.CreatedDate,
                                 PickupDate = o.PickupDate,
                                 BreedName = o.LivestockCircle.Breed.BreedName,
                                 BreedCategory = o.LivestockCircle.Breed.BreedCategory.Name,
@@ -844,7 +844,7 @@ namespace Infrastructure.Services.Implements
                     BadUnitStock = x.BadUnitStock,
                     //TotalBill = x.TotalBill,
                     Status = x.Status,
-                    CreateDate = x.CreatedDate,
+                    CreatedDate = x.CreatedDate,
                     PickupDate = x.PickupDate,
                     BreedName = x.LivestockCircle.Breed.BreedName,
                     BreedCategory = x.LivestockCircle.Breed.BreedCategory.Name
