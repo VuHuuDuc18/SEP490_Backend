@@ -1799,8 +1799,8 @@ namespace Infrastructure.Services.Implements
             var livestockCircleFoods = await _livestockCircleFoodRepository.GetQueryable(x => x.LivestockCircleId == livestockCircleId && x.IsActive).ToListAsync(cancellationToken);
 
             // Lấy danh sách FoodId từ LivestockCircleFoods
-            var foodIds = livestockCircleFoods.Select(f => f.FoodId).ToList();
-
+            var foodIds = livestockCircleFoods.Where(f => f.Remaining > 0).Select(f => f.FoodId).ToList();
+           
             // Lấy thông tin chi tiết của các food từ FoodRepository
             var foods = await _foodRepository.GetQueryable(x => x.IsActive && foodIds.Contains(x.Id))
                 .Include(x => x.FoodCategory)
@@ -1826,7 +1826,7 @@ namespace Infrastructure.Services.Implements
                     Id = food.Id,
                     FoodName = food.FoodName,
                     FoodCategory = foodCategoryResponse,
-                    Stock = food.Stock,
+                    Stock = (int)livestockCircleFood.Remaining,
                     WeighPerUnit = food.WeighPerUnit,
                     IsActive = food.IsActive,
                     ImageLinks = foodImages.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
@@ -1841,7 +1841,7 @@ namespace Infrastructure.Services.Implements
             var livestockCircleMedicines = await _livestockCircleMedicineRepository.GetQueryable(x => x.LivestockCircleId == livestockCircleId && x.IsActive).ToListAsync(cancellationToken);
 
             // Lấy danh sách MedicineId từ LivestockCircleMedicines
-            var medicineIds = livestockCircleMedicines.Select(m => m.MedicineId).ToList();
+            var medicineIds = livestockCircleMedicines.Where(m => m.Remaining > 0).Select(m => m.MedicineId).ToList();
 
             // Lấy thông tin chi tiết của các medicine từ MedicineRepository
             var medicines = await _medicineRepository.GetQueryable(x => x.IsActive && medicineIds.Contains(x.Id))
@@ -1868,7 +1868,7 @@ namespace Infrastructure.Services.Implements
                     Id = medicine.Id,
                     MedicineName = medicine.MedicineName,
                     MedicineCategory = medicineCategoryResponse,
-                    Stock = medicine.Stock,
+                    Stock = (int)livestockCircleMedicine.Remaining,
                     IsActive = medicine.IsActive,
                     ImageLinks = medicineImages.Where(x => x.Thumnail == "false").Select(x => x.ImageLink).ToList(),
                     Thumbnail = medicineImages.FirstOrDefault(x => x.Thumnail == "true")?.ImageLink
