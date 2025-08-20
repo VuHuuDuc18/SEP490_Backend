@@ -279,7 +279,7 @@ namespace Infrastructure.Services.Implements
             try
             {
                 var breedCategory = await _breedCategoryRepository.GetByIdAsync(breedCategoryId);
-                if (breedCategory == null || !breedCategory.IsActive)
+                if (breedCategory == null)
                 {
                     return new Response<BreedCategoryResponse>()
                     {

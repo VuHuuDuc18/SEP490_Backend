@@ -372,7 +372,7 @@ namespace Infrastructure.Services.Implements
             {
 
                 var barn = await _barnRepository.GetByIdAsync(barnId);
-                if (barn == null || !barn.IsActive)
+                if (barn == null)
                 {
                     return new Response<BarnResponse>()
                     {
@@ -815,7 +815,7 @@ namespace Infrastructure.Services.Implements
                 //    };
                 //}
 
-                var barn = await _barnRepository.GetQueryable(x => x.Id == barnId && x.IsActive)
+                var barn = await _barnRepository.GetQueryable(x => x.Id == barnId)
                     .Include(x => x.Worker)
                     .FirstOrDefaultAsync(cancellationToken);
 

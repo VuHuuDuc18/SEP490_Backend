@@ -275,7 +275,7 @@ namespace Infrastructure.Services.Implements
             try
             {
                 var medicineCategory = await _medicineCategoryRepository.GetByIdAsync(medicineCategoryId);
-                if (medicineCategory == null || !medicineCategory.IsActive)
+                if (medicineCategory == null)
                 {
                     return new Response<CategoryResponse>()
                     {
