@@ -44,7 +44,7 @@ namespace Infrastructure.Services.Implements
             {
                 // xu ly daily
                 DateTime formatedStartDate, formatedEndDate;
-                var validResponse = ValidTime(true, false, req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
+                var validResponse = ValidTime(req.livestockCircleId ,true, false, req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
                 if (!validResponse.Equals("Success"))
                 {
                     return new Response<bool>()
@@ -419,7 +419,7 @@ namespace Infrastructure.Services.Implements
                 string validDateResponse;
                 DateTime formatedStartDate, formatedEndDate;
 
-                validDateResponse = ValidTime(false, false, req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
+                validDateResponse = ValidTime(updateItem.LivestockCircleId,  false, false, req.StartDate, req.EndDate, out formatedStartDate, out formatedEndDate);
 
                 if (!validDateResponse.Equals("Success"))
                 {
@@ -544,7 +544,7 @@ namespace Infrastructure.Services.Implements
                 throw new Exception("Không thể tạo kế hoạch thuốc");
             }
         }
-        protected string ValidTime(bool isCreate, bool isDaily, DateTime? StartDate, DateTime? EndDate, out DateTime FormatedStartDate, out DateTime FormatedEndDate)
+        protected string ValidTime(Guid livestockId,bool isCreate, bool isDaily, DateTime? StartDate, DateTime? EndDate, out DateTime FormatedStartDate, out DateTime FormatedEndDate)
         {
             string response = "Success";
             if (!isDaily && StartDate == null && EndDate == null)
@@ -570,7 +570,7 @@ namespace Infrastructure.Services.Implements
                 response = "Thời gian kết thúc phải sau thời gian bắt đầu";
 
             }
-            var conflictTimeItem = _barnplanrepo.GetQueryable(x => x.IsActive)
+            var conflictTimeItem = _barnplanrepo.GetQueryable(x => x.IsActive && x.LivestockCircleId == livestockId)
                                     .FirstOrDefault(it => (EndDate <= it.EndDate) && (StartDate >= it.StartDate));
             if (conflictTimeItem != null && isCreate)
             {
