@@ -3,6 +3,7 @@ using Domain.Dto.Request.Account;
 using Domain.Dto.Request.User;
 using Domain.IServices;
 using Entities.EntityModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -51,10 +52,9 @@ namespace WebApi.Controllers
             var origin = Request.Headers["origin"].ToString();
             if (string.IsNullOrEmpty(origin))
             {
-                origin = Request.Headers["Referer"].ToString() ?? "https://localhost:7074";
+                origin = Request.Headers["Referer"].ToString();
             }
-            await _userServices.ForgotPassword(model, origin);
-            return Ok();
+            return Ok(await _userServices.ForgotPassword(model, origin));
         }
 
         [HttpPost("reset-password")]

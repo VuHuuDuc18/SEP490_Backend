@@ -71,11 +71,11 @@ namespace Infrastructure.Extensions
             return GenerateBaseTemplate("Chào mừng !", content);
         }
 
-        public static string BodyCreateForgotPassword(string token, string resetLink)
+        public static string BodyCreateForgotPassword(string email, string resetLink)
         {
             var content = $@"
             <div class='info'>Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.</div>
-            <div class='info'><strong>Mã:</strong> {token}</div>
+            <div class='info'><strong>Email:</strong> {email}</div>
             <div class='info'>Vui lòng nhấp vào nút bên dưới để đặt lại mật khẩu. Link này sẽ hết hạn sau 24 giờ:</div>
             <a class='btn' href='{resetLink}'>Đặt lại mật khẩu</a>
             <div class='info' style='margin-top: 20px; font-size: 12px; color: #666;'>
@@ -92,7 +92,7 @@ namespace Infrastructure.Extensions
             <div class='info'>Vui lòng nhấp vào nút bên dưới để xác thực tài khoản. Link này sẽ hết hạn sau 24 giờ:</div>
             <a class='btn' href='{resetLink}'>Xác thực tài khoản</a>
             <div class='info' style='margin-top: 20px; font-size: 12px; color: #666;'>
-                Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.
+                Nếu bạn không yêu cầu xác nhận, vui lòng bỏ qua email này.
             </div>";
 
             return GenerateBaseTemplate("Yêu cầu xác thực tài khoản!", content);
