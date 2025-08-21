@@ -415,7 +415,7 @@ namespace Infrastructure.Services.Implements
         {
             try
             {
-                var breed = await _breedRepository.GetQueryable(x => x.Id == breedId && x.IsActive)
+                var breed = await _breedRepository.GetQueryable(x => x.Id == breedId)
                     .Include(x => x.BreedCategory)
                     .FirstOrDefaultAsync(cancellationToken);
 
