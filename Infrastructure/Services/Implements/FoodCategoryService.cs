@@ -278,7 +278,7 @@ namespace Infrastructure.Services.Implements
             try
             {
                 var foodCategory = await _foodCategoryRepository.GetByIdAsync(foodCategoryId);
-                if (foodCategory == null || !foodCategory.IsActive)
+                if (foodCategory == null)
                 {
                     return new Response<CategoryResponse>()
                     {

@@ -413,7 +413,7 @@ namespace Infrastructure.Services.Implements
         {
             try
             {
-                var food = await _foodRepository.GetQueryable(x => x.Id == foodId && x.IsActive)
+                var food = await _foodRepository.GetQueryable(x => x.Id == foodId)
                     .Include(x => x.FoodCategory)
                     .FirstOrDefaultAsync(cancellationToken);
 

@@ -416,7 +416,7 @@ namespace Infrastructure.Services.Implements
             try
             {
                 var medicine = await _medicineRepository.GetByIdAsync(medicineId);
-                if (medicine == null || !medicine.IsActive)
+                if (medicine == null)
                 {
                     return new Response<MedicineResponse>()
                     {

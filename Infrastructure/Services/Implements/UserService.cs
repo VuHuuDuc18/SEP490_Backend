@@ -385,10 +385,8 @@ namespace Infrastructure.Services.Implements
                     Message = $"Tài khoản đã bị vô hiệu hóa."
                 };
 
-                var code = await _userManager.GeneratePasswordResetTokenAsync(account);
-                var route = "api/account/reset-password/";
-                var _enpointUri = new Uri(string.Concat($"{origin}/", route));
-                await _emailService.SendEmailAsync(model.Email, EmailConstant.EMAILSUBJECTFORGOTPASSWORD, MailBodyGenerate.BodyCreateForgotPassword(code, _enpointUri.ToString()));
+                await SendForgotPasswordEmail(account, origin);
+
                 return new Response<string>()
                 {
                     Succeeded = true,
@@ -731,6 +729,19 @@ namespace Infrastructure.Services.Implements
             verificationUri = QueryHelpers.AddQueryString(verificationUri, "email", user.Email);
             //Email Service Call Here
             _emailService.SendEmailAsync(user.Email, EmailConstant.EMAILSUBJECTCONFIRMEMAIL, MailBodyGenerate.BodyCreateConfirmEmail(user.Email, verificationUri));
+            return verificationUri;
+        }
+        private async Task<string> SendForgotPasswordEmail(User user, string origin)
+        {
+            var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            var route = "reset-password/";
+            var _enpointUri = new Uri(string.Concat($"{origin}/", route));
+            var verificationUri = QueryHelpers.AddQueryString(_enpointUri.ToString(), "userId", user.Id.ToString());
+            verificationUri = QueryHelpers.AddQueryString(verificationUri, "code", code);
+            verificationUri = QueryHelpers.AddQueryString(verificationUri, "email", user.Email);
+            //Email Service Call Here
+            _emailService.SendEmailAsync(user.Email, EmailConstant.EMAILSUBJECTFORGOTPASSWORD, MailBodyGenerate.BodyCreateForgotPassword(user.Email, verificationUri));
             return verificationUri;
         }
         private RefreshToken GenerateRefreshToken(Guid userId, string ipAddress)
