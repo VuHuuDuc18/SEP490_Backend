@@ -18,7 +18,7 @@ namespace Infrastructure.Identity.Seeds
             var defaultUser = new User
             {
                 UserName = "Admin",
-                Email = "admin@a",
+                Email = "ad@lcfms.org",
                 EmailConfirmed = true,
                 PhoneNumberConfirmed = true,
             };
@@ -26,7 +26,7 @@ namespace Infrastructure.Identity.Seeds
             var user = await userManager.FindByEmailAsync(defaultUser.Email);
             if (user == null)
             {
-                var result = await userManager.CreateAsync(defaultUser, "Admin@123");
+                var result = await userManager.CreateAsync(defaultUser, "@Password1");
 
                 if (result.Succeeded)
                 {

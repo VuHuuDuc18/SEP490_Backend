@@ -55,7 +55,7 @@ namespace SEP490_BackendAPI
             app.UseCors("AllowAllOrigins");
 
             await app.MigrateDatabaseAsync();
-
+            await app.Services.SeedIdentity();
             // Configure the HTTP request pipeline.
             //if (app.Environment.IsDevelopment())
             //{
