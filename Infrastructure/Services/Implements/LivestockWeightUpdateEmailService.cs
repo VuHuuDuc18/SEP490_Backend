@@ -21,6 +21,7 @@ namespace Infrastructure.Services.Implements
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly TimeSpan _interval = TimeSpan.FromDays(1); // Kiểm tra mỗi ngày
 
+
         public LivestockWeightUpdateEmailService(IConfiguration configuration, IServiceScopeFactory scopeFactory)
         {
             _configuration = configuration;
@@ -32,6 +33,7 @@ namespace Infrastructure.Services.Implements
             while (!stoppingToken.IsCancellationRequested)
             {
                 await CheckAndSendEmailsAsync();
+                await CheckDoneLivestockCircleAsync();
                 await Task.Delay(_interval, stoppingToken);
             }
         }
@@ -79,6 +81,37 @@ namespace Infrastructure.Services.Implements
             catch (Exception ex)
             {
                 Console.WriteLine($"Lỗi khi kiểm tra và gửi email: {ex.Message}");
+            }
+        }
+
+        public async Task CheckDoneLivestockCircleAsync()
+        {
+            try
+            {
+                using var scope = _scopeFactory.CreateScope();
+                var livestockCircleRepository = scope.ServiceProvider.GetRequiredService<IRepository<LivestockCircle>>();
+                var barnRepository = scope.ServiceProvider.GetRequiredService<IRepository<Barn>>();
+
+                // Lấy danh sách LivestockCircle thỏa mãn điều kiện
+                var livestockCircles = await livestockCircleRepository.GetQueryable()
+                    .Where(lc => lc.Status == StatusConstant.RELEASESTAT && lc.ReleaseDate.HasValue && lc.IsActive == true)
+                    .ToListAsync();
+
+                foreach (var circle in livestockCircles)
+                {
+                    var releaseInDays = (DateTime.Now - circle.ReleaseDate!.Value).Days;
+
+                    if (releaseInDays >= 5)
+                    {
+                        circle.Status = StatusConstant.DONESTAT;
+                        circle.IsActive = false;
+                        livestockCircleRepository.Update( circle );
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi kiểm tra lứa nuôi: {ex.Message}");
             }
         }
     }
