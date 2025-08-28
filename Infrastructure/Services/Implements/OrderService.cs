@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -696,30 +697,30 @@ namespace Infrastructure.Services.Implements
                 {
                     return new Response<bool>("Không tìm thấy đơn ");
                 }
-                orderItem.Status = OrderStatus.APPROVED;
-                orderItem.GoodUnitPrice = request.GoodUnitPrice;
-                orderItem.BadUnitPrice = request.BadUnitPrice;
-                //orderItem.TotalBill = request.GoodUnitPrice * orderItem.GoodUnitStock + request.BadUnitPrice * orderItem.BadUnitStock;
-
-
                 var livestockCircleDetail = await _livestockCircleRepository.GetByIdAsync(orderItem.LivestockCircleId);
-                if (request.IsDone || orderItem.Status.Equals(OrderStatus.APPROVED))
+
+                if (request.IsDone)
                 {
-                    if (request.IsDone)
-                        orderItem.Status = OrderStatus.DONE;
                     livestockCircleDetail.GoodUnitNumber += orderItem.GoodUnitStock;
                     livestockCircleDetail.BadUnitNumber += orderItem.BadUnitStock;
                     orderItem.GoodUnitStock = (int)request.GoodUnitStock;
                     orderItem.BadUnitStock = (int)request.BadUnitStock;
+                    livestockCircleDetail.GoodUnitNumber -= (int)request.GoodUnitStock;
+                    livestockCircleDetail.BadUnitNumber -= (int)request.BadUnitStock;
+                    if (livestockCircleDetail.GoodUnitNumber == 0 && livestockCircleDetail.BadUnitNumber == 0)
+                    {
+                        livestockCircleDetail.Status = StatusConstant.DONESTAT;
+                    }
                 }
-
-                livestockCircleDetail.GoodUnitNumber -= orderItem.GoodUnitStock;
-                livestockCircleDetail.BadUnitNumber -= orderItem.BadUnitStock;
-                if (livestockCircleDetail.GoodUnitNumber == 0 && livestockCircleDetail.BadUnitNumber == 0)
+                else
                 {
-                    livestockCircleDetail.Status = StatusConstant.DONESTAT;
+                    orderItem.Status = OrderStatus.APPROVED;
+                    orderItem.GoodUnitPrice = request.GoodUnitPrice;
+                    orderItem.BadUnitPrice = request.BadUnitPrice;
+                    //orderItem.TotalBill = request.GoodUnitPrice * orderItem.GoodUnitStock + request.BadUnitPrice * orderItem.BadUnitStock;
+                    livestockCircleDetail.GoodUnitNumber -= (int)request.GoodUnitStock;
+                    livestockCircleDetail.BadUnitNumber -= (int)request.BadUnitStock;
                 }
-
 
                 // update database
                 _livestockCircleRepository.Update(livestockCircleDetail);
