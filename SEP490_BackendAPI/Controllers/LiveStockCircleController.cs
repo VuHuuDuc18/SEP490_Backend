@@ -118,9 +118,9 @@ namespace SEP490_BackendAPI.Controllers
         /// Cập nhật trung bình cân của chu kỳ chăn nuôi
         /// </summary>
         [HttpPatch("update-livestockCircle-average-weight/{livestockCircleId}")]
-        public async Task<IActionResult> UpdateLivestockCircleAverageWeight([FromRoute]Guid livestockCircleId, [FromBody] float averageWeight)
+        public async Task<IActionResult> UpdateLivestockCircleAverageWeight([FromRoute]Guid livestockCircleId, [FromBody] UpdateAvgWeightDTO request)
         {
-            var (success, errorMessage) = await _livestockCircleService.UpdateAverageWeight(livestockCircleId, averageWeight);
+            var (success, errorMessage) = await _livestockCircleService.UpdateAverageWeight(livestockCircleId, request);
             if (!success)
                 return BadRequest(errorMessage);
             return Ok();

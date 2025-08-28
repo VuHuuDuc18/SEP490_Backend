@@ -150,6 +150,7 @@ namespace Infrastructure.Services.Implements
                 UserName = request.Email,
                 Email = request.Email,
                 FullName = request.FullName,
+                PhoneNumber = request.PhoneNumber,
                 IsActive = true,
                 CreatedBy = _currentUserId,
                 CreatedDate = DateTime.UtcNow,
