@@ -1993,7 +1993,7 @@ namespace Infrastructure.Services.Implements
             {
                 var UpdatedLivestockCircle = await _livestockCircleRepository.GetByIdAsync(request.LivestockCircleId);
 
-                var BillToUpdate = await _billRepository.GetQueryable(x=> x.LivestockCircleId == request.LivestockCircleId && x.Status.Equals(StatusConstant.REQUESTED)).FirstOrDefaultAsync();
+                var BillToUpdate = await _billRepository.GetQueryable(x => x.LivestockCircleId == request.LivestockCircleId && x.Status.Equals(StatusConstant.REQUESTED) && x.TypeBill.Equals(TypeBill.BREED)).FirstOrDefaultAsync();
                 // update total stock va note cuar bill
                 if (!string.IsNullOrEmpty(request.Note))
                 {
