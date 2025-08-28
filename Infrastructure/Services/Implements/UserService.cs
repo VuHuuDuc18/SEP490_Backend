@@ -1,41 +1,25 @@
-﻿using Application.Exceptions;
-using Application.Wrappers;
-using Domain.Dto.Request;
+﻿using Application.Wrappers;
 using Domain.Dto.Request.Account;
-using Domain.Dto.Response;
-using Domain.Dto.Response.Account;
-using Infrastructure.Extensions;
+using Domain.Dto.Request.User;
 using Domain.Helper.Constants;
+using Domain.IServices;
 using Domain.Settings;
 using Entities.EntityModel;
+using Infrastructure.Extensions;
 using Infrastructure.Identity.Contexts;
 using Infrastructure.Identity.Helpers;
 using Infrastructure.Repository;
-using Infrastructure.Services;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
-using Org.BouncyCastle.Ocsp;
-using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-
-using Domain.Dto.Request.User;
-using Domain.Dto.Response.User;
-using Domain.Dto.Response.BarnPlan;
-using Domain.IServices;
-using System.ComponentModel.DataAnnotations;
 
 namespace Infrastructure.Services.Implements
 {
@@ -421,10 +405,11 @@ namespace Infrastructure.Services.Implements
                         Errors = validationResults.Select(r => r.ErrorMessage).ToList()
                     };
                 }
+                var token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(model.Token));
                 var account = await _userManager.FindByEmailAsync(model.Email);
                 if (account == null) return new Response<string>($"Không tìm thấy tài khoản với email {model.Email}.");
                 if (!account.IsActive) return new Response<string>($"Tài khoản với email {model.Email} đã bị khóa.");
-                var result = await _userManager.ResetPasswordAsync(account, model.Token, model.Password);
+                var result = await _userManager.ResetPasswordAsync(account, token, model.Password);
                 if (result.Succeeded)
                 {
                     return new Response<string>(model.Email, message: $"Đã đặt lại mật khẩu.");
