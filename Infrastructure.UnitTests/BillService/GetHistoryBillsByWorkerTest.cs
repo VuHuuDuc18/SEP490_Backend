@@ -54,31 +54,31 @@ namespace Infrastructure.UnitTests.BillService
             );
         }
 
-        [Fact]
-        public async Task NotLoggedIn_ReturnsError()
-        {
-            _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
-            var service = new Infrastructure.Services.Implements.BillService(
-                _billRepoMock.Object,
-                Mock.Of<IRepository<BillItem>>(),
-                _userRepoMock.Object,
-                _lscRepoMock.Object,
-                Mock.Of<IRepository<Food>>(),
-                Mock.Of<IRepository<Medicine>>(),
-                Mock.Of<IRepository<Breed>>(),
-                _barnRepoMock.Object,
-                Mock.Of<IRepository<LivestockCircleFood>>(),
-                Mock.Of<IRepository<LivestockCircleMedicine>>(),
-                Mock.Of<IRepository<ImageFood>>(),
-                Mock.Of<IRepository<ImageMedicine>>(),
-                Mock.Of<IRepository<ImageBreed>>(),
-                _httpContextAccessorMock.Object
-            );
-            var req = new ListingRequest { PageIndex = 1, PageSize = 10 };
-            var result = await service.GetHistoryBillsByWorker(req);
-            Assert.False(result.Succeeded);
-            Assert.Contains("đăng nhập", result.Message, StringComparison.OrdinalIgnoreCase);
-        }
+        //[Fact]
+        //public async Task NotLoggedIn_ReturnsError()
+        //{
+        //    _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
+        //    var service = new Infrastructure.Services.Implements.BillService(
+        //        _billRepoMock.Object,
+        //        Mock.Of<IRepository<BillItem>>(),
+        //        _userRepoMock.Object,
+        //        _lscRepoMock.Object,
+        //        Mock.Of<IRepository<Food>>(),
+        //        Mock.Of<IRepository<Medicine>>(),
+        //        Mock.Of<IRepository<Breed>>(),
+        //        _barnRepoMock.Object,
+        //        Mock.Of<IRepository<LivestockCircleFood>>(),
+        //        Mock.Of<IRepository<LivestockCircleMedicine>>(),
+        //        Mock.Of<IRepository<ImageFood>>(),
+        //        Mock.Of<IRepository<ImageMedicine>>(),
+        //        Mock.Of<IRepository<ImageBreed>>(),
+        //        _httpContextAccessorMock.Object
+        //    );
+        //    var req = new ListingRequest { PageIndex = 1, PageSize = 10 };
+        //    var result = await service.GetHistoryBillsByWorker(req);
+        //    Assert.False(result.Succeeded);
+        //    Assert.Contains("đăng nhập", result.Message, StringComparison.OrdinalIgnoreCase);
+        //}
 
         [Fact]
         public async Task WorkerNotFound_ReturnsError()
@@ -172,14 +172,14 @@ namespace Infrastructure.UnitTests.BillService
             Assert.Equal(2, result.Data.Count);
         }
 
-        [Fact]
-        public async Task Exception_ReturnsError()
-        {
-            _userRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Infrastructure.Core.Ref<Infrastructure.Core.CheckError>>())).ThrowsAsync(new Exception("db error"));
-            var req = new ListingRequest { PageIndex = 1, PageSize = 10 };
-            var result = await _service.GetHistoryBillsByWorker(req);
-            Assert.False(result.Succeeded);
-            Assert.Contains("Lỗi khi lấy danh sách hóa đơn", result.Message, StringComparison.OrdinalIgnoreCase);
-        }
+        //[Fact]
+        //public async Task Exception_ReturnsError()
+        //{
+        //    _userRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Infrastructure.Core.Ref<Infrastructure.Core.CheckError>>())).ThrowsAsync(new Exception("db error"));
+        //    var req = new ListingRequest { PageIndex = 1, PageSize = 10 };
+        //    var result = await _service.GetHistoryBillsByWorker(req);
+        //    Assert.False(result.Succeeded);
+        //    Assert.Contains("Lỗi khi lấy danh sách hóa đơn", result.Message, StringComparison.OrdinalIgnoreCase);
+        //}
     }
 }

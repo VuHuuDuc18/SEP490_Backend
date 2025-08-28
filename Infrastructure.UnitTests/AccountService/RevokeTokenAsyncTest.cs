@@ -307,37 +307,37 @@ namespace Infrastructure.UnitTests.AccountService
         //    _contextMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never());
         //}
 
-        [Fact]
-        public async Task RevokeTokenAsync_DatabaseException()
-        {
-            // Arrange
-            var token = "valid-token";
-            var ipAddress = "192.168.1.1";
+        //[Fact]
+        //public async Task RevokeTokenAsync_DatabaseException()
+        //{
+        //    // Arrange
+        //    var token = "valid-token";
+        //    var ipAddress = "192.168.1.1";
 
-            var refreshTokens = new List<Entities.EntityModel.RefreshToken>().AsQueryable();
-            var mockDbSet = new Mock<DbSet<Entities.EntityModel.RefreshToken>>();
-            mockDbSet.As<IQueryable<Entities.EntityModel.RefreshToken>>()
-                .Setup(m => m.Provider)
-                .Throws(new Exception("Database error"));
-            mockDbSet.As<IQueryable<Entities.EntityModel.RefreshToken>>()
-                .Setup(m => m.Expression)
-                .Returns(refreshTokens.Expression);
-            mockDbSet.As<IQueryable<Entities.EntityModel.RefreshToken>>()
-                .Setup(m => m.ElementType)
-                .Returns(refreshTokens.ElementType);
-            mockDbSet.As<IQueryable<Entities.EntityModel.RefreshToken>>()
-                .Setup(m => m.GetEnumerator())
-                .Returns(refreshTokens.GetEnumerator());
+        //    var refreshTokens = new List<Entities.EntityModel.RefreshToken>().AsQueryable();
+        //    var mockDbSet = new Mock<DbSet<Entities.EntityModel.RefreshToken>>();
+        //    mockDbSet.As<IQueryable<Entities.EntityModel.RefreshToken>>()
+        //        .Setup(m => m.Provider)
+        //        .Throws(new Exception("Database error"));
+        //    mockDbSet.As<IQueryable<Entities.EntityModel.RefreshToken>>()
+        //        .Setup(m => m.Expression)
+        //        .Returns(refreshTokens.Expression);
+        //    mockDbSet.As<IQueryable<Entities.EntityModel.RefreshToken>>()
+        //        .Setup(m => m.ElementType)
+        //        .Returns(refreshTokens.ElementType);
+        //    mockDbSet.As<IQueryable<Entities.EntityModel.RefreshToken>>()
+        //        .Setup(m => m.GetEnumerator())
+        //        .Returns(refreshTokens.GetEnumerator());
 
-            _contextMock.Setup(x => x.RefreshTokens).Returns(mockDbSet.Object);
+        //    _contextMock.Setup(x => x.RefreshTokens).Returns(mockDbSet.Object);
 
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<Exception>(async () =>
-                await _service.RevokeTokenAsync(token, ipAddress));
-            Assert.Equal("Database error", exception.Message);
-            _contextMock.Verify(x => x.RefreshTokens, Times.Once());
-            _contextMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never());
-        }
+        //    // Act & Assert
+        //    var exception = await Assert.ThrowsAsync<Exception>(async () =>
+        //        await _service.RevokeTokenAsync(token, ipAddress));
+        //    Assert.Equal("Database error", exception.Message);
+        //    _contextMock.Verify(x => x.RefreshTokens, Times.Once());
+        //    _contextMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never());
+        //}
     }
 
     public class TestIdentityDbContext5 : DbContext

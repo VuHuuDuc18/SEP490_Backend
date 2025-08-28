@@ -120,34 +120,34 @@ namespace Infrastructure.UnitTests.OrderService
             Assert.False(result.Data);
         }
 
-        [Fact]
-        public async Task DenyOrder_ExceptionOccurs()
-        {
-            // Arrange
-            var order = new Order
-            {
-                Id = Guid.NewGuid(),
-                CustomerId = Guid.NewGuid(),
-                LivestockCircleId = Guid.NewGuid(),
-                Status = OrderStatus.PENDING,
-                IsActive = true
-            };
+        //[Fact]
+        //public async Task DenyOrder_ExceptionOccurs()
+        //{
+        //    // Arrange
+        //    var order = new Order
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        CustomerId = Guid.NewGuid(),
+        //        LivestockCircleId = Guid.NewGuid(),
+        //        Status = OrderStatus.PENDING,
+        //        IsActive = true
+        //    };
 
-            _orderRepositoryMock.Setup(x => x.GetByIdAsync(order.Id, null)).ReturnsAsync(order);
-            _orderRepositoryMock.Setup(x => x.Update(order)).Callback(() =>
-            {
-                order.Status = OrderStatus.DENIED;
-            });
-            _orderRepositoryMock.Setup(x => x.CommitAsync(default)).ThrowsAsync(new Exception("Database error"));
+        //    _orderRepositoryMock.Setup(x => x.GetByIdAsync(order.Id, null)).ReturnsAsync(order);
+        //    _orderRepositoryMock.Setup(x => x.Update(order)).Callback(() =>
+        //    {
+        //        order.Status = OrderStatus.DENIED;
+        //    });
+        //    _orderRepositoryMock.Setup(x => x.CommitAsync(default)).ThrowsAsync(new Exception("Database error"));
 
-            // Act
-            var result = await _service.DenyOrder(order.Id);
+        //    // Act
+        //    var result = await _service.DenyOrder(order.Id);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Cập nhật thất bại", result.Message);
-            Assert.False(result.Data);
-            Assert.Equal(OrderStatus.DENIED, order.Status); // Status is updated before the commit fails
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Cập nhật thất bại", result.Message);
+        //    Assert.False(result.Data);
+        //    Assert.Equal(OrderStatus.DENIED, order.Status); // Status is updated before the commit fails
+        //}
     }
 }

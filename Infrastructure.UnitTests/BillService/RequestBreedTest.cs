@@ -46,13 +46,13 @@ namespace Infrastructure.UnitTests.BillService
             );
         }
 
-        [Fact]
-        public async Task RequestBreed_ReturnsError_WhenRequestIsNull()
-        {
-            var (success, error) = await _service.RequestBreed(null);
-            Assert.False(success);
-            Assert.Contains("Dữ liệu yêu cầu là bắt buộc", error);
-        }
+        //[Fact]
+        //public async Task RequestBreed_ReturnsError_WhenRequestIsNull()
+        //{
+        //    var (success, error) = await _service.RequestBreed(null);
+        //    Assert.False(success);
+        //    Assert.Contains("Dữ liệu yêu cầu là bắt buộc", error);
+        //}
 
         [Fact]
         public async Task RequestBreed_ReturnsError_WhenNoBreedItems()

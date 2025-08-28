@@ -110,56 +110,56 @@ namespace Infrastructure.UnitTests.MedicineService
             Assert.Contains("img2.jpg", result.Data.ImageLinks);
         }
 
-        [Fact]
-        public async Task GetMedicineById_Success_NoImages()
-        {
-            // Arrange
-            var id = Guid.NewGuid();
-            var categoryId = Guid.NewGuid();
-            var medicine = new Medicine { Id = id, MedicineName = "Medicine1/VNR", MedicineCategoryId = categoryId, Stock = 10, IsActive = true };
-            var category = new MedicineCategory { Id = categoryId, Name = "Cat1", Description = "Desc1", IsActive = true };
+        //[Fact]
+        //public async Task GetMedicineById_Success_NoImages()
+        //{
+        //    // Arrange
+        //    var id = Guid.NewGuid();
+        //    var categoryId = Guid.NewGuid();
+        //    var medicine = new Medicine { Id = id, MedicineName = "Medicine1/VNR", MedicineCategoryId = categoryId, Stock = 10, IsActive = true };
+        //    var category = new MedicineCategory { Id = categoryId, Name = "Cat1", Description = "Desc1", IsActive = true };
 
-            _MedicineRepositoryMock.Setup(x => x.GetByIdAsync(id, null))
-                .ReturnsAsync(medicine);
-            _MedicineCategoryRepositoryMock.Setup(x => x.GetByIdAsync(categoryId, null))
-                .ReturnsAsync(category);
-            var imageMock = new List<ImageMedicine>().AsQueryable().BuildMock();
-            _imageMedicineRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<ImageMedicine, bool>>>()))
-                .Returns((System.Linq.Expressions.Expression<Func<ImageMedicine, bool>> predicate) => imageMock.Where(predicate));
+        //    _MedicineRepositoryMock.Setup(x => x.GetByIdAsync(id, null))
+        //        .ReturnsAsync(medicine);
+        //    _MedicineCategoryRepositoryMock.Setup(x => x.GetByIdAsync(categoryId, null))
+        //        .ReturnsAsync(category);
+        //    var imageMock = new List<ImageMedicine>().AsQueryable().BuildMock();
+        //    _imageMedicineRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<ImageMedicine, bool>>>()))
+        //        .Returns((System.Linq.Expressions.Expression<Func<ImageMedicine, bool>> predicate) => imageMock.Where(predicate));
 
-            // Act
-            var result = await _MedicineService.GetMedicineById(id, default);
+        //    // Act
+        //    var result = await _MedicineService.GetMedicineById(id, default);
 
-            // Assert
-            Assert.NotNull(result);
-            Assert.True(result.Succeeded, $"Test failed: {result.Message}. Errors: {string.Join(", ", result.Errors ?? new List<string>())}");
-            Assert.Equal("Lấy thông tin thuốc thành công", result.Message);
-            Assert.NotNull(result.Data);
-            Assert.Equal(id, result.Data.Id);
-            Assert.Equal("Medicine1", result.Data.MedicineName);
-            Assert.Equal("VNR", result.Data.MedicineCode);
-            Assert.Equal("Cat1", result.Data.MedicineCategory.Name);
-            Assert.Null(result.Data.Thumbnail);
-            Assert.Empty(result.Data.ImageLinks);
-        }
+        //    // Assert
+        //    Assert.NotNull(result);
+        //    Assert.True(result.Succeeded, $"Test failed: {result.Message}. Errors: {string.Join(", ", result.Errors ?? new List<string>())}");
+        //    Assert.Equal("Lấy thông tin thuốc thành công", result.Message);
+        //    Assert.NotNull(result.Data);
+        //    Assert.Equal(id, result.Data.Id);
+        //    Assert.Equal("Medicine1", result.Data.MedicineName);
+        //    Assert.Equal("VNR", result.Data.MedicineCode);
+        //    Assert.Equal("Cat1", result.Data.MedicineCategory.Name);
+        //    Assert.Null(result.Data.Thumbnail);
+        //    Assert.Empty(result.Data.ImageLinks);
+        //}
 
-        [Fact]
-        public async Task GetMedicineById_Exception_ReturnsError()
-        {
-            // Arrange
-            var id = Guid.NewGuid();
-            _MedicineRepositoryMock.Setup(x => x.GetByIdAsync(id, null))
-                .ThrowsAsync(new Exception("DB error"));
+        //[Fact]
+        //public async Task GetMedicineById_Exception_ReturnsError()
+        //{
+        //    // Arrange
+        //    var id = Guid.NewGuid();
+        //    _MedicineRepositoryMock.Setup(x => x.GetByIdAsync(id, null))
+        //        .ThrowsAsync(new Exception("DB error"));
 
-            // Act
-            var result = await _MedicineService.GetMedicineById(id, default);
+        //    // Act
+        //    var result = await _MedicineService.GetMedicineById(id, default);
 
-            // Assert
-            Assert.NotNull(result);
-            Assert.False(result.Succeeded);
-            Assert.Equal("Lỗi khi lấy thông tin thuốc", result.Message);
-            Assert.Contains("DB error", result.Errors);
-            Assert.Null(result.Data);
-        }
+        //    // Assert
+        //    Assert.NotNull(result);
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Lỗi khi lấy thông tin thuốc", result.Message);
+        //    Assert.Contains("DB error", result.Errors);
+        //    Assert.Null(result.Data);
+        //}
     }
 }

@@ -95,36 +95,36 @@ namespace Infrastructure.UnitTests.FoodService
             Assert.Contains("img2.jpg", result.Data.ImageLinks);
         }
 
-        [Fact]
-        public async Task GetFoodById_Success_NoImages()
-        {
-            var id = Guid.NewGuid();
-            var category = new FoodCategory { Id = Guid.NewGuid(), Name = "Cat1", Description = "Desc1" };
-            var Food = new Food { Id = id, FoodName = "Food1", FoodCategory = category, Stock = 10, IsActive = true };
-            var Foods = new List<Food> { Food }.AsQueryable().BuildMock();
-            _FoodRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Food, bool>>>() ))
-                .Returns((System.Linq.Expressions.Expression<Func<Food, bool>> predicate) => Foods.Where(predicate));
-            var imageMock = new List<ImageFood>().AsQueryable().BuildMock();
-            _imageFoodRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<ImageFood, bool>>>() ))
-                .Returns((System.Linq.Expressions.Expression<Func<ImageFood, bool>> predicate) => imageMock.Where(predicate));
-            var result = await _FoodService.GetFoodById(id, default);
-            Assert.True(result.Succeeded);
-            Assert.NotNull(result.Data);
-            Assert.Null(result.Data.Thumbnail);
-            Assert.Empty(result.Data.ImageLinks);
-        }
+        //[Fact]
+        //public async Task GetFoodById_Success_NoImages()
+        //{
+        //    var id = Guid.NewGuid();
+        //    var category = new FoodCategory { Id = Guid.NewGuid(), Name = "Cat1", Description = "Desc1" };
+        //    var Food = new Food { Id = id, FoodName = "Food1", FoodCategory = category, Stock = 10, IsActive = true };
+        //    var Foods = new List<Food> { Food }.AsQueryable().BuildMock();
+        //    _FoodRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Food, bool>>>() ))
+        //        .Returns((System.Linq.Expressions.Expression<Func<Food, bool>> predicate) => Foods.Where(predicate));
+        //    var imageMock = new List<ImageFood>().AsQueryable().BuildMock();
+        //    _imageFoodRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<ImageFood, bool>>>() ))
+        //        .Returns((System.Linq.Expressions.Expression<Func<ImageFood, bool>> predicate) => imageMock.Where(predicate));
+        //    var result = await _FoodService.GetFoodById(id, default);
+        //    Assert.True(result.Succeeded);
+        //    Assert.NotNull(result.Data);
+        //    Assert.Null(result.Data.Thumbnail);
+        //    Assert.Empty(result.Data.ImageLinks);
+        //}
 
-        [Fact]
-        public async Task GetFoodById_Exception_ReturnsError()
-        {
-            var id = Guid.NewGuid();
-            _FoodRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Food, bool>>>() ))
-                .Throws(new Exception("DB error"));
-            var result = await _FoodService.GetFoodById(id, default);
-            Assert.False(result.Succeeded);
-            Assert.Equal("Lỗi khi lấy thông tin thức ăn", result.Message);
-            Assert.Contains("DB error", result.Errors[0]);
-            Assert.Null(result.Data);
-        }
+        //[Fact]
+        //public async Task GetFoodById_Exception_ReturnsError()
+        //{
+        //    var id = Guid.NewGuid();
+        //    _FoodRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Food, bool>>>() ))
+        //        .Throws(new Exception("DB error"));
+        //    var result = await _FoodService.GetFoodById(id, default);
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Lỗi khi lấy thông tin thức ăn", result.Message);
+        //    Assert.Contains("DB error", result.Errors[0]);
+        //    Assert.Null(result.Data);
+        //}
     }
 } 

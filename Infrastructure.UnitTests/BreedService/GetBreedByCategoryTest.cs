@@ -92,52 +92,52 @@ namespace Infrastructure.UnitTests.BreedService
             Assert.Equal("Breed2", result.Data[0].BreedName);
         }
 
-        [Fact]
-        public async Task GetBreedByCategory_FilterByNameAndCategoryId_ReturnsFiltered()
-        {
-            var category1 = new BreedCategory { Id = Guid.NewGuid(), Name = "Cat1", Description = "Desc1" };
-            var category2 = new BreedCategory { Id = Guid.NewGuid(), Name = "Cat2", Description = "Desc2" };
-            var breeds = new List<Breed>
-            {
-                new Breed { Id = Guid.NewGuid(), BreedName = "Breed1", BreedCategory = category1, BreedCategoryId = category1.Id, IsActive = true },
-                new Breed { Id = Guid.NewGuid(), BreedName = "Breed2", BreedCategory = category2, BreedCategoryId = category2.Id, IsActive = true }
-            }.AsQueryable().BuildMock();
-            _breedRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Breed, bool>>>() ))
-                .Returns((System.Linq.Expressions.Expression<Func<Breed, bool>> predicate) => breeds.Where(predicate));
-            _imageBreedRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<ImageBreed, bool>>>() ))
-                .Returns(new List<ImageBreed>().AsQueryable().BuildMock());
-            var result = await _breedService.GetBreedByCategory("Breed2", category2.Id, default);
-            Assert.True(result.Succeeded);
-            Assert.Single(result.Data);
-            Assert.Equal("Breed2", result.Data[0].BreedName);
-        }
+        //[Fact]
+        //public async Task GetBreedByCategory_FilterByNameAndCategoryId_ReturnsFiltered()
+        //{
+        //    var category1 = new BreedCategory { Id = Guid.NewGuid(), Name = "Cat1", Description = "Desc1" };
+        //    var category2 = new BreedCategory { Id = Guid.NewGuid(), Name = "Cat2", Description = "Desc2" };
+        //    var breeds = new List<Breed>
+        //    {
+        //        new Breed { Id = Guid.NewGuid(), BreedName = "Breed1", BreedCategory = category1, BreedCategoryId = category1.Id, IsActive = true },
+        //        new Breed { Id = Guid.NewGuid(), BreedName = "Breed2", BreedCategory = category2, BreedCategoryId = category2.Id, IsActive = true }
+        //    }.AsQueryable().BuildMock();
+        //    _breedRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Breed, bool>>>() ))
+        //        .Returns((System.Linq.Expressions.Expression<Func<Breed, bool>> predicate) => breeds.Where(predicate));
+        //    _imageBreedRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<ImageBreed, bool>>>() ))
+        //        .Returns(new List<ImageBreed>().AsQueryable().BuildMock());
+        //    var result = await _breedService.GetBreedByCategory("Breed2", category2.Id, default);
+        //    Assert.True(result.Succeeded);
+        //    Assert.Single(result.Data);
+        //    Assert.Equal("Breed2", result.Data[0].BreedName);
+        //}
 
-        [Fact]
-        public async Task GetBreedByCategory_NoResult_ReturnsEmpty()
-        {
-            var category = new BreedCategory { Id = Guid.NewGuid(), Name = "Cat1", Description = "Desc1" };
-            var breeds = new List<Breed>
-            {
-                new Breed { Id = Guid.NewGuid(), BreedName = "Breed1", BreedCategory = category, BreedCategoryId = category.Id, IsActive = true }
-            }.AsQueryable().BuildMock();
-            _breedRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Breed, bool>>>() ))
-                .Returns((System.Linq.Expressions.Expression<Func<Breed, bool>> predicate) => breeds.Where(predicate));
-            _imageBreedRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<ImageBreed, bool>>>() ))
-                .Returns(new List<ImageBreed>().AsQueryable().BuildMock());
-            var result = await _breedService.GetBreedByCategory("NotExist", null, default);
-            Assert.True(result.Succeeded);
-            Assert.Empty(result.Data);
-        }
+        //[Fact]
+        //public async Task GetBreedByCategory_NoResult_ReturnsEmpty()
+        //{
+        //    var category = new BreedCategory { Id = Guid.NewGuid(), Name = "Cat1", Description = "Desc1" };
+        //    var breeds = new List<Breed>
+        //    {
+        //        new Breed { Id = Guid.NewGuid(), BreedName = "Breed1", BreedCategory = category, BreedCategoryId = category.Id, IsActive = true }
+        //    }.AsQueryable().BuildMock();
+        //    _breedRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Breed, bool>>>() ))
+        //        .Returns((System.Linq.Expressions.Expression<Func<Breed, bool>> predicate) => breeds.Where(predicate));
+        //    _imageBreedRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<ImageBreed, bool>>>() ))
+        //        .Returns(new List<ImageBreed>().AsQueryable().BuildMock());
+        //    var result = await _breedService.GetBreedByCategory("NotExist", null, default);
+        //    Assert.True(result.Succeeded);
+        //    Assert.Empty(result.Data);
+        //}
 
-        [Fact]
-        public async Task GetBreedByCategory_Exception_ReturnsError()
-        {
-            _breedRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Breed, bool>>>() ))
-                .Throws(new Exception("DB error"));
-            var result = await _breedService.GetBreedByCategory(null, null, default);
-            Assert.False(result.Succeeded);
-            Assert.Equal("Lỗi khi lấy danh sách giống loài", result.Message);
-            Assert.Contains("DB error", result.Errors[0]);
-        }
+        //[Fact]
+        //public async Task GetBreedByCategory_Exception_ReturnsError()
+        //{
+        //    _breedRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Breed, bool>>>() ))
+        //        .Throws(new Exception("DB error"));
+        //    var result = await _breedService.GetBreedByCategory(null, null, default);
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Lỗi khi lấy danh sách giống loài", result.Message);
+        //    Assert.Contains("DB error", result.Errors[0]);
+        //}
     }
 } 

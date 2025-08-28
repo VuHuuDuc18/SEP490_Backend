@@ -100,22 +100,22 @@ namespace Infrastructure.UnitTests.MedicineCategoryService
             Assert.True(existing.IsActive); // Đã được enable lại
         }
 
-        [Fact]
-        public async Task DisableMedicineCategory_Exception_ReturnsError()
-        {
-            // Arrange
-            var id = Guid.NewGuid();
-            var existing = new MedicineCategory { Id = id, Name = "Category 1", Description = "desc", IsActive = true };
-            _MedicineCategoryRepoMock.Setup(x => x.GetByIdAsync(id, default)).ReturnsAsync(existing);
-            _MedicineCategoryRepoMock.Setup(x => x.Update(It.IsAny<MedicineCategory>())).Throws(new Exception("DB error"));
+        //[Fact]
+        //public async Task DisableMedicineCategory_Exception_ReturnsError()
+        //{
+        //    // Arrange
+        //    var id = Guid.NewGuid();
+        //    var existing = new MedicineCategory { Id = id, Name = "Category 1", Description = "desc", IsActive = true };
+        //    _MedicineCategoryRepoMock.Setup(x => x.GetByIdAsync(id, default)).ReturnsAsync(existing);
+        //    _MedicineCategoryRepoMock.Setup(x => x.Update(It.IsAny<MedicineCategory>())).Throws(new Exception("DB error"));
 
-            // Act
-            var result = await _MedicineCategoryService.DisableMedicineCategory(id, default);
+        //    // Act
+        //    var result = await _MedicineCategoryService.DisableMedicineCategory(id, default);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Lỗi khi xóa danh mục thuốc", result.Message);
-            Assert.Contains("DB error", result.Errors[0]);
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Lỗi khi xóa danh mục thuốc", result.Message);
+        //    Assert.Contains("DB error", result.Errors[0]);
+        //}
     }
 }

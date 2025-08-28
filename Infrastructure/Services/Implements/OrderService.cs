@@ -83,25 +83,25 @@ namespace Infrastructure.Services.Implements
 
         public async Task<Response<string>> CustomerCreateOrder(CreateOrderRequest request, CancellationToken cancellationToken = default)
         {
-            if (_currentUserId == Guid.Empty)
-            {
-                return new Response<string>()
-                {
-                    Succeeded = false,
-                    Message = "Hãy đăng nhập và thử lại",
-                    Errors = new List<string>() { "Hãy đăng nhập và thử lại" }
-                };
-            }
+            //if (_currentUserId == Guid.Empty)
+            //{
+            //    return new Response<string>()
+            //    {
+            //        Succeeded = false,
+            //        Message = "Hãy đăng nhập và thử lại",
+            //        Errors = new List<string>() { "Hãy đăng nhập và thử lại" }
+            //    };
+            //}
             var currentUser = await _userManager.FindByIdAsync(_currentUserId.ToString());
-            if (currentUser == null)
-            {
-                return new Response<string>()
-                {
-                    Succeeded = false,
-                    Message = "Hãy đăng nhập lại và thử lại.",
-                    Errors = new List<string>() { "Không tìm thấy thông tin người dùng." }
-                };
-            }
+            //if (currentUser == null)
+            //{
+            //    return new Response<string>()
+            //    {
+            //        Succeeded = false,
+            //        Message = "Hãy đăng nhập lại và thử lại.",
+            //        Errors = new List<string>() { "Không tìm thấy thông tin người dùng." }
+            //    };
+            //}
             if (request.GoodUnitStock <= 0 || request.BadUnitStock < 0)
             {
                 return new Response<string>()

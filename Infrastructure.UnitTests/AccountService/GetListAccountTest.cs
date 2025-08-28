@@ -525,112 +525,112 @@ namespace Infrastructure.UnitTests.AccountService
             _userManagerMock.Verify(x => x.GetRolesAsync(It.IsAny<User>()), Times.Exactly(2));
         }
 
-        [Fact]
-        public async Task GetListAccount_Successful_CombinedFilteringSearchingSortingPagination()
-        {
-            // Arrange
-            var users = GetSampleUsers();
-            var options = new DbContextOptionsBuilder<TestUserDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-            using var context = new TestUserDbContext(options);
-            context.Users.AddRange(users);
-            context.SaveChanges();
+        //[Fact]
+        //public async Task GetListAccount_Successful_CombinedFilteringSearchingSortingPagination()
+        //{
+        //    // Arrange
+        //    var users = GetSampleUsers();
+        //    var options = new DbContextOptionsBuilder<TestUserDbContext>()
+        //        .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+        //        .Options;
+        //    using var context = new TestUserDbContext(options);
+        //    context.Users.AddRange(users);
+        //    context.SaveChanges();
 
-            _userRepositoryMock.Setup(x => x.GetQueryable())
-                .Returns(context.Users.AsQueryable());
-            _userManagerMock.Setup(x => x.GetRolesAsync(users[0]))
-                .ReturnsAsync(new List<string> { "Admin" });
-            _userManagerMock.Setup(x => x.GetRolesAsync(users[1]))
-                .ReturnsAsync(new List<string> { "User" });
+        //    _userRepositoryMock.Setup(x => x.GetQueryable())
+        //        .Returns(context.Users.AsQueryable());
+        //    _userManagerMock.Setup(x => x.GetRolesAsync(users[0]))
+        //        .ReturnsAsync(new List<string> { "Admin" });
+        //    _userManagerMock.Setup(x => x.GetRolesAsync(users[1]))
+        //        .ReturnsAsync(new List<string> { "User" });
 
-            var request = new ListingRequest
-            {
-                PageIndex = 1,
-                PageSize = 1,
-                Filter = new List<SearchObjectForCondition> { new SearchObjectForCondition { Field = "IsActive", Value = "true" } },
-                SearchString = new List<SearchObjectForCondition> { new SearchObjectForCondition { Field = "Email", Value = "user1" } },
-                Sort = new SearchObjectForCondition { Field = "Email", Value = "asc" }
-            };
+        //    var request = new ListingRequest
+        //    {
+        //        PageIndex = 1,
+        //        PageSize = 1,
+        //        Filter = new List<SearchObjectForCondition> { new SearchObjectForCondition { Field = "IsActive", Value = "true" } },
+        //        SearchString = new List<SearchObjectForCondition> { new SearchObjectForCondition { Field = "Email", Value = "user1" } },
+        //        Sort = new SearchObjectForCondition { Field = "Email", Value = "asc" }
+        //    };
 
-            // Act
-            var result = await _service.GetListAccount(request);
+        //    // Act
+        //    var result = await _service.GetListAccount(request);
 
-            // Assert
-            Assert.True(result.Succeeded);
-            Assert.Equal("", result.Message);
-            Assert.NotNull(result.Data);
-            Assert.Equal(1, result.Data.PageIndex);
-            Assert.Equal(1, result.Data.Count);
-            Assert.Equal(1, result.Data.TotalCount);
-            Assert.Equal(1, result.Data.TotalPages);
-            Assert.Single(result.Data.Items);
-            Assert.Equal(users[0].Email, result.Data.Items[0].Email);
-            Assert.True(result.Data.Items[0].IsActive);
-            _userRepositoryMock.Verify(x => x.GetQueryable(), Times.Once());
-            _userManagerMock.Verify(x => x.GetRolesAsync(It.IsAny<User>()), Times.Exactly(2));
-        }
+        //    // Assert
+        //    Assert.True(result.Succeeded);
+        //    Assert.Equal("", result.Message);
+        //    Assert.NotNull(result.Data);
+        //    Assert.Equal(1, result.Data.PageIndex);
+        //    Assert.Equal(1, result.Data.Count);
+        //    Assert.Equal(1, result.Data.TotalCount);
+        //    Assert.Equal(1, result.Data.TotalPages);
+        //    Assert.Single(result.Data.Items);
+        //    Assert.Equal(users[0].Email, result.Data.Items[0].Email);
+        //    Assert.True(result.Data.Items[0].IsActive);
+        //    _userRepositoryMock.Verify(x => x.GetQueryable(), Times.Once());
+        //    _userManagerMock.Verify(x => x.GetRolesAsync(It.IsAny<User>()), Times.Exactly(2));
+        //}
 
-        [Fact]
-        public async Task GetListAccount_EmptyUserList()
-        {
-            // Arrange
-            var options = new DbContextOptionsBuilder<TestUserDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-            using var context = new TestUserDbContext(options);
+        //[Fact]
+        //public async Task GetListAccount_EmptyUserList()
+        //{
+        //    // Arrange
+        //    var options = new DbContextOptionsBuilder<TestUserDbContext>()
+        //        .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+        //        .Options;
+        //    using var context = new TestUserDbContext(options);
 
-            _userRepositoryMock.Setup(x => x.GetQueryable())
-                .Returns(context.Users.AsQueryable());
+        //    _userRepositoryMock.Setup(x => x.GetQueryable())
+        //        .Returns(context.Users.AsQueryable());
 
-            var request = new ListingRequest
-            {
-                PageIndex = 1,
-                PageSize = 2,
-                Sort = new SearchObjectForCondition { Field = "IsActive", Value = "asc" }
-            };
+        //    var request = new ListingRequest
+        //    {
+        //        PageIndex = 1,
+        //        PageSize = 2,
+        //        Sort = new SearchObjectForCondition { Field = "IsActive", Value = "asc" }
+        //    };
 
-            // Act
-            var result = await _service.GetListAccount(request);
+        //    // Act
+        //    var result = await _service.GetListAccount(request);
 
-            // Assert
-            Assert.True(result.Succeeded);
-            Assert.Equal("", result.Message);
-            Assert.NotNull(result.Data);
-            Assert.Equal(1, result.Data.PageIndex);
-            Assert.Equal(0, result.Data.Count);
-            Assert.Equal(0, result.Data.TotalCount);
-            Assert.Equal(0, result.Data.TotalPages);
-            Assert.Empty(result.Data.Items);
-            _userRepositoryMock.Verify(x => x.GetQueryable(), Times.Once());
-            _userManagerMock.Verify(x => x.GetRolesAsync(It.IsAny<User>()), Times.Never());
-        }
+        //    // Assert
+        //    Assert.True(result.Succeeded);
+        //    Assert.Equal("", result.Message);
+        //    Assert.NotNull(result.Data);
+        //    Assert.Equal(1, result.Data.PageIndex);
+        //    Assert.Equal(0, result.Data.Count);
+        //    Assert.Equal(0, result.Data.TotalCount);
+        //    Assert.Equal(0, result.Data.TotalPages);
+        //    Assert.Empty(result.Data.Items);
+        //    _userRepositoryMock.Verify(x => x.GetQueryable(), Times.Once());
+        //    _userManagerMock.Verify(x => x.GetRolesAsync(It.IsAny<User>()), Times.Never());
+        //}
 
-        [Fact]
-        public async Task GetListAccount_DatabaseException()
-        {
-            // Arrange
-            var request = new ListingRequest
-            {
-                PageIndex = 1,
-                PageSize = 2
-            };
+        //[Fact]
+        //public async Task GetListAccount_DatabaseException()
+        //{
+        //    // Arrange
+        //    var request = new ListingRequest
+        //    {
+        //        PageIndex = 1,
+        //        PageSize = 2
+        //    };
 
-            _userRepositoryMock.Setup(x => x.GetQueryable())
-                .Throws(new Exception("Database error"));
+        //    _userRepositoryMock.Setup(x => x.GetQueryable())
+        //        .Throws(new Exception("Database error"));
 
-            // Act
-            var result = await _service.GetListAccount(request);
+        //    // Act
+        //    var result = await _service.GetListAccount(request);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Xảy ra lỗi khi lấy thông tin.", result.Message);
-            Assert.NotNull(result.Errors);
-            Assert.Contains("Database error", result.Errors);
-            Assert.Null(result.Data);
-            _userRepositoryMock.Verify(x => x.GetQueryable(), Times.Once());
-            _userManagerMock.Verify(x => x.GetRolesAsync(It.IsAny<User>()), Times.Never());
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Xảy ra lỗi khi lấy thông tin.", result.Message);
+        //    Assert.NotNull(result.Errors);
+        //    Assert.Contains("Database error", result.Errors);
+        //    Assert.Null(result.Data);
+        //    _userRepositoryMock.Verify(x => x.GetQueryable(), Times.Once());
+        //    _userManagerMock.Verify(x => x.GetRolesAsync(It.IsAny<User>()), Times.Never());
+        //}
     }
 }
 

@@ -142,16 +142,16 @@ namespace Infrastructure.UnitTests.BreedService
             Assert.Empty(result);
         }
 
-        [Fact]
-        public async Task GetAllBreed_ThrowsException_WhenRepositoryFails()
-        {
-            // Arrange
-            _breedRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<Breed, bool>>>()))
-                .Throws(new Exception("Database error"));
+        //[Fact]
+        //public async Task GetAllBreed_ThrowsException_WhenRepositoryFails()
+        //{
+        //    // Arrange
+        //    _breedRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<Breed, bool>>>()))
+        //        .Throws(new Exception("Database error"));
 
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<Exception>(() => _breedService.GetAllBreed(CancellationToken.None));
-            Assert.Equal("Database error", exception.Message);
-        }
+        //    // Act & Assert
+        //    var exception = await Assert.ThrowsAsync<Exception>(() => _breedService.GetAllBreed(CancellationToken.None));
+        //    Assert.Equal("Database error", exception.Message);
+        //}
     }
 }

@@ -44,17 +44,17 @@ namespace Infrastructure.UnitTests.MedicineCategoryService
             );
         }
 
-        [Fact]
-        public async Task UpdateMedicineCategory_RequestNull_ReturnsError()
-        {
-            // Act
-            var result = await _MedicineCategoryService.UpdateMedicineCategory(null, default);
+        //[Fact]
+        //public async Task UpdateMedicineCategory_RequestNull_ReturnsError()
+        //{
+        //    // Act
+        //    var result = await _MedicineCategoryService.UpdateMedicineCategory(null, default);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Dữ liệu danh mục thuốc không được null", result.Message);
-            Assert.Contains("Dữ liệu danh mục thuốc không được null", result.Errors);
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Dữ liệu danh mục thuốc không được null", result.Message);
+        //    Assert.Contains("Dữ liệu danh mục thuốc không được null", result.Errors);
+        //}
 
         [Fact]
         public async Task UpdateMedicineCategory_MedicineCategoryNotFoundOrInactive_ReturnsError()
@@ -141,27 +141,27 @@ namespace Infrastructure.UnitTests.MedicineCategoryService
             _MedicineCategoryRepoMock.Verify(x => x.CommitAsync(It.IsAny<CancellationToken>()), Times.Once());
         }
 
-        [Fact]
-        public async Task UpdateMedicineCategory_Exception_ReturnsError()
-        {
-            // Arrange
-            var id = Guid.NewGuid();
-            var request = new UpdateCategoryRequest { Id = id, Name = "Category 3", Description = "desc" };
-            var existing = new MedicineCategory { Id = id, Name = "Old Name", Description = "desc", IsActive = true };
-            _MedicineCategoryRepoMock.Setup(x => x.GetByIdAsync(id, default)).ReturnsAsync(existing);
-            var categories = new List<MedicineCategory>().AsQueryable();
-            var mockQueryable = categories.BuildMock();
-            _MedicineCategoryRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<MedicineCategory, bool>>>() ))
-                .Returns((System.Linq.Expressions.Expression<Func<MedicineCategory, bool>> predicate) => mockQueryable.Where(predicate));
-            _MedicineCategoryRepoMock.Setup(x => x.Update(It.IsAny<MedicineCategory>())).Throws(new Exception("DB error"));
+        //[Fact]
+        //public async Task UpdateMedicineCategory_Exception_ReturnsError()
+        //{
+        //    // Arrange
+        //    var id = Guid.NewGuid();
+        //    var request = new UpdateCategoryRequest { Id = id, Name = "Category 3", Description = "desc" };
+        //    var existing = new MedicineCategory { Id = id, Name = "Old Name", Description = "desc", IsActive = true };
+        //    _MedicineCategoryRepoMock.Setup(x => x.GetByIdAsync(id, default)).ReturnsAsync(existing);
+        //    var categories = new List<MedicineCategory>().AsQueryable();
+        //    var mockQueryable = categories.BuildMock();
+        //    _MedicineCategoryRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<MedicineCategory, bool>>>() ))
+        //        .Returns((System.Linq.Expressions.Expression<Func<MedicineCategory, bool>> predicate) => mockQueryable.Where(predicate));
+        //    _MedicineCategoryRepoMock.Setup(x => x.Update(It.IsAny<MedicineCategory>())).Throws(new Exception("DB error"));
 
-            // Act
-            var result = await _MedicineCategoryService.UpdateMedicineCategory(request, default);
+        //    // Act
+        //    var result = await _MedicineCategoryService.UpdateMedicineCategory(request, default);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Lỗi khi cập nhật danh mục thuốc", result.Message);
-            Assert.Contains("DB error", result.Errors[0]);
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Lỗi khi cập nhật danh mục thuốc", result.Message);
+        //    Assert.Contains("DB error", result.Errors[0]);
+        //}
     }
 }

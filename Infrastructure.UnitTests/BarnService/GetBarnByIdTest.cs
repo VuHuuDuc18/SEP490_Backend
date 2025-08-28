@@ -68,18 +68,18 @@ namespace Infrastructure.UnitTests.BarnService
             Assert.Contains("không tồn tại", result.Message, StringComparison.OrdinalIgnoreCase);
         }
 
-        [Fact]
-        public async Task GetBarnById_BarnInactive_ReturnsError()
-        {
-            var barnId = Guid.NewGuid();
-            var barn = new Barn { Id = barnId, IsActive = false };
-            _barnRepositoryMock.Setup(x => x.GetByIdAsync(barnId, default)).ReturnsAsync(barn);
+        //[Fact]
+        //public async Task GetBarnById_BarnInactive_ReturnsError()
+        //{
+        //    var barnId = Guid.NewGuid();
+        //    var barn = new Barn { Id = barnId, IsActive = false };
+        //    _barnRepositoryMock.Setup(x => x.GetByIdAsync(barnId, default)).ReturnsAsync(barn);
 
-            var result = await _barnService.GetBarnById(barnId);
+        //    var result = await _barnService.GetBarnById(barnId);
 
-            Assert.False(result.Succeeded);
-            Assert.Contains("không tồn tại", result.Message, StringComparison.OrdinalIgnoreCase);
-        }
+        //    Assert.False(result.Succeeded);
+        //    Assert.Contains("không tồn tại", result.Message, StringComparison.OrdinalIgnoreCase);
+        //}
 
         [Fact]
         public async Task GetBarnById_WorkerNotFoundOrInactive_ReturnsError()

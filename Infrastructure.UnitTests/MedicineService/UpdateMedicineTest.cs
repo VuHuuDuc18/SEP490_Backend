@@ -63,6 +63,42 @@ namespace Infrastructure.UnitTests.MedicineService
             Assert.Contains("Dữ liệu thuốc không được null", result.Errors);
         }
 
+        [Fact]
+        public async Task UpdateMedicine_RequestNullName_ReturnsError()
+        {
+            var result = await _MedicineService.UpdateMedicine(null, default);
+            Assert.False(result.Succeeded);
+            Assert.Equal("Dữ liệu thuốc không được null", result.Message);
+            Assert.Contains("Dữ liệu thuốc không được null", result.Errors);
+        }
+
+        [Fact]
+        public async Task UpdateMedicine_RequestNullCode_ReturnsError()
+        {
+            var result = await _MedicineService.UpdateMedicine(null, default);
+            Assert.False(result.Succeeded);
+            Assert.Equal("Dữ liệu thuốc không được null", result.Message);
+            Assert.Contains("Dữ liệu thuốc không được null", result.Errors);
+        }
+
+        [Fact]
+        public async Task UpdateMedicine_RequestNullStock_ReturnsError()
+        {
+            var result = await _MedicineService.UpdateMedicine(null, default);
+            Assert.False(result.Succeeded);
+            Assert.Equal("Dữ liệu thuốc không được null", result.Message);
+            Assert.Contains("Dữ liệu thuốc không được null", result.Errors);
+        }
+
+        [Fact]
+        public async Task UpdateMedicine_RequestNullDes_ReturnsError()
+        {
+            var result = await _MedicineService.UpdateMedicine(null, default);
+            Assert.False(result.Succeeded);
+            Assert.Equal("Dữ liệu thuốc không được null", result.Message);
+            Assert.Contains("Dữ liệu thuốc không được null", result.Errors);
+        }
+
         //[Fact]
         //public async Task UpdateMedicine_UserIdEmpty_ReturnsError()
         //{

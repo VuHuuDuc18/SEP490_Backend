@@ -85,6 +85,24 @@ namespace Infrastructure.UnitTests.DailyReportService
             Assert.Contains("Dữ liệu báo cáo hàng ngày không được null", result.Errors);
         }
 
+        [Fact]
+        public async Task UpdateDailyReport_RequestNullGoodUnit_ReturnsError()
+        {
+            var result = await _dailyReportService.UpdateDailyReport(null, default);
+            Assert.False(result.Succeeded);
+            Assert.Equal("Dữ liệu báo cáo hàng ngày không được null", result.Message);
+            Assert.Contains("Dữ liệu báo cáo hàng ngày không được null", result.Errors);
+        }
+
+        [Fact]
+        public async Task UpdateDailyReport_RequestNullBadUnit_ReturnsError()
+        {
+            var result = await _dailyReportService.UpdateDailyReport(null, default);
+            Assert.False(result.Succeeded);
+            Assert.Equal("Dữ liệu báo cáo hàng ngày không được null", result.Message);
+            Assert.Contains("Dữ liệu báo cáo hàng ngày không được null", result.Errors);
+        }
+
         //[Fact]
         //public async Task UpdateDailyReport_ValidationError_ReturnsError()
         //{
@@ -164,6 +182,53 @@ namespace Infrastructure.UnitTests.DailyReportService
             Assert.False(result.Succeeded);
             Assert.Equal("Vòng chăn nuôi không tồn tại hoặc đã bị xóa", result.Message);
         }
+
+        [Fact]
+        public async Task UpdateDailyReport_FoodExceedRemaining_ReturnsError()
+        {
+            var foodId = Guid.NewGuid();
+            var request = new UpdateDailyReportWithDetailsRequest
+            {
+                DailyReportId = Guid.NewGuid(),
+                LivestockCircleId = Guid.NewGuid(),
+                DeadUnit = 1,
+                BadUnit = 1,
+                FoodReports = new List<UpdateFoodReportRequest> { new UpdateFoodReportRequest { FoodId = foodId, Quantity = 10 } }
+            };
+            var report = new DailyReport { Id = request.DailyReportId, IsActive = true };
+            var circle = new LivestockCircle { Id = request.LivestockCircleId, IsActive = true, StartDate = DateTime.UtcNow.AddDays(-1), GoodUnitNumber = 20 };
+            _livestockCircleRepositoryMock.Setup(x => x.GetByIdAsync(request.LivestockCircleId, null)).ReturnsAsync(circle);
+            _dailyReportRepositoryMock.Setup(x => x.GetByIdAsync(request.DailyReportId, null)).ReturnsAsync(report);
+            var foods = new List<LivestockCircleFood> { new LivestockCircleFood { FoodId = foodId, LivestockCircleId = request.LivestockCircleId, Remaining = 5, IsActive = true } }.AsQueryable().BuildMock();
+            _livestockCircleFoodRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<LivestockCircleFood, bool>>>())).Returns(foods);
+            var result = await _dailyReportService.UpdateDailyReport(request, default);
+            Assert.False(result.Succeeded);
+            Assert.Contains("đơn vị tốt không hợp", result.Message);
+        }
+
+        [Fact]
+        public async Task UpdateDailyReport_MedicinineExceedRemaining_ReturnsError()
+        {
+            var foodId = Guid.NewGuid();
+            var request = new UpdateDailyReportWithDetailsRequest
+            {
+                DailyReportId = Guid.NewGuid(),
+                LivestockCircleId = Guid.NewGuid(),
+                DeadUnit = 1,
+                BadUnit = 1,
+                FoodReports = new List<UpdateFoodReportRequest> { new UpdateFoodReportRequest { FoodId = foodId, Quantity = 10 } }
+            };
+            var report = new DailyReport { Id = request.DailyReportId, IsActive = true };
+            var circle = new LivestockCircle { Id = request.LivestockCircleId, IsActive = true, StartDate = DateTime.UtcNow.AddDays(-1), GoodUnitNumber = 20 };
+            _livestockCircleRepositoryMock.Setup(x => x.GetByIdAsync(request.LivestockCircleId, null)).ReturnsAsync(circle);
+            _dailyReportRepositoryMock.Setup(x => x.GetByIdAsync(request.DailyReportId, null)).ReturnsAsync(report);
+            var foods = new List<LivestockCircleFood> { new LivestockCircleFood { FoodId = foodId, LivestockCircleId = request.LivestockCircleId, Remaining = 5, IsActive = true } }.AsQueryable().BuildMock();
+            _livestockCircleFoodRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<LivestockCircleFood, bool>>>())).Returns(foods);
+            var result = await _dailyReportService.UpdateDailyReport(request, default);
+            Assert.False(result.Succeeded);
+            Assert.Contains("đơn vị tốt không hợp", result.Message);
+        }
+
 
         [Fact]
         public async Task UpdateDailyReport_GoodUnitNegative_ReturnsError()

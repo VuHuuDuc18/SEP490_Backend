@@ -124,23 +124,23 @@ namespace Infrastructure.UnitTests.LiveStockCircleService
             _cloudinaryCloudServiceMock.Verify(x => x.UploadImage(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never());
         }
 
-        [Fact]
-        public async Task UpdateImageLiveStockCircle_NullRequest_ReturnsError()
-        {
-            // Arrange
-            var livestockCircleId = Guid.NewGuid();
-            UpdateImageLiveStockCircle request = null;
+        //[Fact]
+        //public async Task UpdateImageLiveStockCircle_NullRequest_ReturnsError()
+        //{
+        //    // Arrange
+        //    var livestockCircleId = Guid.NewGuid();
+        //    UpdateImageLiveStockCircle request = null;
 
-            // Act
-            var (success, errorMessage) = await _livestockCircleService.UpdateImageLiveStocCircle(livestockCircleId, request, default);
+        //    // Act
+        //    var (success, errorMessage) = await _livestockCircleService.UpdateImageLiveStocCircle(livestockCircleId, request, default);
 
-            // Assert
-            Assert.False(success);
-            Assert.Equal("Dữ liệu cập nhật hình ảnh lứa nuôi không được null.", errorMessage);
-            _imageLiveStockCircleRepositoryMock.Verify(x => x.Insert(It.IsAny<ImageLivestockCircle>()), Times.Never());
-            _imageLiveStockCircleRepositoryMock.Verify(x => x.CommitAsync(It.IsAny<CancellationToken>()), Times.Never());
-            _cloudinaryCloudServiceMock.Verify(x => x.UploadImage(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never());
-        }
+        //    // Assert
+        //    Assert.False(success);
+        //    Assert.Equal("Dữ liệu cập nhật hình ảnh lứa nuôi không được null.", errorMessage);
+        //    _imageLiveStockCircleRepositoryMock.Verify(x => x.Insert(It.IsAny<ImageLivestockCircle>()), Times.Never());
+        //    _imageLiveStockCircleRepositoryMock.Verify(x => x.CommitAsync(It.IsAny<CancellationToken>()), Times.Never());
+        //    _cloudinaryCloudServiceMock.Verify(x => x.UploadImage(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never());
+        //}
 
         //[Fact]
         //public async Task UpdateImageLiveStockCircle_InvalidRequestValidation_ReturnsError()

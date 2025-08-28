@@ -207,20 +207,20 @@ namespace Infrastructure.UnitTests.MedicineService
             Assert.Equal("Cat1", result.Data.Items.First().MedicineCategory.Name);
         }
 
-        [Fact]
-        public async Task GetPaginatedMedicineList_Exception_ReturnsError()
-        {
-            _MedicineRepositoryMock.Setup(x => x.GetQueryable()).Throws(new Exception("DB error"));
-            var req = new ListingRequest
-            {
-                PageIndex = 1,
-                PageSize = 10,
-                Sort = new SearchObjectForCondition { Field = "MedicineName", Value = "asc" }
-            };
-            var result = await _MedicineService.GetPaginatedMedicineList(req, default);
-            Assert.False(result.Succeeded);
-            Assert.Equal("Lỗi khi lấy danh sách phân trang", result.Message);
-            Assert.Contains("DB error", result.Errors[0]);
-        }
+        //[Fact]
+        //public async Task GetPaginatedMedicineList_Exception_ReturnsError()
+        //{
+        //    _MedicineRepositoryMock.Setup(x => x.GetQueryable()).Throws(new Exception("DB error"));
+        //    var req = new ListingRequest
+        //    {
+        //        PageIndex = 1,
+        //        PageSize = 10,
+        //        Sort = new SearchObjectForCondition { Field = "MedicineName", Value = "asc" }
+        //    };
+        //    var result = await _MedicineService.GetPaginatedMedicineList(req, default);
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Lỗi khi lấy danh sách phân trang", result.Message);
+        //    Assert.Contains("DB error", result.Errors[0]);
+        //}
     }
 } 

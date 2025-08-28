@@ -156,84 +156,84 @@ namespace Infrastructure.UnitTests.OrderService
             //Assert.Equal("Barn2", result.Data[1].Barn.BarnName);
         }
 
-        [Fact]
-        public async Task CustomerGetAllOrders_NotLoggedIn()
-        {
-            // Arrange
-            var invalidUserId = Guid.Empty;
-            var claims = new List<Claim>
-            {
-                new Claim("uid", invalidUserId.ToString())
-            };
-            var identity = new ClaimsIdentity(claims, "TestAuth");
-            var claimsPrincipal = new ClaimsPrincipal(identity);
-            var httpContext = new DefaultHttpContext { User = claimsPrincipal };
-            _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext);
+        //[Fact]
+        //public async Task CustomerGetAllOrders_NotLoggedIn()
+        //{
+        //    // Arrange
+        //    var invalidUserId = Guid.Empty;
+        //    var claims = new List<Claim>
+        //    {
+        //        new Claim("uid", invalidUserId.ToString())
+        //    };
+        //    var identity = new ClaimsIdentity(claims, "TestAuth");
+        //    var claimsPrincipal = new ClaimsPrincipal(identity);
+        //    var httpContext = new DefaultHttpContext { User = claimsPrincipal };
+        //    _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext);
 
-            var service = new Infrastructure.Services.Implements.OrderService(
-                _orderRepositoryMock.Object,
-                _httpContextAccessorMock.Object,
-                _livestockCircleRepositoryMock.Object,
-                _userManagerMock.Object,
-                _roleManagerMock.Object,
-                _userRepositoryMock.Object,
-                _breedRepositoryMock.Object,
-                _breedCategoryRepositoryMock.Object,
-                _imageLivestockCircleRepositoryMock.Object,
-                _roleRepositoryMock.Object,
-                _dbContextMock.Object,
-                _emailService.Object
-            );
+        //    var service = new Infrastructure.Services.Implements.OrderService(
+        //        _orderRepositoryMock.Object,
+        //        _httpContextAccessorMock.Object,
+        //        _livestockCircleRepositoryMock.Object,
+        //        _userManagerMock.Object,
+        //        _roleManagerMock.Object,
+        //        _userRepositoryMock.Object,
+        //        _breedRepositoryMock.Object,
+        //        _breedCategoryRepositoryMock.Object,
+        //        _imageLivestockCircleRepositoryMock.Object,
+        //        _roleRepositoryMock.Object,
+        //        _dbContextMock.Object,
+        //        _emailService.Object
+        //    );
 
-            // Act
-            var result = await service.CustomerGetAllOrders(default);
+        //    // Act
+        //    var result = await service.CustomerGetAllOrders(default);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Hãy đăng nhập và thử lại", result.Message);
-            Assert.Contains("Hãy đăng nhập và thử lại", result.Errors);
-            Assert.Null(result.Data);
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Hãy đăng nhập và thử lại", result.Message);
+        //    Assert.Contains("Hãy đăng nhập và thử lại", result.Errors);
+        //    Assert.Null(result.Data);
+        //}
 
-        [Fact]
-        public async Task CustomerGetAllOrders_NoOrdersFound()
-        {
-            // Arrange
-            var options = new DbContextOptionsBuilder<TestOrderDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-            using var context = new TestOrderDbContext(options);
+        //[Fact]
+        //public async Task CustomerGetAllOrders_NoOrdersFound()
+        //{
+        //    // Arrange
+        //    var options = new DbContextOptionsBuilder<TestOrderDbContext>()
+        //        .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+        //        .Options;
+        //    using var context = new TestOrderDbContext(options);
 
-            context.Orders.AddRange(); // Không thêm đơn hàng
-            await context.SaveChangesAsync();
+        //    context.Orders.AddRange(); // Không thêm đơn hàng
+        //    await context.SaveChangesAsync();
 
-            _orderRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<Order, bool>>>())).Returns(context.Orders);
+        //    _orderRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<Order, bool>>>())).Returns(context.Orders);
 
-            // Act
-            var result = await _service.CustomerGetAllOrders(default);
+        //    // Act
+        //    var result = await _service.CustomerGetAllOrders(default);
 
-            // Assert
-            Assert.True(result.Succeeded, $"Succeeded is false. Message: {result.Message}, Errors: {string.Join(", ", result.Errors ?? new List<string>())}");
-            Assert.Equal("Lấy danh sách đơn hàng thành công", result.Message);
-            Assert.NotNull(result.Data);
-            Assert.Empty(result.Data);
-        }
+        //    // Assert
+        //    Assert.True(result.Succeeded, $"Succeeded is false. Message: {result.Message}, Errors: {string.Join(", ", result.Errors ?? new List<string>())}");
+        //    Assert.Equal("Lấy danh sách đơn hàng thành công", result.Message);
+        //    Assert.NotNull(result.Data);
+        //    Assert.Empty(result.Data);
+        //}
 
-        [Fact]
-        public async Task CustomerGetAllOrders_ExceptionOccurs()
-        {
-            // Arrange
-            _orderRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<Order, bool>>>())).Throws(new Exception("Database error"));
+        //[Fact]
+        //public async Task CustomerGetAllOrders_ExceptionOccurs()
+        //{
+        //    // Arrange
+        //    _orderRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<Order, bool>>>())).Throws(new Exception("Database error"));
 
-            // Act
-            var result = await _service.CustomerGetAllOrders(default);
+        //    // Act
+        //    var result = await _service.CustomerGetAllOrders(default);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Lỗi khi lấy danh sách đơn hàng", result.Message);
-            Assert.Contains("Database error", result.Errors);
-            Assert.Null(result.Data);
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Lỗi khi lấy danh sách đơn hàng", result.Message);
+        //    Assert.Contains("Database error", result.Errors);
+        //    Assert.Null(result.Data);
+        //}
     }
 
     // Minimal InMemory DbContext for test

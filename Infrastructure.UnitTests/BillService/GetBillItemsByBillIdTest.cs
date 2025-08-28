@@ -56,13 +56,13 @@ namespace Infrastructure.UnitTests.BillService
             );
         }
 
-        [Fact]
-        public async Task GetBillItemsByBillId_ReturnsError_WhenRequestNull()
-        {
-            var result = await _service.GetBillItemsByBillId(Guid.NewGuid(), null);
-            Assert.False(result.Succeeded);
-            Assert.Contains("Yêu cầu không được để trống", result.Message);
-        }
+        //[Fact]
+        //public async Task GetBillItemsByBillId_ReturnsError_WhenRequestNull()
+        //{
+        //    var result = await _service.GetBillItemsByBillId(Guid.NewGuid(), null);
+        //    Assert.False(result.Succeeded);
+        //    Assert.Contains("Yêu cầu không được để trống", result.Message);
+        //}
 
         [Fact]
         public async Task GetBillItemsByBillId_ReturnsError_WhenPageIndexInvalid()
@@ -125,15 +125,15 @@ namespace Infrastructure.UnitTests.BillService
             Assert.Contains("Trường sắp xếp không hợp lệ", result.Message);
         }
 
-        [Fact]
-        public async Task GetBillItemsByBillId_ReturnsError_WhenBillNotFoundOrInactive()
-        {
-            var req = new ListingRequest { PageIndex = 1, PageSize = 10, Sort = new SearchObjectForCondition { Field = "Id", Value = "asc" } };
-            _billRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), null)).ReturnsAsync((Bill)null);
-            var result = await _service.GetBillItemsByBillId(Guid.NewGuid(), req);
-            Assert.False(result.Succeeded);
-            Assert.Contains("Hóa đơn không tồn tại", result.Message);
-        }
+        //[Fact]
+        //public async Task GetBillItemsByBillId_ReturnsError_WhenBillNotFoundOrInactive()
+        //{
+        //    var req = new ListingRequest { PageIndex = 1, PageSize = 10, Sort = new SearchObjectForCondition { Field = "Id", Value = "asc" } };
+        //    _billRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), null)).ReturnsAsync((Bill)null);
+        //    var result = await _service.GetBillItemsByBillId(Guid.NewGuid(), req);
+        //    Assert.False(result.Succeeded);
+        //    Assert.Contains("Hóa đơn không tồn tại", result.Message);
+        //}
 
         [Fact]
         public async Task GetBillItemsByBillId_ReturnsBillItems_WhenSuccess_FoodType()

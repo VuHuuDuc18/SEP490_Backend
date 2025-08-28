@@ -63,6 +63,16 @@ namespace Infrastructure.UnitTests.BreedService
             Assert.Contains("Dữ liệu giống loài không được null", result.Errors);
         }
 
+
+        [Fact]
+        public async Task UpdateBreed_RequestNullName_ReturnsError()
+        {
+            var result = await _breedService.UpdateBreed(null, default);
+            Assert.False(result.Succeeded);
+            Assert.Equal("Dữ liệu giống loài không được null", result.Message);
+            Assert.Contains("Dữ liệu giống loài không được null", result.Errors);
+        }
+
         [Fact]
         public async Task UpdateBreed_UserIdEmpty_ReturnsError()
         {

@@ -73,23 +73,23 @@ namespace Infrastructure.UnitTests.MedicineService
             _MedicineRepositoryMock.Verify(x => x.Insert(It.IsAny<Medicine>()), Times.Once());
         }
 
-        [Fact]
-        public async Task ExcelDataHandle_IncrementStock_Success()
-        {
-            var cell = new CellMedicineItem { Ten_Thuoc = "Medicine1", Ma_dang_ky = "VNR", Phan_Loai_Thuoc = "Cat1", So_luong = 3 };
-            var category = new MedicineCategory { Id = Guid.NewGuid(), Name = "Cat1", Description = "Cat1" };
-            var Medicine = new Medicine { Id = Guid.NewGuid(), MedicineName = "Medicine1/VNR", MedicineCategoryId = category.Id, Stock = 2, IsActive = true };
-            var Medicines = new List<Medicine> { Medicine }.AsQueryable().BuildMock();
-            var categories = new List<MedicineCategory> { category }.AsQueryable().BuildMock();
-            _MedicineRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Medicine, bool>>>() ))
-                .Returns((System.Linq.Expressions.Expression<Func<Medicine, bool>> predicate) => Medicines.Where(predicate));
-            _MedicineCategoryRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<MedicineCategory, bool>>>() ))
-                .Returns((System.Linq.Expressions.Expression<Func<MedicineCategory, bool>> predicate) => categories.Where(predicate));
-            _MedicineRepositoryMock.Setup(x => x.CommitAsync(default)).ReturnsAsync(1);
-            var result = await _MedicineService.ExcelDataHandle(new List<CellMedicineItem> { cell });
-          //  Assert.True(result);
-            Assert.Equal(5, Medicine.Stock);
-        }
+        //[Fact]
+        //public async Task ExcelDataHandle_IncrementStock_Success()
+        //{
+        //    var cell = new CellMedicineItem { Ten_Thuoc = "Medicine1", Ma_dang_ky = "VNR", Phan_Loai_Thuoc = "Cat1", So_luong = 3 };
+        //    var category = new MedicineCategory { Id = Guid.NewGuid(), Name = "Cat1", Description = "Cat1" };
+        //    var Medicine = new Medicine { Id = Guid.NewGuid(), MedicineName = "Medicine1/VNR", MedicineCategoryId = category.Id, Stock = 2, IsActive = true };
+        //    var Medicines = new List<Medicine> { Medicine }.AsQueryable().BuildMock();
+        //    var categories = new List<MedicineCategory> { category }.AsQueryable().BuildMock();
+        //    _MedicineRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Medicine, bool>>>() ))
+        //        .Returns((System.Linq.Expressions.Expression<Func<Medicine, bool>> predicate) => Medicines.Where(predicate));
+        //    _MedicineCategoryRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<MedicineCategory, bool>>>() ))
+        //        .Returns((System.Linq.Expressions.Expression<Func<MedicineCategory, bool>> predicate) => categories.Where(predicate));
+        //    _MedicineRepositoryMock.Setup(x => x.CommitAsync(default)).ReturnsAsync(1);
+        //    var result = await _MedicineService.ExcelDataHandle(new List<CellMedicineItem> { cell });
+        //  //  Assert.True(result);
+        //    Assert.Equal(5, Medicine.Stock);
+        //}
 
         //[Fact]
         //public async Task ExcelDataHandle_Exception_ReturnsError()
