@@ -283,12 +283,12 @@ namespace Infrastructure.Services.Implements
         /// </summary>
         public async Task<(bool Success, string ErrorMessage)> UpdateAverageWeight(
             Guid livestockCircleId,
-            float averageWeight,
+            UpdateAvgWeightDTO request,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                if (averageWeight < 0)
+                if (request.AverageWeight < 0)
                     return (false, "Trọng lượng trung bình không thể âm.");
 
                 var checkError = new Ref<CheckError>();
@@ -302,7 +302,7 @@ namespace Infrastructure.Services.Implements
                 if (!livestockCircle.IsActive)
                     return (false, "Chu kỳ chăn nuôi không còn hoạt động.");
 
-                livestockCircle.AverageWeight = averageWeight;
+                livestockCircle.AverageWeight = request.AverageWeight;
 
                 _livestockCircleRepository.Update(livestockCircle);
                 await _livestockCircleRepository.CommitAsync(cancellationToken);
