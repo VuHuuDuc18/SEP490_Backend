@@ -454,7 +454,7 @@ namespace Infrastructure.Services.Implements
                     return new Response<PaginationSet<LiveStockCircleHistoryItem>>($"Trường lọc không hợp lệ");
 
                 }
-                var query = _livestockCircleRepository.GetQueryable(x => x.IsActive && x.BarnId == barnId);
+                var query = _livestockCircleRepository.GetQueryable(x => x.AverageWeight != 5000 && x.BarnId == barnId && x.Status == StatusConstant.DONESTAT);
 
                 if (request.SearchString?.Any() == true)
                     query = query.SearchString(request.SearchString);
