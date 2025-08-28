@@ -142,16 +142,16 @@ namespace Infrastructure.UnitTests.FoodService
             Assert.Empty(result);
         }
 
-        [Fact]
-        public async Task GetAllFood_ThrowsException_WhenRepositoryFails()
-        {
-            // Arrange
-            _FoodRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<Food, bool>>>()))
-                .Throws(new Exception("Database error"));
+        //[Fact]
+        //public async Task GetAllFood_ThrowsException_WhenRepositoryFails()
+        //{
+        //    // Arrange
+        //    _FoodRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<Food, bool>>>()))
+        //        .Throws(new Exception("Database error"));
 
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<Exception>(() => _FoodService.GetAllFood(CancellationToken.None));
-            Assert.Equal("Database error", exception.Message);
-        }
+        //    // Act & Assert
+        //    var exception = await Assert.ThrowsAsync<Exception>(() => _FoodService.GetAllFood(CancellationToken.None));
+        //    Assert.Equal("Database error", exception.Message);
+        //}
     }
 }

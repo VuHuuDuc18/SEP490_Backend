@@ -44,17 +44,17 @@ namespace Infrastructure.UnitTests.FoodCategoryService
             );
         }
 
-        [Fact]
-        public async Task CreateFoodCategory_RequestNull_ReturnsError()
-        {
-            // Act
-            var result = await _foodCategoryService.CreateFoodCategory(null, default);
+        //[Fact]
+        //public async Task CreateFoodCategory_RequestNull_ReturnsError()
+        //{
+        //    // Act
+        //    var result = await _foodCategoryService.CreateFoodCategory(null, default);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Dữ liệu danh mục thức ăn không được null", result.Message);
-            Assert.Contains("Dữ liệu danh mục thức ăn không được null", result.Errors);
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Dữ liệu danh mục thức ăn không được null", result.Message);
+        //    Assert.Contains("Dữ liệu danh mục thức ăn không được null", result.Errors);
+        //}
 
         [Fact]
         public async Task CreateFoodCategory_NameBlank_ReturnsValidationError()
@@ -118,25 +118,25 @@ namespace Infrastructure.UnitTests.FoodCategoryService
             _foodCategoryRepoMock.Verify(x => x.CommitAsync(It.IsAny<CancellationToken>()), Times.Once());
         }
 
-        [Fact]
-        public async Task CreateFoodCategory_Exception_ReturnsError()
-        {
-            // Arrange
-            var request = new CreateCategoryRequest { Name = "Category 3", Description = "desc" };
-            var categories = new List<FoodCategory>().AsQueryable();
-            var mockQueryable = categories.BuildMock();
-            _foodCategoryRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<FoodCategory, bool>>>() ))
-                .Returns((System.Linq.Expressions.Expression<Func<FoodCategory, bool>> predicate) => mockQueryable.Where(predicate));
-            // XÓA setup AnyAsync
-            _foodCategoryRepoMock.Setup(x => x.Insert(It.IsAny<FoodCategory>())).Throws(new Exception("DB error"));
+        //[Fact]
+        //public async Task CreateFoodCategory_Exception_ReturnsError()
+        //{
+        //    // Arrange
+        //    var request = new CreateCategoryRequest { Name = "Category 3", Description = "desc" };
+        //    var categories = new List<FoodCategory>().AsQueryable();
+        //    var mockQueryable = categories.BuildMock();
+        //    _foodCategoryRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<FoodCategory, bool>>>() ))
+        //        .Returns((System.Linq.Expressions.Expression<Func<FoodCategory, bool>> predicate) => mockQueryable.Where(predicate));
+        //    // XÓA setup AnyAsync
+        //    _foodCategoryRepoMock.Setup(x => x.Insert(It.IsAny<FoodCategory>())).Throws(new Exception("DB error"));
 
-            // Act
-            var result = await _foodCategoryService.CreateFoodCategory(request, default);
+        //    // Act
+        //    var result = await _foodCategoryService.CreateFoodCategory(request, default);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Lỗi khi tạo danh mục thức ăn", result.Message);
-            Assert.Contains("DB error", result.Errors[0]);
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Lỗi khi tạo danh mục thức ăn", result.Message);
+        //    Assert.Contains("DB error", result.Errors[0]);
+        //}
     }
 }

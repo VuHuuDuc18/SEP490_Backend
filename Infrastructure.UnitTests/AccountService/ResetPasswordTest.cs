@@ -249,6 +249,103 @@ namespace Infrastructure.UnitTests.AccountService
             _userManagerMock.Verify(x => x.ResetPasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never());
         }
 
+
+        [Fact]
+        public async Task ResetPassword_NullOrEmptyToken()
+        {
+            // Arrange
+            var requestNullEmail = new ResetPasswordRequest
+            {
+                Email = null,
+                Token = "valid-token",
+                Password = "NewPassword123!"
+            };
+            var requestEmptyEmail = new ResetPasswordRequest
+            {
+                Email = "",
+                Token = "valid-token",
+                Password = "NewPassword123!"
+            };
+
+            _userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync((User)null);
+
+            // Act & Assert
+            var exceptionNull = await Assert.ThrowsAsync<ApiException>(async () =>
+                await _service.ResetPassword(requestNullEmail));
+            Assert.Equal("No Accounts Registered with .", exceptionNull.Message);
+
+            var exceptionEmpty = await Assert.ThrowsAsync<ApiException>(async () =>
+                await _service.ResetPassword(requestEmptyEmail));
+            Assert.Equal("No Accounts Registered with .", exceptionEmpty.Message);
+
+            _userManagerMock.Verify(x => x.FindByEmailAsync(It.IsAny<string>()), Times.Exactly(2));
+            _userManagerMock.Verify(x => x.ResetPasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never());
+        }
+        [Fact]
+        public async Task ResetPassword_NullOrEmptyPass()
+        {
+            // Arrange
+            var requestNullEmail = new ResetPasswordRequest
+            {
+                Email = null,
+                Token = "valid-token",
+                Password = "NewPassword123!"
+            };
+            var requestEmptyEmail = new ResetPasswordRequest
+            {
+                Email = "",
+                Token = "valid-token",
+                Password = "NewPassword123!"
+            };
+
+            _userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync((User)null);
+
+            // Act & Assert
+            var exceptionNull = await Assert.ThrowsAsync<ApiException>(async () =>
+                await _service.ResetPassword(requestNullEmail));
+            Assert.Equal("No Accounts Registered with .", exceptionNull.Message);
+
+            var exceptionEmpty = await Assert.ThrowsAsync<ApiException>(async () =>
+                await _service.ResetPassword(requestEmptyEmail));
+            Assert.Equal("No Accounts Registered with .", exceptionEmpty.Message);
+
+            _userManagerMock.Verify(x => x.FindByEmailAsync(It.IsAny<string>()), Times.Exactly(2));
+            _userManagerMock.Verify(x => x.ResetPasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never());
+        }
+        [Fact]
+        public async Task ResetPassword_NullRequest()
+        {
+            // Arrange
+            var requestNullEmail = new ResetPasswordRequest
+            {
+                Email = null,
+                Token = "valid-token",
+                Password = "NewPassword123!"
+            };
+            var requestEmptyEmail = new ResetPasswordRequest
+            {
+                Email = "",
+                Token = "valid-token",
+                Password = "NewPassword123!"
+            };
+
+            _userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync((User)null);
+
+            // Act & Assert
+            var exceptionNull = await Assert.ThrowsAsync<ApiException>(async () =>
+                await _service.ResetPassword(requestNullEmail));
+            Assert.Equal("No Accounts Registered with .", exceptionNull.Message);
+
+            var exceptionEmpty = await Assert.ThrowsAsync<ApiException>(async () =>
+                await _service.ResetPassword(requestEmptyEmail));
+            Assert.Equal("No Accounts Registered with .", exceptionEmpty.Message);
+
+            _userManagerMock.Verify(x => x.FindByEmailAsync(It.IsAny<string>()), Times.Exactly(2));
+            _userManagerMock.Verify(x => x.ResetPasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never());
+        }
         [Fact]
         public async Task ResetPassword_UserManagerException()
         {

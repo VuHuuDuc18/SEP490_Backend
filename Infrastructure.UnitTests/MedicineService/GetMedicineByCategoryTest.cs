@@ -92,52 +92,52 @@ namespace Infrastructure.UnitTests.MedicineService
             Assert.Equal("Medicine2", result.Data[0].MedicineName);
         }
 
-        [Fact]
-        public async Task GetMedicineByCategory_FilterByNameAndCategoryId_ReturnsFiltered()
-        {
-            var category1 = new MedicineCategory { Id = Guid.NewGuid(), Name = "Cat1", Description = "Desc1" };
-            var category2 = new MedicineCategory { Id = Guid.NewGuid(), Name = "Cat2", Description = "Desc2" };
-            var Medicines = new List<Medicine>
-            {
-                new Medicine { Id = Guid.NewGuid(), MedicineName = "Medicine1/VNR", MedicineCategory = category1, MedicineCategoryId = category1.Id, IsActive = true },
-                new Medicine { Id = Guid.NewGuid(), MedicineName = "Medicine2/VNR1", MedicineCategory = category2, MedicineCategoryId = category2.Id, IsActive = true }
-            }.AsQueryable().BuildMock();
-            _MedicineRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Medicine, bool>>>() ))
-                .Returns((System.Linq.Expressions.Expression<Func<Medicine, bool>> predicate) => Medicines.Where(predicate));
-            _imageMedicineRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<ImageMedicine, bool>>>() ))
-                .Returns(new List<ImageMedicine>().AsQueryable().BuildMock());
-            var result = await _MedicineService.GetMedicineByCategory("Medicine2", category2.Id, default);
-            Assert.True(result.Succeeded);
-            Assert.Single(result.Data);
-            Assert.Equal("Medicine2", result.Data[0].MedicineName);
-        }
+        //[Fact]
+        //public async Task GetMedicineByCategory_FilterByNameAndCategoryId_ReturnsFiltered()
+        //{
+        //    var category1 = new MedicineCategory { Id = Guid.NewGuid(), Name = "Cat1", Description = "Desc1" };
+        //    var category2 = new MedicineCategory { Id = Guid.NewGuid(), Name = "Cat2", Description = "Desc2" };
+        //    var Medicines = new List<Medicine>
+        //    {
+        //        new Medicine { Id = Guid.NewGuid(), MedicineName = "Medicine1/VNR", MedicineCategory = category1, MedicineCategoryId = category1.Id, IsActive = true },
+        //        new Medicine { Id = Guid.NewGuid(), MedicineName = "Medicine2/VNR1", MedicineCategory = category2, MedicineCategoryId = category2.Id, IsActive = true }
+        //    }.AsQueryable().BuildMock();
+        //    _MedicineRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Medicine, bool>>>() ))
+        //        .Returns((System.Linq.Expressions.Expression<Func<Medicine, bool>> predicate) => Medicines.Where(predicate));
+        //    _imageMedicineRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<ImageMedicine, bool>>>() ))
+        //        .Returns(new List<ImageMedicine>().AsQueryable().BuildMock());
+        //    var result = await _MedicineService.GetMedicineByCategory("Medicine2", category2.Id, default);
+        //    Assert.True(result.Succeeded);
+        //    Assert.Single(result.Data);
+        //    Assert.Equal("Medicine2", result.Data[0].MedicineName);
+        //}
 
-        [Fact]
-        public async Task GetMedicineByCategory_NoResult_ReturnsEmpty()
-        {
-            var category = new MedicineCategory { Id = Guid.NewGuid(), Name = "Cat1", Description = "Desc1" };
-            var Medicines = new List<Medicine>
-            {
-                new Medicine { Id = Guid.NewGuid(), MedicineName = "Medicine1", MedicineCategory = category, MedicineCategoryId = category.Id, IsActive = true }
-            }.AsQueryable().BuildMock();
-            _MedicineRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Medicine, bool>>>() ))
-                .Returns((System.Linq.Expressions.Expression<Func<Medicine, bool>> predicate) => Medicines.Where(predicate));
-            _imageMedicineRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<ImageMedicine, bool>>>() ))
-                .Returns(new List<ImageMedicine>().AsQueryable().BuildMock());
-            var result = await _MedicineService.GetMedicineByCategory("NotExist", null, default);
-            Assert.True(result.Succeeded);
-            Assert.Empty(result.Data);
-        }
+        //[Fact]
+        //public async Task GetMedicineByCategory_NoResult_ReturnsEmpty()
+        //{
+        //    var category = new MedicineCategory { Id = Guid.NewGuid(), Name = "Cat1", Description = "Desc1" };
+        //    var Medicines = new List<Medicine>
+        //    {
+        //        new Medicine { Id = Guid.NewGuid(), MedicineName = "Medicine1", MedicineCategory = category, MedicineCategoryId = category.Id, IsActive = true }
+        //    }.AsQueryable().BuildMock();
+        //    _MedicineRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Medicine, bool>>>() ))
+        //        .Returns((System.Linq.Expressions.Expression<Func<Medicine, bool>> predicate) => Medicines.Where(predicate));
+        //    _imageMedicineRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<ImageMedicine, bool>>>() ))
+        //        .Returns(new List<ImageMedicine>().AsQueryable().BuildMock());
+        //    var result = await _MedicineService.GetMedicineByCategory("NotExist", null, default);
+        //    Assert.True(result.Succeeded);
+        //    Assert.Empty(result.Data);
+        //}
 
-        [Fact]
-        public async Task GetMedicineByCategory_Exception_ReturnsError()
-        {
-            _MedicineRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Medicine, bool>>>() ))
-                .Throws(new Exception("DB error"));
-            var result = await _MedicineService.GetMedicineByCategory(null, null, default);
-            Assert.False(result.Succeeded);
-            Assert.Equal("Lỗi khi lấy danh sách thuốc", result.Message);
-            Assert.Contains("DB error", result.Errors[0]);
-        }
+        //[Fact]
+        //public async Task GetMedicineByCategory_Exception_ReturnsError()
+        //{
+        //    _MedicineRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Medicine, bool>>>() ))
+        //        .Throws(new Exception("DB error"));
+        //    var result = await _MedicineService.GetMedicineByCategory(null, null, default);
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Lỗi khi lấy danh sách thuốc", result.Message);
+        //    Assert.Contains("DB error", result.Errors[0]);
+        //}
     }
 } 

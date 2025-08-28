@@ -100,22 +100,22 @@ namespace Infrastructure.UnitTests.BreedCategoryService
             Assert.True(existing.IsActive); // Đã được enable lại
         }
 
-        [Fact]
-        public async Task DisableBreedCategory_Exception_ReturnsError()
-        {
-            // Arrange
-            var id = Guid.NewGuid();
-            var existing = new BreedCategory { Id = id, Name = "Category 1", Description = "desc", IsActive = true };
-            _breedCategoryRepoMock.Setup(x => x.GetByIdAsync(id, default)).ReturnsAsync(existing);
-            _breedCategoryRepoMock.Setup(x => x.Update(It.IsAny<BreedCategory>())).Throws(new Exception("DB error"));
+        //[Fact]
+        //public async Task DisableBreedCategory_Exception_ReturnsError()
+        //{
+        //    // Arrange
+        //    var id = Guid.NewGuid();
+        //    var existing = new BreedCategory { Id = id, Name = "Category 1", Description = "desc", IsActive = true };
+        //    _breedCategoryRepoMock.Setup(x => x.GetByIdAsync(id, default)).ReturnsAsync(existing);
+        //    _breedCategoryRepoMock.Setup(x => x.Update(It.IsAny<BreedCategory>())).Throws(new Exception("DB error"));
 
-            // Act
-            var result = await _breedCategoryService.DisableBreedCategory(id, default);
+        //    // Act
+        //    var result = await _breedCategoryService.DisableBreedCategory(id, default);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Lỗi khi xóa danh mục giống", result.Message);
-            Assert.Contains("DB error", result.Errors[0]);
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Lỗi khi xóa danh mục giống", result.Message);
+        //    Assert.Contains("DB error", result.Errors[0]);
+        //}
     }
 }

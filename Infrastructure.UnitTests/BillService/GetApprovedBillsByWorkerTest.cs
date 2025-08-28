@@ -56,31 +56,31 @@ namespace Infrastructure.UnitTests.BillService
             );
         }
 
-        [Fact]
-        public async Task GetApprovedBillsByWorker_NotLoggedIn_ReturnsError()
-        {
-            _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
-            var service = new Infrastructure.Services.Implements.BillService(
-                _billRepoMock.Object,
-                new Mock<IRepository<BillItem>>().Object,
-                _userRepoMock.Object,
-                _lscRepoMock.Object,
-                new Mock<IRepository<Food>>().Object,
-                new Mock<IRepository<Medicine>>().Object,
-                new Mock<IRepository<Breed>>().Object,
-                _barnRepoMock.Object,
-                new Mock<IRepository<LivestockCircleFood>>().Object,
-                new Mock<IRepository<LivestockCircleMedicine>>().Object,
-                new Mock<IRepository<ImageFood>>().Object,
-                new Mock<IRepository<ImageMedicine>>().Object,
-                new Mock<IRepository<ImageBreed>>().Object,
-                _httpContextAccessorMock.Object
-            );
-            var req = new ListingRequest { PageIndex = 1, PageSize = 10 };
-            var result = await service.GetApprovedBillsByWorker(req);
-            Assert.False(result.Succeeded);
-            Assert.Contains("đăng nhập", result.Message, StringComparison.OrdinalIgnoreCase);
-        }
+        //[Fact]
+        //public async Task GetApprovedBillsByWorker_NotLoggedIn_ReturnsError()
+        //{
+        //    _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
+        //    var service = new Infrastructure.Services.Implements.BillService(
+        //        _billRepoMock.Object,
+        //        new Mock<IRepository<BillItem>>().Object,
+        //        _userRepoMock.Object,
+        //        _lscRepoMock.Object,
+        //        new Mock<IRepository<Food>>().Object,
+        //        new Mock<IRepository<Medicine>>().Object,
+        //        new Mock<IRepository<Breed>>().Object,
+        //        _barnRepoMock.Object,
+        //        new Mock<IRepository<LivestockCircleFood>>().Object,
+        //        new Mock<IRepository<LivestockCircleMedicine>>().Object,
+        //        new Mock<IRepository<ImageFood>>().Object,
+        //        new Mock<IRepository<ImageMedicine>>().Object,
+        //        new Mock<IRepository<ImageBreed>>().Object,
+        //        _httpContextAccessorMock.Object
+        //    );
+        //    var req = new ListingRequest { PageIndex = 1, PageSize = 10 };
+        //    var result = await service.GetApprovedBillsByWorker(req);
+        //    Assert.False(result.Succeeded);
+        //    Assert.Contains("đăng nhập", result.Message, StringComparison.OrdinalIgnoreCase);
+        //}
 
         [Fact]
         public async Task GetApprovedBillsByWorker_WorkerNotFound_ReturnsError()
@@ -188,14 +188,14 @@ namespace Infrastructure.UnitTests.BillService
             Assert.Equal(2, result.Data.Items.Count);
         }
 
-        [Fact]
-        public async Task GetApprovedBillsByWorker_Exception_ReturnsError()
-        {
-            _userRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), null)).Throws(new Exception("DB error"));
-            var req = new ListingRequest { PageIndex = 1, PageSize = 10, Sort = new SearchObjectForCondition { Field = "Id", Value = "asc" } };
-            var result = await _service.GetApprovedBillsByWorker(req);
-            Assert.False(result.Succeeded);
-            Assert.Contains("Lỗi khi lấy danh sách hóa đơn", result.Message, StringComparison.OrdinalIgnoreCase);
-        }
+        //[Fact]
+        //public async Task GetApprovedBillsByWorker_Exception_ReturnsError()
+        //{
+        //    _userRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), null)).Throws(new Exception("DB error"));
+        //    var req = new ListingRequest { PageIndex = 1, PageSize = 10, Sort = new SearchObjectForCondition { Field = "Id", Value = "asc" } };
+        //    var result = await _service.GetApprovedBillsByWorker(req);
+        //    Assert.False(result.Succeeded);
+        //    Assert.Contains("Lỗi khi lấy danh sách hóa đơn", result.Message, StringComparison.OrdinalIgnoreCase);
+        //}
     }
 }

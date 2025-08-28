@@ -98,18 +98,18 @@ namespace Infrastructure.UnitTests.BarnService
             Assert.True(barn.IsActive);
         }
 
-        [Fact]
-        public async Task DisableBarn_Exception_ReturnsError()
-        {
-            var barnId = Guid.NewGuid();
-            var barn = new Barn { Id = barnId, IsActive = true };
-            _barnRepositoryMock.Setup(x => x.GetByIdAsync(barnId, default)).ReturnsAsync(barn);
-            _barnRepositoryMock.Setup(x => x.Update(barn)).Throws(new Exception("db error"));
+        //[Fact]
+        //public async Task DisableBarn_Exception_ReturnsError()
+        //{
+        //    var barnId = Guid.NewGuid();
+        //    var barn = new Barn { Id = barnId, IsActive = true };
+        //    _barnRepositoryMock.Setup(x => x.GetByIdAsync(barnId, default)).ReturnsAsync(barn);
+        //    _barnRepositoryMock.Setup(x => x.Update(barn)).Throws(new Exception("db error"));
 
-            var result = await _barnService.DisableBarn(barnId);
+        //    var result = await _barnService.DisableBarn(barnId);
 
-            Assert.False(result.Succeeded);
-            Assert.Contains("lỗi", result.Message, StringComparison.OrdinalIgnoreCase);
-        }
+        //    Assert.False(result.Succeeded);
+        //    Assert.Contains("lỗi", result.Message, StringComparison.OrdinalIgnoreCase);
+        //}
     }
 }

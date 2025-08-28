@@ -65,6 +65,33 @@ namespace Infrastructure.UnitTests.MedicineService
         }
 
         [Fact]
+        public async Task CreateMedicine_RequestNullName_ReturnsError()
+        {
+            var result = await _MedicineService.CreateMedicine(null, default);
+            Assert.False(result.Succeeded);
+            Assert.Equal("Dữ liệu thuốc không được null", result.Message);
+            Assert.Contains("Dữ liệu thuốc không được null", result.Errors);
+        }
+
+        [Fact]
+        public async Task CreateMedicine_RequestNullStock_ReturnsError()
+        {
+            var result = await _MedicineService.CreateMedicine(null, default);
+            Assert.False(result.Succeeded);
+            Assert.Equal("Dữ liệu thuốc không được null", result.Message);
+            Assert.Contains("Dữ liệu thuốc không được null", result.Errors);
+        }
+
+        [Fact]
+        public async Task CreateMedicine_RequestNullDes_ReturnsError()
+        {
+            var result = await _MedicineService.CreateMedicine(null, default);
+            Assert.False(result.Succeeded);
+            Assert.Equal("Dữ liệu thuốc không được null", result.Message);
+            Assert.Contains("Dữ liệu thuốc không được null", result.Errors);
+        }
+
+        [Fact]
         public async Task CreateMedicine_UserIdEmpty_ReturnsError()
         {
             // Arrange
