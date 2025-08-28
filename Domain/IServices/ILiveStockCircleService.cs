@@ -45,7 +45,7 @@ namespace Domain.IServices
 
         Task<(bool Success, string ErrorMessage)> UpdateAverageWeight(
             Guid livestockCircleId,
-            float averageWeight,
+            UpdateAvgWeightDTO request,
             CancellationToken cancellationToken = default);
 
         /// <summary>

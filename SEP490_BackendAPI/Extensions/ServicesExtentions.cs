@@ -56,10 +56,15 @@ namespace SEP490_BackendAPI.Extensions
         
         public static async Task SeedIdentity(this IServiceProvider servicesProvider)
         {
-            var userManager = servicesProvider.GetRequiredService<UserManager<User>>();
-            var roleManaer = servicesProvider.GetRequiredService<RoleManager<Role>>();
-            await RoleSeeds.SeedAsync(roleManaer);
-            await UserSeeds.SeedAsync(userManager, roleManaer);
+            using (var scope = servicesProvider.CreateScope())
+            {
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
+
+                await RoleSeeds.SeedAsync(roleManager);
+                await UserSeeds.SeedAsync(userManager, roleManager);
+            }
+            
         }
     }
 }

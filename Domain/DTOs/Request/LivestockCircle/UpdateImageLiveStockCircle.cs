@@ -10,4 +10,9 @@ namespace Domain.DTOs.Request.LivestockCircle
     {
         public List<string> Images { get; set; }  = new List<string>();
     }
+
+    public class UpdateAvgWeightDTO
+    {
+        public float AverageWeight { get; set; }
+    }
 }
