@@ -707,6 +707,7 @@ namespace Infrastructure.Services.Implements
                     orderItem.BadUnitStock = (int)request.BadUnitStock;
                     livestockCircleDetail.GoodUnitNumber -= (int)request.GoodUnitStock;
                     livestockCircleDetail.BadUnitNumber -= (int)request.BadUnitStock;
+                    orderItem.Status = OrderStatus.DONE;
                     if (livestockCircleDetail.GoodUnitNumber == 0 && livestockCircleDetail.BadUnitNumber == 0)
                     {
                         livestockCircleDetail.Status = StatusConstant.DONESTAT;
