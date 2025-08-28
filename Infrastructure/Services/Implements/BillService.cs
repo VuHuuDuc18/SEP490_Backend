@@ -139,6 +139,10 @@ namespace Infrastructure.Services.Implements
         private async Task UpdateLivestockCircle(Guid livestockCircleId, int quantity, int? deadUnit, float? averageWeight, CancellationToken cancellationToken)
         {
             var livestockCircle = await _livestockCircleRepository.GetByIdAsync(livestockCircleId, new Ref<CheckError>());
+            if(livestockCircle != null && averageWeight == 5000)
+            {
+                livestockCircle.IsActive = false;
+            }
             if (livestockCircle != null)
             {
                 livestockCircle.Status = StatusConstant.GROWINGSTAT;
@@ -1161,14 +1165,20 @@ namespace Infrastructure.Services.Implements
 
                 if (bill.Status == StatusConstant.APPROVED)
                 {
-                    // Rollback stock nếu APPROVED
+                    // Rollback stock nếu Approved
                     foreach (var item in billItems)
                     {
                         await UpdateStock(item, -item.Stock, cancellationToken);
                     }
                 }
 
+                if(bill.TypeBill == TypeBill.BREED)
+                {
+                    await UpdateLivestockCircle(bill.LivestockCircleId, 0, 0, 5000, cancellationToken);
+                }
+
                 bill.Status = StatusConstant.REJECTED;
+                
                 _billRepository.Update(bill);
                 await _billRepository.CommitAsync(cancellationToken);
 
