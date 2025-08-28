@@ -65,6 +65,30 @@ namespace Infrastructure.UnitTests.FoodService
         }
 
         [Fact]
+        public async Task CreateFood_RequestNullName_ReturnsError()
+        {
+            var result = await _FoodService.CreateFood(null, default);
+            Assert.False(result.Succeeded);
+            Assert.Equal("Dữ liệu thức ăn không được null", result.Message);
+            Assert.Contains("Dữ liệu thức ăn không được null", result.Errors);
+        }
+        [Fact]
+        public async Task CreateFood_RequestNullStock_ReturnsError()
+        {
+            var result = await _FoodService.CreateFood(null, default);
+            Assert.False(result.Succeeded);
+            Assert.Equal("Dữ liệu thức ăn không được null", result.Message);
+            Assert.Contains("Dữ liệu thức ăn không được null", result.Errors);
+        }
+        [Fact]
+        public async Task CreateFood_RequestNullDescription_ReturnsError()
+        {
+            var result = await _FoodService.CreateFood(null, default);
+            Assert.False(result.Succeeded);
+            Assert.Equal("Dữ liệu thức ăn không được null", result.Message);
+            Assert.Contains("Dữ liệu thức ăn không được null", result.Errors);
+        }
+        [Fact]
         public async Task CreateFood_UserIdEmpty_ReturnsError()
         {
             // Arrange

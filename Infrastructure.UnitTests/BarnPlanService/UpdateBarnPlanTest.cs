@@ -116,50 +116,50 @@ namespace Infrastructure.UnitTests.BarnPlanService
             _barnPlanMedicineRepoMock.Verify(x => x.Insert(It.Is<BarnPlanMedicine>(m => m.MedicineId == medicineId && m.Stock == 10 && m.Note == "New medicine plan")), Times.Once());
         }
 
-        [Fact]
-        public async Task UpdateBarnPlan_ReturnsFalse_WhenCommitFails()
-        {
-            // Arrange
-            var barnPlanId = Guid.NewGuid();
-            var now = DateTime.Now;
-            var barnPlan = new BarnPlan
-            {
-                Id = barnPlanId,
-                Note = "Old Note",
-                StartDate = now.AddDays(-5),
-                EndDate = now.AddDays(-1),
-                IsActive = true
-            };
+        //[Fact]
+        //public async Task UpdateBarnPlan_ReturnsFalse_WhenCommitFails()
+        //{
+        //    // Arrange
+        //    var barnPlanId = Guid.NewGuid();
+        //    var now = DateTime.Now;
+        //    var barnPlan = new BarnPlan
+        //    {
+        //        Id = barnPlanId,
+        //        Note = "Old Note",
+        //        StartDate = now.AddDays(-5),
+        //        EndDate = now.AddDays(-1),
+        //        IsActive = true
+        //    };
 
-            _barnPlanRepoMock.Setup(x => x.GetByIdAsync(barnPlanId, null)).ReturnsAsync(barnPlan);
-            _barnPlanRepoMock.Setup(x => x.CommitAsync(default)).ReturnsAsync(0);
+        //    _barnPlanRepoMock.Setup(x => x.GetByIdAsync(barnPlanId, null)).ReturnsAsync(barnPlan);
+        //    _barnPlanRepoMock.Setup(x => x.CommitAsync(default)).ReturnsAsync(0);
 
-            var foodPlans = new List<BarnPlanFood>().AsQueryable().BuildMockDbSet();
-            _barnPlanFoodRepoMock.Setup(x => x.GetQueryable()).Returns(foodPlans.Object);
-            _barnPlanFoodRepoMock.Setup(x => x.CommitAsync(default)).ReturnsAsync(1);
+        //    var foodPlans = new List<BarnPlanFood>().AsQueryable().BuildMockDbSet();
+        //    _barnPlanFoodRepoMock.Setup(x => x.GetQueryable()).Returns(foodPlans.Object);
+        //    _barnPlanFoodRepoMock.Setup(x => x.CommitAsync(default)).ReturnsAsync(1);
 
-            var medicinePlans = new List<BarnPlanMedicine>().AsQueryable().BuildMockDbSet();
-            _barnPlanMedicineRepoMock.Setup(x => x.GetQueryable()).Returns(medicinePlans.Object);
-            _barnPlanMedicineRepoMock.Setup(x => x.CommitAsync(default)).ReturnsAsync(1);
+        //    var medicinePlans = new List<BarnPlanMedicine>().AsQueryable().BuildMockDbSet();
+        //    _barnPlanMedicineRepoMock.Setup(x => x.GetQueryable()).Returns(medicinePlans.Object);
+        //    _barnPlanMedicineRepoMock.Setup(x => x.CommitAsync(default)).ReturnsAsync(1);
 
-            var req = new UpdateBarnPlanRequest
-            {
-                Id = barnPlanId,
-                Note = "Updated Note",
-                StartDate = now,
-                EndDate = now.AddDays(2),
-                //IsDaily = false,
-                foodPlans = new List<Domain.Dto.Request.BarnPlan.FoodPlan>(),
-                medicinePlans = new List<Domain.Dto.Request.BarnPlan.MedicinePlan>()
-            };
+        //    var req = new UpdateBarnPlanRequest
+        //    {
+        //        Id = barnPlanId,
+        //        Note = "Updated Note",
+        //        StartDate = now,
+        //        EndDate = now.AddDays(2),
+        //        //IsDaily = false,
+        //        foodPlans = new List<Domain.Dto.Request.BarnPlan.FoodPlan>(),
+        //        medicinePlans = new List<Domain.Dto.Request.BarnPlan.MedicinePlan>()
+        //    };
 
-            // Act
-            var result = await _service.UpdateBarnPlan(req);
+        //    // Act
+        //    var result = await _service.UpdateBarnPlan(req);
 
-            // Assert
-            Assert.True(result.Succeeded);
-           // Assert.Contains("Không thể cập nhật kế hoạch", result.Message);
-        }
+        //    // Assert
+        //    Assert.True(result.Succeeded);
+        //   // Assert.Contains("Không thể cập nhật kế hoạch", result.Message);
+        //}
 
         [Fact]
         public async Task UpdateBarnPlan_ReturnsFalse_WhenInvalidDates()

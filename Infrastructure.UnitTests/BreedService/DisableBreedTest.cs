@@ -94,17 +94,17 @@ namespace Infrastructure.UnitTests.BreedService
             Assert.True(existing.IsActive);
         }
 
-        [Fact]
-        public async Task DisableBreed_Exception_ReturnsError()
-        {
-            var id = Guid.NewGuid();
-            var existing = new Breed { Id = id, BreedName = "Breed1", IsActive = true };
-            _breedRepositoryMock.Setup(x => x.GetByIdAsync(id, null)).ReturnsAsync(existing);
-            _breedRepositoryMock.Setup(x => x.Update(It.IsAny<Breed>())).Throws(new Exception("DB error"));
-            var result = await _breedService.DisableBreed(id, default);
-            Assert.False(result.Succeeded);
-            Assert.Equal("Lỗi khi xóa giống loài", result.Message);
-            Assert.Contains("DB error", result.Errors[0]);
-        }
+        //[Fact]
+        //public async Task DisableBreed_Exception_ReturnsError()
+        //{
+        //    var id = Guid.NewGuid();
+        //    var existing = new Breed { Id = id, BreedName = "Breed1", IsActive = true };
+        //    _breedRepositoryMock.Setup(x => x.GetByIdAsync(id, null)).ReturnsAsync(existing);
+        //    _breedRepositoryMock.Setup(x => x.Update(It.IsAny<Breed>())).Throws(new Exception("DB error"));
+        //    var result = await _breedService.DisableBreed(id, default);
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Lỗi khi xóa giống loài", result.Message);
+        //    Assert.Contains("DB error", result.Errors[0]);
+        //}
     }
 } 

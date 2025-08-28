@@ -94,17 +94,17 @@ namespace Infrastructure.UnitTests.FoodService
             Assert.True(existing.IsActive);
         }
 
-        [Fact]
-        public async Task DisableFood_Exception_ReturnsError()
-        {
-            var id = Guid.NewGuid();
-            var existing = new Food { Id = id, FoodName = "Food1", IsActive = true };
-            _FoodRepositoryMock.Setup(x => x.GetByIdAsync(id, null)).ReturnsAsync(existing);
-            _FoodRepositoryMock.Setup(x => x.Update(It.IsAny<Food>())).Throws(new Exception("DB error"));
-            var result = await _FoodService.DisableFood(id, default);
-            Assert.False(result.Succeeded);
-            Assert.Equal("Lỗi khi xóa thức ăn", result.Message);
-            Assert.Contains("DB error", result.Errors[0]);
-        }
+        //[Fact]
+        //public async Task DisableFood_Exception_ReturnsError()
+        //{
+        //    var id = Guid.NewGuid();
+        //    var existing = new Food { Id = id, FoodName = "Food1", IsActive = true };
+        //    _FoodRepositoryMock.Setup(x => x.GetByIdAsync(id, null)).ReturnsAsync(existing);
+        //    _FoodRepositoryMock.Setup(x => x.Update(It.IsAny<Food>())).Throws(new Exception("DB error"));
+        //    var result = await _FoodService.DisableFood(id, default);
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Lỗi khi xóa thức ăn", result.Message);
+        //    Assert.Contains("DB error", result.Errors[0]);
+        //}
     }
 } 

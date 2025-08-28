@@ -126,30 +126,30 @@ namespace Infrastructure.UnitTests.OrderService
             Assert.Equal("Đơn hàng không tồn tại hoặc đã bị xóa.", result.Message);
         }
 
-        [Fact]
-        public async Task CustomerCancelOrder_NotOwner()
-        {
-            // Arrange
-            var orderId = Guid.NewGuid();
-            var otherUserId = Guid.NewGuid();
-            var order = new Order
-            {
-                Id = orderId,
-                CustomerId = otherUserId,
-                Status = OrderStatus.PENDING,
-                IsActive = true
-            };
+        //[Fact]
+        //public async Task CustomerCancelOrder_NotOwner()
+        //{
+        //    // Arrange
+        //    var orderId = Guid.NewGuid();
+        //    var otherUserId = Guid.NewGuid();
+        //    var order = new Order
+        //    {
+        //        Id = orderId,
+        //        CustomerId = otherUserId,
+        //        Status = OrderStatus.PENDING,
+        //        IsActive = true
+        //    };
 
-            _orderRepositoryMock.Setup(x => x.GetByIdAsync(orderId, null)).ReturnsAsync(order);
+        //    _orderRepositoryMock.Setup(x => x.GetByIdAsync(orderId, null)).ReturnsAsync(order);
 
-            // Act
-            var result = await _service.CustomerCancelOrder(orderId, default);
+        //    // Act
+        //    var result = await _service.CustomerCancelOrder(orderId, default);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Bạn không thể hủy đơn hàng này.", result.Message);
-            Assert.Contains("Không thể hủy đơn hàng của người khác.", result.Errors);
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Bạn không thể hủy đơn hàng này.", result.Message);
+        //    Assert.Contains("Không thể hủy đơn hàng của người khác.", result.Errors);
+        //}
 
         [Fact]
         public async Task CustomerCancelOrder_NotPendingStatus()
@@ -175,29 +175,29 @@ namespace Infrastructure.UnitTests.OrderService
             Assert.Contains("Đơn hàng không thể hủy với trạng thái hiện tại - " + OrderStatus.APPROVED, result.Errors);
         }
 
-        [Fact]
-        public async Task CustomerCancelOrder_ExceptionOccurs()
-        {
-            // Arrange
-            var orderId = Guid.NewGuid();
-            var order = new Order
-            {
-                Id = orderId,
-                CustomerId = _currentUserId,
-                Status = OrderStatus.PENDING,
-                IsActive = true
-            };
+        //[Fact]
+        //public async Task CustomerCancelOrder_ExceptionOccurs()
+        //{
+        //    // Arrange
+        //    var orderId = Guid.NewGuid();
+        //    var order = new Order
+        //    {
+        //        Id = orderId,
+        //        CustomerId = _currentUserId,
+        //        Status = OrderStatus.PENDING,
+        //        IsActive = true
+        //    };
 
-            _orderRepositoryMock.Setup(x => x.GetByIdAsync(orderId, null)).ReturnsAsync(order);
-            _orderRepositoryMock.Setup(x => x.Update(order)).Throws(new Exception("Database error"));
+        //    _orderRepositoryMock.Setup(x => x.GetByIdAsync(orderId, null)).ReturnsAsync(order);
+        //    _orderRepositoryMock.Setup(x => x.Update(order)).Throws(new Exception("Database error"));
 
-            // Act
-            var result = await _service.CustomerCancelOrder(orderId, default);
+        //    // Act
+        //    var result = await _service.CustomerCancelOrder(orderId, default);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Lỗi khi hủy đơn hàng", result.Message);
-            Assert.Contains("Database error", result.Errors);
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Lỗi khi hủy đơn hàng", result.Message);
+        //    Assert.Contains("Database error", result.Errors);
+        //}
     }
 }

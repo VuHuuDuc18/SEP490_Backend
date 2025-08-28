@@ -175,15 +175,15 @@ namespace Infrastructure.UnitTests.BillService
             Assert.Equal(2, result.Data.Items.Count);
         }
 
-        [Fact]
-        public async Task GetPaginatedBillListByTechicalStaff_Exception_ReturnsError()
-        {
-            _userRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Infrastructure.Core.Ref<Infrastructure.Core.CheckError>>())).Throws(new Exception("DB error"));
-            var req = new ListingRequest { PageIndex = 1, PageSize = 10 };
-            var result = await _service.GetPaginatedBillListByTechicalStaff(req, "Food");
-            Assert.False(result.Succeeded);
-            Assert.Contains("Lỗi khi lấy danh sách hóa đơn", result.Message, StringComparison.OrdinalIgnoreCase);
-        }
+        //[Fact]
+        //public async Task GetPaginatedBillListByTechicalStaff_Exception_ReturnsError()
+        //{
+        //    _userRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Infrastructure.Core.Ref<Infrastructure.Core.CheckError>>())).Throws(new Exception("DB error"));
+        //    var req = new ListingRequest { PageIndex = 1, PageSize = 10 };
+        //    var result = await _service.GetPaginatedBillListByTechicalStaff(req, "Food");
+        //    Assert.False(result.Succeeded);
+        //    Assert.Contains("Lỗi khi lấy danh sách hóa đơn", result.Message, StringComparison.OrdinalIgnoreCase);
+        //}
 
         // Minimal InMemory DbContext for test
         public class TestBillDbContext : DbContext

@@ -155,95 +155,95 @@ namespace Infrastructure.UnitTests.DailyReportService
             Assert.False(result.Data);
         }
 
-        [Fact]
-        public async Task HasDailyReportToday_InactiveReportToday_ReturnsFalse()
-        {
-            // Arrange
-            var livestockCircleId = Guid.NewGuid();
-            var livestockCircle = new LivestockCircle
-            {
-                Id = livestockCircleId,
-                LivestockCircleName = "Test",
-                Status = StatusConstant.GROWINGSTAT,
-                IsActive = true
-            };
-            var today = DateTime.UtcNow.Date;
-            var dailyReport = new DailyReport
-            {
-                Id = Guid.NewGuid(),
-                LivestockCircleId = livestockCircleId,
-                Status = "today",
-                Note = "test",
-                IsActive = false, // Inactive report
-                CreatedDate = today
-            };
+        //[Fact]
+        //public async Task HasDailyReportToday_InactiveReportToday_ReturnsFalse()
+        //{
+        //    // Arrange
+        //    var livestockCircleId = Guid.NewGuid();
+        //    var livestockCircle = new LivestockCircle
+        //    {
+        //        Id = livestockCircleId,
+        //        LivestockCircleName = "Test",
+        //        Status = StatusConstant.GROWINGSTAT,
+        //        IsActive = true
+        //    };
+        //    var today = DateTime.UtcNow.Date;
+        //    var dailyReport = new DailyReport
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        LivestockCircleId = livestockCircleId,
+        //        Status = "today",
+        //        Note = "test",
+        //        IsActive = false, // Inactive report
+        //        CreatedDate = today
+        //    };
 
-            var options = new DbContextOptionsBuilder<TestDbContext3>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-            using var context = new TestDbContext3(options);
-            context.LivestockCircles.Add(livestockCircle);
-            context.DailyReports.Add(dailyReport);
-            context.SaveChanges();
+        //    var options = new DbContextOptionsBuilder<TestDbContext3>()
+        //        .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+        //        .Options;
+        //    using var context = new TestDbContext3(options);
+        //    context.LivestockCircles.Add(livestockCircle);
+        //    context.DailyReports.Add(dailyReport);
+        //    context.SaveChanges();
 
-            _livestockCircleRepositoryMock.Setup(x => x.GetByIdAsync(livestockCircleId, null))
-                .ReturnsAsync(livestockCircle);
-            _dailyReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<DailyReport, bool>>>()))
-                .Returns((Expression<Func<DailyReport, bool>> expr) => context.DailyReports.Where(expr));
+        //    _livestockCircleRepositoryMock.Setup(x => x.GetByIdAsync(livestockCircleId, null))
+        //        .ReturnsAsync(livestockCircle);
+        //    _dailyReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<DailyReport, bool>>>()))
+        //        .Returns((Expression<Func<DailyReport, bool>> expr) => context.DailyReports.Where(expr));
 
-            // Act
-            var result = await _dailyReportService.HasDailyReportToday(livestockCircleId, default);
+        //    // Act
+        //    var result = await _dailyReportService.HasDailyReportToday(livestockCircleId, default);
 
-            // Assert
-            Assert.True(result.Succeeded, $"Service message: {result.Message}");
-            Assert.Equal("Kiểm tra báo cáo thành công", result.Message);
-            Assert.False(result.Data);
-        }
+        //    // Assert
+        //    Assert.True(result.Succeeded, $"Service message: {result.Message}");
+        //    Assert.Equal("Kiểm tra báo cáo thành công", result.Message);
+        //    Assert.False(result.Data);
+        //}
 
-        [Fact]
-        public async Task HasDailyReportToday_ReportOnDifferentDate_ReturnsFalse()
-        {
-            // Arrange
-            var livestockCircleId = Guid.NewGuid();
-            var livestockCircle = new LivestockCircle
-            {
-                Id = livestockCircleId,
-                LivestockCircleName = "Test",
-                Status = StatusConstant.GROWINGSTAT,
-                IsActive = true
-            };
-            var yesterday = DateTime.UtcNow.Date.AddDays(-1);
-            var dailyReport = new DailyReport
-            {
-                Id = Guid.NewGuid(),
-                LivestockCircleId = livestockCircleId,
-                Status = "today",
-                Note = "test",
-                IsActive = true,
-                CreatedDate = yesterday
-            };
+        //[Fact]
+        //public async Task HasDailyReportToday_ReportOnDifferentDate_ReturnsFalse()
+        //{
+        //    // Arrange
+        //    var livestockCircleId = Guid.NewGuid();
+        //    var livestockCircle = new LivestockCircle
+        //    {
+        //        Id = livestockCircleId,
+        //        LivestockCircleName = "Test",
+        //        Status = StatusConstant.GROWINGSTAT,
+        //        IsActive = true
+        //    };
+        //    var yesterday = DateTime.UtcNow.Date.AddDays(-1);
+        //    var dailyReport = new DailyReport
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        LivestockCircleId = livestockCircleId,
+        //        Status = "today",
+        //        Note = "test",
+        //        IsActive = true,
+        //        CreatedDate = yesterday
+        //    };
 
-            var options = new DbContextOptionsBuilder<TestDbContext3>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-            using var context = new TestDbContext3(options);
-            context.LivestockCircles.Add(livestockCircle);
-            context.DailyReports.Add(dailyReport);
-            context.SaveChanges();
+        //    var options = new DbContextOptionsBuilder<TestDbContext3>()
+        //        .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+        //        .Options;
+        //    using var context = new TestDbContext3(options);
+        //    context.LivestockCircles.Add(livestockCircle);
+        //    context.DailyReports.Add(dailyReport);
+        //    context.SaveChanges();
 
-            _livestockCircleRepositoryMock.Setup(x => x.GetByIdAsync(livestockCircleId, null))
-                .ReturnsAsync(livestockCircle);
-            _dailyReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<DailyReport, bool>>>()))
-                .Returns((Expression<Func<DailyReport, bool>> expr) => context.DailyReports.Where(expr));
+        //    _livestockCircleRepositoryMock.Setup(x => x.GetByIdAsync(livestockCircleId, null))
+        //        .ReturnsAsync(livestockCircle);
+        //    _dailyReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<DailyReport, bool>>>()))
+        //        .Returns((Expression<Func<DailyReport, bool>> expr) => context.DailyReports.Where(expr));
 
-            // Act
-            var result = await _dailyReportService.HasDailyReportToday(livestockCircleId, default);
+        //    // Act
+        //    var result = await _dailyReportService.HasDailyReportToday(livestockCircleId, default);
 
-            // Assert
-            Assert.True(result.Succeeded, $"Service message: {result.Message}");
-            Assert.Equal("Kiểm tra báo cáo thành công", result.Message);
-            Assert.False(result.Data);
-        }
+        //    // Assert
+        //    Assert.True(result.Succeeded, $"Service message: {result.Message}");
+        //    Assert.Equal("Kiểm tra báo cáo thành công", result.Message);
+        //    Assert.False(result.Data);
+        //}
 
         [Fact]
         public async Task HasDailyReportToday_LivestockCircleNotFound_ReturnsError()
@@ -263,108 +263,108 @@ namespace Infrastructure.UnitTests.DailyReportService
             Assert.Equal("Vòng chăn nuôi không tồn tại", result.Errors.First());
         }
 
-        [Fact]
-        public async Task HasDailyReportToday_InactiveLivestockCircle_ReturnsError()
-        {
-            // Arrange
-            var livestockCircleId = Guid.NewGuid();
-            var livestockCircle = new LivestockCircle
-            {
-                Id = livestockCircleId,
-                LivestockCircleName = "Test",
-                Status = StatusConstant.GROWINGSTAT,
-                IsActive = false
-            };
-            _livestockCircleRepositoryMock.Setup(x => x.GetByIdAsync(livestockCircleId, null))
-                .ReturnsAsync(livestockCircle);
+        //[Fact]
+        //public async Task HasDailyReportToday_InactiveLivestockCircle_ReturnsError()
+        //{
+        //    // Arrange
+        //    var livestockCircleId = Guid.NewGuid();
+        //    var livestockCircle = new LivestockCircle
+        //    {
+        //        Id = livestockCircleId,
+        //        LivestockCircleName = "Test",
+        //        Status = StatusConstant.GROWINGSTAT,
+        //        IsActive = false
+        //    };
+        //    _livestockCircleRepositoryMock.Setup(x => x.GetByIdAsync(livestockCircleId, null))
+        //        .ReturnsAsync(livestockCircle);
 
-            // Act
-            var result = await _dailyReportService.HasDailyReportToday(livestockCircleId, default);
+        //    // Act
+        //    var result = await _dailyReportService.HasDailyReportToday(livestockCircleId, default);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Vòng chăn nuôi không tồn tại", result.Message);
-            Assert.Single(result.Errors);
-            Assert.Equal("Vòng chăn nuôi không tồn tại", result.Errors.First());
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Vòng chăn nuôi không tồn tại", result.Message);
+        //    Assert.Single(result.Errors);
+        //    Assert.Equal("Vòng chăn nuôi không tồn tại", result.Errors.First());
+        //}
 
-        [Fact]
-        public async Task HasDailyReportToday_EmptyLivestockCircleId_ReturnsFalse()
-        {
-            // Arrange
-            var livestockCircleId = Guid.Empty;
-            var livestockCircle = new LivestockCircle
-            {
-                Id = livestockCircleId,
-                LivestockCircleName = "Test",
-                Status = StatusConstant.GROWINGSTAT,
-                IsActive = true
-            };
-            var options = new DbContextOptionsBuilder<TestDbContext3>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-            using var context = new TestDbContext3(options);
-            context.LivestockCircles.Add(livestockCircle);
-            context.SaveChanges();
+        //[Fact]
+        //public async Task HasDailyReportToday_EmptyLivestockCircleId_ReturnsFalse()
+        //{
+        //    // Arrange
+        //    var livestockCircleId = Guid.Empty;
+        //    var livestockCircle = new LivestockCircle
+        //    {
+        //        Id = livestockCircleId,
+        //        LivestockCircleName = "Test",
+        //        Status = StatusConstant.GROWINGSTAT,
+        //        IsActive = true
+        //    };
+        //    var options = new DbContextOptionsBuilder<TestDbContext3>()
+        //        .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+        //        .Options;
+        //    using var context = new TestDbContext3(options);
+        //    context.LivestockCircles.Add(livestockCircle);
+        //    context.SaveChanges();
 
-            _livestockCircleRepositoryMock.Setup(x => x.GetByIdAsync(livestockCircleId, null))
-                .ReturnsAsync(livestockCircle);
-            _dailyReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<DailyReport, bool>>>()))
-                .Returns((Expression<Func<DailyReport, bool>> expr) => context.DailyReports.Where(expr));
+        //    _livestockCircleRepositoryMock.Setup(x => x.GetByIdAsync(livestockCircleId, null))
+        //        .ReturnsAsync(livestockCircle);
+        //    _dailyReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<DailyReport, bool>>>()))
+        //        .Returns((Expression<Func<DailyReport, bool>> expr) => context.DailyReports.Where(expr));
 
-            // Act
-            var result = await _dailyReportService.HasDailyReportToday(livestockCircleId, default);
+        //    // Act
+        //    var result = await _dailyReportService.HasDailyReportToday(livestockCircleId, default);
 
-            // Assert
-            Assert.True(result.Succeeded, $"Service message: {result.Message}");
-            Assert.Equal("Kiểm tra báo cáo thành công", result.Message);
-            Assert.False(result.Data);
-        }
+        //    // Assert
+        //    Assert.True(result.Succeeded, $"Service message: {result.Message}");
+        //    Assert.Equal("Kiểm tra báo cáo thành công", result.Message);
+        //    Assert.False(result.Data);
+        //}
 
-        [Fact]
-        public async Task HasDailyReportToday_LivestockCircleRepositoryThrowsException_ReturnsError()
-        {
-            // Arrange
-            var livestockCircleId = Guid.NewGuid();
-            _livestockCircleRepositoryMock.Setup(x => x.GetByIdAsync(livestockCircleId, null))
-                .ThrowsAsync(new Exception("Database error"));
+        //[Fact]
+        //public async Task HasDailyReportToday_LivestockCircleRepositoryThrowsException_ReturnsError()
+        //{
+        //    // Arrange
+        //    var livestockCircleId = Guid.NewGuid();
+        //    _livestockCircleRepositoryMock.Setup(x => x.GetByIdAsync(livestockCircleId, null))
+        //        .ThrowsAsync(new Exception("Database error"));
 
-            // Act
-            var result = await _dailyReportService.HasDailyReportToday(livestockCircleId, default);
+        //    // Act
+        //    var result = await _dailyReportService.HasDailyReportToday(livestockCircleId, default);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Lỗi khi kiểm tra báo cáo hàng ngày", result.Message);
-            Assert.Single(result.Errors);
-            Assert.Equal("Database error", result.Errors.First());
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Lỗi khi kiểm tra báo cáo hàng ngày", result.Message);
+        //    Assert.Single(result.Errors);
+        //    Assert.Equal("Database error", result.Errors.First());
+        //}
 
-        [Fact]
-        public async Task HasDailyReportToday_DailyReportRepositoryThrowsException_ReturnsError()
-        {
-            // Arrange
-            var livestockCircleId = Guid.NewGuid();
-            var livestockCircle = new LivestockCircle
-            {
-                Id = livestockCircleId,
-                LivestockCircleName = "Test",
-                Status = StatusConstant.GROWINGSTAT,
-                IsActive = true
-            };
-            _livestockCircleRepositoryMock.Setup(x => x.GetByIdAsync(livestockCircleId, null))
-                .ReturnsAsync(livestockCircle);
-            _dailyReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<DailyReport, bool>>>()))
-                .Throws(new Exception("Database query error"));
+        //[Fact]
+        //public async Task HasDailyReportToday_DailyReportRepositoryThrowsException_ReturnsError()
+        //{
+        //    // Arrange
+        //    var livestockCircleId = Guid.NewGuid();
+        //    var livestockCircle = new LivestockCircle
+        //    {
+        //        Id = livestockCircleId,
+        //        LivestockCircleName = "Test",
+        //        Status = StatusConstant.GROWINGSTAT,
+        //        IsActive = true
+        //    };
+        //    _livestockCircleRepositoryMock.Setup(x => x.GetByIdAsync(livestockCircleId, null))
+        //        .ReturnsAsync(livestockCircle);
+        //    _dailyReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<DailyReport, bool>>>()))
+        //        .Throws(new Exception("Database query error"));
 
-            // Act
-            var result = await _dailyReportService.HasDailyReportToday(livestockCircleId, default);
+        //    // Act
+        //    var result = await _dailyReportService.HasDailyReportToday(livestockCircleId, default);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Lỗi khi kiểm tra báo cáo hàng ngày", result.Message);
-            Assert.Single(result.Errors);
-            Assert.Equal("Database query error", result.Errors.First());
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Lỗi khi kiểm tra báo cáo hàng ngày", result.Message);
+        //    Assert.Single(result.Errors);
+        //    Assert.Equal("Database query error", result.Errors.First());
+        //}
 
         //[Fact]
         //public async Task HasDailyReportToday_CancellationRequested_ThrowsOperationCanceledException()

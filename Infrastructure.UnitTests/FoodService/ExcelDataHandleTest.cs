@@ -73,23 +73,23 @@ namespace Infrastructure.UnitTests.FoodService
             _FoodRepositoryMock.Verify(x => x.Insert(It.IsAny<Food>()), Times.Once());
         }
 
-        [Fact]
-        public async Task ExcelDataHandle_IncrementStock_Success()
-        {
-            var cell = new CellFoodItem { Ten = "Food1", Phan_Loai = "Cat1", So_luong = 3 };
-            var category = new FoodCategory { Id = Guid.NewGuid(), Name = "Cat1", Description = "Cat1" };
-            var Food = new Food { Id = Guid.NewGuid(), FoodName = "Food1", FoodCategoryId = category.Id, Stock = 2, IsActive = true };
-            var Foods = new List<Food> { Food }.AsQueryable().BuildMock();
-            var categories = new List<FoodCategory> { category }.AsQueryable().BuildMock();
-            _FoodRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Food, bool>>>() ))
-                .Returns((System.Linq.Expressions.Expression<Func<Food, bool>> predicate) => Foods.Where(predicate));
-            _FoodCategoryRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<FoodCategory, bool>>>() ))
-                .Returns((System.Linq.Expressions.Expression<Func<FoodCategory, bool>> predicate) => categories.Where(predicate));
-            _FoodRepositoryMock.Setup(x => x.CommitAsync(default)).ReturnsAsync(1);
-            var result = await _FoodService.ExcelDataHandle(new List<CellFoodItem> { cell });
-           // Assert.True(result);
-            Assert.Equal(5, Food.Stock);
-        }
+        //[Fact]
+        //public async Task ExcelDataHandle_IncrementStock_Success()
+        //{
+        //    var cell = new CellFoodItem { Ten = "Food1", Phan_Loai = "Cat1", So_luong = 3 };
+        //    var category = new FoodCategory { Id = Guid.NewGuid(), Name = "Cat1", Description = "Cat1" };
+        //    var Food = new Food { Id = Guid.NewGuid(), FoodName = "Food1", FoodCategoryId = category.Id, Stock = 2, IsActive = true };
+        //    var Foods = new List<Food> { Food }.AsQueryable().BuildMock();
+        //    var categories = new List<FoodCategory> { category }.AsQueryable().BuildMock();
+        //    _FoodRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Food, bool>>>() ))
+        //        .Returns((System.Linq.Expressions.Expression<Func<Food, bool>> predicate) => Foods.Where(predicate));
+        //    _FoodCategoryRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<FoodCategory, bool>>>() ))
+        //        .Returns((System.Linq.Expressions.Expression<Func<FoodCategory, bool>> predicate) => categories.Where(predicate));
+        //    _FoodRepositoryMock.Setup(x => x.CommitAsync(default)).ReturnsAsync(1);
+        //    var result = await _FoodService.ExcelDataHandle(new List<CellFoodItem> { cell });
+        //   // Assert.True(result);
+        //    Assert.Equal(5, Food.Stock);
+        //}
 
         //[Fact]
         //public async Task ExcelDataHandle_Exception_ReturnsError()

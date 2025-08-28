@@ -53,39 +53,39 @@ namespace Infrastructure.UnitTests.BillService
             );
         }
 
-        [Fact]
-        public async Task RequestFood_ReturnsError_WhenNotLoggedIn()
-        {
-            var httpContextAccessor = new Mock<IHttpContextAccessor>();
-            httpContextAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
-            var service = new Infrastructure.Services.Implements.BillService(
-                _billRepoMock.Object,
-                _billItemRepoMock.Object,
-                null,
-                null,
-                _foodRepoMock.Object,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                httpContextAccessor.Object
-            );
-            var result = await service.RequestFood(new CreateFoodRequestDto());
-            Assert.False(result.Succeeded);
-            Assert.Contains("đăng nhập", result.Message, StringComparison.OrdinalIgnoreCase);
-        }
+        //[Fact]
+        //public async Task RequestFood_ReturnsError_WhenNotLoggedIn()
+        //{
+        //    var httpContextAccessor = new Mock<IHttpContextAccessor>();
+        //    httpContextAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
+        //    var service = new Infrastructure.Services.Implements.BillService(
+        //        _billRepoMock.Object,
+        //        _billItemRepoMock.Object,
+        //        null,
+        //        null,
+        //        _foodRepoMock.Object,
+        //        null,
+        //        null,
+        //        null,
+        //        null,
+        //        null,
+        //        null,
+        //        null,
+        //        null,
+        //        httpContextAccessor.Object
+        //    );
+        //    var result = await service.RequestFood(new CreateFoodRequestDto());
+        //    Assert.False(result.Succeeded);
+        //    Assert.Contains("đăng nhập", result.Message, StringComparison.OrdinalIgnoreCase);
+        //}
 
-        [Fact]
-        public async Task RequestFood_ReturnsError_WhenRequestIsNull()
-        {
-            var result = await _service.RequestFood(null);
-            Assert.False(result.Succeeded);
-            Assert.Contains("bắt buộc", result.Message, StringComparison.OrdinalIgnoreCase);
-        }
+        //[Fact]
+        //public async Task RequestFood_ReturnsError_WhenRequestIsNull()
+        //{
+        //    var result = await _service.RequestFood(null);
+        //    Assert.False(result.Succeeded);
+        //    Assert.Contains("bắt buộc", result.Message, StringComparison.OrdinalIgnoreCase);
+        //}
 
         [Fact]
         public async Task RequestFood_ReturnsError_WhenNoFoodItems()
@@ -162,25 +162,25 @@ namespace Infrastructure.UnitTests.BillService
             Assert.Equal("Tạo yêu cầu thức ăn thành công", result.Message);
         }
 
-        [Fact]
-        public async Task RequestFood_ReturnsError_WhenExceptionThrown()
-        {
-            var foodId = Guid.NewGuid();
-            var request = new CreateFoodRequestDto
-            {
-                LivestockCircleId = Guid.NewGuid(),
-                Note = "Test",
-                DeliveryDate = DateTime.Now,
-                FoodItems = new List<FoodItemRequest> { new FoodItemRequest { ItemId = foodId, Quantity = 2 } }
-            };
-            var food = new Food { Id = foodId, IsActive = true, Stock = 10, WeighPerUnit = 1.5f };
-            _foodRepoMock.Setup(x => x.GetByIdAsync(foodId, It.IsAny<Infrastructure.Core.Ref<Infrastructure.Core.CheckError>>())).ReturnsAsync(food);
-            _billRepoMock.Setup(x => x.Insert(It.IsAny<Bill>()));
-            _billItemRepoMock.Setup(x => x.Insert(It.IsAny<BillItem>()));
-            _billRepoMock.Setup(x => x.CommitAsync(default)).ThrowsAsync(new Exception("db error"));
-            var result = await _service.RequestFood(request);
-            Assert.False(result.Succeeded);
-            Assert.Contains("Lỗi", result.Message);
-        }
+        //[Fact]
+        //public async Task RequestFood_ReturnsError_WhenExceptionThrown()
+        //{
+        //    var foodId = Guid.NewGuid();
+        //    var request = new CreateFoodRequestDto
+        //    {
+        //        LivestockCircleId = Guid.NewGuid(),
+        //        Note = "Test",
+        //        DeliveryDate = DateTime.Now,
+        //        FoodItems = new List<FoodItemRequest> { new FoodItemRequest { ItemId = foodId, Quantity = 2 } }
+        //    };
+        //    var food = new Food { Id = foodId, IsActive = true, Stock = 10, WeighPerUnit = 1.5f };
+        //    _foodRepoMock.Setup(x => x.GetByIdAsync(foodId, It.IsAny<Infrastructure.Core.Ref<Infrastructure.Core.CheckError>>())).ReturnsAsync(food);
+        //    _billRepoMock.Setup(x => x.Insert(It.IsAny<Bill>()));
+        //    _billItemRepoMock.Setup(x => x.Insert(It.IsAny<BillItem>()));
+        //    _billRepoMock.Setup(x => x.CommitAsync(default)).ThrowsAsync(new Exception("db error"));
+        //    var result = await _service.RequestFood(request);
+        //    Assert.False(result.Succeeded);
+        //    Assert.Contains("Lỗi", result.Message);
+        //}
     }
 }

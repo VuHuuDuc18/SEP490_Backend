@@ -82,8 +82,86 @@ namespace Infrastructure.UnitTests.OrderService
             );
         }
 
+        //[Fact]
+        //public async Task CustomerGetPagiantionList_Successful()
+        //{
+        //    // Arrange
+        //    var options = new DbContextOptionsBuilder<TestOrderDbContext1>()
+        //        .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+        //        .Options;
+        //    using var context = new TestOrderDbContext1(options);
+
+        //    var order1 = new Order
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        CustomerId = _currentUserId,
+        //        LivestockCircle = new LivestockCircle
+        //        {
+        //            Id = Guid.NewGuid(),
+        //            LivestockCircleName = "Cycle1", // Thêm thuộc tính mới
+        //            Status = StatusConstant.GROWINGSTAT, // Thêm thuộc tính mới
+        //            Breed = new Breed { BreedName = "Chicken", BreedCategory = new BreedCategory { Name = "Poultry", Description = "Poultry description" } }, // Thêm Description
+        //            Barn = new Barn { Id = Guid.NewGuid(), BarnName = "Barn1", Address = "Test Address 1", Image = "Test Image 1" }
+        //        },
+        //        GoodUnitStock = 5,
+        //        BadUnitStock = 2,
+        //        //TotalBill = 1000,
+        //        Status = OrderStatus.PENDING,
+        //        CreatedDate = DateTime.UtcNow.AddDays(-2),
+        //        PickupDate = DateTime.UtcNow.AddDays(1),
+        //        IsActive = true
+        //    };
+        //    var order2 = new Order
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        CustomerId = _currentUserId,
+        //        LivestockCircle = new LivestockCircle
+        //        {
+        //            Id = Guid.NewGuid(),
+        //            LivestockCircleName = "Cycle2", // Thêm thuộc tính mới
+        //            Status = StatusConstant.DONESTAT, // Thêm thuộc tính mới
+        //            Breed = new Breed { BreedName = "Duck", BreedCategory = new BreedCategory { Name = "Poultry", Description = "Poultry description" } }, // Thêm Description
+        //            Barn = new Barn { Id = Guid.NewGuid(), BarnName = "Barn2", Address = "Test Address 2", Image = "Test Image 2" }
+        //        },
+        //        GoodUnitStock = 3,
+        //        BadUnitStock = 1,
+        //        //TotalBill = 500,
+        //        Status = OrderStatus.APPROVED,
+        //        CreatedDate = DateTime.UtcNow.AddDays(-1),
+        //        PickupDate = DateTime.UtcNow.AddDays(2),
+        //        IsActive = true
+        //    };
+
+        //    context.Orders.AddRange(order1, order2);
+        //    await context.SaveChangesAsync();
+
+        //    _orderRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<Order, bool>>>())).Returns(context.Orders);
+
+        //    var request = new ListingRequest
+        //    {
+        //        PageIndex = 1,
+        //        PageSize = 1,
+        //        Sort = new SearchObjectForCondition { Field = "Id", Value = "desc" }
+        //    };
+
+        //    // Act
+        //    var result = await _service.CustomerGetPagiantionList(request, default);
+
+        //    // Assert
+        //    Assert.True(result.Succeeded, $"Succeeded is false. Message: {result.Message}, Errors: {string.Join(", ", result.Errors ?? new List<string>())}");
+        //    Assert.Equal("Lấy dữ liệu thành công.", result.Message);
+        //    Assert.NotNull(result.Data);
+        //    //Assert.Equal(2, result.Data.TotalItems); // Tổng số đơn hàng
+        //    //Assert.Single(result.Data.Items);
+        //    //Assert.Equal(order2.Id, result.Data.Items[0].Id); // Kiểm tra order mới nhất (desc)
+        //    //Assert.Equal("Duck", result.Data.Items[0].BreedName);
+        //    //Assert.Equal("Poultry", result.Data.Items[0].BreedCategory);
+        //    //Assert.NotNull(result.Data.Items[0].Barn);
+        //    //Assert.Equal("Barn2", result.Data.Items[0].Barn.BarnName);
+        //}
+
         [Fact]
-        public async Task CustomerGetPagiantionList_Successful()
+        public async Task CustomerGetPagiantionList_Successful_Sort()
         {
             // Arrange
             var options = new DbContextOptionsBuilder<TestOrderDbContext1>()
@@ -141,7 +219,163 @@ namespace Infrastructure.UnitTests.OrderService
             {
                 PageIndex = 1,
                 PageSize = 1,
-                Sort = new SearchObjectForCondition { Field = "CreateDate", Value = "desc" }
+                Sort = new SearchObjectForCondition { Field = "Id", Value = "desc" }
+            };
+
+            // Act
+            var result = await _service.CustomerGetPagiantionList(request, default);
+
+            // Assert
+            Assert.True(result.Succeeded, $"Succeeded is false. Message: {result.Message}, Errors: {string.Join(", ", result.Errors ?? new List<string>())}");
+            Assert.Equal("Lấy dữ liệu thành công.", result.Message);
+            Assert.NotNull(result.Data);
+            //Assert.Equal(2, result.Data.TotalItems); // Tổng số đơn hàng
+            //Assert.Single(result.Data.Items);
+            //Assert.Equal(order2.Id, result.Data.Items[0].Id); // Kiểm tra order mới nhất (desc)
+            //Assert.Equal("Duck", result.Data.Items[0].BreedName);
+            //Assert.Equal("Poultry", result.Data.Items[0].BreedCategory);
+            //Assert.NotNull(result.Data.Items[0].Barn);
+            //Assert.Equal("Barn2", result.Data.Items[0].Barn.BarnName);
+        }
+
+        [Fact]
+        public async Task CustomerGetPagiantionList_Successful_Filter()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<TestOrderDbContext1>()
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .Options;
+            using var context = new TestOrderDbContext1(options);
+
+            var order1 = new Order
+            {
+                Id = Guid.NewGuid(),
+                CustomerId = _currentUserId,
+                LivestockCircle = new LivestockCircle
+                {
+                    Id = Guid.NewGuid(),
+                    LivestockCircleName = "Cycle1", // Thêm thuộc tính mới
+                    Status = StatusConstant.GROWINGSTAT, // Thêm thuộc tính mới
+                    Breed = new Breed { BreedName = "Chicken", BreedCategory = new BreedCategory { Name = "Poultry", Description = "Poultry description" } }, // Thêm Description
+                    Barn = new Barn { Id = Guid.NewGuid(), BarnName = "Barn1", Address = "Test Address 1", Image = "Test Image 1" }
+                },
+                GoodUnitStock = 5,
+                BadUnitStock = 2,
+                //TotalBill = 1000,
+                Status = OrderStatus.PENDING,
+                CreatedDate = DateTime.UtcNow.AddDays(-2),
+                PickupDate = DateTime.UtcNow.AddDays(1),
+                IsActive = true
+            };
+            var order2 = new Order
+            {
+                Id = Guid.NewGuid(),
+                CustomerId = _currentUserId,
+                LivestockCircle = new LivestockCircle
+                {
+                    Id = Guid.NewGuid(),
+                    LivestockCircleName = "Cycle2", // Thêm thuộc tính mới
+                    Status = StatusConstant.DONESTAT, // Thêm thuộc tính mới
+                    Breed = new Breed { BreedName = "Duck", BreedCategory = new BreedCategory { Name = "Poultry", Description = "Poultry description" } }, // Thêm Description
+                    Barn = new Barn { Id = Guid.NewGuid(), BarnName = "Barn2", Address = "Test Address 2", Image = "Test Image 2" }
+                },
+                GoodUnitStock = 3,
+                BadUnitStock = 1,
+                //TotalBill = 500,
+                Status = OrderStatus.APPROVED,
+                CreatedDate = DateTime.UtcNow.AddDays(-1),
+                PickupDate = DateTime.UtcNow.AddDays(2),
+                IsActive = true
+            };
+
+            context.Orders.AddRange(order1, order2);
+            await context.SaveChangesAsync();
+
+            _orderRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<Order, bool>>>())).Returns(context.Orders);
+
+            var request = new ListingRequest
+            {
+                PageIndex = 1,
+                PageSize = 1,
+                Sort = new SearchObjectForCondition { Field = "Id", Value = "desc" }
+            };
+
+            // Act
+            var result = await _service.CustomerGetPagiantionList(request, default);
+
+            // Assert
+            Assert.True(result.Succeeded, $"Succeeded is false. Message: {result.Message}, Errors: {string.Join(", ", result.Errors ?? new List<string>())}");
+            Assert.Equal("Lấy dữ liệu thành công.", result.Message);
+            Assert.NotNull(result.Data);
+            //Assert.Equal(2, result.Data.TotalItems); // Tổng số đơn hàng
+            //Assert.Single(result.Data.Items);
+            //Assert.Equal(order2.Id, result.Data.Items[0].Id); // Kiểm tra order mới nhất (desc)
+            //Assert.Equal("Duck", result.Data.Items[0].BreedName);
+            //Assert.Equal("Poultry", result.Data.Items[0].BreedCategory);
+            //Assert.NotNull(result.Data.Items[0].Barn);
+            //Assert.Equal("Barn2", result.Data.Items[0].Barn.BarnName);
+        }
+
+        [Fact]
+        public async Task CustomerGetPagiantionList_Successful_Search()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<TestOrderDbContext1>()
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .Options;
+            using var context = new TestOrderDbContext1(options);
+
+            var order1 = new Order
+            {
+                Id = Guid.NewGuid(),
+                CustomerId = _currentUserId,
+                LivestockCircle = new LivestockCircle
+                {
+                    Id = Guid.NewGuid(),
+                    LivestockCircleName = "Cycle1", // Thêm thuộc tính mới
+                    Status = StatusConstant.GROWINGSTAT, // Thêm thuộc tính mới
+                    Breed = new Breed { BreedName = "Chicken", BreedCategory = new BreedCategory { Name = "Poultry", Description = "Poultry description" } }, // Thêm Description
+                    Barn = new Barn { Id = Guid.NewGuid(), BarnName = "Barn1", Address = "Test Address 1", Image = "Test Image 1" }
+                },
+                GoodUnitStock = 5,
+                BadUnitStock = 2,
+                //TotalBill = 1000,
+                Status = OrderStatus.PENDING,
+                CreatedDate = DateTime.UtcNow.AddDays(-2),
+                PickupDate = DateTime.UtcNow.AddDays(1),
+                IsActive = true
+            };
+            var order2 = new Order
+            {
+                Id = Guid.NewGuid(),
+                CustomerId = _currentUserId,
+                LivestockCircle = new LivestockCircle
+                {
+                    Id = Guid.NewGuid(),
+                    LivestockCircleName = "Cycle2", // Thêm thuộc tính mới
+                    Status = StatusConstant.DONESTAT, // Thêm thuộc tính mới
+                    Breed = new Breed { BreedName = "Duck", BreedCategory = new BreedCategory { Name = "Poultry", Description = "Poultry description" } }, // Thêm Description
+                    Barn = new Barn { Id = Guid.NewGuid(), BarnName = "Barn2", Address = "Test Address 2", Image = "Test Image 2" }
+                },
+                GoodUnitStock = 3,
+                BadUnitStock = 1,
+                //TotalBill = 500,
+                Status = OrderStatus.APPROVED,
+                CreatedDate = DateTime.UtcNow.AddDays(-1),
+                PickupDate = DateTime.UtcNow.AddDays(2),
+                IsActive = true
+            };
+
+            context.Orders.AddRange(order1, order2);
+            await context.SaveChangesAsync();
+
+            _orderRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<Order, bool>>>())).Returns(context.Orders);
+
+            var request = new ListingRequest
+            {
+                PageIndex = 1,
+                PageSize = 1,
+                Sort = new SearchObjectForCondition { Field = "Id", Value = "desc" }
             };
 
             // Act

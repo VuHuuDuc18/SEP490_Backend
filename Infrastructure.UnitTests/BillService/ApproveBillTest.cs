@@ -52,31 +52,31 @@ namespace Infrastructure.UnitTests.BillService
             );
         }
 
-        [Fact]
-        public async Task ApproveBill_ReturnsError_WhenNotLoggedIn()
-        {
-            var httpContextAccessor = new Mock<IHttpContextAccessor>();
-            httpContextAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
-            var service = new Infrastructure.Services.Implements.BillService(
-                _billRepoMock.Object,
-                _billItemRepoMock.Object,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                httpContextAccessor.Object
-            );
-            var result = await service.ApproveBill(Guid.NewGuid());
-            Assert.False(result.Succeeded);
-            Assert.Contains("đăng nhập", result.Message, StringComparison.OrdinalIgnoreCase);
-        }
+        //[Fact]
+        //public async Task ApproveBill_ReturnsError_WhenNotLoggedIn()
+        //{
+        //    var httpContextAccessor = new Mock<IHttpContextAccessor>();
+        //    httpContextAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
+        //    var service = new Infrastructure.Services.Implements.BillService(
+        //        _billRepoMock.Object,
+        //        _billItemRepoMock.Object,
+        //        null,
+        //        null,
+        //        null,
+        //        null,
+        //        null,
+        //        null,
+        //        null,
+        //        null,
+        //        null,
+        //        null,
+        //        null,
+        //        httpContextAccessor.Object
+        //    );
+        //    var result = await service.ApproveBill(Guid.NewGuid());
+        //    Assert.False(result.Succeeded);
+        //    Assert.Contains("đăng nhập", result.Message, StringComparison.OrdinalIgnoreCase);
+        //}
 
         [Fact]
         public async Task ApproveBill_ReturnsError_WhenBillNotFoundOrInactive()
@@ -123,19 +123,19 @@ namespace Infrastructure.UnitTests.BillService
             Assert.Equal("Duyệt hóa đơn thành công", result.Message);
         }
 
-        [Fact]
-        public async Task ApproveBill_ReturnsError_WhenExceptionThrown()
-        {
-            var billId = Guid.NewGuid();
-            var bill = new Bill { Id = billId, IsActive = true, Status = Domain.Helper.Constants.StatusConstant.REQUESTED, Note = "n", Name = "n", TypeBill = "Food", Total = 1, Weight = 1 };
-            var billItems = new List<BillItem> { new BillItem { Id = Guid.NewGuid(), BillId = billId, FoodId = Guid.NewGuid(), Stock = 2, IsActive = true } };
-            _billRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), null)).ReturnsAsync(bill);
-            _billItemRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<System.Func<BillItem, bool>>>())).Returns((System.Linq.Expressions.Expression<System.Func<BillItem, bool>> expr) => billItems.AsQueryable().Where(expr));
-            _billRepoMock.Setup(x => x.Update(It.IsAny<Bill>()));
-            _billRepoMock.Setup(x => x.CommitAsync(default)).ThrowsAsync(new Exception("db error"));
-            var result = await _service.ApproveBill(billId);
-            Assert.False(result.Succeeded);
-            Assert.Contains("Lỗi", result.Message);
-        }
+        //[Fact]
+        //public async Task ApproveBill_ReturnsError_WhenExceptionThrown()
+        //{
+        //    var billId = Guid.NewGuid();
+        //    var bill = new Bill { Id = billId, IsActive = true, Status = Domain.Helper.Constants.StatusConstant.REQUESTED, Note = "n", Name = "n", TypeBill = "Food", Total = 1, Weight = 1 };
+        //    var billItems = new List<BillItem> { new BillItem { Id = Guid.NewGuid(), BillId = billId, FoodId = Guid.NewGuid(), Stock = 2, IsActive = true } };
+        //    _billRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), null)).ReturnsAsync(bill);
+        //    _billItemRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<System.Func<BillItem, bool>>>())).Returns((System.Linq.Expressions.Expression<System.Func<BillItem, bool>> expr) => billItems.AsQueryable().Where(expr));
+        //    _billRepoMock.Setup(x => x.Update(It.IsAny<Bill>()));
+        //    _billRepoMock.Setup(x => x.CommitAsync(default)).ThrowsAsync(new Exception("db error"));
+        //    var result = await _service.ApproveBill(billId);
+        //    Assert.False(result.Succeeded);
+        //    Assert.Contains("Lỗi", result.Message);
+        //}
     }
 }

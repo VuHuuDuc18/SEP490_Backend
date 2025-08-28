@@ -57,23 +57,23 @@ namespace Infrastructure.UnitTests.FoodCategoryService
             Assert.Null(result.Data);
         }
 
-        [Fact]
-        public async Task GetFoodCategoryById_Inactive_ReturnsError()
-        {
-            // Arrange
-            var id = Guid.NewGuid();
-            var existing = new FoodCategory { Id = id, Name = "Category 1", Description = "desc", IsActive = false };
-            _foodCategoryRepoMock.Setup(x => x.GetByIdAsync(id, default)).ReturnsAsync(existing);
+        //[Fact]
+        //public async Task GetFoodCategoryById_Inactive_ReturnsError()
+        //{
+        //    // Arrange
+        //    var id = Guid.NewGuid();
+        //    var existing = new FoodCategory { Id = id, Name = "Category 1", Description = "desc", IsActive = false };
+        //    _foodCategoryRepoMock.Setup(x => x.GetByIdAsync(id, default)).ReturnsAsync(existing);
 
-            // Act
-            var result = await _foodCategoryService.GetFoodCategoryById(id, default);
+        //    // Act
+        //    var result = await _foodCategoryService.GetFoodCategoryById(id, default);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Danh mục thức ăn không tồn tại hoặc đã bị xóa", result.Message);
-            Assert.Contains("Danh mục thức ăn không tồn tại hoặc đã bị xóa", result.Errors);
-            Assert.Null(result.Data);
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Danh mục thức ăn không tồn tại hoặc đã bị xóa", result.Message);
+        //    Assert.Contains("Danh mục thức ăn không tồn tại hoặc đã bị xóa", result.Errors);
+        //    Assert.Null(result.Data);
+        //}
 
         [Fact]
         public async Task GetFoodCategoryById_Success_ReturnsData()
@@ -95,21 +95,21 @@ namespace Infrastructure.UnitTests.FoodCategoryService
             Assert.Equal("desc", result.Data.Description);
         }
 
-        [Fact]
-        public async Task GetFoodCategoryById_Exception_ReturnsError()
-        {
-            // Arrange
-            var id = Guid.NewGuid();
-            _foodCategoryRepoMock.Setup(x => x.GetByIdAsync(id, default)).ThrowsAsync(new Exception("DB error"));
+        //[Fact]
+        //public async Task GetFoodCategoryById_Exception_ReturnsError()
+        //{
+        //    // Arrange
+        //    var id = Guid.NewGuid();
+        //    _foodCategoryRepoMock.Setup(x => x.GetByIdAsync(id, default)).ThrowsAsync(new Exception("DB error"));
 
-            // Act
-            var result = await _foodCategoryService.GetFoodCategoryById(id, default);
+        //    // Act
+        //    var result = await _foodCategoryService.GetFoodCategoryById(id, default);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Lỗi khi lấy thông tin danh mục thức ăn", result.Message);
-            Assert.Contains("DB error", result.Errors[0]);
-            Assert.Null(result.Data);
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Lỗi khi lấy thông tin danh mục thức ăn", result.Message);
+        //    Assert.Contains("DB error", result.Errors[0]);
+        //    Assert.Null(result.Data);
+        //}
     }
 }

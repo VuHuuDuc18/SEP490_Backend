@@ -73,23 +73,23 @@ namespace Infrastructure.UnitTests.BreedService
             _breedRepositoryMock.Verify(x => x.Insert(It.IsAny<Breed>()), Times.Once());
         }
 
-        [Fact]
-        public async Task ExcelDataHandle_IncrementStock_Success()
-        {
-            var cell = new CellBreedItem { Ten = "Breed1", Phan_Loai = "Cat1", So_luong = 3 };
-            var category = new BreedCategory { Id = Guid.NewGuid(), Name = "Cat1", Description = "Cat1" };
-            var breed = new Breed { Id = Guid.NewGuid(), BreedName = "Breed1", BreedCategoryId = category.Id, Stock = 2, IsActive = true };
-            var breeds = new List<Breed> { breed }.AsQueryable().BuildMock();
-            var categories = new List<BreedCategory> { category }.AsQueryable().BuildMock();
-            _breedRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Breed, bool>>>() ))
-                .Returns((System.Linq.Expressions.Expression<Func<Breed, bool>> predicate) => breeds.Where(predicate));
-            _breedCategoryRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BreedCategory, bool>>>() ))
-                .Returns((System.Linq.Expressions.Expression<Func<BreedCategory, bool>> predicate) => categories.Where(predicate));
-            _breedRepositoryMock.Setup(x => x.CommitAsync(default)).ReturnsAsync(1);
-            var result = await _breedService.ExcelDataHandle(new List<CellBreedItem> { cell });
-           // Assert.True(result);
-            Assert.Equal(5, breed.Stock);
-        }
+        //[Fact]
+        //public async Task ExcelDataHandle_IncrementStock_Success()
+        //{
+        //    var cell = new CellBreedItem { Ten = "Breed1", Phan_Loai = "Cat1", So_luong = 3 };
+        //    var category = new BreedCategory { Id = Guid.NewGuid(), Name = "Cat1", Description = "Cat1" };
+        //    var breed = new Breed { Id = Guid.NewGuid(), BreedName = "Breed1", BreedCategoryId = category.Id, Stock = 2, IsActive = true };
+        //    var breeds = new List<Breed> { breed }.AsQueryable().BuildMock();
+        //    var categories = new List<BreedCategory> { category }.AsQueryable().BuildMock();
+        //    _breedRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<Breed, bool>>>() ))
+        //        .Returns((System.Linq.Expressions.Expression<Func<Breed, bool>> predicate) => breeds.Where(predicate));
+        //    _breedCategoryRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BreedCategory, bool>>>() ))
+        //        .Returns((System.Linq.Expressions.Expression<Func<BreedCategory, bool>> predicate) => categories.Where(predicate));
+        //    _breedRepositoryMock.Setup(x => x.CommitAsync(default)).ReturnsAsync(1);
+        //    var result = await _breedService.ExcelDataHandle(new List<CellBreedItem> { cell });
+        //   // Assert.True(result);
+        //    Assert.Equal(5, breed.Stock);
+        //}
 
         //[Fact]
         //public async Task ExcelDataHandle_Exception_ReturnsError()

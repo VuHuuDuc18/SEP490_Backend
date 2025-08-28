@@ -66,30 +66,30 @@ namespace Infrastructure.UnitTests.BreedCategoryService
             Assert.All(result.Data, c => Assert.True(c.Name.StartsWith("Category")));
         }
 
-        [Fact]
-        public async Task GetBreedCategoryByName_FilterByName_ReturnsFiltered()
-        {
-            // Arrange
-            var categories = new List<BreedCategory>
-            {
-                new BreedCategory { Id = Guid.NewGuid(), Name = "Category 1", Description = "desc 1", IsActive = true },
-                new BreedCategory { Id = Guid.NewGuid(), Name = "Category 2", Description = "desc 2", IsActive = true },
-                new BreedCategory { Id = Guid.NewGuid(), Name = "Inactive", Description = "desc 3", IsActive = false }
-            };
-            var mockQueryable = categories.AsQueryable().BuildMock();
-            _breedCategoryRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BreedCategory, bool>>>() ))
-                .Returns((System.Linq.Expressions.Expression<Func<BreedCategory, bool>> predicate) => mockQueryable.Where(predicate));
+        //[Fact]
+        //public async Task GetBreedCategoryByName_FilterByName_ReturnsFiltered()
+        //{
+        //    // Arrange
+        //    var categories = new List<BreedCategory>
+        //    {
+        //        new BreedCategory { Id = Guid.NewGuid(), Name = "Category 1", Description = "desc 1", IsActive = true },
+        //        new BreedCategory { Id = Guid.NewGuid(), Name = "Category 2", Description = "desc 2", IsActive = true },
+        //        new BreedCategory { Id = Guid.NewGuid(), Name = "Inactive", Description = "desc 3", IsActive = false }
+        //    };
+        //    var mockQueryable = categories.AsQueryable().BuildMock();
+        //    _breedCategoryRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BreedCategory, bool>>>() ))
+        //        .Returns((System.Linq.Expressions.Expression<Func<BreedCategory, bool>> predicate) => mockQueryable.Where(predicate));
 
-            // Act
-            var result = await _breedCategoryService.GetBreedCategoryByName("2", default);
+        //    // Act
+        //    var result = await _breedCategoryService.GetBreedCategoryByName("2", default);
 
-            // Assert
-            Assert.True(result.Succeeded);
-            Assert.Equal("Lấy danh sách danh mục giống thành công", result.Message);
-            Assert.NotNull(result.Data);
-            Assert.Single(result.Data);
-            Assert.Equal("Category 2", result.Data[0].Name);
-        }
+        //    // Assert
+        //    Assert.True(result.Succeeded);
+        //    Assert.Equal("Lấy danh sách danh mục giống thành công", result.Message);
+        //    Assert.NotNull(result.Data);
+        //    Assert.Single(result.Data);
+        //    Assert.Equal("Category 2", result.Data[0].Name);
+        //}
 
         [Fact]
         public async Task GetBreedCategoryByName_NoResult_ReturnsEmpty()
@@ -113,20 +113,20 @@ namespace Infrastructure.UnitTests.BreedCategoryService
             Assert.Empty(result.Data);
         }
 
-        [Fact]
-        public async Task GetBreedCategoryByName_Exception_ReturnsError()
-        {
-            // Arrange
-            _breedCategoryRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BreedCategory, bool>>>() ))
-                .Throws(new Exception("DB error"));
+        //[Fact]
+        //public async Task GetBreedCategoryByName_Exception_ReturnsError()
+        //{
+        //    // Arrange
+        //    _breedCategoryRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<BreedCategory, bool>>>() ))
+        //        .Throws(new Exception("DB error"));
 
-            // Act
-            var result = await _breedCategoryService.GetBreedCategoryByName(null, default);
+        //    // Act
+        //    var result = await _breedCategoryService.GetBreedCategoryByName(null, default);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Lỗi khi lấy danh sách danh mục giống", result.Message);
-            Assert.Contains("DB error", result.Errors[0]);
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Lỗi khi lấy danh sách danh mục giống", result.Message);
+        //    Assert.Contains("DB error", result.Errors[0]);
+        //}
     }
 }

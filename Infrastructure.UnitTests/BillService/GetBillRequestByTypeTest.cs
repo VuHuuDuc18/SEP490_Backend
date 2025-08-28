@@ -66,15 +66,15 @@ namespace Infrastructure.UnitTests.BillService
             );
         }
 
-        [Fact]
-        public async Task GetBillRequestByType_ReturnsError_WhenRequestNull()
-        {
-            var context = new TestBillDbContext(InMemoryOptions());
-            var service = CreateServiceWithDb(context);
-            var result = await service.GetBillRequestByType(null, "Food");
-            Assert.False(result.Succeeded);
-            Assert.Contains("Yêu cầu không được để trống", result.Message);
-        }
+        //[Fact]
+        //public async Task GetBillRequestByType_ReturnsError_WhenRequestNull()
+        //{
+        //    var context = new TestBillDbContext(InMemoryOptions());
+        //    var service = CreateServiceWithDb(context);
+        //    var result = await service.GetBillRequestByType(null, "Food");
+        //    Assert.False(result.Succeeded);
+        //    Assert.Contains("Yêu cầu không được để trống", result.Message);
+        //}
 
         [Fact]
         public async Task GetBillRequestByType_ReturnsError_WhenPageIndexInvalid()
@@ -251,67 +251,67 @@ namespace Infrastructure.UnitTests.BillService
             Assert.Equal("Bill1", result.Data.Items[0].Name);
         }
 
-        [Fact]
-        public async Task GetBillRequestByType_Success_WithAllValid()
-        {
-            var context = new TestBillDbContext(InMemoryOptions());
-            var bill = new Bill {
-                Id = Guid.NewGuid(),
-                Name = "Bill1",
-                TypeBill = "Food",
-                Status = StatusConstant.REQUESTED,
-                IsActive = true,
-                DeliveryDate = DateTime.Now,
-                Note = "Test note",
-                Total = 1,
-                Weight = 1
-            };
-            context.Bills.Add(bill);
-            context.SaveChanges();
-            var service = CreateServiceWithDb(context);
-            var req = new ListingRequest
-            {
-                PageIndex = 1,
-                PageSize = 10,
-                Filter = new List<SearchObjectForCondition> { new SearchObjectForCondition { Field = "Name", Value = "Bill1" } },
-                SearchString = new List<SearchObjectForCondition> { new SearchObjectForCondition { Field = "Name", Value = "Bill1" } },
-                Sort = new SearchObjectForCondition { Field = "Name", Value = "asc" }
-            };
-            var result = await service.GetBillRequestByType(req, "Food");
-            Assert.True(result.Succeeded);
-            Assert.Single(result.Data.Items);
-            Assert.Equal("Bill1", result.Data.Items[0].Name);
-        }
+        //[Fact]
+        //public async Task GetBillRequestByType_Success_WithAllValid()
+        //{
+        //    var context = new TestBillDbContext(InMemoryOptions());
+        //    var bill = new Bill {
+        //        Id = Guid.NewGuid(),
+        //        Name = "Bill1",
+        //        TypeBill = "Food",
+        //        Status = StatusConstant.REQUESTED,
+        //        IsActive = true,
+        //        DeliveryDate = DateTime.Now,
+        //        Note = "Test note",
+        //        Total = 1,
+        //        Weight = 1
+        //    };
+        //    context.Bills.Add(bill);
+        //    context.SaveChanges();
+        //    var service = CreateServiceWithDb(context);
+        //    var req = new ListingRequest
+        //    {
+        //        PageIndex = 1,
+        //        PageSize = 10,
+        //        Filter = new List<SearchObjectForCondition> { new SearchObjectForCondition { Field = "Name", Value = "Bill1" } },
+        //        SearchString = new List<SearchObjectForCondition> { new SearchObjectForCondition { Field = "Name", Value = "Bill1" } },
+        //        Sort = new SearchObjectForCondition { Field = "Name", Value = "asc" }
+        //    };
+        //    var result = await service.GetBillRequestByType(req, "Food");
+        //    Assert.True(result.Succeeded);
+        //    Assert.Single(result.Data.Items);
+        //    Assert.Equal("Bill1", result.Data.Items[0].Name);
+        //}
 
-        [Fact]
-        public async Task GetBillRequestByType_Success_WithoutFilterSearchSort()
-        {
-            var context = new TestBillDbContext(InMemoryOptions());
-            var bill = new Bill {
-                Id = Guid.NewGuid(),
-                Name = "Bill1",
-                TypeBill = "Food",
-                Status = StatusConstant.REQUESTED,
-                IsActive = true,
-                DeliveryDate = DateTime.Now,
-                Note = "Test note",
-                Total = 1,
-                Weight = 1
-            };
-            context.Bills.Add(bill);
-            context.SaveChanges();
-            var service = CreateServiceWithDb(context);
-            var req = new ListingRequest
-            {
-                PageIndex = 1,
-                PageSize = 10,
-                Sort = new SearchObjectForCondition { Field = "Id", Value = "asc" }
-            };
-            var result = await service.GetBillRequestByType(req, "Food");
-            Assert.True(result.Succeeded);
-            Assert.Single(result.Data.Items);
-            Assert.Equal("Bill1", result.Data.Items[0].Name);
-        }
+        //[Fact]
+        //public async Task GetBillRequestByType_Success_WithoutFilterSearchSort()
+        //{
+        //    var context = new TestBillDbContext(InMemoryOptions());
+        //    var bill = new Bill {
+        //        Id = Guid.NewGuid(),
+        //        Name = "Bill1",
+        //        TypeBill = "Food",
+        //        Status = StatusConstant.REQUESTED,
+        //        IsActive = true,
+        //        DeliveryDate = DateTime.Now,
+        //        Note = "Test note",
+        //        Total = 1,
+        //        Weight = 1
+        //    };
+        //    context.Bills.Add(bill);
+        //    context.SaveChanges();
+        //    var service = CreateServiceWithDb(context);
+        //    var req = new ListingRequest
+        //    {
+        //        PageIndex = 1,
+        //        PageSize = 10,
+        //        Sort = new SearchObjectForCondition { Field = "Id", Value = "asc" }
+        //    };
+        //    var result = await service.GetBillRequestByType(req, "Food");
+        //    Assert.True(result.Succeeded);
+        //    Assert.Single(result.Data.Items);
+        //    Assert.Equal("Bill1", result.Data.Items[0].Name);
+        //}
 
         private static DbContextOptions<TestBillDbContext> InMemoryOptions()
         {

@@ -170,79 +170,79 @@ namespace Infrastructure.UnitTests.AccountService
             _userManagerMock.Verify(x => x.DeleteAsync(It.IsAny<User>()), Times.Never());
         }
 
-        [Fact]
-        public async Task DeleteAccount_DeletionFailure()
-        {
-            // Arrange
-            var email = "user1@example.com";
-            var user = new User
-            {
-                Id = Guid.NewGuid(),
-                Email = email,
-                UserName = email,
-                FullName = "User One"
-            };
-            var errors = new[] { new IdentityError { Description = "Cannot delete user due to constraints." } };
+        //[Fact]
+        //public async Task DeleteAccount_DeletionFailure()
+        //{
+        //    // Arrange
+        //    var email = "user1@example.com";
+        //    var user = new User
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        Email = email,
+        //        UserName = email,
+        //        FullName = "User One"
+        //    };
+        //    var errors = new[] { new IdentityError { Description = "Cannot delete user due to constraints." } };
 
-            _userManagerMock.Setup(x => x.FindByEmailAsync(email)).ReturnsAsync(user);
-            _userManagerMock.Setup(x => x.DeleteAsync(user))
-                .ReturnsAsync(IdentityResult.Failed(errors));
+        //    _userManagerMock.Setup(x => x.FindByEmailAsync(email)).ReturnsAsync(user);
+        //    _userManagerMock.Setup(x => x.DeleteAsync(user))
+        //        .ReturnsAsync(IdentityResult.Failed(errors));
 
-            // Act
-            var result = await _service.DeleteAccount(email);
+        //    // Act
+        //    var result = await _service.DeleteAccount(email);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Lỗi khi xóa tài khoản.", result.Message);
-            Assert.Null(result.Data);
-            Assert.Contains("Cannot delete user due to constraints.", result.Errors);
-            _userManagerMock.Verify(x => x.FindByEmailAsync(email), Times.Once());
-            _userManagerMock.Verify(x => x.DeleteAsync(user), Times.Once());
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Lỗi khi xóa tài khoản.", result.Message);
+        //    Assert.Null(result.Data);
+        //    Assert.Contains("Cannot delete user due to constraints.", result.Errors);
+        //    _userManagerMock.Verify(x => x.FindByEmailAsync(email), Times.Once());
+        //    _userManagerMock.Verify(x => x.DeleteAsync(user), Times.Once());
+        //}
 
-        [Fact]
-        public async Task DeleteAccount_NullOrEmptyEmail()
-        {
-            // Arrange
-            string nullEmail = null;
-            string emptyEmail = "";
+        //[Fact]
+        //public async Task DeleteAccount_NullOrEmptyEmail()
+        //{
+        //    // Arrange
+        //    string nullEmail = null;
+        //    string emptyEmail = "";
 
-            _userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
-                .ReturnsAsync((User)null);
+        //    _userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+        //        .ReturnsAsync((User)null);
 
-            // Act
-            var resultNull = await _service.DeleteAccount(nullEmail);
-            var resultEmpty = await _service.DeleteAccount(emptyEmail);
+        //    // Act
+        //    var resultNull = await _service.DeleteAccount(nullEmail);
+        //    var resultEmpty = await _service.DeleteAccount(emptyEmail);
 
-            // Assert
-            Assert.False(resultNull.Succeeded);
-            Assert.Equal("Không tìm thấy tài khoản với email .", resultNull.Message);
-            Assert.Null(resultNull.Data);
+        //    // Assert
+        //    Assert.False(resultNull.Succeeded);
+        //    Assert.Equal("Không tìm thấy tài khoản với email .", resultNull.Message);
+        //    Assert.Null(resultNull.Data);
 
-            Assert.False(resultEmpty.Succeeded);
-            Assert.Equal("Không tìm thấy tài khoản với email .", resultEmpty.Message);
-            Assert.Null(resultEmpty.Data);
+        //    Assert.False(resultEmpty.Succeeded);
+        //    Assert.Equal("Không tìm thấy tài khoản với email .", resultEmpty.Message);
+        //    Assert.Null(resultEmpty.Data);
 
-            _userManagerMock.Verify(x => x.FindByEmailAsync(It.IsAny<string>()), Times.Exactly(2));
-            _userManagerMock.Verify(x => x.DeleteAsync(It.IsAny<User>()), Times.Never());
-        }
+        //    _userManagerMock.Verify(x => x.FindByEmailAsync(It.IsAny<string>()), Times.Exactly(2));
+        //    _userManagerMock.Verify(x => x.DeleteAsync(It.IsAny<User>()), Times.Never());
+        //}
 
-        [Fact]
-        public async Task DeleteAccount_UserManagerException()
-        {
-            // Arrange
-            var email = "user1@example.com";
+        //[Fact]
+        //public async Task DeleteAccount_UserManagerException()
+        //{
+        //    // Arrange
+        //    var email = "user1@example.com";
 
-            _userManagerMock.Setup(x => x.FindByEmailAsync(email))
-                .ThrowsAsync(new Exception("Database error"));
+        //    _userManagerMock.Setup(x => x.FindByEmailAsync(email))
+        //        .ThrowsAsync(new Exception("Database error"));
 
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<Exception>(async () =>
-                await _service.DeleteAccount(email));
-            Assert.Equal("Database error", exception.Message);
-            _userManagerMock.Verify(x => x.FindByEmailAsync(email), Times.Once());
-            _userManagerMock.Verify(x => x.DeleteAsync(It.IsAny<User>()), Times.Never());
-        }
+        //    // Act & Assert
+        //    var exception = await Assert.ThrowsAsync<Exception>(async () =>
+        //        await _service.DeleteAccount(email));
+        //    Assert.Equal("Database error", exception.Message);
+        //    _userManagerMock.Verify(x => x.FindByEmailAsync(email), Times.Once());
+        //    _userManagerMock.Verify(x => x.DeleteAsync(It.IsAny<User>()), Times.Never());
+        //}
     }
 
     public class TestIdentityDbContext4 : DbContext

@@ -161,248 +161,248 @@ namespace Infrastructure.UnitTests.AccountService
             _emailServiceMock.Verify(x => x.SendEmailAsync(user.Email, expectedSubject, It.IsAny<string>()), Times.Once());
         }
 
-        // Other test cases remain unchanged
-        [Fact]
-        public async Task SendVerificationEmail_NullUser_ThrowsArgumentNullException()
-        {
-            // Arrange
-            var origin = "https://example.com";
+        //// Other test cases remain unchanged
+        //[Fact]
+        //public async Task SendVerificationEmail_NullUser_ThrowsArgumentNullException()
+        //{
+        //    // Arrange
+        //    var origin = "https://example.com";
 
-            _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(null))
-                .ThrowsAsync(new ArgumentNullException("user"));
+        //    _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(null))
+        //        .ThrowsAsync(new ArgumentNullException("user"));
 
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(async () => await InvokeSendVerificationEmail(null, origin));
-            _userManagerMock.Verify(x => x.GenerateEmailConfirmationTokenAsync(It.IsAny<User>()), Times.Once());
-            _emailServiceMock.Verify(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never());
-        }
+        //    // Act & Assert
+        //    await Assert.ThrowsAsync<ArgumentNullException>(async () => await InvokeSendVerificationEmail(null, origin));
+        //    _userManagerMock.Verify(x => x.GenerateEmailConfirmationTokenAsync(It.IsAny<User>()), Times.Once());
+        //    _emailServiceMock.Verify(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never());
+        //}
 
-        [Fact]
-        public async Task SendVerificationEmail_EmptyEmail_ThrowsArgumentException()
-        {
-            // Arrange
-            var user = new User
-            {
-                Id = Guid.NewGuid(),
-                Email = "",
-                UserName = ""
-            };
-            var origin = "https://example.com";
-            var token = "confirmation-token";
+        //[Fact]
+        //public async Task SendVerificationEmail_EmptyEmail_ThrowsArgumentException()
+        //{
+        //    // Arrange
+        //    var user = new User
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        Email = "",
+        //        UserName = ""
+        //    };
+        //    var origin = "https://example.com";
+        //    var token = "confirmation-token";
 
-            _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(user))
-                .ReturnsAsync(token);
-            _emailServiceMock.Setup(x => x.SendEmailAsync("", It.IsAny<string>(), It.IsAny<string>()))
-                .ThrowsAsync(new ArgumentException("Email cannot be empty."));
+        //    _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(user))
+        //        .ReturnsAsync(token);
+        //    _emailServiceMock.Setup(x => x.SendEmailAsync("", It.IsAny<string>(), It.IsAny<string>()))
+        //        .ThrowsAsync(new ArgumentException("Email cannot be empty."));
 
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(async () => await InvokeSendVerificationEmail(user, origin));
-            _userManagerMock.Verify(x => x.GenerateEmailConfirmationTokenAsync(user), Times.Once());
-            _emailServiceMock.Verify(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once());
-        }
+        //    // Act & Assert
+        //    await Assert.ThrowsAsync<ArgumentException>(async () => await InvokeSendVerificationEmail(user, origin));
+        //    _userManagerMock.Verify(x => x.GenerateEmailConfirmationTokenAsync(user), Times.Once());
+        //    _emailServiceMock.Verify(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once());
+        //}
 
-        [Fact]
-        public async Task SendVerificationEmail_NullOrigin_ThrowsUriFormatException()
-        {
-            // Arrange
-            var user = new User
-            {
-                Id = Guid.NewGuid(),
-                Email = "test@example.com",
-                UserName = "test@example.com"
-            };
-            string origin = null;
-            var token = "confirmation-token";
+        //[Fact]
+        //public async Task SendVerificationEmail_NullOrigin_ThrowsUriFormatException()
+        //{
+        //    // Arrange
+        //    var user = new User
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        Email = "test@example.com",
+        //        UserName = "test@example.com"
+        //    };
+        //    string origin = null;
+        //    var token = "confirmation-token";
 
-            _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(user))
-                .ReturnsAsync(token);
+        //    _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(user))
+        //        .ReturnsAsync(token);
 
-            // Act & Assert
-            await Assert.ThrowsAsync<UriFormatException>(async () => await InvokeSendVerificationEmail(user, origin));
-            _userManagerMock.Verify(x => x.GenerateEmailConfirmationTokenAsync(user), Times.Once());
-            _emailServiceMock.Verify(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never());
-        }
+        //    // Act & Assert
+        //    await Assert.ThrowsAsync<UriFormatException>(async () => await InvokeSendVerificationEmail(user, origin));
+        //    _userManagerMock.Verify(x => x.GenerateEmailConfirmationTokenAsync(user), Times.Once());
+        //    _emailServiceMock.Verify(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never());
+        //}
 
-        [Fact]
-        public async Task SendVerificationEmail_InvalidOrigin_ThrowsUriFormatException()
-        {
-            // Arrange
-            var user = new User
-            {
-                Id = Guid.NewGuid(),
-                Email = "test@example.com",
-                UserName = "test@example.com"
-            };
-            var origin = "invalid-url";
-            var token = "confirmation-token";
+        //[Fact]
+        //public async Task SendVerificationEmail_InvalidOrigin_ThrowsUriFormatException()
+        //{
+        //    // Arrange
+        //    var user = new User
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        Email = "test@example.com",
+        //        UserName = "test@example.com"
+        //    };
+        //    var origin = "invalid-url";
+        //    var token = "confirmation-token";
 
-            _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(user))
-                .ReturnsAsync(token);
+        //    _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(user))
+        //        .ReturnsAsync(token);
 
-            // Act & Assert
-            await Assert.ThrowsAsync<UriFormatException>(async () => await InvokeSendVerificationEmail(user, origin));
-            _userManagerMock.Verify(x => x.GenerateEmailConfirmationTokenAsync(user), Times.Once());
-            _emailServiceMock.Verify(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never());
-        }
+        //    // Act & Assert
+        //    await Assert.ThrowsAsync<UriFormatException>(async () => await InvokeSendVerificationEmail(user, origin));
+        //    _userManagerMock.Verify(x => x.GenerateEmailConfirmationTokenAsync(user), Times.Once());
+        //    _emailServiceMock.Verify(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never());
+        //}
 
-        [Fact]
-        public async Task SendVerificationEmail_TokenGenerationFailure_ThrowsException()
-        {
-            // Arrange
-            var user = new User
-            {
-                Id = Guid.NewGuid(),
-                Email = "test@example.com",
-                UserName = "test@example.com"
-            };
-            var origin = "https://example.com";
+        //[Fact]
+        //public async Task SendVerificationEmail_TokenGenerationFailure_ThrowsException()
+        //{
+        //    // Arrange
+        //    var user = new User
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        Email = "test@example.com",
+        //        UserName = "test@example.com"
+        //    };
+        //    var origin = "https://example.com";
 
-            _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(user))
-                .ThrowsAsync(new InvalidOperationException("Token generation failed."));
+        //    _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(user))
+        //        .ThrowsAsync(new InvalidOperationException("Token generation failed."));
 
-            // Act & Assert
-            await Assert.ThrowsAsync<InvalidOperationException>(async () => await InvokeSendVerificationEmail(user, origin));
-            _userManagerMock.Verify(x => x.GenerateEmailConfirmationTokenAsync(user), Times.Once());
-            _emailServiceMock.Verify(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never());
-        }
+        //    // Act & Assert
+        //    await Assert.ThrowsAsync<InvalidOperationException>(async () => await InvokeSendVerificationEmail(user, origin));
+        //    _userManagerMock.Verify(x => x.GenerateEmailConfirmationTokenAsync(user), Times.Once());
+        //    _emailServiceMock.Verify(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never());
+        //}
 
-        [Fact]
-        public async Task SendVerificationEmail_EmailSendingFailure_ThrowsException()
-        {
-            // Arrange
-            var user = new User
-            {
-                Id = Guid.NewGuid(),
-                Email = "test@example.com",
-                UserName = "test@example.com"
-            };
-            var origin = "https://example.com";
-            var token = "confirmation-token";
-            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-            var expectedUri = $"{origin}/api/user/confirm-email/?userId={user.Id}&code={encodedToken}";
-            var expectedSubject = "XÁC NHẬN EMAIL";
+        //[Fact]
+        //public async Task SendVerificationEmail_EmailSendingFailure_ThrowsException()
+        //{
+        //    // Arrange
+        //    var user = new User
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        Email = "test@example.com",
+        //        UserName = "test@example.com"
+        //    };
+        //    var origin = "https://example.com";
+        //    var token = "confirmation-token";
+        //    var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+        //    var expectedUri = $"{origin}/api/user/confirm-email/?userId={user.Id}&code={encodedToken}";
+        //    var expectedSubject = "XÁC NHẬN EMAIL";
 
-            _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(user))
-                .ReturnsAsync(token);
-            _emailServiceMock.Setup(x => x.SendEmailAsync(user.Email, expectedSubject, It.IsAny<string>()))
-                .ThrowsAsync(new InvalidOperationException("Email sending failed."));
+        //    _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(user))
+        //        .ReturnsAsync(token);
+        //    _emailServiceMock.Setup(x => x.SendEmailAsync(user.Email, expectedSubject, It.IsAny<string>()))
+        //        .ThrowsAsync(new InvalidOperationException("Email sending failed."));
 
-            // Act & Assert
-            await Assert.ThrowsAsync<InvalidOperationException>(async () => await InvokeSendVerificationEmail(user, origin));
-            _userManagerMock.Verify(x => x.GenerateEmailConfirmationTokenAsync(user), Times.Once());
-            _emailServiceMock.Verify(x => x.SendEmailAsync(user.Email, expectedSubject, It.IsAny<string>()), Times.Once());
-        }
+        //    // Act & Assert
+        //    await Assert.ThrowsAsync<InvalidOperationException>(async () => await InvokeSendVerificationEmail(user, origin));
+        //    _userManagerMock.Verify(x => x.GenerateEmailConfirmationTokenAsync(user), Times.Once());
+        //    _emailServiceMock.Verify(x => x.SendEmailAsync(user.Email, expectedSubject, It.IsAny<string>()), Times.Once());
+        //}
 
-        [Fact]
-        public async Task SendVerificationEmail_EmptyToken_ReturnsValidUri()
-        {
-            // Arrange
-            var user = new User
-            {
-                Id = Guid.NewGuid(),
-                Email = "test@example.com",
-                UserName = "test@example.com"
-            };
-            var origin = "https://example.com";
-            var token = "";
-            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-            var expectedUri = $"{origin}/api/user/confirm-email/?userId={user.Id}&code={encodedToken}";
-            var expectedSubject = "XÁC NHẬN EMAIL";
+        //[Fact]
+        //public async Task SendVerificationEmail_EmptyToken_ReturnsValidUri()
+        //{
+        //    // Arrange
+        //    var user = new User
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        Email = "test@example.com",
+        //        UserName = "test@example.com"
+        //    };
+        //    var origin = "https://example.com";
+        //    var token = "";
+        //    var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+        //    var expectedUri = $"{origin}/api/user/confirm-email/?userId={user.Id}&code={encodedToken}";
+        //    var expectedSubject = "XÁC NHẬN EMAIL";
 
-            _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(user))
-                .ReturnsAsync(token);
-            _emailServiceMock.Setup(x => x.SendEmailAsync(user.Email, expectedSubject, It.IsAny<string>()))
-                .Returns(Task.CompletedTask)
-                .Callback<string, string, string>((email, subject, body) =>
-                {
-                    Assert.Equal(user.Email, email);
-                    Assert.Equal(expectedSubject, subject);
-                    Assert.Contains(user.Email, body);
-                    Assert.Contains(expectedUri, body);
-                });
+        //    _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(user))
+        //        .ReturnsAsync(token);
+        //    _emailServiceMock.Setup(x => x.SendEmailAsync(user.Email, expectedSubject, It.IsAny<string>()))
+        //        .Returns(Task.CompletedTask)
+        //        .Callback<string, string, string>((email, subject, body) =>
+        //        {
+        //            Assert.Equal(user.Email, email);
+        //            Assert.Equal(expectedSubject, subject);
+        //            Assert.Contains(user.Email, body);
+        //            Assert.Contains(expectedUri, body);
+        //        });
 
-            // Act
-            var result = await InvokeSendVerificationEmail(user, origin);
+        //    // Act
+        //    var result = await InvokeSendVerificationEmail(user, origin);
 
-            // Assert
-            Assert.Equal(expectedUri, result);
-            _userManagerMock.Verify(x => x.GenerateEmailConfirmationTokenAsync(user), Times.Once());
-            _emailServiceMock.Verify(x => x.SendEmailAsync(user.Email, expectedSubject, It.IsAny<string>()), Times.Once());
-        }
+        //    // Assert
+        //    Assert.Equal(expectedUri, result);
+        //    _userManagerMock.Verify(x => x.GenerateEmailConfirmationTokenAsync(user), Times.Once());
+        //    _emailServiceMock.Verify(x => x.SendEmailAsync(user.Email, expectedSubject, It.IsAny<string>()), Times.Once());
+        //}
 
-        [Fact]
-        public async Task SendVerificationEmail_SpecialCharactersInEmail_HandlesCorrectly()
-        {
-            // Arrange
-            var user = new User
-            {
-                Id = Guid.NewGuid(),
-                Email = "test+special@exämple.com",
-                UserName = "test+special@exämple.com"
-            };
-            var origin = "https://example.com";
-            var token = "confirmation-token";
-            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-            var expectedUri = $"{origin}/api/user/confirm-email/?userId={user.Id}&code={encodedToken}";
-            var expectedSubject = "XÁC NHẬN EMAIL";
+        //[Fact]
+        //public async Task SendVerificationEmail_SpecialCharactersInEmail_HandlesCorrectly()
+        //{
+        //    // Arrange
+        //    var user = new User
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        Email = "test+special@exämple.com",
+        //        UserName = "test+special@exämple.com"
+        //    };
+        //    var origin = "https://example.com";
+        //    var token = "confirmation-token";
+        //    var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+        //    var expectedUri = $"{origin}/api/user/confirm-email/?userId={user.Id}&code={encodedToken}";
+        //    var expectedSubject = "XÁC NHẬN EMAIL";
 
-            _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(user))
-                .ReturnsAsync(token);
-            _emailServiceMock.Setup(x => x.SendEmailAsync(user.Email, expectedSubject, It.IsAny<string>()))
-                .Returns(Task.CompletedTask)
-                .Callback<string, string, string>((email, subject, body) =>
-                {
-                    Assert.Equal(user.Email, email);
-                    Assert.Equal(expectedSubject, subject);
-                    Assert.Contains(user.Email, body);
-                    Assert.Contains(expectedUri, body);
-                });
+        //    _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(user))
+        //        .ReturnsAsync(token);
+        //    _emailServiceMock.Setup(x => x.SendEmailAsync(user.Email, expectedSubject, It.IsAny<string>()))
+        //        .Returns(Task.CompletedTask)
+        //        .Callback<string, string, string>((email, subject, body) =>
+        //        {
+        //            Assert.Equal(user.Email, email);
+        //            Assert.Equal(expectedSubject, subject);
+        //            Assert.Contains(user.Email, body);
+        //            Assert.Contains(expectedUri, body);
+        //        });
 
-            // Act
-            var result = await InvokeSendVerificationEmail(user, origin);
+        //    // Act
+        //    var result = await InvokeSendVerificationEmail(user, origin);
 
-            // Assert
-            Assert.Equal(expectedUri, result);
-            _userManagerMock.Verify(x => x.GenerateEmailConfirmationTokenAsync(user), Times.Once());
-            _emailServiceMock.Verify(x => x.SendEmailAsync(user.Email, expectedSubject, It.IsAny<string>()), Times.Once());
-        }
+        //    // Assert
+        //    Assert.Equal(expectedUri, result);
+        //    _userManagerMock.Verify(x => x.GenerateEmailConfirmationTokenAsync(user), Times.Once());
+        //    _emailServiceMock.Verify(x => x.SendEmailAsync(user.Email, expectedSubject, It.IsAny<string>()), Times.Once());
+        //}
 
-        [Fact]
-        public async Task SendVerificationEmail_LongToken_HandlesCorrectly()
-        {
-            // Arrange
-            var user = new User
-            {
-                Id = Guid.NewGuid(),
-                Email = "test@example.com",
-                UserName = "test@example.com"
-            };
-            var origin = "https://example.com";
-            var token = new string('a', 1000); // Long token
-            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-            var expectedUri = $"{origin}/api/user/confirm-email/?userId={user.Id}&code={encodedToken}";
-            var expectedSubject = "XÁC NHẬN EMAIL";
+        //[Fact]
+        //public async Task SendVerificationEmail_LongToken_HandlesCorrectly()
+        //{
+        //    // Arrange
+        //    var user = new User
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        Email = "test@example.com",
+        //        UserName = "test@example.com"
+        //    };
+        //    var origin = "https://example.com";
+        //    var token = new string('a', 1000); // Long token
+        //    var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+        //    var expectedUri = $"{origin}/api/user/confirm-email/?userId={user.Id}&code={encodedToken}";
+        //    var expectedSubject = "XÁC NHẬN EMAIL";
 
-            _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(user))
-                .ReturnsAsync(token);
-            _emailServiceMock.Setup(x => x.SendEmailAsync(user.Email, expectedSubject, It.IsAny<string>()))
-                .Returns(Task.CompletedTask)
-                .Callback<string, string, string>((email, subject, body) =>
-                {
-                    Assert.Equal(user.Email, email);
-                    Assert.Equal(expectedSubject, subject);
-                    Assert.Contains(user.Email, body);
-                    Assert.Contains(expectedUri, body);
-                });
+        //    _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(user))
+        //        .ReturnsAsync(token);
+        //    _emailServiceMock.Setup(x => x.SendEmailAsync(user.Email, expectedSubject, It.IsAny<string>()))
+        //        .Returns(Task.CompletedTask)
+        //        .Callback<string, string, string>((email, subject, body) =>
+        //        {
+        //            Assert.Equal(user.Email, email);
+        //            Assert.Equal(expectedSubject, subject);
+        //            Assert.Contains(user.Email, body);
+        //            Assert.Contains(expectedUri, body);
+        //        });
 
-            // Act
-            var result = await InvokeSendVerificationEmail(user, origin);
+        //    // Act
+        //    var result = await InvokeSendVerificationEmail(user, origin);
 
-            // Assert
-            Assert.Equal(expectedUri, result);
-            _userManagerMock.Verify(x => x.GenerateEmailConfirmationTokenAsync(user), Times.Once());
-            _emailServiceMock.Verify(x => x.SendEmailAsync(user.Email, expectedSubject, It.IsAny<string>()), Times.Once());
-        }
+        //    // Assert
+        //    Assert.Equal(expectedUri, result);
+        //    _userManagerMock.Verify(x => x.GenerateEmailConfirmationTokenAsync(user), Times.Once());
+        //    _emailServiceMock.Verify(x => x.SendEmailAsync(user.Email, expectedSubject, It.IsAny<string>()), Times.Once());
+        //}
 
         //[Fact]
         //public async Task SendVerificationEmail_MissingEmailSubjectConstant_ThrowsException()

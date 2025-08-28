@@ -73,7 +73,26 @@ namespace Infrastructure.UnitTests.BarnService
         //}
 
         [Fact]
-        public async Task UpdateBarn_BarnNotFoundOrInactive_ReturnsError()
+        public async Task UpdateBarn_BarnNotFound_ReturnsError()
+        {
+            var request = new UpdateBarnRequest
+            {
+                BarnId = Guid.Parse("E1D40884-FF30-407A-8934-0A580D2BD57A"),
+                BarnName = "Chuồng 1 của anh A",
+                Address = "Nghe An",
+                Image = "data:image/png;base64,xxx",
+                WorkerId = Guid.Parse("8808C9FB-825E-4BD2-FEA2-08DDAE35A557")
+            };
+            _barnRepositoryMock.Setup(x => x.GetByIdAsync(request.BarnId, default)).ReturnsAsync((Barn)null);
+            var result = await _barnService.UpdateBarn(request, default);
+            Xunit.Assert.False(result.Succeeded);
+            Xunit.Assert.Equal("Chuồng trại không tồn tại hoặc đã bị xóa", result.Message);
+            Xunit.Assert.Null(result.Data);
+            Xunit.Assert.Contains("Chuồng trại không tồn tại hoặc đã bị xóa", result.Errors);
+        }
+
+        [Fact]
+        public async Task UpdateBarn_BarnInactive_ReturnsError()
         {
             var request = new UpdateBarnRequest
             {

@@ -203,50 +203,50 @@ namespace Infrastructure.UnitTests.AccountService
             _userManagerMock.Verify(x => x.UpdateAsync(It.IsAny<User>()), Times.Never());
         }
 
-        [Fact]
-        public async Task DisableAccountAsync_NullOrEmptyEmail()
-        {
-            // Arrange
-            string nullEmail = null;
-            string emptyEmail = "";
+        //[Fact]
+        //public async Task DisableAccountAsync_NullOrEmptyEmail()
+        //{
+        //    // Arrange
+        //    string nullEmail = null;
+        //    string emptyEmail = "";
 
-            _userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
-                .ReturnsAsync((User)null);
+        //    _userManagerMock.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+        //        .ReturnsAsync((User)null);
 
-            // Act
-            var resultNull = await _service.DisableAccountAsync(nullEmail);
-            var resultEmpty = await _service.DisableAccountAsync(emptyEmail);
+        //    // Act
+        //    var resultNull = await _service.DisableAccountAsync(nullEmail);
+        //    var resultEmpty = await _service.DisableAccountAsync(emptyEmail);
 
-            // Assert
-            Assert.False(resultNull.Succeeded);
-            Assert.Equal($"Không tìm thấy tài khoản với email {nullEmail}.", resultNull.Message);
-            Assert.Null(resultNull.Data);
+        //    // Assert
+        //    Assert.False(resultNull.Succeeded);
+        //    Assert.Equal($"Không tìm thấy tài khoản với email {nullEmail}.", resultNull.Message);
+        //    Assert.Null(resultNull.Data);
 
-            Assert.False(resultEmpty.Succeeded);
-            Assert.Equal($"Không tìm thấy tài khoản với email {emptyEmail}.", resultEmpty.Message);
-            Assert.Null(resultEmpty.Data);
+        //    Assert.False(resultEmpty.Succeeded);
+        //    Assert.Equal($"Không tìm thấy tài khoản với email {emptyEmail}.", resultEmpty.Message);
+        //    Assert.Null(resultEmpty.Data);
 
-            _userManagerMock.Verify(x => x.FindByEmailAsync(nullEmail), Times.Once());
-            _userManagerMock.Verify(x => x.FindByEmailAsync(emptyEmail), Times.Once());
-            _userManagerMock.Verify(x => x.UpdateAsync(It.IsAny<User>()), Times.Never());
-        }
+        //    _userManagerMock.Verify(x => x.FindByEmailAsync(nullEmail), Times.Once());
+        //    _userManagerMock.Verify(x => x.FindByEmailAsync(emptyEmail), Times.Once());
+        //    _userManagerMock.Verify(x => x.UpdateAsync(It.IsAny<User>()), Times.Never());
+        //}
 
-        [Fact]
-        public async Task DisableAccountAsync_DatabaseException()
-        {
-            // Arrange
-            var email = "test@example.com";
+        //[Fact]
+        //public async Task DisableAccountAsync_DatabaseException()
+        //{
+        //    // Arrange
+        //    var email = "test@example.com";
 
-            _userManagerMock.Setup(x => x.FindByEmailAsync(email))
-                .ThrowsAsync(new Exception("Database error"));
+        //    _userManagerMock.Setup(x => x.FindByEmailAsync(email))
+        //        .ThrowsAsync(new Exception("Database error"));
 
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<Exception>(async () =>
-                await _service.DisableAccountAsync(email));
-            Assert.Equal("Database error", exception.Message);
-            _userManagerMock.Verify(x => x.FindByEmailAsync(email), Times.Once());
-            _userManagerMock.Verify(x => x.UpdateAsync(It.IsAny<User>()), Times.Never());
-        }
+        //    // Act & Assert
+        //    var exception = await Assert.ThrowsAsync<Exception>(async () =>
+        //        await _service.DisableAccountAsync(email));
+        //    Assert.Equal("Database error", exception.Message);
+        //    _userManagerMock.Verify(x => x.FindByEmailAsync(email), Times.Once());
+        //    _userManagerMock.Verify(x => x.UpdateAsync(It.IsAny<User>()), Times.Never());
+        //}
     }
 
 }

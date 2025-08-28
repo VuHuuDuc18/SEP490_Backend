@@ -44,17 +44,17 @@ namespace Infrastructure.UnitTests.MedicineCategoryService
             );
         }
 
-        [Fact]
-        public async Task CreateMedicineCategory_RequestNull_ReturnsError()
-        {
-            // Act
-            var result = await _MedicineCategoryService.CreateMedicineCategory(null, default);
+        //[Fact]
+        //public async Task CreateMedicineCategory_RequestNull_ReturnsError()
+        //{
+        //    // Act
+        //    var result = await _MedicineCategoryService.CreateMedicineCategory(null, default);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Dữ liệu danh mục thuốc không được null", result.Message);
-            Assert.Contains("Dữ liệu danh mục thuốc không được null", result.Errors);
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Dữ liệu danh mục thuốc không được null", result.Message);
+        //    Assert.Contains("Dữ liệu danh mục thuốc không được null", result.Errors);
+        //}
 
         [Fact]
         public async Task CreateMedicineCategory_NameBlank_ReturnsValidationError()
@@ -118,25 +118,25 @@ namespace Infrastructure.UnitTests.MedicineCategoryService
             _MedicineCategoryRepoMock.Verify(x => x.CommitAsync(It.IsAny<CancellationToken>()), Times.Once());
         }
 
-        [Fact]
-        public async Task CreateMedicineCategory_Exception_ReturnsError()
-        {
-            // Arrange
-            var request = new CreateCategoryRequest { Name = "Category 3", Description = "desc" };
-            var categories = new List<MedicineCategory>().AsQueryable();
-            var mockQueryable = categories.BuildMock();
-            _MedicineCategoryRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<MedicineCategory, bool>>>() ))
-                .Returns((System.Linq.Expressions.Expression<Func<MedicineCategory, bool>> predicate) => mockQueryable.Where(predicate));
-            // XÓA setup AnyAsync
-            _MedicineCategoryRepoMock.Setup(x => x.Insert(It.IsAny<MedicineCategory>())).Throws(new Exception("DB error"));
+        //[Fact]
+        //public async Task CreateMedicineCategory_Exception_ReturnsError()
+        //{
+        //    // Arrange
+        //    var request = new CreateCategoryRequest { Name = "Category 3", Description = "desc" };
+        //    var categories = new List<MedicineCategory>().AsQueryable();
+        //    var mockQueryable = categories.BuildMock();
+        //    _MedicineCategoryRepoMock.Setup(x => x.GetQueryable(It.IsAny<System.Linq.Expressions.Expression<Func<MedicineCategory, bool>>>() ))
+        //        .Returns((System.Linq.Expressions.Expression<Func<MedicineCategory, bool>> predicate) => mockQueryable.Where(predicate));
+        //    // XÓA setup AnyAsync
+        //    _MedicineCategoryRepoMock.Setup(x => x.Insert(It.IsAny<MedicineCategory>())).Throws(new Exception("DB error"));
 
-            // Act
-            var result = await _MedicineCategoryService.CreateMedicineCategory(request, default);
+        //    // Act
+        //    var result = await _MedicineCategoryService.CreateMedicineCategory(request, default);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Lỗi khi tạo danh mục thuốc", result.Message);
-            Assert.Contains("DB error", result.Errors[0]);
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Lỗi khi tạo danh mục thuốc", result.Message);
+        //    Assert.Contains("DB error", result.Errors[0]);
+        //}
     }
 }

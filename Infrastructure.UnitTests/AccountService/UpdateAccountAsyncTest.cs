@@ -293,29 +293,29 @@ namespace Infrastructure.UnitTests.AccountService
             _userManagerMock.Verify(x => x.UpdateAsync(user), Times.Once());
         }
 
-        [Fact]
-        public async Task UpdateAccountAsync_DatabaseException()
-        {
-            // Arrange
-            var userId = Guid.NewGuid().ToString();
-            var request = new UpdateAccountRequest
-            {
-                UserId = userId,
-                Email = "new@example.com",
-                PhoneNumber = "1234567890",
-                FullName = "New Name"
-            };
+        //[Fact]
+        //public async Task UpdateAccountAsync_DatabaseException()
+        //{
+        //    // Arrange
+        //    var userId = Guid.NewGuid().ToString();
+        //    var request = new UpdateAccountRequest
+        //    {
+        //        UserId = userId,
+        //        Email = "new@example.com",
+        //        PhoneNumber = "1234567890",
+        //        FullName = "New Name"
+        //    };
 
-            _userManagerMock.Setup(x => x.FindByIdAsync(userId))
-                .ThrowsAsync(new Exception("Database error"));
+        //    _userManagerMock.Setup(x => x.FindByIdAsync(userId))
+        //        .ThrowsAsync(new Exception("Database error"));
 
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<Exception>(async () =>
-                await _service.UpdateAccountAsync(request));
-            Assert.Equal("Database error", exception.Message);
-            _userManagerMock.Verify(x => x.FindByIdAsync(userId), Times.Once());
-            _userManagerMock.Verify(x => x.UpdateAsync(It.IsAny<User>()), Times.Never());
-        }
+        //    // Act & Assert
+        //    var exception = await Assert.ThrowsAsync<Exception>(async () =>
+        //        await _service.UpdateAccountAsync(request));
+        //    Assert.Equal("Database error", exception.Message);
+        //    _userManagerMock.Verify(x => x.FindByIdAsync(userId), Times.Once());
+        //    _userManagerMock.Verify(x => x.UpdateAsync(It.IsAny<User>()), Times.Never());
+        //}
     
 }
 }

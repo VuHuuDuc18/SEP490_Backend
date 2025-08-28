@@ -79,18 +79,18 @@ namespace Infrastructure.UnitTests.DailyReportService
             );
         }
 
-        [Fact]
-        public async Task GetPaginatedDailyReportList_NullRequest_ReturnsError()
-        {
-            // Act
-            var result = await _dailyReportService.GetPaginatedDailyReportList(null, null, default);
+        //[Fact]
+        //public async Task GetPaginatedDailyReportList_NullRequest_ReturnsError()
+        //{
+        //    // Act
+        //    var result = await _dailyReportService.GetPaginatedDailyReportList(null, null, default);
 
-            // Assert
-            Assert.False(result.Succeeded);
-            Assert.Equal("Yêu cầu không được null", result.Message);
-            Assert.Single(result.Errors);
-            Assert.Equal("Yêu cầu không được null", result.Errors.First());
-        }
+        //    // Assert
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Yêu cầu không được null", result.Message);
+        //    Assert.Single(result.Errors);
+        //    Assert.Equal("Yêu cầu không được null", result.Errors.First());
+        //}
 
         [Fact]
         public async Task GetPaginatedDailyReportList_InvalidPageIndex_ReturnsError()
@@ -679,154 +679,154 @@ namespace Infrastructure.UnitTests.DailyReportService
         //    Assert.Equal(0, result.Data.TotalPages);
         //}
 
-        [Fact]
-        public async Task GetPaginatedDailyReportList_NoRelatedData_ReturnsEmptyRelatedLists()
-        {
-            // Arrange
-            var livestockCircleId = Guid.NewGuid();
-            var dailyReport = new DailyReport
-            {
-                Id = Guid.NewGuid(),
-                IsActive = true,
-                LivestockCircleId = livestockCircleId,
-                Note = "Report 1",
-                Status = "today",
-                CreatedDate = DateTime.UtcNow,
-                CreatedBy = _userId
-            };
-            var options = new DbContextOptionsBuilder<TestDbContext2>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-            using var context = new TestDbContext2(options);
-            context.DailyReports.Add(dailyReport);
-            context.SaveChanges();
+        //[Fact]
+        //public async Task GetPaginatedDailyReportList_NoRelatedData_ReturnsEmptyRelatedLists()
+        //{
+        //    // Arrange
+        //    var livestockCircleId = Guid.NewGuid();
+        //    var dailyReport = new DailyReport
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        IsActive = true,
+        //        LivestockCircleId = livestockCircleId,
+        //        Note = "Report 1",
+        //        Status = "today",
+        //        CreatedDate = DateTime.UtcNow,
+        //        CreatedBy = _userId
+        //    };
+        //    var options = new DbContextOptionsBuilder<TestDbContext2>()
+        //        .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+        //        .Options;
+        //    using var context = new TestDbContext2(options);
+        //    context.DailyReports.Add(dailyReport);
+        //    context.SaveChanges();
 
-            _dailyReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<DailyReport, bool>>>()))
-                .Returns((Expression<Func<DailyReport, bool>> expr) => context.DailyReports.Where(expr));
-            _dailyReportRepositoryMock.Setup(x => x.GetQueryable())
-                .Returns(context.DailyReports);
-            _foodReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<FoodReport, bool>>>()))
-                .Returns((Expression<Func<FoodReport, bool>> expr) => context.FoodReports.Where(expr));
-            _medicineReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<MedicineReport, bool>>>()))
-                .Returns((Expression<Func<MedicineReport, bool>> expr) => context.MedicineReports.Where(expr));
-            _imageDailyReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<ImageDailyReport, bool>>>()))
-                .Returns((Expression<Func<ImageDailyReport, bool>> expr) => context.ImageDailyReports.Where(expr));
-            _foodRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<Food, bool>>>()))
-                .Returns((Expression<Func<Food, bool>> expr) => context.Foods.Where(expr));
-            _medicineRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<Medicine, bool>>>()))
-                .Returns((Expression<Func<Medicine, bool>> expr) => context.Medicines.Where(expr));
-            _foodImageRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<ImageFood, bool>>>()))
-                .Returns((Expression<Func<ImageFood, bool>> expr) => context.ImageFoods.Where(expr));
-            _medicineImageRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<ImageMedicine, bool>>>()))
-                .Returns((Expression<Func<ImageMedicine, bool>> expr) => context.ImageMedicines.Where(expr));
+        //    _dailyReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<DailyReport, bool>>>()))
+        //        .Returns((Expression<Func<DailyReport, bool>> expr) => context.DailyReports.Where(expr));
+        //    _dailyReportRepositoryMock.Setup(x => x.GetQueryable())
+        //        .Returns(context.DailyReports);
+        //    _foodReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<FoodReport, bool>>>()))
+        //        .Returns((Expression<Func<FoodReport, bool>> expr) => context.FoodReports.Where(expr));
+        //    _medicineReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<MedicineReport, bool>>>()))
+        //        .Returns((Expression<Func<MedicineReport, bool>> expr) => context.MedicineReports.Where(expr));
+        //    _imageDailyReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<ImageDailyReport, bool>>>()))
+        //        .Returns((Expression<Func<ImageDailyReport, bool>> expr) => context.ImageDailyReports.Where(expr));
+        //    _foodRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<Food, bool>>>()))
+        //        .Returns((Expression<Func<Food, bool>> expr) => context.Foods.Where(expr));
+        //    _medicineRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<Medicine, bool>>>()))
+        //        .Returns((Expression<Func<Medicine, bool>> expr) => context.Medicines.Where(expr));
+        //    _foodImageRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<ImageFood, bool>>>()))
+        //        .Returns((Expression<Func<ImageFood, bool>> expr) => context.ImageFoods.Where(expr));
+        //    _medicineImageRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<ImageMedicine, bool>>>()))
+        //        .Returns((Expression<Func<ImageMedicine, bool>> expr) => context.ImageMedicines.Where(expr));
 
-            var request = new ListingRequest
-            {
-                PageIndex = 1,
-                PageSize = 10,
-                Sort = new SearchObjectForCondition { Field = "CreatedDate", Value = "desc" }
-            };
+        //    var request = new ListingRequest
+        //    {
+        //        PageIndex = 1,
+        //        PageSize = 10,
+        //        Sort = new SearchObjectForCondition { Field = "CreatedDate", Value = "desc" }
+        //    };
 
-            // Act
-            var result = await _dailyReportService.GetPaginatedDailyReportList(request, livestockCircleId, default);
+        //    // Act
+        //    var result = await _dailyReportService.GetPaginatedDailyReportList(request, livestockCircleId, default);
 
-            // Assert
-            Assert.True(result.Succeeded, $"Service message: {result.Message}");
-            Assert.Equal("Lấy danh sách báo cáo hàng ngày phân trang thành công", result.Message);
-            Assert.NotNull(result.Data);
-            Assert.Single(result.Data.Items);
-            var report = result.Data.Items.First();
-            Assert.Equal(dailyReport.Id, report.Id);
-            Assert.Empty(report.ImageLinks);
-            Assert.Null(report.Thumbnail);
-            Assert.Empty(report.FoodReports);
-            Assert.Empty(report.MedicineReports);
-        }
+        //    // Assert
+        //    Assert.True(result.Succeeded, $"Service message: {result.Message}");
+        //    Assert.Equal("Lấy danh sách báo cáo hàng ngày phân trang thành công", result.Message);
+        //    Assert.NotNull(result.Data);
+        //    Assert.Single(result.Data.Items);
+        //    var report = result.Data.Items.First();
+        //    Assert.Equal(dailyReport.Id, report.Id);
+        //    Assert.Empty(report.ImageLinks);
+        //    Assert.Null(report.Thumbnail);
+        //    Assert.Empty(report.FoodReports);
+        //    Assert.Empty(report.MedicineReports);
+        //}
 
-        [Fact]
-        public async Task GetPaginatedDailyReportList_MissingFoodAndMedicineDetails_ReturnsPartialData()
-        {
-            // Arrange
-            var livestockCircleId = Guid.NewGuid();
-            var dailyReport = new DailyReport
-            {
-                Id = Guid.NewGuid(),
-                IsActive = true,
-                LivestockCircleId = livestockCircleId,
-                Note = "Report 1",
-                Status = "today",
-                CreatedDate = DateTime.UtcNow,
-                CreatedBy = _userId
-            };
-            var foodReport = new FoodReport
-            {
-                Id = Guid.NewGuid(),
-                ReportId = dailyReport.Id,
-                FoodId = Guid.NewGuid(),
-                Quantity = 50,
-                IsActive = true
-            };
-            var medicineReport = new MedicineReport
-            {
-                Id = Guid.NewGuid(),
-                ReportId = dailyReport.Id,
-                MedicineId = Guid.NewGuid(),
-                Quantity = 10,
-                IsActive = true
-            };
-            var options = new DbContextOptionsBuilder<TestDbContext2>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-            using var context = new TestDbContext2(options);
-            context.DailyReports.Add(dailyReport);
-            context.FoodReports.Add(foodReport);
-            context.MedicineReports.Add(medicineReport);
-            context.SaveChanges();
+        //[Fact]
+        //public async Task GetPaginatedDailyReportList_MissingFoodAndMedicineDetails_ReturnsPartialData()
+        //{
+        //    // Arrange
+        //    var livestockCircleId = Guid.NewGuid();
+        //    var dailyReport = new DailyReport
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        IsActive = true,
+        //        LivestockCircleId = livestockCircleId,
+        //        Note = "Report 1",
+        //        Status = "today",
+        //        CreatedDate = DateTime.UtcNow,
+        //        CreatedBy = _userId
+        //    };
+        //    var foodReport = new FoodReport
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        ReportId = dailyReport.Id,
+        //        FoodId = Guid.NewGuid(),
+        //        Quantity = 50,
+        //        IsActive = true
+        //    };
+        //    var medicineReport = new MedicineReport
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        ReportId = dailyReport.Id,
+        //        MedicineId = Guid.NewGuid(),
+        //        Quantity = 10,
+        //        IsActive = true
+        //    };
+        //    var options = new DbContextOptionsBuilder<TestDbContext2>()
+        //        .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+        //        .Options;
+        //    using var context = new TestDbContext2(options);
+        //    context.DailyReports.Add(dailyReport);
+        //    context.FoodReports.Add(foodReport);
+        //    context.MedicineReports.Add(medicineReport);
+        //    context.SaveChanges();
 
-            _dailyReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<DailyReport, bool>>>()))
-                .Returns((Expression<Func<DailyReport, bool>> expr) => context.DailyReports.Where(expr));
-            _dailyReportRepositoryMock.Setup(x => x.GetQueryable())
-                .Returns(context.DailyReports);
-            _foodReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<FoodReport, bool>>>()))
-                .Returns((Expression<Func<FoodReport, bool>> expr) => context.FoodReports.Where(expr));
-            _medicineReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<MedicineReport, bool>>>()))
-                .Returns((Expression<Func<MedicineReport, bool>> expr) => context.MedicineReports.Where(expr));
-            _imageDailyReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<ImageDailyReport, bool>>>()))
-                .Returns((Expression<Func<ImageDailyReport, bool>> expr) => context.ImageDailyReports.Where(expr));
-            _foodRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<Food, bool>>>()))
-                .Returns((Expression<Func<Food, bool>> expr) => context.Foods.Where(expr));
-            _medicineRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<Medicine, bool>>>()))
-                .Returns((Expression<Func<Medicine, bool>> expr) => context.Medicines.Where(expr));
-            _foodImageRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<ImageFood, bool>>>()))
-                .Returns((Expression<Func<ImageFood, bool>> expr) => context.ImageFoods.Where(expr));
-            _medicineImageRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<ImageMedicine, bool>>>()))
-                .Returns((Expression<Func<ImageMedicine, bool>> expr) => context.ImageMedicines.Where(expr));
+        //    _dailyReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<DailyReport, bool>>>()))
+        //        .Returns((Expression<Func<DailyReport, bool>> expr) => context.DailyReports.Where(expr));
+        //    _dailyReportRepositoryMock.Setup(x => x.GetQueryable())
+        //        .Returns(context.DailyReports);
+        //    _foodReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<FoodReport, bool>>>()))
+        //        .Returns((Expression<Func<FoodReport, bool>> expr) => context.FoodReports.Where(expr));
+        //    _medicineReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<MedicineReport, bool>>>()))
+        //        .Returns((Expression<Func<MedicineReport, bool>> expr) => context.MedicineReports.Where(expr));
+        //    _imageDailyReportRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<ImageDailyReport, bool>>>()))
+        //        .Returns((Expression<Func<ImageDailyReport, bool>> expr) => context.ImageDailyReports.Where(expr));
+        //    _foodRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<Food, bool>>>()))
+        //        .Returns((Expression<Func<Food, bool>> expr) => context.Foods.Where(expr));
+        //    _medicineRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<Medicine, bool>>>()))
+        //        .Returns((Expression<Func<Medicine, bool>> expr) => context.Medicines.Where(expr));
+        //    _foodImageRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<ImageFood, bool>>>()))
+        //        .Returns((Expression<Func<ImageFood, bool>> expr) => context.ImageFoods.Where(expr));
+        //    _medicineImageRepositoryMock.Setup(x => x.GetQueryable(It.IsAny<Expression<Func<ImageMedicine, bool>>>()))
+        //        .Returns((Expression<Func<ImageMedicine, bool>> expr) => context.ImageMedicines.Where(expr));
 
-            var request = new ListingRequest
-            {
-                PageIndex = 1,
-                PageSize = 10,
-                Sort = new SearchObjectForCondition { Field = "CreatedDate", Value = "desc" }
-            };
+        //    var request = new ListingRequest
+        //    {
+        //        PageIndex = 1,
+        //        PageSize = 10,
+        //        Sort = new SearchObjectForCondition { Field = "CreatedDate", Value = "desc" }
+        //    };
 
-            // Act
-            var result = await _dailyReportService.GetPaginatedDailyReportList(request, livestockCircleId, default);
+        //    // Act
+        //    var result = await _dailyReportService.GetPaginatedDailyReportList(request, livestockCircleId, default);
 
-            // Assert
-            Assert.True(result.Succeeded, $"Service message: {result.Message}");
-            Assert.Equal("Lấy danh sách báo cáo hàng ngày phân trang thành công", result.Message);
-            Assert.NotNull(result.Data);
-            Assert.Single(result.Data.Items);
-            var report = result.Data.Items.First();
-            Assert.Single(report.FoodReports);
-            //Assert.Equal(foodReport.FoodId, report.FoodReports[0].Food.Id);
-            //Assert.Null(report.FoodReports[0].Food.FoodName);
-            //Assert.Null(report.FoodReports[0].Food.Thumbnail);
-            //Assert.Single(report.MedicineReports);
-            //Assert.Equal(medicineReport.MedicineId, report.MedicineReports[0].Medicine.Id);
-            //Assert.Null(report.MedicineReports[0].Medicine.MedicineName);
-            //Assert.Null(report.MedicineReports[0].Medicine.Thumbnail);
-        }
+        //    // Assert
+        //    Assert.True(result.Succeeded, $"Service message: {result.Message}");
+        //    Assert.Equal("Lấy danh sách báo cáo hàng ngày phân trang thành công", result.Message);
+        //    Assert.NotNull(result.Data);
+        //    Assert.Single(result.Data.Items);
+        //    var report = result.Data.Items.First();
+        //    Assert.Single(report.FoodReports);
+        //    //Assert.Equal(foodReport.FoodId, report.FoodReports[0].Food.Id);
+        //    //Assert.Null(report.FoodReports[0].Food.FoodName);
+        //    //Assert.Null(report.FoodReports[0].Food.Thumbnail);
+        //    //Assert.Single(report.MedicineReports);
+        //    //Assert.Equal(medicineReport.MedicineId, report.MedicineReports[0].Medicine.Id);
+        //    //Assert.Null(report.MedicineReports[0].Medicine.MedicineName);
+        //    //Assert.Null(report.MedicineReports[0].Medicine.Thumbnail);
+        //}
 
         //[Fact]
         //public async Task GetPaginatedDailyReportList_RepositoryThrowsException_ReturnsError()

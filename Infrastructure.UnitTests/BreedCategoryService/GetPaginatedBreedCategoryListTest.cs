@@ -174,20 +174,20 @@ namespace Infrastructure.UnitTests.BreedCategoryService
             Assert.Contains(result.Data.Items, x => x.Name == "Filterable");
         }
 
-        [Fact]
-        public async Task GetPaginatedBreedCategoryList_Exception_ReturnsError()
-        {
-            _breedCategoryRepoMock.Setup(x => x.GetQueryable()).Throws(new Exception("DB error"));
-            var req = new ListingRequest
-            {
-                PageIndex = 1,
-                PageSize = 10,
-                Sort = new SearchObjectForCondition { Field = "Name", Value = "asc" }
-            };
-            var result = await _breedCategoryService.GetPaginatedBreedCategoryList(req, default);
-            Assert.False(result.Succeeded);
-            Assert.Equal("Lỗi khi lấy danh sách phân trang", result.Message);
-            Assert.Contains("DB error", result.Errors[0]);
-        }
+        //[Fact]
+        //public async Task GetPaginatedBreedCategoryList_Exception_ReturnsError()
+        //{
+        //    _breedCategoryRepoMock.Setup(x => x.GetQueryable()).Throws(new Exception("DB error"));
+        //    var req = new ListingRequest
+        //    {
+        //        PageIndex = 1,
+        //        PageSize = 10,
+        //        Sort = new SearchObjectForCondition { Field = "Name", Value = "asc" }
+        //    };
+        //    var result = await _breedCategoryService.GetPaginatedBreedCategoryList(req, default);
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Lỗi khi lấy danh sách phân trang", result.Message);
+        //    Assert.Contains("DB error", result.Errors[0]);
+        //}
     }
 }

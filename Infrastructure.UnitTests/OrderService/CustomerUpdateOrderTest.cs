@@ -285,6 +285,126 @@ namespace Infrastructure.UnitTests.OrderService
             Assert.Equal("Ngày lấy hàng phải lớn hơn hoặc bằng ngày hiện tại", result.Message);
         }
 
+        [Fact]
+        public async Task CustomerUpdateOrder_BadUnit()
+        {
+            // Arrange
+            var orderId = Guid.NewGuid();
+            var livestockCircleId = Guid.NewGuid();
+            var request = new UpdateOrderRequest { OrderId = orderId, GoodUnitStock = 3, BadUnitStock = 1, PickupDate = DateTime.UtcNow.AddDays(-1) };
+            var order = new Order
+            {
+                Id = orderId,
+                CustomerId = _currentUserId,
+                LivestockCircleId = livestockCircleId,
+                GoodUnitStock = 5,
+                BadUnitStock = 2,
+                Status = OrderStatus.PENDING,
+                IsActive = true,
+                LivestockCircle = new LivestockCircle { GoodUnitNumber = 10, BadUnitNumber = 5, ReleaseDate = DateTime.UtcNow }
+            };
+
+            _orderRepositoryMock.Setup(x => x.GetByIdAsync(orderId, null)).ReturnsAsync(order);
+            _livestockCircleRepositoryMock.Setup(x => x.GetByIdAsync(livestockCircleId, null)).ReturnsAsync(order.LivestockCircle);
+
+            // Act
+            var result = await _service.CustomerUpdateOrder(request, default);
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Equal("Ngày lấy hàng phải lớn hơn hoặc bằng ngày hiện tại", result.Message);
+        }
+
+        [Fact]
+        public async Task CustomerUpdateOrder_PickupDate()
+        {
+            // Arrange
+            var orderId = Guid.NewGuid();
+            var livestockCircleId = Guid.NewGuid();
+            var request = new UpdateOrderRequest { OrderId = orderId, GoodUnitStock = 3, BadUnitStock = 1, PickupDate = DateTime.UtcNow.AddDays(-1) };
+            var order = new Order
+            {
+                Id = orderId,
+                CustomerId = _currentUserId,
+                LivestockCircleId = livestockCircleId,
+                GoodUnitStock = 5,
+                BadUnitStock = 2,
+                Status = OrderStatus.PENDING,
+                IsActive = true,
+                LivestockCircle = new LivestockCircle { GoodUnitNumber = 10, BadUnitNumber = 5, ReleaseDate = DateTime.UtcNow }
+            };
+
+            _orderRepositoryMock.Setup(x => x.GetByIdAsync(orderId, null)).ReturnsAsync(order);
+            _livestockCircleRepositoryMock.Setup(x => x.GetByIdAsync(livestockCircleId, null)).ReturnsAsync(order.LivestockCircle);
+
+            // Act
+            var result = await _service.CustomerUpdateOrder(request, default);
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Equal("Ngày lấy hàng phải lớn hơn hoặc bằng ngày hiện tại", result.Message);
+        }
+
+        [Fact]
+        public async Task CustomerUpdateOrder_PickupDateNull()
+        {
+            // Arrange
+            var orderId = Guid.NewGuid();
+            var livestockCircleId = Guid.NewGuid();
+            var request = new UpdateOrderRequest { OrderId = orderId, GoodUnitStock = 3, BadUnitStock = 1, PickupDate = DateTime.UtcNow.AddDays(-1) };
+            var order = new Order
+            {
+                Id = orderId,
+                CustomerId = _currentUserId,
+                LivestockCircleId = livestockCircleId,
+                GoodUnitStock = 5,
+                BadUnitStock = 2,
+                Status = OrderStatus.PENDING,
+                IsActive = true,
+                LivestockCircle = new LivestockCircle { GoodUnitNumber = 10, BadUnitNumber = 5, ReleaseDate = DateTime.UtcNow }
+            };
+
+            _orderRepositoryMock.Setup(x => x.GetByIdAsync(orderId, null)).ReturnsAsync(order);
+            _livestockCircleRepositoryMock.Setup(x => x.GetByIdAsync(livestockCircleId, null)).ReturnsAsync(order.LivestockCircle);
+
+            // Act
+            var result = await _service.CustomerUpdateOrder(request, default);
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Equal("Ngày lấy hàng phải lớn hơn hoặc bằng ngày hiện tại", result.Message);
+        }
+
+        [Fact]
+        public async Task CustomerUpdateOrder_GoodUnit()
+        {
+            // Arrange
+            var orderId = Guid.NewGuid();
+            var livestockCircleId = Guid.NewGuid();
+            var request = new UpdateOrderRequest { OrderId = orderId, GoodUnitStock = 3, BadUnitStock = 1, PickupDate = DateTime.UtcNow.AddDays(-1) };
+            var order = new Order
+            {
+                Id = orderId,
+                CustomerId = _currentUserId,
+                LivestockCircleId = livestockCircleId,
+                GoodUnitStock = 5,
+                BadUnitStock = 2,
+                Status = OrderStatus.PENDING,
+                IsActive = true,
+                LivestockCircle = new LivestockCircle { GoodUnitNumber = 10, BadUnitNumber = 5, ReleaseDate = DateTime.UtcNow }
+            };
+
+            _orderRepositoryMock.Setup(x => x.GetByIdAsync(orderId, null)).ReturnsAsync(order);
+            _livestockCircleRepositoryMock.Setup(x => x.GetByIdAsync(livestockCircleId, null)).ReturnsAsync(order.LivestockCircle);
+
+            // Act
+            var result = await _service.CustomerUpdateOrder(request, default);
+
+            // Assert
+            Assert.False(result.Succeeded);
+            Assert.Equal("Ngày lấy hàng phải lớn hơn hoặc bằng ngày hiện tại", result.Message);
+        }
+
         //[Fact]
         //public async Task CustomerUpdateOrder_PickupDateExceedsReleaseDateLimit()
         //{

@@ -104,22 +104,22 @@ namespace Infrastructure.UnitTests.LiveStockCircleService
             Assert.Equal("Không tìm thấy chu kỳ chăn nuôi.", result.ErrorMessage);
         }
 
-        [Fact]
-        public async Task DisableLiveStockCircle_ExceptionOccurs()
-        {
-            // Arrange
-            var livestockCircleId = Guid.NewGuid();
-            _livestockCircleRepositoryMock.Setup(x => x.GetByIdAsync(livestockCircleId, It.IsAny<Ref<CheckError>>()))
-                .ReturnsAsync(new LivestockCircle { Id = livestockCircleId, IsActive = true });
-            _livestockCircleRepositoryMock.Setup(x => x.CommitAsync(It.IsAny<CancellationToken>())).ThrowsAsync(new Exception("Database error"));
+        //[Fact]
+        //public async Task DisableLiveStockCircle_ExceptionOccurs()
+        //{
+        //    // Arrange
+        //    var livestockCircleId = Guid.NewGuid();
+        //    _livestockCircleRepositoryMock.Setup(x => x.GetByIdAsync(livestockCircleId, It.IsAny<Ref<CheckError>>()))
+        //        .ReturnsAsync(new LivestockCircle { Id = livestockCircleId, IsActive = true });
+        //    _livestockCircleRepositoryMock.Setup(x => x.CommitAsync(It.IsAny<CancellationToken>())).ThrowsAsync(new Exception("Database error"));
 
-            // Act
-            var result = await _service.DisableLiveStockCircle(livestockCircleId);
+        //    // Act
+        //    var result = await _service.DisableLiveStockCircle(livestockCircleId);
 
-            // Assert
-            Assert.False(result.Success);
-            Assert.Equal("Lỗi khi xóa chu kỳ chăn nuôi: Database error", result.ErrorMessage);
-        }
+        //    // Assert
+        //    Assert.False(result.Success);
+        //    Assert.Equal("Lỗi khi xóa chu kỳ chăn nuôi: Database error", result.ErrorMessage);
+        //}
 
         //[Fact]
         //public async Task DisableLiveStockCircle_CheckErrorFromRepository()

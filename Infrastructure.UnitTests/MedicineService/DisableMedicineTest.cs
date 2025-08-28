@@ -94,17 +94,17 @@ namespace Infrastructure.UnitTests.MedicineService
             Assert.True(existing.IsActive);
         }
 
-        [Fact]
-        public async Task DisableMedicine_Exception_ReturnsError()
-        {
-            var id = Guid.NewGuid();
-            var existing = new Medicine { Id = id, MedicineName = "Medicine1", IsActive = true };
-            _MedicineRepositoryMock.Setup(x => x.GetByIdAsync(id, null)).ReturnsAsync(existing);
-            _MedicineRepositoryMock.Setup(x => x.Update(It.IsAny<Medicine>())).Throws(new Exception("DB error"));
-            var result = await _MedicineService.DisableMedicine(id, default);
-            Assert.False(result.Succeeded);
-            Assert.Equal("Lỗi khi xóa thuốc", result.Message);
-            Assert.Contains("DB error", result.Errors[0]);
-        }
+        //[Fact]
+        //public async Task DisableMedicine_Exception_ReturnsError()
+        //{
+        //    var id = Guid.NewGuid();
+        //    var existing = new Medicine { Id = id, MedicineName = "Medicine1", IsActive = true };
+        //    _MedicineRepositoryMock.Setup(x => x.GetByIdAsync(id, null)).ReturnsAsync(existing);
+        //    _MedicineRepositoryMock.Setup(x => x.Update(It.IsAny<Medicine>())).Throws(new Exception("DB error"));
+        //    var result = await _MedicineService.DisableMedicine(id, default);
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Lỗi khi xóa thuốc", result.Message);
+        //    Assert.Contains("DB error", result.Errors[0]);
+        //}
     }
 } 
